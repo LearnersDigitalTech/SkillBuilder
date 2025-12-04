@@ -982,3 +982,55 @@
         font-size: 0.8rem;
     }
 }
+/* Tutor Button Pulsing Animation */
+.tutorActionButton {
+    animation: tutorPulse 2s ease-in-out infinite !important;
+    position: relative !important;
+}
+
+.tutorActionButton::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, #10b981, #34d399);
+    opacity: 0;
+    animation: tutorGlow 2s ease-in-out infinite;
+    z-index: -1;
+}
+
+.tutorActionButton :global(.MuiButton-startIcon) {
+    animation: iconPulse 2s ease-in-out infinite !important;
+}
+
+@keyframes tutorPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+    }
+    50% {
+        transform: scale(1.03);
+        box-shadow: 0 8px 35px rgba(16, 185, 129, 0.5);
+    }
+}
+
+@keyframes tutorGlow {
+    0%, 100% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 0.4;
+    }
+}
+
+@keyframes iconPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+    }
+}

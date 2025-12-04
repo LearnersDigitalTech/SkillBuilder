@@ -27,7 +27,8 @@ const HomeContent = () => {
 
     const handleStartAssessment = async () => {
         if (user) {
-            const phoneNumber = user.phoneNumber ? user.phoneNumber.slice(-10) : "";
+            // Get user key (works for phone, Google, and email auth)
+            const userKey = user.phoneNumber ? user.phoneNumber.slice(-10) : user.uid;
 
             const children = userData?.children || null;
             const childKeys = children ? Object.keys(children) : [];
@@ -35,7 +36,7 @@ const HomeContent = () => {
 
             // If there are multiple children, prefer the one selected on the dashboard
             if (childKeys.length > 1 && typeof window !== "undefined") {
-                const storedChildId = window.localStorage.getItem(`activeChild_${phoneNumber}`);
+                const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
                 if (storedChildId && childKeys.includes(storedChildId)) {
                     activeChildId = storedChildId;
                 }
@@ -54,7 +55,7 @@ const HomeContent = () => {
                     window.localStorage.removeItem("quizSession");
                 }
 
-                const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${phoneNumber}/${activeChildId}`);
+                const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${userKey}/${activeChildId}`);
                 const snapshot = await get(reportRef);
                 if (snapshot.exists()) {
                     setAlreadyAttemptedModalOpen(true);
@@ -66,7 +67,7 @@ const HomeContent = () => {
 
             const userDetails = {
                 ...activeChild,
-                phoneNumber,
+                phoneNumber: userKey, // Use userKey for backward compatibility
                 childId: activeChildId,
             };
 

@@ -24,7 +24,7 @@ export const generateRealNumbers = () => {
         const lcm = (x, y) => (x * y) / gcd(x, y);
 
         const val = subType === "HCF" ? gcd(a, b) : lcm(a, b);
-        question = `Find the ${subType} of ${a} and ${b}.`;
+        question = `Find the ${subType} of $${a}$ and $${b}$.`;
         answer = String(val);
     } else {
         // Prime Factorization of simple composite numbers
@@ -34,7 +34,7 @@ export const generateRealNumbers = () => {
         const p3 = primes[getRandomInt(0, 2)]; // Keep numbers small
         const num = p1 * p2 * p3;
 
-        question = `Express ${num} as a product of its prime factors.`;
+        question = `Express $${num}$ as a product of its prime factors.`;
         // Sort factors for consistent answer string
         const factors = [p1, p2, p3].sort((a, b) => a - b);
         answer = factors.join(" × ");
@@ -97,7 +97,7 @@ export const generatePolynomials = () => {
         const c = getRandomInt(1, 10);
         const subType = Math.random() > 0.5 ? "Sum" : "Product";
 
-        question = `Find the ${subType.toLowerCase()} of the zeroes of the polynomial ${a}x^2 + ${b}x + ${c}.`;
+        question = `Find the ${subType.toLowerCase()} of the zeroes of the polynomial $${a}x^{2} + ${b}x + ${c}$.`;
 
         let val;
         if (subType === "Sum") val = -b / a; // alpha + beta = -b/a
@@ -110,18 +110,18 @@ export const generatePolynomials = () => {
         const sum = getRandomInt(-5, 5);
         const prod = getRandomInt(-5, 5);
 
-        question = `Find a quadratic polynomial whose sum and product of zeroes are ${sum} and ${prod} respectively.`;
+        question = `Find a quadratic polynomial whose sum and product of zeroes are $${sum}$ and $${prod}$ respectively.`;
         // k(x^2 - (sum)x + prod)
         const term2 = sum >= 0 ? `- ${sum}x` : `+ ${Math.abs(sum)}x`;
         const term3 = prod >= 0 ? `+ ${prod}` : `- ${Math.abs(prod)}`;
-        answer = `x^2 ${term2} ${term3}`;
+        answer = `$x^{2} ${term2} ${term3}$`;
     }
 
     const options = shuffleArray([
         { value: answer, label: answer },
-        { value: answer.includes("x^2") ? answer.replace("-", "+").replace("+", "-") : String(Number(answer) + 1), label: answer.includes("x^2") ? answer.replace("-", "+").replace("+", "-") : String(Number(answer) + 1) },
-        { value: answer.includes("x^2") ? answer.replace("x^2", "2x^2") : String(Number(answer) - 1), label: answer.includes("x^2") ? answer.replace("x^2", "2x^2") : String(Number(answer) - 1) },
-        { value: answer.includes("x^2") ? `x^2 + ${getRandomInt(1, 5)}x + 1` : String(Number(answer) * 2), label: answer.includes("x^2") ? `x^2 + ${getRandomInt(1, 5)}x + 1` : String(Number(answer) * 2) }
+        { value: answer.includes("x^{2}") ? answer.replace("-", "+").replace("+", "-") : String(Number(answer) + 1), label: answer.includes("x^{2}") ? answer.replace("-", "+").replace("+", "-") : String(Number(answer) + 1) },
+        { value: answer.includes("x^{2}") ? answer.replace("x^{2}", "2x^{2}") : String(Number(answer) - 1), label: answer.includes("x^{2}") ? answer.replace("x^{2}", "2x^{2}") : String(Number(answer) - 1) },
+        { value: answer.includes("x^{2}") ? `$x^{2} + ${getRandomInt(1, 5)}x + 1$` : String(Number(answer) * 2), label: answer.includes("x^{2}") ? `$x^{2} + ${getRandomInt(1, 5)}x + 1$` : String(Number(answer) * 2) }
     ]);
 
     // Ensure unique options
@@ -135,7 +135,7 @@ export const generatePolynomials = () => {
     }
     while (uniqueOptions.length < 4) {
         const r = getRandomInt(1, 20);
-        const val = answer.includes("x^2") ? `x^2 + ${r}x + ${r}` : String(r);
+        const val = answer.includes("x^{2}") ? `$x^{2} + ${r}x + ${r}$` : String(r);
         if (!seen.has(val)) {
             seen.add(val);
             uniqueOptions.push({ value: val, label: val });
@@ -172,14 +172,14 @@ export const generateLinearEquations = () => {
     const eq1_rhs = x + y;
     const eq2_rhs = x - y;
 
-    const question = `Solve for x and y: x + y = ${eq1_rhs} and x - y = ${eq2_rhs}`;
+    const question = `Solve for $x$ and $y$: <br/> $x + y = ${eq1_rhs}$ and $x - y = ${eq2_rhs}$`;
     const answer = `x=${x}, y=${y}`;
 
     const options = shuffleArray([
-        { value: answer, label: answer },
-        { value: `x=${x + 1}, y=${y}`, label: `x=${x + 1}, y=${y}` },
-        { value: `x=${x}, y=${y + 1}`, label: `x=${x}, y=${y + 1}` },
-        { value: `x=${y}, y=${x}`, label: `x=${y}, y=${x}` }
+        { value: answer, label: `$x=${x}, y=${y}$` },
+        { value: `x=${x + 1}, y=${y}`, label: `$x=${x + 1}, y=${y}$` },
+        { value: `x=${x}, y=${y + 1}`, label: `$x=${x}, y=${y + 1}$` },
+        { value: `x=${y}, y=${x}`, label: `$x=${y}, y=${x}$` }
     ]);
 
     // Ensure unique options
@@ -197,7 +197,7 @@ export const generateLinearEquations = () => {
         const val = `x=${r1}, y=${r2}`;
         if (!seen.has(val)) {
             seen.add(val);
-            uniqueOptions.push({ value: val, label: val });
+            uniqueOptions.push({ value: val, label: `$x=${r1}, y=${r2}$` });
         }
     }
 
@@ -224,7 +224,7 @@ export const generateQuadraticEquations = () => {
         const sum = a + b;
         const prod = a * b;
 
-        question = `Find the roots of the quadratic equation: x^2 - ${sum}x + ${prod} = 0`;
+        question = `Find the roots of the quadratic equation: <br/> $x^{2} - ${sum}x + ${prod} = 0$`;
         answer = `${a}, ${b}`;
     } else {
         // Find discriminant D = b^2 - 4ac
@@ -232,7 +232,7 @@ export const generateQuadraticEquations = () => {
         const b = getRandomInt(5, 10);
         const c = getRandomInt(1, 5);
 
-        question = `Find the discriminant of the quadratic equation: ${a}x^2 + ${b}x + ${c} = 0`;
+        question = `Find the discriminant of the quadratic equation: <br/> $${a}x^{2} + ${b}x + ${c} = 0$`;
         const D = b * b - 4 * a * c;
         answer = String(D);
     }
@@ -293,12 +293,12 @@ export const generateArithmeticProgression = () => {
     if (type === "NthTerm") {
         // an = a + (n-1)d
         const an = a + (n - 1) * d;
-        question = `Find the ${n}th term of the AP: ${a}, ${a + d}, ${a + 2 * d}, ...`;
+        question = `Find the $${n}^{\\text{th}}$ term of the AP: $${a}, ${a + d}, ${a + 2 * d}, \\ldots$`;
         answer = String(an);
     } else {
         // Sn = n/2 [2a + (n-1)d]
         const Sn = (n / 2) * (2 * a + (n - 1) * d);
-        question = `Find the sum of the first ${n} terms of the AP: ${a}, ${a + d}, ${a + 2 * d}, ...`;
+        question = `Find the sum of the first $${n}$ terms of the AP: $${a}, ${a + d}, ${a + 2 * d}, \\ldots$`;
         answer = String(Sn);
     }
 
@@ -362,7 +362,7 @@ export const generateCoordinateGeometry = () => {
         const x2 = x1 + dx;
         const y2 = y1 + dy;
 
-        question = `Find the distance between A(${x1}, ${y1}) and B(${x2}, ${y2}).`;
+        question = `Find the distance between $A(${x1}, ${y1})$ and $B(${x2}, ${y2})$.`;
         answer = String(dist);
     } else {
         // Midpoint: ((x1+x2)/2, (y1+y2)/2)
@@ -375,7 +375,7 @@ export const generateCoordinateGeometry = () => {
         const mx = (x1 + x2) / 2;
         const my = (y1 + y2) / 2;
 
-        question = `Find the midpoint of the line segment joining A(${x1}, ${y1}) and B(${x2}, ${y2}).`;
+        question = `Find the midpoint of the line segment joining $A(${x1}, ${y1})$ and $B(${x2}, ${y2})$.`;
         answer = `(${mx}, ${my})`;
     }
 
@@ -434,20 +434,20 @@ export const generateTrigonometry = () => {
         const triplets = [[3, 4, 5], [5, 12, 13], [8, 15, 17]];
         const [opp, adj, hyp] = triplets[getRandomInt(0, triplets.length - 1)];
 
-        question = `If sin A = ${opp}/${hyp}, find cos A.`;
-        answer = `${adj}/${hyp}`;
+        question = `If $\\sin A = \\frac{${opp}}{${hyp}}$, find $\\cos A$.`;
+        answer = `$\\frac{${adj}}{${hyp}}$`;
     } else {
         // Identity: sin^2 + cos^2 = 1
         const angle = getRandomInt(10, 80);
-        question = `Find the value of sin²${angle}° + cos²${angle}°.`;
+        question = `Find the value of $\\sin^{2}${angle}^{\\circ} + \\cos^{2}${angle}^{\\circ}$.`;
         answer = "1";
     }
 
     const options = shuffleArray([
         { value: answer, label: answer },
-        { value: "0", label: "0" },
-        { value: "1/2", label: "1/2" },
-        { value: "2", label: "2" }
+        { value: "0", label: "$0$" },
+        { value: "1/2", label: "$\\frac{1}{2}$" },
+        { value: "2", label: "$2$" }
     ]);
 
     // Ensure unique options
@@ -464,7 +464,7 @@ export const generateTrigonometry = () => {
         const val = `1/${r}`;
         if (!seen.has(val)) {
             seen.add(val);
-            uniqueOptions.push({ value: val, label: val });
+            uniqueOptions.push({ value: val, label: `$\\frac{1}{${r}}$` });
         }
     }
 
@@ -473,7 +473,7 @@ export const generateTrigonometry = () => {
             type: "userInput",
             question: question,
             topic: "Trigonometry",
-            answer: answer
+            answer: answer.replace(/\$/g, '').replace(/\\frac\{(\d+)\}\{(\d+)\}/g, '$1/$2')
         };
     }
 
@@ -482,7 +482,7 @@ export const generateTrigonometry = () => {
         question: question,
         topic: "Trigonometry",
         options: uniqueOptions,
-        answer: answer
+        answer: answer.replace(/\$/g, '').replace(/\\frac\{(\d+)\}\{(\d+)\}/g, '$1/$2')
     };
 };
 
@@ -498,17 +498,17 @@ export const generateMensuration = () => {
     if (shape === "Cone") {
         // Volume = 1/3 pi r^2 h
         const vol = (1 / 3) * Math.PI * r * r * h;
-        question = `Find the volume of a cone with radius ${r}cm and height ${h}cm. (Use π = 3.14)`;
+        question = `Find the volume of a cone with radius $${r}$ cm and height $${h}$ cm. (Use $\\pi = 3.14$)`;
         answer = `${vol.toFixed(2)} cm³`;
     } else if (shape === "Sphere") {
         // Surface Area = 4 pi r^2
         const sa = 4 * Math.PI * r * r;
-        question = `Find the surface area of a sphere with radius ${r}cm. (Use π = 3.14)`;
+        question = `Find the surface area of a sphere with radius $${r}$ cm. (Use $\\pi = 3.14$)`;
         answer = `${sa.toFixed(2)} cm²`;
     } else {
         // Cylinder Volume = pi r^2 h
         const vol = Math.PI * r * r * h;
-        question = `Find the volume of a cylinder with radius ${r}cm and height ${h}cm. (Use π = 3.14)`;
+        question = `Find the volume of a cylinder with radius $${r}$ cm and height $${h}$ cm. (Use $\\pi = 3.14$)`;
         answer = `${vol.toFixed(2)} cm³`;
     }
 
@@ -516,10 +516,10 @@ export const generateMensuration = () => {
     const unit = answer.split(' ')[1];
 
     const options = shuffleArray([
-        { value: answer, label: answer },
-        { value: `${(val + 10).toFixed(2)} ${unit}`, label: `${(val + 10).toFixed(2)} ${unit}` },
-        { value: `${(val * 2).toFixed(2)} ${unit}`, label: `${(val * 2).toFixed(2)} ${unit}` },
-        { value: `${(val / 2).toFixed(2)} ${unit}`, label: `${(val / 2).toFixed(2)} ${unit}` }
+        { value: answer, label: `$${val.toFixed(2)}$ ${unit}` },
+        { value: `${(val + 10).toFixed(2)} ${unit}`, label: `$${(val + 10).toFixed(2)}$ ${unit}` },
+        { value: `${(val * 2).toFixed(2)} ${unit}`, label: `$${(val * 2).toFixed(2)}$ ${unit}` },
+        { value: `${(val / 2).toFixed(2)} ${unit}`, label: `$${(val / 2).toFixed(2)}$ ${unit}` }
     ]);
 
     // Ensure unique options
@@ -536,7 +536,7 @@ export const generateMensuration = () => {
         const valStr = `${r.toFixed(2)} ${unit}`;
         if (!seen.has(valStr)) {
             seen.add(valStr);
-            uniqueOptions.push({ value: valStr, label: valStr });
+            uniqueOptions.push({ value: valStr, label: `$${r.toFixed(2)}$ ${unit}` });
         }
     }
 
@@ -567,7 +567,7 @@ export const generateStatistics = () => {
     const mode = 3 * median - 2 * mean;
     let question, answer;
 
-    question = `If the Mean is ${mean} and Median is ${median}, find the Mode using the empirical relationship.`;
+    question = `If the Mean is $${mean}$ and Median is $${median}$, find the Mode using the empirical relationship.`;
     answer = String(mode);
 
     const options = shuffleArray([
@@ -624,18 +624,18 @@ export const generateProbability = () => {
         question = "A die is thrown once. Find the probability of getting a prime number.";
         answer = "1/2"; // 2, 3, 5 -> 3/6
     } else {
-        question = "One card is drawn from a well-shuffled deck of 52 cards. Find the probability of getting a King.";
+        question = "One card is drawn from a well-shuffled deck of $52$ cards. Find the probability of getting a King.";
         answer = "1/13"; // 4/52
     }
 
     const allOptions = [
-        { value: answer, label: answer },
-        { value: "1/4", label: "1/4" },
-        { value: "1/2", label: "1/2" },
-        { value: "1/13", label: "1/13" },
-        { value: "1/52", label: "1/52" },
-        { value: "1/3", label: "1/3" },
-        { value: "1/6", label: "1/6" }
+        { value: answer, label: `$\\frac{${answer.split('/')[0]}}{${answer.split('/')[1]}}$` },
+        { value: "1/4", label: "$\\frac{1}{4}$" },
+        { value: "1/2", label: "$\\frac{1}{2}$" },
+        { value: "1/13", label: "$\\frac{1}{13}$" },
+        { value: "1/52", label: "$\\frac{1}{52}$" },
+        { value: "1/3", label: "$\\frac{1}{3}$" },
+        { value: "1/6", label: "$\\frac{1}{6}$" }
     ];
 
     // Ensure unique options
@@ -644,7 +644,7 @@ export const generateProbability = () => {
 
     // Always add answer first
     seen.add(answer);
-    uniqueOptions.push({ value: answer, label: answer });
+    uniqueOptions.push({ value: answer, label: `$\\frac{${answer.split('/')[0]}}{${answer.split('/')[1]}}$` });
 
     // Add distractors
     for (const opt of shuffleArray(allOptions)) {
@@ -660,7 +660,7 @@ export const generateProbability = () => {
         const val = `1/${r}`;
         if (!seen.has(val)) {
             seen.add(val);
-            uniqueOptions.push({ value: val, label: val });
+            uniqueOptions.push({ value: val, label: `$\\frac{1}{${r}}$` });
         }
     }
 

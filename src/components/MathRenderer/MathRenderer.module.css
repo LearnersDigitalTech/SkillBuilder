@@ -1,0 +1,26 @@
+/* MathRenderer styles */
+.mathContainer {
+    line-height: 1.6;
+}
+
+/* Ensure KaTeX renders properly in all contexts */
+.mathContainer .katex {
+    font-size: 1.1em;
+}
+
+.mathContainer .katex-display {
+    margin: 1rem 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .mathContainer .katex {
+        font-size: 1em;
+    }
+    
+    .mathContainer .katex-display {
+        font-size: 0.95em;
+    }
+}

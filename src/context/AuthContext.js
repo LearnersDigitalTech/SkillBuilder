@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
-import { auth, firebaseDatabase } from "@/backend/firebaseHandler";
+import { auth, firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { get, ref } from "firebase/database";
 
@@ -17,22 +17,26 @@ export const AuthProvider = ({ children }) => {
             if (currentUser) {
                 // Fetch user details from Realtime Database
                 try {
-                    // Standardize to 10 digits for database keys
-                    const phoneNumber = currentUser.phoneNumber ? currentUser.phoneNumber.slice(-10) : "";
-                    const userRef = ref(firebaseDatabase, `NMD_2025/Registrations/${phoneNumber}`);
+                    // Get database key based on auth provider
+                    const userKey = getUserDatabaseKey(currentUser);
+                    const userRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}`);
                     const snapshot = await get(userRef);
+
                     if (snapshot.exists()) {
                         const rawData = snapshot.val();
 
-                        // Normalize to support multiple child profiles per phone number.
+                        // Normalize to support multiple child profiles per user.
                         // Legacy shape: a single profile object at the root.
-                        // New shape: { parentPhone, children: { childId: { ...profile } } }
+                        // New shape: { parentPhone/parentEmail, authProvider, children: { childId: { ...profile } } }
                         let normalizedData;
                         if (rawData && rawData.children) {
                             normalizedData = rawData;
                         } else if (rawData) {
+                            // Legacy phone auth user - normalize
+                            const phoneNumber = currentUser.phoneNumber ? currentUser.phoneNumber.slice(-10) : "";
                             normalizedData = {
                                 parentPhone: phoneNumber,
+                                authProvider: "phone",
                                 children: {
                                     default: rawData
                                 }
