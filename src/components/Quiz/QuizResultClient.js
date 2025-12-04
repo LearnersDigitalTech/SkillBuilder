@@ -7,7 +7,7 @@ import { QuizSessionContext } from "../../app/context/QuizSessionContext";
 import analyzeResponses from "@/app/workload/GenerateReport";
 import Footer from "@/components/Footer/Footer.component";
 import { ref, set, get } from "firebase/database";
-import { firebaseDatabase } from "@/backend/firebaseHandler";
+import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler";
 import { useRouter } from "next/navigation";
 import { Button, Dialog, DialogTitle, DialogContent, IconButton, CircularProgress, TextField, MenuItem, Link as MuiLink } from "@mui/material";
 import { useAuth } from "@/context/AuthContext";
@@ -42,7 +42,7 @@ const QuizResultClient = () => {
                 }
 
                 // Get user key (works for phone, Google, and email auth)
-                const userKey = user.phoneNumber ? user.phoneNumber.slice(-10) : user.uid;
+                const userKey = getUserDatabaseKey(user);
                 const children = userData.children;
                 const childKeys = Object.keys(children);
                 if (childKeys.length === 0) return;
@@ -170,7 +170,7 @@ const QuizResultClient = () => {
 
     if ((!displayName || !displayGrade) && user && userData?.children) {
         // Get user key (works for phone, Google, and email auth)
-        const userKey = user.phoneNumber ? user.phoneNumber.slice(-10) : user.uid;
+        const userKey = getUserDatabaseKey(user);
         const children = userData.children;
         const childKeys = Object.keys(children);
         if (childKeys.length > 0) {

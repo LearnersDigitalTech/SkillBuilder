@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Dialog, DialogTitle, DialogContent, TextField, Button, CircularProgress } from "@mui/material";
 import { Phone } from "lucide-react";
 import { ref, set } from "firebase/database";
-import { firebaseDatabase } from "@/backend/firebaseHandler";
+import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler";
 import Styles from "./PhoneNumberDialog.module.css";
 
 export default function PhoneNumberDialog({ open, user, onComplete }) {
@@ -23,9 +23,11 @@ export default function PhoneNumberDialog({ open, user, onComplete }) {
         setError("");
 
         try {
-            // Save phone number to user profile
-            const userRef = ref(firebaseDatabase, `NMD_2025/Users/${user.uid}/phoneNumber`);
-            await set(userRef, phoneNumber);
+            // Get user database key consistently
+            const userKey = getUserDatabaseKey(user);
+            // Save phone number to user's registration data (correct location)
+            const phoneRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}/phoneNumber`);
+            await set(phoneRef, phoneNumber);
 
             // Call completion callback
             onComplete(phoneNumber);

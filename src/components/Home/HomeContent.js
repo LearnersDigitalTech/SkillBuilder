@@ -16,7 +16,7 @@ import AuthModal from "@/components/Auth/AuthModal.component";
 import { useAuth } from "@/context/AuthContext";
 import CustomModal from "@/components/CustomModal/CustomModal.component";
 import { get, ref } from "firebase/database";
-import { firebaseDatabase } from "@/backend/firebaseHandler";
+import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler";
 
 const HomeContent = () => {
     const router = useRouter();
@@ -28,7 +28,7 @@ const HomeContent = () => {
     const handleStartAssessment = async () => {
         if (user) {
             // Get user key (works for phone, Google, and email auth)
-            const userKey = user.phoneNumber ? user.phoneNumber.slice(-10) : user.uid;
+            const userKey = getUserDatabaseKey(user);
 
             const children = userData?.children || null;
             const childKeys = children ? Object.keys(children) : [];

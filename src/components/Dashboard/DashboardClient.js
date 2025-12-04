@@ -8,7 +8,7 @@ import PhoneNumberDialog from "@/components/Auth/PhoneNumberDialog";
 import { CircularProgress, Button, FormControl, InputLabel, Select, MenuItem, TextField, Dialog, DialogTitle, DialogContent, Card, CardContent } from "@mui/material";
 import { User, LogOut, BookOpen, Clock, Award, ChevronRight, Edit2 } from "lucide-react";
 import { ref, get, set } from "firebase/database";
-import { firebaseDatabase } from "@/backend/firebaseHandler";
+import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler";
 import Styles from "../../app/dashboard/Dashboard.module.css";
 import { QuizSessionContext } from "../../app/context/QuizSessionContext";
 
@@ -54,12 +54,26 @@ const DashboardClient = () => {
     // Handle phone number completion
     const handlePhoneComplete = async (phoneNumber) => {
         setShowPhoneDialog(false);
-        // Update userData to include the phone number
-        if (userData) {
-            setUserData({
-                ...userData,
-                phoneNumber: phoneNumber
-            });
+
+        // Refresh userData from database to get the updated phone number
+        if (user && userData) {
+            try {
+                const userKey = getUserDatabaseKey(user);
+                const userRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}`);
+                const snapshot = await get(userRef);
+
+                if (snapshot.exists()) {
+                    const updatedData = snapshot.val();
+                    setUserData(updatedData);
+                }
+            } catch (error) {
+                console.error("Error refreshing user data:", error);
+                // Fallback: update local state
+                setUserData({
+                    ...userData,
+                    phoneNumber: phoneNumber
+                });
+            }
         }
     };
 
@@ -68,7 +82,7 @@ const DashboardClient = () => {
         if (!user || !userData || !userData.children) return;
 
         // Get user key (works for phone, Google, and email auth)
-        const userKey = user.phoneNumber ? user.phoneNumber.slice(-10) : (userData?.phoneNumber || user.uid);
+        const userKey = getUserDatabaseKey(user);
         const storedChildId = typeof window !== "undefined"
             ? window.localStorage.getItem(`activeChild_${userKey}`)
             : null;
@@ -88,7 +102,7 @@ const DashboardClient = () => {
                 setFetchingReports(true);
                 try {
                     // Get user key (works for phone, Google, and email auth)
-                    const userKey = user.phoneNumber ? user.phoneNumber.slice(-10) : (userData?.phoneNumber || user.uid);
+                    const userKey = getUserDatabaseKey(user);
                     const reportsRef = ref(firebaseDatabase, `NMD_2025/Reports/${userKey}/${activeChildId}`);
                     const snapshot = await get(reportsRef);
                     if (snapshot.exists()) {
@@ -144,7 +158,7 @@ const DashboardClient = () => {
         setActiveChildId(newChildId);
         if (user) {
             // Get user key (works for phone, Google, and email auth)
-            const userKey = user.phoneNumber ? user.phoneNumber.slice(-10) : (userData?.phoneNumber || user.uid);
+            const userKey = getUserDatabaseKey(user);
             if (typeof window !== "undefined") {
                 window.localStorage.setItem(`activeChild_${userKey}`, newChildId);
             }
@@ -171,7 +185,7 @@ const DashboardClient = () => {
         }
 
         // Get user database key (works for phone, Google, and email auth)
-        const userKey = user.phoneNumber ? user.phoneNumber.slice(-10) : (userData?.phoneNumber || user.uid);
+        const userKey = getUserDatabaseKey(user);
         const childId = `child_${Date.now()}`;
         const childProfile = {
             ...childForm,
@@ -227,7 +241,7 @@ const DashboardClient = () => {
         }
 
         // Get user database key (works for phone, Google, and email auth)
-        const userKey = user.phoneNumber ? user.phoneNumber.slice(-10) : (userData?.phoneNumber || user.uid);
+        const userKey = getUserDatabaseKey(user);
 
         const updatedProfile = {
             ...childForm,
@@ -393,7 +407,7 @@ const DashboardClient = () => {
                                     }
 
                                     // Get user key (works for phone, Google, and email auth)
-                                    const userKey = user.phoneNumber ? user.phoneNumber.slice(-10) : (userData?.phoneNumber || user.uid);
+                                    const userKey = getUserDatabaseKey(user);
 
                                     try {
                                         if (typeof window !== "undefined") {
