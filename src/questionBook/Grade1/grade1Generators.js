@@ -19,10 +19,10 @@ export const generateCountForward = () => {
   const answer = start + 4;
 
   // 50% chance for userInput
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
-      question: `What comes next: ${sequence.join(", ")}, ...?`,
+      question: `What comes next: </br>${sequence.join(", ")}, ...?`,
       topic: "Number Sense / Counting",
       answer: String(answer)
     };
@@ -58,7 +58,7 @@ export const generateCountBackward = () => {
 
   return {
     type: "mcq",
-    question: `Count backwards: ${sequence.join(", ")}, ...?`,
+    question: `Count backwards: </br> ${sequence.join(", ")}, ...?`,
     topic: "Number Sense / Counting",
     options: options,
     answer: String(answer)
@@ -70,10 +70,10 @@ export const generateSkipCounting = (step) => {
   const sequence = [start, start + step, start + 2 * step, start + 3 * step];
   const answer = start + 4 * step;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
-      question: `Skip count by ${step}s: ${sequence.join(", ")}, ...?`,
+      question: `Skip count by ${step}s: </br>${sequence.join(", ")}, ...?`,
       topic: "Number Sense / Skip Counting",
       answer: String(answer)
     };
@@ -139,7 +139,7 @@ export const generateComparison = (type) => {
     questionText = "Which number is the smallest?";
   }
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: `${questionText} [${nums.join(", ")}]`,
@@ -186,9 +186,9 @@ export const generateAdditionObjects = () => {
   // Using simple text representation for objects as emojis might not render consistently everywhere, 
   // but for a web app, emojis are usually fine.
   const object = "🍎";
-  const question = `Add the apples: ${object.repeat(num1)} + ${object.repeat(num2)} = ?`;
+  const question = `Add the apples:</br> ${object.repeat(num1)} + ${object.repeat(num2)} = ?`;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: question,
@@ -214,7 +214,7 @@ export const generateAdditionObjects = () => {
 };
 
 export const generateAdditionWordProblems = () => {
-  const names = ["Raju", "Sita", "Ali", "John"];
+  const names = ["Raju", "Rama", "Ali", "John"];
   const items = ["balls", "apples", "pencils", "books"];
 
   const name = names[getRandomInt(0, names.length - 1)];
@@ -225,7 +225,7 @@ export const generateAdditionWordProblems = () => {
 
   const question = `${name} has ${num1} ${item}. He gets ${num2} more. How many ${item} does he have now?`;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: question,
@@ -253,14 +253,14 @@ export const generateAdditionWordProblems = () => {
 // --- Subtraction ---
 
 export const generateSubtractionObjects = () => {
-  const num1 = getRandomInt(5, 9);
-  const num2 = getRandomInt(1, 4);
+  const num1 = getRandomInt(3, 6);
+  const num2 = getRandomInt(1, 2);
   const answer = num1 - num2;
 
   const object = "🎈";
-  const question = `Subtract the balloons: ${object.repeat(num1)} - ${object.repeat(num2)} = ?`;
+  const question = `Subtract the balloons:</br> ${object.repeat(num1)} - ${object.repeat(num2)} = ?`;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: question,
@@ -286,18 +286,18 @@ export const generateSubtractionObjects = () => {
 };
 
 export const generateSubtractionWordProblems = () => {
-  const names = ["Raju", "Sita", "Ali", "John"];
+  const names = ["Raju", "Rama", "Ali", "John"];
   const items = ["crayons", "candies", "toys", "stickers"];
 
   const name = names[getRandomInt(0, names.length - 1)];
   const item = items[getRandomInt(0, items.length - 1)];
-  const num1 = getRandomInt(5, 10);
-  const num2 = getRandomInt(1, 4);
+  const num1 = getRandomInt(6, 10);
+  const num2 = getRandomInt(3, 5);
   const answer = num1 - num2;
 
-  const question = `${name} had ${num1} ${item}. She lost ${num2}. How many ${item} are left?`;
+  const question = `${name} had ${num1} ${item}. He lost ${num2}. How many ${item} are left?`;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: question,
@@ -326,10 +326,47 @@ export const generateSubtractionWordProblems = () => {
 
 export const generateIdentifyShapes = () => {
   const shapes = [
-    { name: "Circle", objects: ["Clock", "Coin", "Wheel", "Pizza"] },
-    { name: "Square", objects: ["Chessboard", "Window", "Slice of Bread", "Tile"] },
-    { name: "Triangle", objects: ["Slice of Pizza", "Traffic Sign", "Nachos", "Hanger"] },
-    { name: "Rectangle", objects: ["Door", "Book", "Mobile Phone", "TV Screen"] }
+    {
+      name: "Circle",
+      objects: [
+        { name: "Clock", img: "⏰" },
+        { name: "Coin", img: "🪙" },
+        { name: "Wheel", img: "🛞" },
+        { name: "Pizza", img: "🍕" }, // Whole pizza usually implies circle context, or use 🌕 Full Moon
+        { name: "Ball", img: "⚽" },
+        { name: "Sun", img: "☀️" }
+      ]
+    },
+    {
+      name: "Square",
+      objects: [
+        { name: "Window", img: "🪟" },
+        // { name: "Slice of Bread", img: "🍞" },
+        { name: "Gift Box", img: "🎁" },
+        { name: "Frame", img: "🖼️" },
+        { name: "Dice", img: "🎲" } // Face of a dice is square
+      ]
+    },
+    {
+      name: "Triangle",
+      objects: [
+        { name: "Slice of Pizza", img: "🍕" },
+        { name: "Traffic Sign", img: "⚠️" }, // Warning sign
+        { name: "Cheese", img: "🧀" },
+        { name: "Tent", img: "⛺" },
+        { name: "Party Hat", img: "🎉" } // Cone looks like triangle in 2D
+      ]
+    },
+    {
+      name: "Rectangle",
+      objects: [
+        { name: "Door", img: "🚪" },
+        { name: "Book", img: "📖" },
+        { name: "Mobile Phone", img: "📱" },
+        { name: "TV Screen", img: "📺" },
+        { name: "Envelope", img: "✉️" }
+      ]
+    }
   ];
 
   const shape = shapes[getRandomInt(0, shapes.length - 1)];
@@ -339,7 +376,7 @@ export const generateIdentifyShapes = () => {
 
   return {
     type: "mcq",
-    question: `What shape does a ${object} look like?`,
+    question: `What shape does a ${object.name} look like? <br/> <div style="font-size: 4rem; margin-top: 10px;">${object.img}</div>`,
     topic: "Geometry / Shapes",
     options: options,
     answer: shape.name
@@ -348,9 +385,27 @@ export const generateIdentifyShapes = () => {
 
 export const generateSpatial = () => {
   const concepts = [
-    { type: "Inside/Outside", question: "If a cat is in a box, is it inside or outside?", answer: "Inside", other: "Outside" },
-    { type: "Left/Right", question: "In the word 'APPLE', is 'A' on the left or right?", answer: "Left", other: "Right" },
-    { type: "Top/Bottom", question: "Is the sky above (top) or below (bottom) us?", answer: "Top", other: "Bottom" }
+    {
+      type: "Inside/Outside",
+      question: "In the Picture below, is the cat inside or outside the box?",
+      answer: "Inside",
+      other: "Outside",
+      img: "/assets/grade1/cat_inside.jpg"
+    },
+    {
+      type: "Left/Right",
+      question: "In the Picture below, which side is the Yellow Flower?",
+      answer: "Left",
+      other: "Right",
+      img: "/assets/grade1/Flower_left.png"
+    },
+    {
+      type: "Top/Bottom",
+      question: "Is the sky above (top) or below (bottom) us?",
+      answer: "Top",
+      other: "Bottom",
+      img: "/assets/grade1/sky_top.jpg"
+    }
   ];
 
   const concept = concepts[getRandomInt(0, concepts.length - 1)];
@@ -362,7 +417,7 @@ export const generateSpatial = () => {
 
   return {
     type: "mcq",
-    question: concept.question,
+    question: `${concept.question} <br/> <img src="${concept.img}" alt="${concept.type}" style="max-width: 300px; margin-top: 10px; border-radius: 8px;" />`,
     topic: "Geometry / Spatial",
     options: options,
     answer: concept.answer
@@ -374,7 +429,7 @@ export const generateSpatial = () => {
 export const generateLengthComparison = () => {
   const items = [
     { name: "Pencil", length: getRandomInt(2, 5) },
-    { name: "Table", length: getRandomInt(10, 20) },
+    { name: "Table", length: getRandomInt(6, 10) },
     { name: "Book", length: getRandomInt(5, 8) }
   ];
 
@@ -401,14 +456,14 @@ export const generateLengthComparison = () => {
 
 export const generateWeightComparison = () => {
   const comparisons = [
-    { heavy: "Elephant", light: "Mouse" },
-    { heavy: "Car", light: "Bicycle" },
-    { heavy: "Watermelon", light: "Apple" },
-    { heavy: "Book", light: "Feather" }
+    { heavy: "Elephant", light: "Mouse", img: "/assets/grade1/elephant_mouse.png" },
+    { heavy: "Car", light: "Bicycle", img: "/assets/grade1/car_bicycle.png" },
+    { heavy: "Watermelon", light: "Apple", img: "/assets/grade1/watermelon_apple.png" },
+    { heavy: "Book", light: "Feather", img: "/assets/grade1/book_feather.png" }
   ];
 
   const comp = comparisons[getRandomInt(0, comparisons.length - 1)];
-  const askHeavy = Math.random() > 0.5;
+  const askHeavy = Math.random() > 0;
 
   const question = askHeavy
     ? `Which is heavier: ${comp.heavy} or ${comp.light}?`
@@ -423,7 +478,7 @@ export const generateWeightComparison = () => {
 
   return {
     type: "mcq",
-    question: question,
+    question: `${question} <br/> <img src="${comp.img}" alt="${comp.heavy} vs ${comp.light}" style="max-width: 300px; margin-top: 10px; border-radius: 8px;" />`,
     topic: "Measurement / Weight",
     options: options,
     answer: answer
@@ -432,18 +487,18 @@ export const generateWeightComparison = () => {
 
 export const generateCapacityComparison = () => {
   const comparisons = [
-    { more: "Bucket", less: "Cup" },
-    { more: "Jug", less: "Spoon" },
-    { more: "Pool", less: "Bathtub" },
-    { more: "Bottle", less: "Glass" }
+    { more: "Bucket", less: "Cup", img: "/assets/grade1/bucket_cup.png" },
+    { more: "Jug", less: "Spoon", img: "/assets/grade1/jug_spoon.png" },
+    { more: "Pool", less: "Bathtub", img: "/assets/grade1/pool_bathtub.png" },
+    { more: "Bottle", less: "Glass", img: "/assets/grade1/bottle_glass.png" }
   ];
 
   const comp = comparisons[getRandomInt(0, comparisons.length - 1)];
-  const askMore = Math.random() > 0.5;
+  const askMore = Math.random() > 0;
 
   const question = askMore
-    ? `Which holds more water: ${comp.more} or ${comp.less}?`
-    : `Which holds less water: ${comp.more} or ${comp.less}?`;
+    ? `Which holds more water:</br> ${comp.more} or ${comp.less}?`
+    : `Which holds less water:</br> ${comp.more} or ${comp.less}?`;
 
   const answer = askMore ? comp.more : comp.less;
 
@@ -454,7 +509,7 @@ export const generateCapacityComparison = () => {
 
   return {
     type: "mcq",
-    question: question,
+    question: `${question} <br/> <img src="${comp.img}" alt="${comp.more} vs ${comp.less}" style="max-width: 300px; margin-top: 10px; border-radius: 8px;" />`,
     topic: "Measurement / Capacity",
     options: options,
     answer: answer
@@ -501,9 +556,9 @@ export const generateMoneyCounting = () => {
     total += note;
   }
 
-  const question = `Count the money: ${selectedNotes.map(n => `₹${n}`).join(" + ")} = ?`;
+  const question = `Count the money:</br> ${selectedNotes.map(n => `₹${n}`).join(" + ")} = ?`;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: question,
@@ -540,7 +595,7 @@ export const generatePatterns = () => {
 
   const pattern = patterns[getRandomInt(0, patterns.length - 1)];
 
-  const question = `Complete the pattern: ${pattern.seq.join(", ")}, ...?`;
+  const question = `Complete the pattern:</br> ${pattern.seq.join(", ")}, ...?`;
 
   const options = shuffleArray([
     { value: pattern.next, label: pattern.next },
@@ -561,9 +616,9 @@ export const generatePatterns = () => {
 export const generateTally = () => {
   const count = getRandomInt(1, 10);
   const tallyMark = "|";
-  const question = `Count the tally marks: ${tallyMark.repeat(count)}`;
+  const question = `Count the tally marks:</br> ${tallyMark.repeat(count)}`;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: question,
@@ -588,35 +643,37 @@ export const generateTally = () => {
   };
 };
 
-export const generateNumberLine = () => {
-  const start = getRandomInt(0, 5);
-  const jump = getRandomInt(1, 5);
-  const answer = start + jump;
+export const generateCountingObjects = () => {
+  const count = getRandomInt(2, 10);
+  const objects = ["🍎", "🍌", "🍇", "🍊", "🍓", "⚽", "🎈", "⭐"];
+  const selectedObject = objects[getRandomInt(0, objects.length - 1)];
 
-  const question = `Start at ${start} on the number line. Jump ${jump} steps forward. Where do you land?`;
+  const questionString = selectedObject.repeat(count);
+  const question = `Count the objects: </br>
+    ${questionString}`;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: question,
-      topic: "Number Sense / Number Line",
-      answer: String(answer)
+      topic: "Number Sense / Counting Objects",
+      answer: String(count)
     };
   }
 
   const options = shuffleArray([
-    { value: String(answer), label: String(answer) },
-    { value: String(answer + 1), label: String(answer + 1) },
-    { value: String(answer - 1), label: String(answer - 1) },
-    { value: String(answer + 2), label: String(answer + 2) }
+    { value: String(count), label: String(count) },
+    { value: String(count + 1), label: String(count + 1) },
+    { value: String(count - 1), label: String(count - 1) },
+    { value: String(count + 2), label: String(count + 2) }
   ]);
 
   return {
     type: "mcq",
     question: question,
-    topic: "Number Sense / Number Line",
+    topic: "Number Sense / Counting Objects",
     options: options,
-    answer: String(answer)
+    answer: String(count)
   };
 };
 
@@ -624,7 +681,7 @@ export const generateDaysOfWeek = () => {
   const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const index = getRandomInt(0, 5); // Avoid Saturday for "tomorrow" edge case simplicity if needed, but array handles it.
 
-  const type = Math.random() > 0.5 ? "after" : "before";
+  const type = Math.random() > 0 ? "after" : "before";
   let question, answer;
 
   if (type === "after") {
@@ -658,9 +715,9 @@ export const generatePictureGraph = () => {
   const selectedItem = items[getRandomInt(0, items.length - 1)];
   const count = getRandomInt(1, 8);
 
-  const question = `If 1 😃 = 1 fruit, how many fruits are there? \n ${"😃 ".repeat(count)}`;
+  const question = `If 1 😃 = 1 fruit, how many fruits are there?</br> ${"😃 ".repeat(count)}`;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: question,

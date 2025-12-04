@@ -10,14 +10,16 @@ const TypeUserInput = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, q
     const isLastQuestion = questionPaper && activeQuestionIndex === questionPaper.length - 1;
     const isMarkedForReview = questionPaper && questionPaper[activeQuestionIndex]?.markedForReview || false;
 
+    // Logic to hide operators for Grade 1
+    const isGrade1 = grade && grade.toString().includes("Grade 1");
+    const showOperators = !isGrade1;
+
     const handleChange = (character) => {
-        setInputValue((state) => {
-            const next = `${state}${character}`;
-            if (onAnswerChange) {
-                onAnswerChange(next);
-            }
-            return next;
-        });
+        const next = `${inputValue}${character}`;
+        setInputValue(next);
+        if (onAnswerChange) {
+            onAnswerChange(next);
+        }
     }
 
     const handleReset = () => {
@@ -28,13 +30,11 @@ const TypeUserInput = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, q
     }
 
     const handleBackspace = () => {
-        setInputValue((state) => {
-            const next = state.slice(0, -1);
-            if (onAnswerChange) {
-                onAnswerChange(next);
-            }
-            return next;
-        });
+        const next = inputValue.slice(0, -1);
+        setInputValue(next);
+        if (onAnswerChange) {
+            onAnswerChange(next);
+        }
     }
 
     useEffect(() => {
@@ -76,33 +76,33 @@ const TypeUserInput = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, q
                     />
 
                     {/* Compact Dial Pad with Math Operators */}
-                    <div className={Styles.dialPad}>
+                    <div className={showOperators ? Styles.dialPad : Styles.dialPadThreeCol}>
                         {/* Row 1: Numbers 1-3 + Addition */}
                         <Button onClick={_ => handleChange('1')} className={Styles.dialButton}>1</Button>
                         <Button onClick={_ => handleChange('2')} className={Styles.dialButton}>2</Button>
                         <Button onClick={_ => handleChange('3')} className={Styles.dialButton}>3</Button>
-                        <Button onClick={_ => handleChange('+')} className={Styles.operatorButton}>+</Button>
+                        {showOperators && <Button onClick={_ => handleChange('+')} className={Styles.operatorButton}>+</Button>}
 
                         {/* Row 2: Numbers 4-6 + Subtraction */}
                         <Button onClick={_ => handleChange('4')} className={Styles.dialButton}>4</Button>
                         <Button onClick={_ => handleChange('5')} className={Styles.dialButton}>5</Button>
                         <Button onClick={_ => handleChange('6')} className={Styles.dialButton}>6</Button>
-                        <Button onClick={_ => handleChange('-')} className={Styles.operatorButton}>−</Button>
+                        {showOperators && <Button onClick={_ => handleChange('-')} className={Styles.operatorButton}>−</Button>}
 
                         {/* Row 3: Numbers 7-9 + Multiplication */}
                         <Button onClick={_ => handleChange('7')} className={Styles.dialButton}>7</Button>
                         <Button onClick={_ => handleChange('8')} className={Styles.dialButton}>8</Button>
                         <Button onClick={_ => handleChange('9')} className={Styles.dialButton}>9</Button>
-                        <Button onClick={_ => handleChange('*')} className={Styles.operatorButton}>×</Button>
+                        {showOperators && <Button onClick={_ => handleChange('*')} className={Styles.operatorButton}>×</Button>}
 
                         {/* Row 4: Decimal, 0, Backspace, Division */}
                         <Button onClick={_ => handleChange('.')} className={Styles.dialButton}>.</Button>
                         <Button onClick={_ => handleChange('0')} className={Styles.dialButton}>0</Button>
                         <Button onClick={handleBackspace} className={Styles.backspaceButton}>⌫</Button>
-                        <Button onClick={_ => handleChange('/')} className={Styles.operatorButton}>÷</Button>
+                        {showOperators && <Button onClick={_ => handleChange('/')} className={Styles.operatorButton}>÷</Button>}
 
                         {/* Row 5: Reset button */}
-                        <Button onClick={handleReset} className={Styles.resetButton}>Clear</Button>
+                        <Button onClick={handleReset} className={showOperators ? Styles.resetButton : Styles.resetButtonThreeCol}>Clear</Button>
                     </div>
                 </div>
 
@@ -118,7 +118,7 @@ const TypeUserInput = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, q
                                 Previous
                             </Button>
                         )}
-                        {onMarkForReview && (
+                        {/* {onMarkForReview && (
                             <Button
                                 onClick={handleMarkForReview}
                                 size="large"
@@ -127,7 +127,7 @@ const TypeUserInput = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, q
                             >
                                 {isMarkedForReview ? 'Marked' : 'Mark for Review'}
                             </Button>
-                        )}
+                        )} */}
                     </div>
                     <Button
                         onClick={_ => onClick(inputValue, timeTakeRef.current)}

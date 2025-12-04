@@ -1,7 +1,7 @@
 import {
     generateCountForward,
     generateCountBackward,
-    generateNumberLine,
+    generateCountingObjects,
     generateSkipCounting,
     generatePlaceValue,
     generateComparison,
@@ -30,7 +30,7 @@ const generate = (generator, count = 10) => {
 const Grade1Questions = {
     q1: generate(generateCountForward),
     q2: generate(generateCountBackward),
-    q3: generate(generateNumberLine),
+    q3: generate(generateCountingObjects),
     q4: generate(() => generateSkipCounting(2)),
     q5: generate(() => generateSkipCounting(5)),
     q6: generate(() => generateSkipCounting(10)),

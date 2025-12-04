@@ -127,6 +127,13 @@
     width: 100%;
 }
 
+.dialPadThreeCol {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    width: 100%;
+}
+
 .dialButton {
     aspect-ratio: 1 !important;
     font-size: 1.25rem !important;
@@ -213,6 +220,24 @@
 }
 
 .resetButton:hover {
+    background: #fecaca !important;
+    border-color: #f87171 !important;
+}
+
+.resetButtonThreeCol {
+    grid-column: span 3 !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    background: #fee2e2 !important;
+    border: 2px solid #fca5a5 !important;
+    border-radius: 0.5rem !important;
+    color: #dc2626 !important;
+    transition: all 0.15s ease !important;
+    padding: 0.75rem !important;
+    min-height: 45px !important;
+}
+
+.resetButtonThreeCol:hover {
     background: #fecaca !important;
     border-color: #f87171 !important;
 }

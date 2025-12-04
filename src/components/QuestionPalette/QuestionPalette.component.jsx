@@ -62,10 +62,10 @@ const QuestionPalette = ({ questions, activeQuestionIndex, onSelect }) => {
                     <span className={`${Styles.dot} ${Styles.completed}`}></span>
                     <span>Answered</span>
                 </div>
-                <div className={Styles.legendItem}>
+                {/* <div className={Styles.legendItem}>
                     <span className={`${Styles.dot} ${Styles.markedForReview}`}></span>
                     <span>Marked for Review</span>
-                </div>
+                </div> */}
                 <div className={Styles.legendItem}>
                     <span className={`${Styles.dot} ${Styles.active}`}></span>
                     <span>Current</span>

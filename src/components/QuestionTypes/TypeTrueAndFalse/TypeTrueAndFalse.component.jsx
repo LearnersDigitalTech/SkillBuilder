@@ -61,7 +61,7 @@ const TypeTrueAndFalse = ({ onClick, onPrevious, onMarkForReview, onAnswerChange
                                 Previous
                             </Button>
                         )}
-                        {onMarkForReview && (
+                        {/* {onMarkForReview && (
                             <Button
                                 onClick={handleMarkForReview}
                                 size="large"
@@ -70,7 +70,7 @@ const TypeTrueAndFalse = ({ onClick, onPrevious, onMarkForReview, onAnswerChange
                             >
                                 {isMarkedForReview ? 'Marked' : 'Mark for Review'}
                             </Button>
-                        )}
+                        )} */}
                     </div>
                     <Button
                         onClick={() => onClick(selectedOption, timeTakeRef.current)}

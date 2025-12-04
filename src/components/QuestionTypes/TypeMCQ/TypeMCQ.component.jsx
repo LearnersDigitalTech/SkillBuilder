@@ -70,7 +70,7 @@ const TypeMCQ = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, questio
                                 Previous
                             </Button>
                         )}
-                        {onMarkForReview && (
+                        {/* {onMarkForReview && (
                             <Button
                                 onClick={handleMarkForReview}
                                 size="large"
@@ -79,7 +79,7 @@ const TypeMCQ = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, questio
                             >
                                 {isMarkedForReview ? 'Marked' : 'Mark for Review'}
                             </Button>
-                        )}
+                        )} */}
                     </div>
                     <Button
                         onClick={() => onClick(selectedOption, timeTakeRef.current)}

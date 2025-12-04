@@ -400,7 +400,7 @@ const QuizClient = () => {
         }
 
         // Toggle mark for review
-        currentQuestion.markedForReview = !currentQuestion.markedForReview;
+        // currentQuestion.markedForReview = !currentQuestion.markedForReview;
 
         const newQuestionPaper = [...questionPaper];
         newQuestionPaper[activeQuestionIndex] = currentQuestion;
