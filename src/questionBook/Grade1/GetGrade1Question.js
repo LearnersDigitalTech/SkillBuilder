@@ -17,7 +17,10 @@ import {
     generateTimeBasics,
     generateDaysOfWeek,
     generateMoneyCounting,
-    generatePatterns
+    generatePatterns,
+    generateBeforeAfter,
+    generateBetweenNumber,
+    generatePictureGraph
 } from './grade1Generators.js';
 
 const generate = (generator, count = 10) => {
@@ -27,29 +30,29 @@ const generate = (generator, count = 10) => {
 const Grade1Questions = {
     q1: generate(generateCountForward),
     q2: generate(generateCountBackward),
-    q3: generate(generateCountingObjects),
-    q4: generate(() => generateSkipCounting(2)),
-    q5: generate(() => generateSkipCounting(5)),
-    q6: generate(() => generateSkipCounting(10)),
-    q7: generate(generatePlaceValue),
-    q8: generate(() => generateComparison('greatest')),
-    q9: generate(generateEvenOdd),
-    q10: generate(generateAdditionObjects),
-    q11: generate(generateAdditionWordProblems),
-    q12: generate(generateSubtractionObjects),
-    q13: generate(generateSubtractionWordProblems),
-    q14: generate(generateIdentifyShapes),
-    q15: generate(generateSpatial),
-    q16: generate(generateWeightComparison),
-    q17: generate(generateCapacityComparison),
-    q18: generate(generateTimeBasics),
-    q19: generate(generateDaysOfWeek),
-    q20: generate(generateMoneyCounting),
-    q21: generate(generatePatterns),
-    q22: generate(() => generateComparison('smallest')),
-    q23: generate(generateAdditionObjects),
-    q24: generate(generateSubtractionObjects),
-    q25: generate(generateIdentifyShapes)
+    q3: generate(generateBeforeAfter),
+    q4: generate(generateBetweenNumber),
+    q5: generate(generateCountingObjects),
+    q6: generate(() => generateSkipCounting(2)),
+    q7: generate(() => generateSkipCounting(5)),
+    q8: generate(() => generateSkipCounting(10)),
+    q9: generate(generatePlaceValue),
+    q10: generate(() => generateComparison('smallest')),
+    q11: generate(() => generateComparison('greatest')),
+    q12: generate(generateEvenOdd),
+    q13: generate(generateAdditionObjects),
+    q14: generate(generateAdditionWordProblems),
+    q15: generate(generateSubtractionObjects),
+    q16: generate(generateSubtractionWordProblems),
+    q17: generate(generateIdentifyShapes),
+    q18: generate(generateSpatial),
+    q19: generate(generateWeightComparison),
+    q20: generate(generateCapacityComparison),
+    q21: generate(generateTimeBasics),
+    q22: generate(generateMoneyCounting),
+    q23: generate(generatePatterns),
+    q24: generate(generateDaysOfWeek),
+    q25: generate(generatePictureGraph)
 };
 
 export default Grade1Questions;

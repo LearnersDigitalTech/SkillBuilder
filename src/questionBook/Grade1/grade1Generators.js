@@ -144,7 +144,7 @@ export const generateComparison = (type) => {
   if (Math.random() > 0) {
     return {
       type: "userInput",
-      question: `${questionText} [${nums.join(", ")}]`,
+      question: `${questionText} </br>[${nums.join(", ")}]`,
       topic: "Number Sense / Comparison",
       answer: String(answer)
     };
@@ -175,6 +175,31 @@ export const generateEvenOdd = () => {
       { value: "Odd", label: "Odd" }
     ],
     answer: answer
+  };
+};
+
+export const generateBeforeAfter = () => {
+  const num = getRandomInt(2, 98);
+  const type = Math.random() > 0.5 ? "before" : "after";
+  const answer = type === "before" ? num - 1 : num + 1;
+
+  return {
+    type: "userInput",
+    question: `What number comes ${type} ${num}?`,
+    topic: "Number Sense / Before & After",
+    answer: String(answer)
+  };
+};
+
+export const generateBetweenNumber = () => {
+  const num = getRandomInt(2, 98);
+  const answer = num + 1;
+
+  return {
+    type: "userInput",
+    question: `What number comes between ${num} and ${num + 2}?`,
+    topic: "Number Sense / Between",
+    answer: String(answer)
   };
 };
 

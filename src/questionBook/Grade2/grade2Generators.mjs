@@ -91,15 +91,6 @@ export const generateExpandedForm = () => {
 
   const answer = `${hundreds * 100} + ${tens * 10} + ${ones}`;
 
-  if (Math.random() > 0.5) {
-    return {
-      type: "userInput",
-      question: `What is the expanded form of ${number}?`,
-      topic: "Number Sense / Expanded Form",
-      answer: answer
-    };
-  }
-
   const options = shuffleArray([
     { value: answer, label: answer },
     { value: `${hundreds * 100} + ${tens} + ${ones}`, label: `${hundreds * 100} + ${tens} + ${ones}` },
@@ -208,7 +199,7 @@ export const generateSkipCounting = (step) => {
   const sequence = [start, start + step, start + 2 * step, start + 3 * step];
   const answer = start + 4 * step;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: `Skip count by ${step}: ${sequence.join(", ")}, ...?`,
@@ -262,7 +253,7 @@ export const generateAddNoCarry = () => {
 
   const answer = num1 + num2;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: `Add: ${num1} + ${num2} = ?`,
@@ -297,7 +288,7 @@ export const generateAddWithCarry = () => {
 
   const answer = num1 + num2;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: `Add: ${num1} + ${num2} = ?`,
@@ -371,7 +362,7 @@ export const generateSubNoBorrow = () => {
 
   const answer = num1 - num2;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: `Subtract: ${num1} - ${num2} = ?`,
@@ -406,7 +397,7 @@ export const generateSubWithBorrow = () => {
 
   const answer = num1 - num2;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: `Subtract: ${num1} - ${num2} = ?`,
@@ -443,7 +434,7 @@ export const generateSubWordProblems = () => {
 
   const question = `${name} had ${num1} ${item}. She gave ${num2} to her friend. How many ${item} are left?`;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: question,
@@ -478,7 +469,7 @@ export const generateRepeatedAddition = () => {
   const additionStr = Array(times).fill(num).join(" + ");
   const question = `${times} times ${num} is the same as: ${additionStr} = ?`;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: question,
@@ -510,7 +501,7 @@ export const generateTables = () => {
 
   const question = `${num} x ${times} = ?`;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: question,
@@ -583,7 +574,7 @@ export const generateAddMoney = () => {
 
   const question = `₹${num1} + ₹${num2} = ?`;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: question,
@@ -615,7 +606,7 @@ export const generateSubMoney = () => {
 
   const question = `₹${num1} - ₹${num2} = ?`;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: question,
@@ -826,7 +817,7 @@ export const generateTally = () => {
 
   const question2 = `What number does this tally show: ${tallyStr}?`;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: question2,
@@ -858,7 +849,7 @@ export const generatePictograph = () => {
 
   const question = `If 1 🍎 = ${scale} apples, how many apples are there in: ${"🍎 ".repeat(count)}?`;
 
-  if (Math.random() > 0.5) {
+  if (Math.random() > 0) {
     return {
       type: "userInput",
       question: question,
