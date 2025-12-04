@@ -63,25 +63,51 @@
 /* Mobile Design (768px and below) */
 @media (max-width: 768px) {
     .quizPageWrapper {
-        padding: 0.75rem 0.75rem;
-        gap: 0.75rem;
-        min-height: 100dvh;
+        padding: 0;
+        gap: 0;
+        height: 100dvh;
+        overflow: hidden;
+        flex-direction: column;
     }
 
     .sidebarSection {
-        flex-direction: column;
-        gap: 0.5rem;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: white;
+        border-bottom: 1px solid #e5e7eb;
+        flex: 0 0 auto;
+        width: 100%;
+        gap: 1rem;
+        z-index: 50;
     }
 
-    .timerSection,
-    .paletteSection {
+    .timerSection {
+        flex: 0 0 auto;
+        width: auto;
         max-height: none;
+    }
+
+    .paletteSection {
+        flex: 0 0 auto;
+        width: auto;
+        max-height: none;
+    }
+
+    .questionSection {
+        flex: 1;
+        min-height: 0;
+        /* Important for nested scrolling */
+        overflow: hidden;
+        width: 100%;
+        padding: 0;
     }
 }
 
 /* Small Mobile (480px and below) */
 @media (max-width: 480px) {
     .quizPageWrapper {
-        padding: 0.25rem;
+        padding: 0;
     }
 }

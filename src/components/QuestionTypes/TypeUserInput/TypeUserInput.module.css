@@ -89,7 +89,8 @@
     display: flex;
     flex-direction: column;
     padding: 2.5rem;
-    background: white;
+    background: #f8fafc;
+    /* Subtle background for contrast */
     overflow-y: auto;
     position: relative;
 }
@@ -99,149 +100,173 @@
     flex-direction: column;
     gap: 1.5rem;
     width: 100%;
-    max-width: 350px;
+    max-width: 400px;
     margin: 0 auto;
 }
 
+/* Premium Input Styling */
 .answerInput :global(.MuiInput-input) {
-    font-size: 2rem !important;
+    font-size: 2.5rem !important;
     font-weight: 700 !important;
     color: #1e293b !important;
-    padding: 1rem !important;
-    background: #f8fafc !important;
-    border-radius: 0.75rem !important;
+    padding: 1.5rem 1rem !important;
+    background: white !important;
+    border-radius: 1rem !important;
     border: 2px solid #e2e8f0 !important;
     text-align: center !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.2s ease !important;
+}
+
+.answerInput :global(.MuiInput-input:focus) {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
 }
 
 .answerInput :global(.MuiInput-input::placeholder) {
     color: #94a3b8 !important;
-    opacity: 1 !important;
+    opacity: 0.8 !important;
+    font-weight: 500 !important;
+    font-size: 1.5rem !important;
 }
 
-/* Compact Dial Pad - 4x4 grid with operators */
+/* Dial Pad Grid */
 .dialPad {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 0.5rem;
+    gap: 0.75rem;
     width: 100%;
 }
 
 .dialPadThreeCol {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
+    gap: 0.75rem;
     width: 100%;
 }
 
+/* Base Button Reset */
+.dialButton,
+.operatorButton,
+.backspaceButton,
+.resetButton,
+.resetButtonThreeCol {
+    border: none !important;
+    outline: none !important;
+    position: relative !important;
+    overflow: hidden !important;
+    cursor: pointer !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Number Buttons - Tactile 3D Look */
 .dialButton {
     aspect-ratio: 1 !important;
-    font-size: 1.25rem !important;
+    font-size: 1.5rem !important;
     font-weight: 600 !important;
     background: white !important;
-    border: 2px solid #e2e8f0 !important;
-    border-radius: 0.5rem !important;
-    color: #1e293b !important;
-    transition: all 0.15s ease !important;
-    min-height: 50px !important;
+    border-radius: 1rem !important;
+    color: #334155 !important;
+    box-shadow: 0 4px 0 #cbd5e1 !important;
+    transition: all 0.1s ease !important;
+    min-height: 60px !important;
+    transform: translateY(0);
     padding: 0 !important;
     min-width: 0 !important;
 }
 
-.dialButton:hover {
-    border-color: #2563eb !important;
-    background: #f8fafc !important;
-    transform: scale(1.05);
-}
-
 .dialButton:active {
-    transform: scale(0.95);
+    transform: translateY(4px) !important;
+    box-shadow: 0 0 0 #cbd5e1 !important;
+    background: #f1f5f9 !important;
 }
 
+/* Operator Buttons */
 .operatorButton {
     aspect-ratio: 1 !important;
     font-size: 1.5rem !important;
     font-weight: 700 !important;
-    background: #dbeafe !important;
-    border: 2px solid #93c5fd !important;
-    border-radius: 0.5rem !important;
-    color: #1e40af !important;
-    transition: all 0.15s ease !important;
-    min-height: 50px !important;
+    background: #eff6ff !important;
+    /* Light blue */
+    border-radius: 1rem !important;
+    color: #2563eb !important;
+    box-shadow: 0 4px 0 #bfdbfe !important;
+    transition: all 0.1s ease !important;
+    min-height: 60px !important;
     padding: 0 !important;
     min-width: 0 !important;
 }
 
-.operatorButton:hover {
-    background: #bfdbfe !important;
-    border-color: #60a5fa !important;
-    transform: scale(1.05);
-}
-
 .operatorButton:active {
-    transform: scale(0.95);
+    transform: translateY(4px) !important;
+    box-shadow: 0 0 0 #bfdbfe !important;
+    background: #dbeafe !important;
 }
 
+/* Backspace Button */
 .backspaceButton {
     aspect-ratio: 1 !important;
     font-size: 1.25rem !important;
     font-weight: 600 !important;
-    background: #fef3c7 !important;
-    border: 2px solid #fcd34d !important;
-    border-radius: 0.5rem !important;
-    color: #92400e !important;
-    transition: all 0.15s ease !important;
-    min-height: 50px !important;
+    background: #fff7ed !important;
+    /* Light orange */
+    border-radius: 1rem !important;
+    color: #ea580c !important;
+    box-shadow: 0 4px 0 #fed7aa !important;
+    transition: all 0.1s ease !important;
+    min-height: 60px !important;
     padding: 0 !important;
     min-width: 0 !important;
 }
 
-.backspaceButton:hover {
-    background: #fde68a !important;
-    border-color: #fbbf24 !important;
-    transform: scale(1.05);
+.backspaceButton:active {
+    transform: translateY(4px) !important;
+    box-shadow: 0 0 0 #fed7aa !important;
+    background: #ffedd5 !important;
 }
 
-.backspaceButton:active {
-    transform: scale(0.95);
+/* Clear/Reset Button */
+.resetButton,
+.resetButtonThreeCol {
+    font-size: 0.875rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    background: transparent !important;
+    border: 2px solid #fee2e2 !important;
+    /* Subtle red border */
+    border-radius: 0.75rem !important;
+    color: #ef4444 !important;
+    padding: 0.75rem !important;
+    min-height: 50px !important;
+    box-shadow: none !important;
+    transition: all 0.2s ease !important;
+    margin-top: 0.5rem !important;
+}
+
+.resetButton:hover,
+.resetButtonThreeCol:hover {
+    background: #fef2f2 !important;
+    border-color: #fca5a5 !important;
+    transform: translateY(-1px);
+}
+
+.resetButton:active,
+.resetButtonThreeCol:active {
+    transform: translateY(1px);
+    background: #fee2e2 !important;
 }
 
 .resetButton {
     grid-column: span 4 !important;
-    font-size: 0.875rem !important;
-    font-weight: 600 !important;
-    background: #fee2e2 !important;
-    border: 2px solid #fca5a5 !important;
-    border-radius: 0.5rem !important;
-    color: #dc2626 !important;
-    transition: all 0.15s ease !important;
-    padding: 0.75rem !important;
-    min-height: 45px !important;
-}
-
-.resetButton:hover {
-    background: #fecaca !important;
-    border-color: #f87171 !important;
 }
 
 .resetButtonThreeCol {
     grid-column: span 3 !important;
-    font-size: 0.875rem !important;
-    font-weight: 600 !important;
-    background: #fee2e2 !important;
-    border: 2px solid #fca5a5 !important;
-    border-radius: 0.5rem !important;
-    color: #dc2626 !important;
-    transition: all 0.15s ease !important;
-    padding: 0.75rem !important;
-    min-height: 45px !important;
 }
 
-.resetButtonThreeCol:hover {
-    background: #fecaca !important;
-    border-color: #f87171 !important;
-}
-
+/* Navigation Container */
 .navigationContainer {
     margin-top: auto;
     padding-top: 2rem;
@@ -259,29 +284,19 @@
 
 .prevButton {
     background: white !important;
-    color: #2563eb !important;
-    border: 1px solid #2563eb !important;
+    color: #64748b !important;
+    border: 1px solid #e2e8f0 !important;
     text-transform: none !important;
     font-weight: 600 !important;
-    border-radius: 0.5rem !important;
+    border-radius: 0.75rem !important;
+    padding: 0.75rem 1.5rem !important;
+    box-shadow: 0 2px 0 #e2e8f0 !important;
+    transition: all 0.1s ease !important;
 }
 
-.reviewButton {
-    background: white !important;
-    color: #9333ea !important;
-    border: 1px solid #e9d5ff !important;
-    text-transform: none !important;
-    font-weight: 600 !important;
-    border-radius: 0.5rem !important;
-}
-
-.reviewButtonActive {
-    background: #9333ea !important;
-    color: white !important;
-    border: 1px solid #9333ea !important;
-    text-transform: none !important;
-    font-weight: 600 !important;
-    border-radius: 0.5rem !important;
+.prevButton:active {
+    transform: translateY(2px) !important;
+    box-shadow: none !important;
 }
 
 .nextButton {
@@ -289,12 +304,15 @@
     color: white !important;
     text-transform: none !important;
     font-weight: 600 !important;
-    border-radius: 0.5rem !important;
-    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3) !important;
+    border-radius: 0.75rem !important;
+    padding: 0.75rem 2rem !important;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3), 0 2px 0 #1e40af !important;
+    transition: all 0.1s ease !important;
 }
 
-.nextButton:hover {
-    background: #1d4ed8 !important;
+.nextButton:active {
+    transform: translateY(2px) !important;
+    box-shadow: 0 2px 4px -1px rgba(37, 99, 235, 0.3), 0 0 0 #1e40af !important;
 }
 
 .submitButton {
@@ -302,14 +320,15 @@
     color: white !important;
     text-transform: none !important;
     font-weight: 700 !important;
-    border-radius: 0.5rem !important;
-    box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.4) !important;
-    padding: 0.875rem 2rem !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.4), 0 2px 0 #14532d !important;
+    padding: 0.75rem 2.5rem !important;
+    transition: all 0.1s ease !important;
 }
 
-.submitButton:hover {
-    background: linear-gradient(135deg, #15803d, #166534) !important;
-    box-shadow: 0 6px 10px -1px rgba(22, 163, 74, 0.5) !important;
+.submitButton:active {
+    transform: translateY(2px) !important;
+    box-shadow: 0 2px 4px -1px rgba(22, 163, 74, 0.4), 0 0 0 #14532d !important;
 }
 
 /* Responsive Design */
@@ -345,70 +364,107 @@
 @media (max-width: 640px) {
     .quizContainer {
         border-radius: 0;
-        height: 100vh;
+        height: 100%;
+        display: block;
+        /* Unified scrolling */
+        box-shadow: none;
+        overflow-y: auto;
+        padding-bottom: 70px;
+        /* Space for fixed navigation */
     }
 
     .questionColumn {
-        padding: 1rem;
+        padding: 0.75rem;
         min-height: auto;
-        flex: 0 0 auto;
+        flex: none;
+        max-height: none;
+        overflow-y: visible;
     }
 
     .question {
-        font-size: 1.1rem;
+        font-size: 1rem;
         margin-bottom: 0;
     }
 
     .questionHeader {
-        margin-bottom: 1rem;
+        margin-bottom: 0.25rem;
     }
 
     .optionsColumn {
-        padding: 0.75rem;
-        flex: 1 1 auto;
-        overflow-y: auto;
+        padding: 0.5rem;
+        flex: none;
+        overflow-y: visible;
+        display: block;
+        background: #f8fafc;
     }
 
     .optionContainer {
         max-width: 100%;
         gap: 0.5rem;
         margin-top: 0;
+        flex: none;
+        overflow-y: visible;
     }
 
     .answerInput :global(.MuiInput-input) {
         font-size: 1.25rem !important;
-        padding: 0.5rem !important;
+        padding: 0.75rem !important;
         height: auto !important;
     }
 
     .dialPad,
     .dialPadThreeCol {
-        gap: 0.25rem;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
     }
 
     .dialButton,
     .operatorButton,
     .backspaceButton {
-        min-height: 35px !important;
-        font-size: 0.9rem !important;
-        border-radius: 0.25rem !important;
+        min-height: 48px !important;
+        font-size: 1rem !important;
+        border-radius: 0.5rem !important;
+        box-shadow: 0 2px 0 #cbd5e1 !important;
         aspect-ratio: auto !important;
-        padding: 0.25rem !important;
+    }
+
+    .dialButton:active,
+    .operatorButton:active,
+    .backspaceButton:active {
+        transform: translateY(2px) !important;
+        box-shadow: 0 0 0 transparent !important;
+    }
+
+    .operatorButton {
+        box-shadow: 0 2px 0 #bfdbfe !important;
+    }
+
+    .backspaceButton {
+        box-shadow: 0 2px 0 #fed7aa !important;
     }
 
     .resetButton,
     .resetButtonThreeCol {
-        min-height: 32px !important;
+        min-height: 40px !important;
         padding: 0.25rem !important;
         font-size: 0.75rem !important;
-        border-radius: 0.25rem !important;
+        border-radius: 0.5rem !important;
+        margin-top: 0.25rem !important;
     }
 
     .navigationContainer {
-        padding-top: 0.75rem;
-        gap: 0.75rem;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: white;
+        padding: 0.5rem 0.75rem;
+        gap: 0.5rem;
         display: grid;
         grid-template-columns: 1fr 1fr;
+        border-top: 1px solid #e5e7eb;
+        z-index: 100;
+        box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
     }
 
     .leftButtons {
@@ -418,13 +474,19 @@
 
     .nextButton,
     .submitButton,
-    .prevButton,
-    .reviewButton,
-    .reviewButtonActive {
-        padding: 0.35rem 0.75rem !important;
+    .prevButton {
+        padding: 0.4rem !important;
         font-size: 0.85rem !important;
-        min-height: 35px !important;
+        min-height: 36px !important;
         width: 100%;
         justify-content: center;
+        box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .nextButton:active,
+    .submitButton:active,
+    .prevButton:active {
+        transform: translateY(2px) !important;
+        box-shadow: none !important;
     }
 }
