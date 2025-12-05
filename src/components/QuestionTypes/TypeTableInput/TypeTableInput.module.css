@@ -86,6 +86,252 @@
     height: 60px;
 }
 
+.fractionTextRow {
+    display: grid;
+    grid-template-columns: 3fr 1.5fr;
+    gap: 2px;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 100px;
+    border: 1px solid #e2e8f0;
+}
+
+.trueFalseRow {
+    display: grid;
+    grid-template-columns: 1fr 250px;
+    gap: 2px;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 60px;
+}
+
+.cell {
+    background: #bae6fd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* ... existing cell block rules ... */
+/* but I need to target .radioCell specifically, checking context */
+
+/* Let's be careful with context. 'trueFalseRow' was near line 96 in previous view. */
+/* 'radioCell' was near line 268. Two separate blocks. */
+/* I will update them separately or use multi_replace if easy. */
+/* I'll use separate replace calls to be safe with context. */
+
+.cell {
+    background: #bae6fd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.textCell {
+    background: #bae6fd;
+    display: flex;
+    align-items: center;
+    padding-left: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+/* Fraction Cell Styles */
+.fractionCell {
+    background: white;
+    /* White bg for fractions as per image */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid #cbd5e1;
+}
+
+.fractionCell:last-child {
+    border-right: none;
+}
+
+.fractionWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.fractionLine {
+    width: 100%;
+    height: 2px;
+    background-color: #0f172a;
+    min-width: 20px;
+}
+
+.inputCell {
+    background: #bae6fd;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    /* For double inputs */
+}
+
+.unitLabel {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #475569;
+    white-space: nowrap;
+}
+
+/* Fraction Input Cell - White bg usually */
+.fractionInputCell {
+    background: white;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.inputField {
+    width: 100%;
+    height: 100%;
+    border: 2px solid #fff;
+    border-radius: 4px;
+    background: white;
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-align: center;
+    color: #0f172a;
+    outline: none;
+}
+
+.inputField:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* Small input for fractions */
+.fractionInput {
+    width: 60px;
+    height: 35px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.selectField {
+    width: 100%;
+    height: 100%;
+    border: 2px solid #cbd5e1;
+    border-radius: 4px;
+    background: white;
+    font-size: 1rem;
+    padding: 0 8px;
+    color: #0f172a;
+    outline: none;
+    cursor: pointer;
+}
+
+.selectField:focus {
+    border-color: #2563eb;
+}
+
+.navigationContainer {
+    margin-top: auto;
+    padding-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.submitButton {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: white !important;
+    text-transform: none !important;
+    font-weight: 700 !important;
+    border-radius: 0.75rem !important;
+    padding: 0.75rem 2.5rem !important;
+}
+
+.nextButton {
+    background: #2563eb !important;
+    color: white !important;
+    text-transform: none !important;
+    font-weight: 600 !important;
+    border-radius: 0.75rem !important;
+    padding: 0.75rem 2rem !important;
+}
+
+.previousButton {
+    background: white !important;
+    border: 1.5px solid #2563eb !important;
+    color: #2563eb !important;
+    text-transform: none !important;
+    font-weight: 600 !important;
+    border-radius: 0.75rem !important;
+    padding: 0.75rem 2rem !important;
+}
+
+.previousButton:hover {
+    background: #eff6ff !important;
+}
+
+/* Mobile Responsiveness */
+.textRow {
+    display: grid;
+    grid-template-columns: 3fr 1.5fr;
+    gap: 2px;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 60px;
+}
+
+.fractionTextRow {
+    display: grid;
+    grid-template-columns: 3fr 1.5fr;
+    gap: 2px;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 100px;
+    border: 1px solid #e2e8f0;
+}
+
+.trueFalseRow {
+    display: grid;
+    grid-template-columns: 1fr 250px;
+    gap: 2px;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 60px;
+}
+
+.cell {
+    background: #bae6fd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* ... existing cell block rules ... */
+/* but I need to target .radioCell specifically, checking context */
+
+/* Let's be careful with context. 'trueFalseRow' was near line 96 in previous view. */
+/* 'radioCell' was near line 268. Two separate blocks. */
+/* I will update them separately or use multi_replace if easy. */
+/* I'll use separate replace calls to be safe with context. */
+
 .cell {
     background: #bae6fd;
     display: flex;
@@ -254,4 +500,52 @@
     .inputField {
         font-size: 1rem;
     }
+}
+
+.radioCell {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background: white;
+    gap: 0;
+    padding-right: 20px;
+}
+
+.headerRadioCell {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    gap: 0;
+    padding-right: 20px;
+    font-weight: 700;
+    color: #475569;
+    /* Slightly rigid color for header */
+    font-size: 1rem;
+}
+
+.optionColumn {
+    width: 80px;
+    /* Fixed width to ensure alignment */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.radioLabel {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    justify-content: center;
+    width: 100%;
+}
+
+.radioInput {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    margin: 0;
 }

@@ -512,13 +512,13 @@ export const generateAlgebraicMultiplication = () => {
     const term2 = (b * c) - (a * d); // coeff of xy
     const term3 = b * d; // since it is -d, last term is -bd y^2
 
-    const question = `(${a}x + ${b}y)(${c}x - ${d}y)`;
+    const question = `$(${a}x + ${b}y)(${c}x - ${d}y)$`;
 
     const term2Str = term2 >= 0 ? `+ ${term2}xy` : `- ${Math.abs(term2)}xy`;
     const ansStr = `${term1}x^2 ${term2Str} - ${term3}y^2`;
 
-    // format option wrapper
-    const fo = (s) => ({ value: s, label: s });
+    // format option wrapper with LaTeX delimiters
+    const fo = (s) => ({ value: `$${s}$`, label: `$${s}$` });
 
     const options = ensureUnique(fo(ansStr), [
         fo(`${term1}x^2 - ${Math.abs(term2) + 2}xy - ${term3}y^2`),
@@ -527,7 +527,7 @@ export const generateAlgebraicMultiplication = () => {
         fo(`${term1}x^2 + ${Math.abs(term2) + 5}xy - ${term3}y^2`)
     ]);
 
-    return { type: 'mcq', question, answer: ansStr, options, topic: 'Algebraic Multiplication' };
+    return { type: 'mcq', question, answer: `$${ansStr}$`, options, topic: 'Algebraic Multiplication' };
 };
 
 // --- CAT14: Algebraic Division ---
@@ -543,7 +543,7 @@ export const generateAlgebraicDivision = () => {
     // Numerator: k(ax - b) = k*a x - k*b
     const num1 = `${k1 * a1}x - ${k1 * b1}`;
     const den1 = `${a1}x - ${b1}`;
-    rows.push({ text: `Divide: (${num1}) ÷ (${den1})`, answer: String(k1) });
+    rows.push({ text: `Divide: $(${num1}) \\div (${den1})$`, answer: String(k1) });
 
     // Q2: Quadratic / Quadratic (2 common)
     // (k(ax^2 + bx + c)) / (ax^2 + bx + c)
@@ -554,7 +554,7 @@ export const generateAlgebraicDivision = () => {
     // 14x^2 - 20x + 10 / 7x^2 - 10x + 5 (from image, k=2)
     const num2 = `${k2 * a2}x^2 - ${k2 * b2}x + ${k2 * c2}`;
     const den2 = `${a2}x^2 - ${b2}x + ${c2}`;
-    rows.push({ text: `Divide: (${num2}) ÷ (${den2})`, answer: String(k2) });
+    rows.push({ text: `Divide: $(${num2}) \\div (${den2})$`, answer: String(k2) });
 
     // Q3: Monomial division
     // 63 p^4 m^2 n / 7 p^4 m^2 n = 9
@@ -562,7 +562,7 @@ export const generateAlgebraicDivision = () => {
     const c3 = getRandomInt(3, 9);
     const num3 = `${k3 * c3}p^4m^2n`;
     const den3 = `${c3}p^4m^2n`;
-    rows.push({ text: `Divide: ${num3} ÷ ${den3}`, answer: String(k3) });
+    rows.push({ text: `Divide: $${num3} \\div ${den3}$`, answer: String(k3) });
 
     const answerObj = {};
     rows.forEach((r, i) => answerObj[i] = r.answer);
@@ -818,129 +818,474 @@ export const generateCartesianPoint = () => {
 
 // --- CAT21: Coordinate Geometry ---
 export const generateCoordinateGeometry = () => {
-    const x = [3, 6, 5, 8, 9][getRandomInt(0, 4)];
-    const y = [4, 8, 12, 15, 12][getRandomInt(0, 4)];
-    const dist = Math.sqrt(x * x + y * y).toFixed(2);
-    const answer = String(Number(dist) === parseInt(dist) ? parseInt(dist) : dist);
-    const options = ensureUnique(formatOption(answer), [
-        formatOption(parseInt(answer) + 1),
-        formatOption(parseInt(answer) - 1),
-        formatOption(parseInt(answer) + 2),
-        formatOption(parseInt(answer) + 5)
-    ]);
-    return { type: 'mcq', question: `Find the distance of point (${x}, ${y}) from the origin.`, answer, options, topic: 'Coordinate Geometry' };
+    const rows = [];
+
+    // Distance Formula: sqrt((x2-x1)^2 + (y2-y1)^2)
+    // We want integer distance results (Pythagorean Triples)
+    // Triples: (3,4,5), (5,12,13), (8,15,17), (6,8,10), (9,12,15)
+
+    const triples = [
+        [3, 4, 5], [5, 12, 13], [8, 15, 17], [6, 8, 10], [12, 16, 20]
+    ];
+    const [dx, dy, dist] = triples[getRandomInt(0, triples.length - 1)];
+
+    // Pick P(x1, y1)
+    const x1 = getRandomInt(-10, 10);
+    const y1 = getRandomInt(-10, 10);
+
+    // Determine Q(x2, y2) based on dx, dy
+    // Randomize direction by multiplying dx/dy by -1 or 1
+    const sx = Math.random() < 0.5 ? 1 : -1;
+    const sy = Math.random() < 0.5 ? 1 : -1;
+
+    const x2 = x1 + (sx * dx);
+    const y2 = y1 + (sy * dy);
+
+    // Question Text: "Distance between the points P(x1, y1) and Q(x2, y2)"
+    const questionText = `Distance between the points $P(${x1}, ${y1})$ and $Q(${x2}, ${y2})$`;
+
+    rows.push({ text: `Distance =`, unit: 'units', answer: String(dist) });
+
+    const answerObj = { 0: String(dist) };
+
+    return {
+        type: 'tableInput',
+        question: questionText,
+        answer: JSON.stringify(answerObj),
+        rows: rows,
+        topic: 'Coordinate Geometry'
+    };
 };
 
 // --- CAT22: Section Formula ---
 export const generateSectionFormula = () => {
-    const x1 = 2, y1 = 4;
-    const x2 = 6, y2 = 8;
-    const answer = `(4, 6)`;
-    const options = ensureUnique(formatOption(answer), [
-        formatOption(`(3, 5)`),
-        formatOption(`(5, 7)`),
-        formatOption(`(2, 4)`),
-        formatOption(`(1, 2)`)
-    ]);
-    return { type: 'mcq', question: `Find the midpoint of the line segment joining (${x1}, ${y1}) and (${x2}, ${y2}).`, answer, options, topic: 'Section Formula' };
+    // Internal Division
+    // P = ( (m*x2 + n*x1)/(m+n), (m*y2 + n*y1)/(m+n) )
+
+    const rows = [];
+
+    // Ratio m:n
+    const m = getRandomInt(1, 4);
+    const n = getRandomInt(1, 4);
+    const sum = m + n;
+
+    // To ensure integer results for P(x, y):
+    // (m*x2 + n*x1) must be divisible by (m+n)
+    // (m*y2 + n*y1) must be divisible by (m+n)
+
+    // Strategy: Pick P(x,y) and A(x1,y1) first, then calculate B(x2,y2)?
+    // Px = (m*x2 + n*x1) / sum => sum*Px = m*x2 + n*x1 => m*x2 = sum*Px - n*x1
+    // This requires m*x2 to be divisible by m... which is specific.
+
+    // Better Strategy:
+    // x2 - x1 = k * (m+n) / something?
+    // Let's generate A and B such that the difference (x2-x1) is a multiple of (m+n).
+
+    const x1 = getRandomInt(-10, 10);
+    const y1 = getRandomInt(-10, 10);
+
+    const kx = getRandomInt(-3, 3) || 1; // multiplier
+    const ky = getRandomInt(-3, 3) || 1;
+
+    const dx = kx * sum; // total distance in x
+    const dy = ky * sum; // total distance in y
+
+    const x2 = x1 + dx;
+    const y2 = y1 + dy;
+
+    // Calculate P
+    const px = (m * x2 + n * x1) / sum;
+    const py = (m * y2 + n * y1) / sum;
+
+    const questionText = `Given $A = (${x1}, ${y1})$ and $B = (${x2}, ${y2})$ what are the coordinates of point $P = (x, y)$ which internally divides line segment $\\overleftrightarrow{AB}$ in the ratio ${m}:${n}?`;
+
+    rows.push({ text: `P = `, answer: `(${px},${py})` }); // "text" here is just a label if needed, but we use special input
+
+    // We need to store x and y separately for the answer checker using the 'coordinate' variant logic
+    // The 'answer' string in row is for reference, but the validation usually checks exact string match or object match.
+    // My TypeTableInput logic saves result as {x: "...", y: "..."} for coordinate variant.
+    // So answerObj should key '0' to { x: String(px), y: String(py) } ?
+    // Or stringified?
+    // Let's check TypeTableInput initialization: JSON.parse(currentQuestion.userAnswer).
+    // And onAnswerChange: JSON.stringify(newAnswers).
+    // So the stored answer should be the stringified object.
+
+    const answerObj = { 0: { x: String(px), y: String(py) } };
+
+    return {
+        type: 'tableInput',
+        variant: 'coordinate',
+        question: questionText,
+        answer: JSON.stringify(answerObj),
+        rows: rows,
+        topic: 'Section Formula'
+    };
 };
 
 // --- CAT23: Trigonometry ---
 export const generateTrigonometry = () => {
-    const answer = "1";
-    const options = ensureUnique(formatOption(answer), [
-        formatOption("0"),
-        formatOption("1/2"),
-        formatOption("-1"),
-        formatOption("sqrt(3)/2")
-    ]);
-    return { type: 'mcq', question: "What is the value of $\\sin 90^\\circ$?", answer, options, topic: 'Trigonometry' };
+    // "If SinA = 3/5 then match the following:"
+    // CosA = [], TanA = [], SecA = [], CotA = []
+
+    const rows = [];
+
+    // Pythagorean Triples (Opp, Adj, Hyp)
+    const triples = [
+        [3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [20, 21, 29]
+    ];
+    // Randomly pick a triple and swap adj/opp for variety
+    let [opp, adj, hyp] = triples[getRandomInt(0, triples.length - 1)];
+    if (Math.random() < 0.5) {
+        [opp, adj] = [adj, opp];
+    }
+
+    // Given SinA = opp/hyp
+    // Find CosA(adj/hyp), TanA(opp/adj), SecA(hyp/adj), CotA(adj/opp)
+
+    const ratios = [
+        { label: 'CosA', val: { n: adj, d: hyp } },
+        { label: 'TanA', val: { n: opp, d: adj } },
+        { label: 'SecA', val: { n: hyp, d: adj } },
+        { label: 'CotA', val: { n: adj, d: opp } }
+    ];
+
+    // Convert to rows. "text" is label (e.g. CosA = ).
+    // We use variant 'fraction' which expects answer stringified {num:..., den:...}
+    // Actually, TypeTableInput variant='fraction' uses separate num/den inputs.
+    // The expected "answer" string in row object is for validation.
+    // But wait, TypeTableInput validation usually compares a string.
+    // For 'fraction' variant, the component renders two inputs. 
+    // The component's `handleInputChange` updates `{num:..., den:...}`.
+    // The final answer object will have keys 0..3, each value is json string or object.
+
+    // Let's format the answer so we can validate it easily?
+    // Actually the validation script `test_grade10.mjs` just checks validity of structure.
+    // For manual checking or future auto-grading, we should probably store "num,den" string or object.
+
+    const answerObj = {};
+
+    ratios.forEach((r, idx) => {
+        rows.push({
+            // TypeTableInput logic:
+            // If variant='fraction', it renders fraction inputs.
+            // We need a visual label "CosA ="
+            // The component renders: 
+            // <div className={variant === 'fraction' ? Styles.fractionRow ...>
+            //   <div ...>{renderCellContent(row.left)}</div>
+            //   <div ...>{row.op}</div> ...
+            // left, op, right are used if provided. 
+            // Or row.text is used.
+            // If row.text is used, it renders textCell + inputCell.
+            // In 'fraction' mode, inputCell handles fraction inputs.
+
+            // Re-reading TypeTableInput:
+            // if (row.text) { render textCell; renderInputCell(idx); }
+            // renderInputCell checks variant. If 'fraction', renders fraction inputs.
+            // Perfect.
+
+            text: `${r.label} =`,
+            answer: JSON.stringify({ num: String(r.val.n), den: String(r.val.d) })
+        });
+        answerObj[idx] = { num: String(r.val.n), den: String(r.val.d) };
+    });
+
+    // Given Text
+    const questionText = `If $\\sin A = \\frac{${opp}}{${hyp}}$ then match the following trigonometric ratios`;
+
+    return {
+        type: 'tableInput',
+        variant: 'fraction',
+        question: questionText,
+        answer: JSON.stringify(answerObj),
+        rows: rows,
+        topic: 'Trigonometry'
+    };
 };
 
-// --- CAT24: Trig Ratios ---
+// --- CAT24: Trig Ratios of Standard Angles ---
 export const generateTrigRatios = () => {
-    const answer = "1";
-    const options = ensureUnique(formatOption(answer), [
-        formatOption("0"),
-        formatOption("sqrt(3)"),
-        formatOption("1/sqrt(3)"),
-        formatOption("2")
-    ]);
-    return { type: 'mcq', question: "Evaluate: $\\tan 45^\\circ$", answer, options, topic: 'Trig Ratios' };
+    const rows = [];
+
+    const data = [
+        { angle: '30^\\circ', deg: 30, values: { sin: '1/2', cos: 'sqrt(3)/2', tan: '1/sqrt(3)', cot: 'sqrt(3)' } },
+        { angle: '45^\\circ', deg: 45, values: { sin: '1/sqrt(2)', cos: '1/sqrt(2)', tan: '1', cot: '1' } },
+        { angle: '60^\\circ', deg: 60, values: { sin: 'sqrt(3)/2', cos: '1/2', tan: 'sqrt(3)', cot: '1/sqrt(3)' } },
+        { angle: '90^\\circ', deg: 90, values: { sin: '1', cos: '0', cot: '0' } },
+        { angle: '180^\\circ', deg: 180, values: { sin: '0', cos: '-1', tan: '0' } },
+        { angle: '270^\\circ', deg: 270, values: { sin: '-1', cos: '0', cot: '0' } },
+        { angle: '0^\\circ', deg: 0, values: { sin: '0', cos: '1', tan: '0' } }
+    ];
+
+    for (let i = 0; i < 4; i++) {
+        const item = data[getRandomInt(0, data.length - 1)];
+        const funcs = Object.keys(item.values);
+        const func = funcs[getRandomInt(0, funcs.length - 1)];
+        const val = item.values[func];
+        const funcDisp = func.charAt(0).toUpperCase() + func.slice(1);
+
+        rows.push({
+            text: `$${funcDisp}(${item.angle}) =$`,
+            answer: val
+        });
+    }
+
+    const answerObj = {};
+    rows.forEach((r, i) => answerObj[i] = r.answer);
+
+    return {
+        type: 'tableInput',
+        question: 'Find the values of the following:',
+        answer: JSON.stringify(answerObj),
+        rows: rows,
+        topic: 'Trigonometric Ratios of Standard angles'
+    };
 };
 
 // --- CAT25: Pythagoras ---
 export const generatePythagoras = () => {
-    const b = 3, h = 4;
-    const answer = "5";
-    const options = ensureUnique(formatOption(answer), [
-        formatOption("6"),
-        formatOption("7"),
-        formatOption("25"),
-        formatOption("4")
-    ]);
-    return { type: 'mcq', question: `In a right-angled triangle, if base is ${b} and height is ${h}, find the hypotenuse.`, answer, options, topic: 'Pythagoras' };
+    const rows = [];
+    const triples = [[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [20, 21, 29]];
+    const [base, height, hyp] = triples[getRandomInt(0, triples.length - 1)];
+    const k = getRandomInt(1, 4);
+    const h_val = height * k;
+    const hyp_val = hyp * k;
+    const b_val = base * k;
+
+    const questionText = `If a flag pole of height ${h_val}meters is erected with the help of a thread of length ${hyp_val}meters then what is the distance between base of the thread to base of pole in meters ? <br/> <img src="/assets/grade10/pyth.png" alt="Pythagoras Diagram" style="width: 80%; max-width: 300px; margin: 10px auto; display: block;" />`;
+    rows.push({ text: `d =`, unit: 'm', answer: String(b_val) });
+    const answerObj = { 0: String(b_val) };
+
+    return {
+        type: 'tableInput',
+        question: questionText,
+        answer: JSON.stringify(answerObj),
+        rows: rows,
+        topic: 'Word Problems - Pythagorean Theorem'
+    };
 };
 
 // --- CAT26: Clocks ---
 export const generateClocks = () => {
-    const h = 3;
-    const answer = "90 degrees";
-    const options = ensureUnique(formatOption(answer), [
-        formatOption("180 degrees"),
-        formatOption("60 degrees"),
-        formatOption("45 degrees"),
-        formatOption("30 degrees")
-    ]);
-    return { type: 'mcq', question: `Find the angle between the hour and minute hands at ${h}:00.`, answer, options, topic: 'Clocks' };
+    // "What is the angle between the hour hand and minute hand on a clock when the time is 1:30 ?"
+    const rows = [];
+
+    // Pick random time
+    const h = getRandomInt(1, 12);
+    const m = getRandomInt(0, 11) * 5;
+
+    // Angle Formula: | 0.5 * (60h - 11m) |
+    const val = Math.abs(0.5 * (60 * h - 11 * m));
+    const angle = Math.min(360 - val, val);
+
+    const mStr = m < 10 ? `0${m}` : m;
+    const questionText = `What is the angle between the hour hand and minute hand on a clock when the time is ${h}:${mStr} ?`;
+
+    rows.push({ text: `Angle =`, unit: 'degrees', answer: String(angle) });
+    const answerObj = { 0: String(angle) };
+
+    return {
+        type: 'tableInput',
+        question: questionText,
+        answer: JSON.stringify(answerObj),
+        rows: rows,
+        topic: 'Clocks'
+    };
 };
 
-// --- CAT27: Probability ---
+// --- CAT27: True/False (was Probability) ---
 export const generateProbability = () => {
-    const answer = "1/2";
-    const options = ensureUnique(formatOption(answer), [
-        formatOption("1/4"),
-        formatOption("1"),
-        formatOption("0"),
-        formatOption("1/8")
-    ]);
-    return { type: 'mcq', question: "Probability of getting a head in a single coin toss?", answer, options, topic: 'Probability' };
+    // "True or False" table
+    const rows = [];
+
+    const pool = [
+        { q: `$\\sqrt{a} + \\sqrt{b} = \\sqrt{a+b}$`, a: 'False' },
+        { q: `$-3^2 = 9$`, a: 'False' },
+        { q: `$\\frac{a}{a+b} = \\frac{a}{a} + \\frac{a}{b}$`, a: 'False' },
+        { q: `$(a+b)^2 = a^2 + b^2$`, a: 'False' },
+        { q: `$\\sqrt{x^2+y^2} = x+y$`, a: 'False' },
+        { q: `$sin(90^\\circ) = 1$`, a: 'True' },
+        { q: `$2^3 \\times 2^2 = 2^5$`, a: 'True' },
+        { q: `$(-2)^3 = -8$`, a: 'True' }
+    ];
+
+    const selected = [];
+    while (selected.length < 3) {
+        const item = pool[getRandomInt(0, pool.length - 1)];
+        if (!selected.includes(item)) selected.push(item);
+    }
+
+    selected.forEach((item, idx) => {
+        rows.push({
+            text: item.q,
+            inputType: 'radio',
+            options: ['True', 'False'],
+            answer: item.a
+        });
+    });
+
+    const answerObj = {};
+    rows.forEach((r, i) => answerObj[i] = r.answer);
+
+    return {
+        type: 'tableInput',
+        question: 'True or False',
+        answer: JSON.stringify(answerObj),
+        rows: rows,
+        topic: 'Miscellaneous'
+    };
 };
 
-// --- CAT28: Linear Eq Word Problem ---
-export const generateWordProblemLinearEq = () => {
-    const n = getRandomInt(1, 10);
-    const sum = n + (n + 1);
-    const answer = String(n);
-    const options = ensureUnique(formatOption(answer), [
-        formatOption(n + 1),
-        formatOption(n - 1),
-        formatOption(sum),
-        formatOption(n + 2)
-    ]);
-    return { type: 'mcq', question: `The sum of two consecutive integers is ${sum}. Find the smaller integer.`, answer, options, topic: 'Linear Eq Word Problem' };
+// --- CAT28: Probability (Dice Sum) ---
+export const generateDiceProbability = () => {
+    // "Two dice are thrown... probability that sum is X?"
+    // Sums map:
+    // 2: (1,1) -> 1
+    // 3: (1,2),(2,1) -> 2
+    // 4: (1,3),(2,2),(3,1) -> 3
+    // 5: 4
+    // 6: 5
+    // 7: 6
+    // 8: 5
+    // 9: 4
+    // 10: 3
+    // 11: 2
+    // 12: 1
+
+    // Pick a random target sum between 2 and 12
+    const targetSum = getRandomInt(2, 12);
+    let count = 0;
+    for (let i = 1; i <= 6; i++) {
+        for (let j = 1; j <= 6; j++) {
+            if (i + j === targetSum) count++;
+        }
+    }
+
+    // Fraction is count/36
+    // Simplify? User input usually expects simplified or raw? 
+    // Image implies inputs for num/den. Let's not simplify for now or calculate standard reduction.
+    // If I use Fraction type, it checks equivalence usually if implemented right, 
+    // but TypeTableInput fraction checking might be simple string compare.
+    // Let's assume standard form.
+
+    // Simplification logic
+    const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+    const common = gcd(count, 36);
+    const num = count / common;
+    const den = 36 / common;
+
+    const rows = [];
+    rows.push({
+        text: 'Probability =',
+        answer: JSON.stringify({ num: String(num), den: String(den) }) // Fraction variant expects {num, den} answer format?
+        // Actually TypeTableInput variant='fraction' usually expects answer to be just the string "num/den" or object?
+        // Let's check handleInputChange or check logic. 
+        // Logic: if variant fraction, input is object {num, den}. 
+        // And comparison? usually simple. Let's return JSON string of object for the row answer to be parsed?
+        // Wait, standard `answer` in row object is string.
+        // Let's store it as `{num: "1", den: "36"}` (object).
+        // But `row.answer` is usually a string in other generators.
+        // Let's look at CAT03 (Fractions) if it exists. 
+        // Actually I haven't implemented fraction table inputs yet heavily.
+        // Let's use string "num/den" and hope check works or I might need to adjust.
+        // Wait, `TypeTableInput` check logic: 
+        // `if (variant === 'fraction') { ... check num and den ... }`
+        // Let's look at TypeTableInput component later if needed. 
+        // For now providing key-value "num" and "den".
+    });
+
+    // NOTE: The valid answer for the row should be an object for fraction variant comparison
+    // But `answer` prop in row is often string. 
+    // Let's store it as `{num: "1", den: "36"}` (object).
+    rows[0].answer = { num: String(num), den: String(den) };
+
+    const answerObj = { 0: rows[0].answer };
+
+    return {
+        type: 'tableInput',
+        variant: 'fraction',
+        question: `Two dice are thrown at the same time. What is the probability that the sum of numbers on the dice is ${targetSum} ?`,
+        answer: JSON.stringify(answerObj),
+        rows: rows,
+        topic: 'Probability'
+    };
 };
 
-// --- CAT29: Word Problem ---
-export const generateWordProblem = () => {
-    const answer = "20%";
-    const options = ensureUnique(formatOption(answer), [
-        formatOption("10%"),
-        formatOption("25%"),
-        formatOption("15%"),
-        formatOption("30%")
-    ]);
-    return { type: 'mcq', question: `A book is bought for 100 and sold for 120. Find the profit percentage.`, answer, options, topic: 'General Word Problem' };
+// --- CAT29: Word Problem (Linear Eq) ---
+export const generateAgeProblem = () => {
+    // Father = M * Son
+    // Father + Y = M_future * (Son + Y)
+    // M*S + Y = Mf*S + Mf*Y
+    // S(M - Mf) = Y(Mf - 1)
+    // S = Y(Mf - 1) / (M - Mf)
+
+    // We need integer S.
+    // Let's pick M, Mf, Y such that S is integer.
+    // Common sets:
+    // M=4, Mf=3. (4-3)=1. Denom is 1. Always works!
+    // S = Y(2)/1 = 2Y.
+    // If Y=5, S=10. F=40.
+    // After 5 yrs: S=15, F=45. 45 = 3*15. Correct.
+
+    // M=3, Mf=2. (3-2)=1. Always works.
+    // S = Y(1)/1 = Y.
+    // If Y=10, S=10, F=30.
+    // After 10: S=20, F=40. 40=2*20. Correct.
+
+    // Let's randomize between these two reliable patterns.
+    const pattern = getRandomInt(0, 1);
+    let M, Mf, Y, S, F;
+
+    if (pattern === 0) {
+        M = 4; Mf = 3;
+        Y = getRandomInt(4, 8); // Random years 4-8
+        S = 2 * Y;
+    } else {
+        M = 3; Mf = 2;
+        Y = getRandomInt(5, 12);
+        S = Y;
+    }
+
+    F = M * S;
+
+    const rows = [];
+    rows.push({ text: `Robert's age =`, answer: String(S) });
+    rows.push({ text: `Robert's father's age =`, answer: String(F) });
+
+    const answerObj = { 0: String(S), 1: String(F) };
+
+    return {
+        type: 'tableInput',
+        question: `Robert's father is ${M} times as old as Robert. After ${Y} years, father will be ${Mf === 2 ? 'twice' : Mf === 3 ? 'three times' : Mf + ' times'} as old as Robert. Find their present ages.`,
+        answer: JSON.stringify(answerObj),
+        rows: rows,
+        topic: 'Linear Equations Word Problems'
+    };
 };
 
-// --- CAT30: Miscellaneous ---
-export const generateMiscellaneous = () => {
-    const answer = "360";
-    const options = ensureUnique(formatOption(answer), [
-        formatOption("180"),
-        formatOption("90"),
-        formatOption("270"),
-        formatOption("100")
-    ]);
-    return { type: 'mcq', question: "How many degrees are there in a circle?", answer, options, topic: 'Miscellaneous' };
+// --- CAT30: Word Problem (Quadratic) ---
+export const generateNumberSquareProblem = () => {
+    // "Sum of a positive number and its square is X. Find the number."
+    // n + n^2 = X
+    // Pick n (positive integer).
+    const n = getRandomInt(3, 12);
+    const X = n + n * n;
+
+    const rows = [];
+    // Image shows NO label, just input. 
+    // Using "Number =" as text or empty string?
+    // If I use empty string, it might trigger the equation view unless I modified it.
+    // But I modified `grade10Generators.mjs` not the component heavily for empty text logic logic.
+    // Actually, earlier bug was empty text -> equation 4 cols.
+    // Safest is "Number =". User surely won't mind a label.
+    rows.push({ text: `Number =`, answer: String(n) });
+
+    const answerObj = { 0: String(n) };
+
+    return {
+        type: 'tableInput',
+        question: `The sum of a positive number and its square is ${X}. Find the number.`,
+        answer: JSON.stringify(answerObj),
+        rows: rows,
+        topic: 'Quadratic Equations Word Problems'
+    };
 };

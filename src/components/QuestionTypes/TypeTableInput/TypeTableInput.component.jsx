@@ -2,10 +2,10 @@
 import React, { useEffect, useState } from "react";
 import Styles from "./TypeTableInput.module.css";
 import { Button } from "@mui/material";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, ArrowLeft } from "lucide-react";
 import MathRenderer from "@/components/MathRenderer/MathRenderer.component";
 
-const TypeTableInput = ({ onClick, onAnswerChange, questionPaper, activeQuestionIndex, topic, grade, timeTakeRef }) => {
+const TypeTableInput = ({ onClick, onPrevious, onAnswerChange, questionPaper, activeQuestionIndex, topic, grade, timeTakeRef }) => {
     const [answers, setAnswers] = useState({});
     const currentQuestion = questionPaper[activeQuestionIndex];
     const rows = currentQuestion?.rows || [];
@@ -38,11 +38,8 @@ const TypeTableInput = ({ onClick, onAnswerChange, questionPaper, activeQuestion
     const handleInputChange = (idx, field, value) => {
         const currentAnswer = answers[idx] || {};
 
-        // For default variant, field is just 'value' (or we interpret direct string)
-        // For fraction, field is 'num' or 'den'
-
         let newRowAnswer;
-        if (variant === 'fraction') {
+        if (variant === 'fraction' || variant === 'coordinate') {
             newRowAnswer = { ...currentAnswer, [field]: value };
         } else {
             newRowAnswer = value;
@@ -63,7 +60,6 @@ const TypeTableInput = ({ onClick, onAnswerChange, questionPaper, activeQuestion
     };
 
     const renderCellContent = (content) => {
-        // If content is an object with n/d, render fraction
         if (typeof content === 'object' && content.n !== undefined && content.d !== undefined) {
             return (
                 <div className={Styles.fractionWrapper}>
@@ -78,6 +74,27 @@ const TypeTableInput = ({ onClick, onAnswerChange, questionPaper, activeQuestion
 
     const renderInputCell = (idx) => {
         const rowData = currentQuestion.rows[idx];
+
+        if (rowData.inputType === 'radio') {
+            return (
+                <div className={Styles.radioCell}>
+                    {rowData.options.map((opt) => (
+                        <div key={opt} className={Styles.optionColumn}>
+                            <label className={Styles.radioLabel}>
+                                <input
+                                    type="radio"
+                                    name={`question-${activeQuestionIndex}-row-${idx}`}
+                                    value={opt}
+                                    checked={answers[idx] === opt}
+                                    onChange={(e) => handleInputChange(idx, 'value', e.target.value)}
+                                    className={Styles.radioInput}
+                                />
+                            </label>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
 
         if (rowData.inputType === 'select') {
             return (
@@ -94,6 +111,31 @@ const TypeTableInput = ({ onClick, onAnswerChange, questionPaper, activeQuestion
                             </option>
                         ))}
                     </select>
+                </div>
+            );
+        }
+
+        if (variant === 'coordinate') {
+            const rowAns = answers[idx] || {};
+            return (
+                <div className={Styles.inputCell} style={{ gap: '4px' }}>
+                    <span style={{ fontSize: '1.5rem' }}>(</span>
+                    <input
+                        type="text"
+                        className={Styles.fractionInput}
+                        style={{ width: '50px' }}
+                        value={rowAns.x || ""}
+                        onChange={(e) => handleInputChange(idx, 'x', e.target.value)}
+                    />
+                    <span style={{ fontSize: '1.5rem' }}>,</span>
+                    <input
+                        type="text"
+                        className={Styles.fractionInput}
+                        style={{ width: '50px' }}
+                        value={rowAns.y || ""}
+                        onChange={(e) => handleInputChange(idx, 'y', e.target.value)}
+                    />
+                    <span style={{ fontSize: '1.5rem' }}>)</span>
                 </div>
             );
         }
@@ -147,11 +189,29 @@ const TypeTableInput = ({ onClick, onAnswerChange, questionPaper, activeQuestion
                         <MathRenderer content={currentQuestion.question} />
                     </div>
                 )}
+
+                {/* Header Row for True/False Table */}
+                {variant === 'true-false' && (
+                    <div className={Styles.trueFalseRow} style={{ height: '40px', marginBottom: '-10px', background: 'transparent', border: 'none' }}>
+                        {/* Empty Left Cell */}
+                        <div style={{ background: 'transparent' }}></div>
+                        {/* Right Cell matching radioCell alignment */}
+                        <div className={Styles.headerRadioCell}>
+                            <div className={Styles.optionColumn}>True</div>
+                            <div className={Styles.optionColumn}>False</div>
+                        </div>
+                    </div>
+                )}
+
                 {rows.map((row, idx) => {
                     if (row.text) {
+                        let rowClass = Styles.textRow;
+                        if (variant === 'fraction') rowClass = Styles.fractionTextRow;
+                        if (variant === 'true-false') rowClass = Styles.trueFalseRow;
+
                         return (
-                            <div key={idx} className={Styles.textRow}>
-                                <div className={Styles.textCell}>{row.text}</div>
+                            <div key={idx} className={rowClass}>
+                                <div className={Styles.textCell}><MathRenderer content={row.text} /></div>
                                 {renderInputCell(idx)}
                             </div>
                         );
@@ -173,7 +233,19 @@ const TypeTableInput = ({ onClick, onAnswerChange, questionPaper, activeQuestion
             </div>
 
             <div className={Styles.navigationContainer}>
-                <div />
+                {activeQuestionIndex > 0 && (
+                    <Button
+                        onClick={onPrevious}
+                        size="large"
+                        startIcon={<ArrowLeft />}
+                        className={Styles.previousButton}
+                        style={{ marginRight: 'auto' }}
+                    >
+                        Previous
+                    </Button>
+                )}
+                {activeQuestionIndex === 0 && <div />}
+
                 <Button
                     onClick={handleSubmit}
                     size="large"

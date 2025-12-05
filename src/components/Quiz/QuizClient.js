@@ -408,6 +408,7 @@ const QuizClient = () => {
                     questionPaper[activeQuestionIndex]?.type === "tableInput" ?
                         <TypeTableInput
                             onClick={handleNext}
+                            onPrevious={handlePrevious}
                             onAnswerChange={handleAnswerChange}
                             questionPaper={questionPaper}
                             activeQuestionIndex={activeQuestionIndex}

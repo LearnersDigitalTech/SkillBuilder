@@ -26,9 +26,9 @@ import {
     generatePythagoras,
     generateClocks,
     generateProbability,
-    generateWordProblemLinearEq,
-    generateWordProblem,
-    generateMiscellaneous
+    generateDiceProbability,
+    generateAgeProblem,
+    generateNumberSquareProblem
 } from './grade10Generators.mjs';
 
 const generate = (generator, count = 10) => {
@@ -63,9 +63,9 @@ const Grade10Questions = {
     q25: generate(generatePythagoras),
     q26: generate(generateClocks),
     q27: generate(generateProbability),
-    q28: generate(generateWordProblemLinearEq),
-    q29: generate(generateWordProblem),
-    q30: generate(generateMiscellaneous)
+    q28: generate(generateDiceProbability),
+    q29: generate(generateAgeProblem),
+    q30: generate(generateNumberSquareProblem)
 };
 
 export default Grade10Questions;
