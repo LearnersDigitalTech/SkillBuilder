@@ -638,6 +638,20 @@ export const generatePatterns = () => {
   };
 };
 
+export const generateSequencePattern = () => {
+  const start = getRandomInt(1, 10);
+  const step = getRandomInt(1, 2);
+  const seq = [start, start + step, start + 2 * step, start + 3 * step];
+  const answer = start + 4 * step;
+
+  return {
+    type: "userInput",
+    question: `Complete the sequence: </br>${seq.join(", ")}, ...?`,
+    topic: "Patterns / Sequences",
+    answer: String(answer)
+  };
+};
+
 // --- Data Handling ---
 
 export const generateTally = () => {

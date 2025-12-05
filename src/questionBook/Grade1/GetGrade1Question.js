@@ -20,7 +20,7 @@ import {
     generatePatterns,
     generateBeforeAfter,
     generateBetweenNumber,
-    generatePictureGraph
+    generateSequencePattern
 } from './grade1Generators.js';
 
 const generate = (generator, count = 10) => {
@@ -50,9 +50,9 @@ const Grade1Questions = {
     q20: generate(generateCapacityComparison),
     q21: generate(generateTimeBasics),
     q22: generate(generateMoneyCounting),
-    q23: generate(generatePatterns),
-    q24: generate(generateDaysOfWeek),
-    q25: generate(generatePictureGraph)
+    q23: generate(generateDaysOfWeek),
+    q24: generate(generatePatterns),
+    q25: generate(generateSequencePattern)
 };
 
 export default Grade1Questions;
