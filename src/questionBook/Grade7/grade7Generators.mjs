@@ -1,3 +1,6 @@
+// Grade 7 with LaTeX - Moderate complexity
+// Focus: Fractions, exponents, simple algebra, percentages
+
 const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 const shuffleArray = (array) => {
@@ -21,18 +24,17 @@ export const generateIntegerOps = () => {
     let question, answer;
 
     if (op === "Add") {
-        question = `Evaluate: ${n1} + (${n2})`;
+        question = `Evaluate: $${n1} + (${n2})$`;
         answer = String(n1 + n2);
     } else if (op === "Subtract") {
-        question = `Evaluate: ${n1} - (${n2})`;
+        question = `Evaluate: $${n1} - (${n2})$`;
         answer = String(n1 - n2);
     } else if (op === "Multiply") {
-        question = `Evaluate: ${n1} × (${n2})`;
+        question = `Evaluate: $${n1} \\times (${n2})$`;
         answer = String(n1 * n2);
     } else {
-        // Ensure divisibility
         n1 = n2 * getRandomInt(-10, 10);
-        question = `Evaluate: ${n1} ÷ (${n2})`;
+        question = `Evaluate: $${n1} \\div (${n2})$`;
         answer = String(n1 / n2);
     }
 
@@ -44,7 +46,6 @@ export const generateIntegerOps = () => {
         { value: String(val - 1), label: String(val - 1) }
     ]);
 
-    // Fix duplicates if val is 0 or small
     const uniqueOptions = [];
     const seen = new Set();
     for (const opt of options) {
@@ -79,18 +80,16 @@ export const generateIntegerOps = () => {
 // --- Rational Numbers ---
 
 export const generateRationalOps = () => {
-    // Add/Sub like fractions but with signs
     const op = Math.random() > 0.5 ? "+" : "-";
     const d = getRandomInt(2, 10);
     const n1 = getRandomInt(-10, 10);
     const n2 = getRandomInt(-10, 10);
 
-    const question = `Simplify: (${n1}/${d}) ${op} (${n2}/${d})`;
+    const question = `Simplify: $\\frac{${n1}}{${d}} ${op} \\frac{${n2}}{${d}}$`;
     let num;
     if (op === "+") num = n1 + n2;
     else num = n1 - n2;
 
-    // Simplify result
     const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
     const common = Math.abs(gcd(num, d));
     const sNum = num / common;
@@ -99,13 +98,12 @@ export const generateRationalOps = () => {
     const answer = `${sNum}/${sDen}`;
 
     const options = shuffleArray([
-        { value: answer, label: answer },
-        { value: `${-sNum}/${sDen}`, label: `${-sNum}/${sDen}` },
-        { value: `${sNum}/${sDen + 1}`, label: `${sNum}/${sDen + 1}` },
-        { value: `${sDen}/${sNum}`, label: `${sDen}/${sNum}` }
+        { value: answer, label: `$\\frac{${sNum}}{${sDen}}$` },
+        { value: `${-sNum}/${sDen}`, label: `$\\frac{${-sNum}}{${sDen}}$` },
+        { value: `${sNum}/${sDen + 1}`, label: `$\\frac{${sNum}}{${sDen + 1}}$` },
+        { value: `${sDen}/${sNum}`, label: `$\\frac{${sDen}}{${sNum}}$` }
     ]);
 
-    // Unique check
     const uniqueOptions = [];
     const seen = new Set();
     for (const opt of options) {
@@ -120,7 +118,7 @@ export const generateRationalOps = () => {
         const val = `${r1}/${r2}`;
         if (!seen.has(val)) {
             seen.add(val);
-            uniqueOptions.push({ value: val, label: val });
+            uniqueOptions.push({ value: val, label: `$\\frac{${r1}}{${r2}}$` });
         }
     }
 
@@ -153,26 +151,24 @@ export const generateExponentLaws = () => {
     let question, answer, wrong1;
 
     if (type === "Mul") {
-        question = `Simplify: ${base}^${p1} × ${base}^${p2}`;
-        answer = `${base}^${p1 + p2}`;
-        wrong1 = `${base}^${p1 * p2}`;
+        question = `Simplify: $${base}^{${p1}} \\times ${base}^{${p2}}$`;
+        answer = `$${base}^{${p1 + p2}}$`;
+        wrong1 = `$${base}^{${p1 * p2}}$`;
     } else {
-        // Ensure p1 > p2
         const big = Math.max(p1, p2) + 2;
         const small = Math.min(p1, p2);
-        question = `Simplify: ${base}^${big} ÷ ${base}^${small}`;
-        answer = `${base}^${big - small}`;
-        wrong1 = `${base}^${big + small}`;
+        question = `Simplify: $${base}^{${big}} \\div ${base}^{${small}}$`;
+        answer = `$${base}^{${big - small}}$`;
+        wrong1 = `$${base}^{${big + small}}$`;
     }
 
     const options = shuffleArray([
         { value: answer, label: answer },
         { value: wrong1, label: wrong1 },
-        { value: `${base}^${Math.abs(p1 - p2) + 1}`, label: `${base}^${Math.abs(p1 - p2) + 1}` },
-        { value: `${base + 1}^${p1}`, label: `${base + 1}^${p1}` }
+        { value: `$${base}^{${Math.abs(p1 - p2) + 1}}$`, label: `$${base}^{${Math.abs(p1 - p2) + 1}}$` },
+        { value: `$${base + 1}^{${p1}}$`, label: `$${base + 1}^{${p1}}$` }
     ]);
 
-    // Ensure unique options
     const uniqueOptions = [];
     const seen = new Set();
     for (const opt of options) {
@@ -183,7 +179,7 @@ export const generateExponentLaws = () => {
     }
     while (uniqueOptions.length < 4) {
         const r = getRandomInt(2, 10);
-        const val = `${base}^${r}`;
+        const val = `$${base}^{${r}}$`;
         if (!seen.has(val)) {
             seen.add(val);
             uniqueOptions.push({ value: val, label: val });
@@ -200,21 +196,19 @@ export const generateExponentLaws = () => {
 };
 
 export const generateStandardForm = () => {
-    // Scientific notation: a x 10^n
     const num = getRandomInt(1, 9);
     const decimal = getRandomInt(10, 99);
     const power = getRandomInt(3, 8);
 
-    // Construct number like 5.43 x 10^5 -> 543000
     const valStr = `${num}${decimal}` + "0".repeat(power - 2);
-    const question = `Write ${valStr} in standard form.`;
-    const answer = `${num}.${decimal} × 10^${power}`;
+    const question = `Write $${valStr}$ in standard form.`;
+    const answer = `$${num}.${decimal} \\times 10^{${power}}$`;
 
     const options = shuffleArray([
         { value: answer, label: answer },
-        { value: `${num}.${decimal} × 10^${power - 1}`, label: `${num}.${decimal} × 10^${power - 1}` },
-        { value: `${num}${decimal} × 10^${power - 2}`, label: `${num}${decimal} × 10^${power - 2}` },
-        { value: `0.${num}${decimal} × 10^${power + 1}`, label: `0.${num}${decimal} × 10^${power + 1}` }
+        { value: `$${num}.${decimal} \\times 10^{${power - 1}}$`, label: `$${num}.${decimal} \\times 10^{${power - 1}}$` },
+        { value: `$${num}${decimal} \\times 10^{${power - 2}}$`, label: `$${num}${decimal} \\times 10^{${power - 2}}$` },
+        { value: `$0.${num}${decimal} \\times 10^{${power + 1}}$`, label: `$0.${num}${decimal} \\times 10^{${power + 1}}$` }
     ]);
 
     return {
@@ -229,15 +223,14 @@ export const generateStandardForm = () => {
 // --- BODMAS ---
 
 export const generateBODMAS = () => {
-    // Simple expression like 5 + 3 * 2 - 4
     const n1 = getRandomInt(2, 10);
     const n2 = getRandomInt(2, 10);
     const n3 = getRandomInt(2, 10);
     const n4 = getRandomInt(2, 10);
 
-    const question = `Evaluate: ${n1} + ${n2} × ${n3} - ${n4}`;
+    const question = `Evaluate: $${n1} + ${n2} \\times ${n3} - ${n4}$`;
     const answer = String(n1 + (n2 * n3) - n4);
-    const wrong1 = String((n1 + n2) * n3 - n4); // No precedence
+    const wrong1 = String((n1 + n2) * n3 - n4);
 
     const options = shuffleArray([
         { value: answer, label: answer },
@@ -246,7 +239,6 @@ export const generateBODMAS = () => {
         { value: String(Number(answer) - 5), label: String(Number(answer) - 5) }
     ]);
 
-    // Ensure unique options
     const uniqueOptions = [];
     const seen = new Set();
     for (const opt of options) {
@@ -285,7 +277,6 @@ export const generateBODMAS = () => {
 // --- Algebra ---
 
 export const generateAlgebraTerms = () => {
-    // Identify coefficients, terms, etc.
     const coeff = getRandomInt(2, 9);
     const variable = ["x", "y", "z", "a", "b"][getRandomInt(0, 4)];
     const constant = getRandomInt(1, 10);
@@ -296,10 +287,10 @@ export const generateAlgebraTerms = () => {
     let question, answer;
 
     if (type === "Coefficient") {
-        question = `Identify the coefficient of ${variable} in the expression: ${expr}`;
+        question = `Identify the coefficient of $${variable}$ in the expression: $${expr}$`;
         answer = String(coeff);
     } else {
-        question = `Identify the constant term in the expression: ${expr}`;
+        question = `Identify the constant term in the expression: $${expr}$`;
         answer = String(constant);
     }
 
@@ -307,10 +298,9 @@ export const generateAlgebraTerms = () => {
         { value: answer, label: answer },
         { value: String(coeff + constant), label: String(coeff + constant) },
         { value: String(Math.abs(coeff - constant)), label: String(Math.abs(coeff - constant)) },
-        { value: "1", label: "1" }
+        { value: "1", label: "$1$" }
     ]);
 
-    // Ensure unique options
     const uniqueOptions = [];
     const seen = new Set();
     for (const opt of options) {
@@ -347,13 +337,12 @@ export const generateAlgebraTerms = () => {
 };
 
 export const generateLinearEquation = () => {
-    // ax + b = c
     const a = getRandomInt(2, 9);
     const x = getRandomInt(2, 10);
     const b = getRandomInt(1, 20);
     const c = a * x + b;
 
-    const question = `Solve for x: ${a}x + ${b} = ${c}`;
+    const question = `Solve for $x$: $${a}x + ${b} = ${c}$`;
     const answer = String(x);
 
     const options = shuffleArray([
@@ -363,7 +352,6 @@ export const generateLinearEquation = () => {
         { value: String(c), label: String(c) }
     ]);
 
-    // Unique check
     const uniqueOptions = [];
     const seen = new Set();
     for (const opt of options) {
@@ -396,7 +384,6 @@ export const generateLinearEquation = () => {
 };
 
 export const generateAlgebraWordProblem = () => {
-    // Age problem or number problem
     const type = Math.random() > 0.5 ? "Number" : "Age";
     let question, answer;
 
@@ -406,16 +393,15 @@ export const generateAlgebraWordProblem = () => {
         const add = getRandomInt(1, 10);
         const res = mult * x + add;
 
-        question = `If ${add} is added to ${mult} times a number, the result is ${res}. Find the number.`;
+        question = `If $${add}$ is added to $${mult}$ times a number, the result is $${res}$. Find the number.`;
         answer = String(x);
     } else {
-        // Age: A is n times older than B. Sum is S.
         const bAge = getRandomInt(5, 15);
         const times = getRandomInt(2, 4);
         const aAge = times * bAge;
         const sum = aAge + bAge;
 
-        question = `Ram is ${times} times as old as Shyam. The sum of their ages is ${sum}. How old is Shyam?`;
+        question = `Ram is $${times}$ times as old as Shyam. The sum of their ages is $${sum}$. How old is Shyam?`;
         answer = String(bAge);
     }
 
@@ -447,7 +433,6 @@ export const generateAlgebraWordProblem = () => {
 // --- Commercial Math ---
 
 export const generatePercentage = () => {
-    // Convert fraction to % or find % of number
     const type = Math.random() > 0.5 ? "Convert" : "Find";
     let question, answer;
 
@@ -456,25 +441,24 @@ export const generatePercentage = () => {
         const den = [2, 4, 5, 10, 20, 25, 50][getRandomInt(0, 6)];
         const val = (num / den) * 100;
 
-        question = `Convert ${num}/${den} to percentage.`;
+        question = `Convert $\\frac{${num}}{${den}}$ to percentage.`;
         answer = `${val}%`;
     } else {
-        const pct = getRandomInt(1, 10) * 10; // 10, 20...
-        const total = getRandomInt(1, 20) * 10; // 10, 20...
+        const pct = getRandomInt(1, 10) * 10;
+        const total = getRandomInt(1, 20) * 10;
         const val = (pct / 100) * total;
 
-        question = `Find ${pct}% of ${total}.`;
+        question = `Find $${pct}\\%$ of $${total}$.`;
         answer = String(val);
     }
 
     const options = shuffleArray([
-        { value: answer, label: answer },
-        { value: type === "Convert" ? `${parseFloat(answer) + 10}%` : String(Number(answer) + 10), label: type === "Convert" ? `${parseFloat(answer) + 10}%` : String(Number(answer) + 10) },
-        { value: type === "Convert" ? `${parseFloat(answer) / 2}%` : String(Number(answer) / 2), label: type === "Convert" ? `${parseFloat(answer) / 2}%` : String(Number(answer) / 2) },
-        { value: type === "Convert" ? `${parseFloat(answer) * 2}%` : String(Number(answer) * 2), label: type === "Convert" ? `${parseFloat(answer) * 2}%` : String(Number(answer) * 2) }
+        { value: answer, label: type === "Convert" ? `$${parseFloat(answer)}\\%$` : answer },
+        { value: type === "Convert" ? `${parseFloat(answer) + 10}%` : String(Number(answer) + 10), label: type === "Convert" ? `$${parseFloat(answer) + 10}\\%$` : String(Number(answer) + 10) },
+        { value: type === "Convert" ? `${parseFloat(answer) / 2}%` : String(Number(answer) / 2), label: type === "Convert" ? `$${parseFloat(answer) / 2}\\%$` : String(Number(answer) / 2) },
+        { value: type === "Convert" ? `${parseFloat(answer) * 2}%` : String(Number(answer) * 2), label: type === "Convert" ? `$${parseFloat(answer) * 2}\\%$` : String(Number(answer) * 2) }
     ]);
 
-    // Ensure unique options
     const uniqueOptions = [];
     const seen = new Set();
     for (const opt of options) {
@@ -488,7 +472,7 @@ export const generatePercentage = () => {
         const val = type === "Convert" ? `${r}%` : String(r);
         if (!seen.has(val)) {
             seen.add(val);
-            uniqueOptions.push({ value: val, label: val });
+            uniqueOptions.push({ value: val, label: type === "Convert" ? `$${r}\\%$` : String(r) });
         }
     }
 
@@ -518,24 +502,23 @@ export const generateProfitLoss = () => {
     if (isProfit) {
         const profit = getRandomInt(1, 5) * 10;
         sp = cp + profit;
-        question = `A shopkeeper bought an item for ₹${cp} and sold it for ₹${sp}. Find the profit.`;
+        question = `A shopkeeper bought an item for ₹$${cp}$ and sold it for ₹$${sp}$. Find the profit.`;
         answer = `₹${profit}`;
     } else {
         const loss = getRandomInt(1, 5) * 10;
         sp = cp - loss;
-        question = `A shopkeeper bought an item for ₹${cp} and sold it for ₹${sp}. Find the loss.`;
+        question = `A shopkeeper bought an item for ₹$${cp}$ and sold it for ₹$${sp}$. Find the loss.`;
         answer = `₹${loss}`;
     }
 
     const val = parseInt(answer.replace("₹", ""));
     const options = shuffleArray([
-        { value: answer, label: answer },
-        { value: `₹${val + 10}`, label: `₹${val + 10}` },
-        { value: `₹${val - 5}`, label: `₹${val - 5}` },
-        { value: `₹${val * 2}`, label: `₹${val * 2}` }
+        { value: answer, label: `₹$${val}$` },
+        { value: `₹${val + 10}`, label: `₹$${val + 10}$` },
+        { value: `₹${val - 5}`, label: `₹$${val - 5}$` },
+        { value: `₹${val * 2}`, label: `₹$${val * 2}$` }
     ]);
 
-    // Ensure unique options
     const uniqueOptions = [];
     const seen = new Set();
     for (const opt of options) {
@@ -549,7 +532,7 @@ export const generateProfitLoss = () => {
         const val = `₹${r}`;
         if (!seen.has(val)) {
             seen.add(val);
-            uniqueOptions.push({ value: val, label: val });
+            uniqueOptions.push({ value: val, label: `₹$${r}$` });
         }
     }
 
@@ -577,17 +560,16 @@ export const generateSimpleInterest = () => {
     const T = getRandomInt(1, 5);
     const SI = (P * R * T) / 100;
 
-    const question = `Find Simple Interest for P = ₹${P}, R = ${R}%, T = ${T} years.`;
+    const question = `Find Simple Interest for $P = $ ₹$${P}$, $R = ${R}\\%$, $T = ${T}$ years.`;
     const answer = `₹${SI}`;
 
     const options = shuffleArray([
-        { value: answer, label: answer },
-        { value: `₹${SI + 100}`, label: `₹${SI + 100}` },
-        { value: `₹${SI - 50}`, label: `₹${SI - 50}` },
-        { value: `₹${SI * 2}`, label: `₹${SI * 2}` }
+        { value: answer, label: `₹$${SI}$` },
+        { value: `₹${SI + 100}`, label: `₹$${SI + 100}$` },
+        { value: `₹${SI - 50}`, label: `₹$${SI - 50}$` },
+        { value: `₹${SI * 2}`, label: `₹$${SI * 2}$` }
     ]);
 
-    // Ensure unique options
     const uniqueOptions = [];
     const seen = new Set();
     for (const opt of options) {
@@ -601,7 +583,7 @@ export const generateSimpleInterest = () => {
         const val = `₹${r}`;
         if (!seen.has(val)) {
             seen.add(val);
-            uniqueOptions.push({ value: val, label: val });
+            uniqueOptions.push({ value: val, label: `₹$${r}$` });
         }
     }
 
@@ -622,5 +604,3 @@ export const generateSimpleInterest = () => {
         answer: answer
     };
 };
-
-

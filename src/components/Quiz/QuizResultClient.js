@@ -7,7 +7,7 @@ import { QuizSessionContext } from "../../app/context/QuizSessionContext";
 import analyzeResponses from "@/app/workload/GenerateReport";
 import Footer from "@/components/Footer/Footer.component";
 import { ref, set, get } from "firebase/database";
-import { firebaseDatabase } from "@/backend/firebaseHandler";
+import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler";
 import { useRouter } from "next/navigation";
 import { Button, Dialog, DialogTitle, DialogContent, IconButton, CircularProgress, TextField, MenuItem, Link as MuiLink } from "@mui/material";
 import { useAuth } from "@/context/AuthContext";
@@ -37,24 +37,25 @@ const QuizResultClient = () => {
                 }
 
                 // Case 2: Revisit results later: fetch stored report for active child from Firebase
-                if (!user || !user.phoneNumber || !userData?.children) {
+                if (!user || !userData?.children) {
                     return;
                 }
 
-                const phoneNumber = user.phoneNumber.slice(-10);
+                // Get user key (works for phone, Google, and email auth)
+                const userKey = getUserDatabaseKey(user);
                 const children = userData.children;
                 const childKeys = Object.keys(children);
                 if (childKeys.length === 0) return;
 
                 let activeChildId = childKeys[0];
                 if (childKeys.length > 1 && typeof window !== "undefined") {
-                    const storedChildId = window.localStorage.getItem(`activeChild_${phoneNumber}`);
+                    const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
                     if (storedChildId && childKeys.includes(storedChildId)) {
                         activeChildId = storedChildId;
                     }
                 }
 
-                const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${phoneNumber}/${activeChildId}`);
+                const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${userKey}/${activeChildId}`);
                 const snapshot = await get(reportRef);
                 if (!snapshot.exists()) {
                     return;
@@ -128,9 +129,13 @@ const QuizResultClient = () => {
         if (!quizSession?.questionPaper) {
             return;
         }
-        const phoneNumber = quizSession?.userDetails?.phoneNumber ? quizSession.userDetails.phoneNumber.slice(-10) : "";
+        // Get user key from quizSession (already set correctly in Start Assessment)
+        const userKey = quizSession?.userDetails?.phoneNumber || "";
         const childId = quizSession?.userDetails?.childId || "default";
-        const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${phoneNumber}/${childId}`);
+
+        if (!userKey) return;
+
+        const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${userKey}/${childId}`);
         set(reportRef, {
             summary,
             generalFeedbackStringified: JSON.stringify({
@@ -164,13 +169,14 @@ const QuizResultClient = () => {
     let displayPhone = quizSession?.userDetails?.phoneNumber || "";
 
     if ((!displayName || !displayGrade) && user && userData?.children) {
-        const phoneNumber = user.phoneNumber ? user.phoneNumber.slice(-10) : "";
+        // Get user key (works for phone, Google, and email auth)
+        const userKey = getUserDatabaseKey(user);
         const children = userData.children;
         const childKeys = Object.keys(children);
         if (childKeys.length > 0) {
             let activeChildId = childKeys[0];
             if (childKeys.length > 1 && typeof window !== "undefined") {
-                const storedChildId = window.localStorage.getItem(`activeChild_${phoneNumber}`);
+                const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
                 if (storedChildId && childKeys.includes(storedChildId)) {
                     activeChildId = storedChildId;
                 }
@@ -179,7 +185,14 @@ const QuizResultClient = () => {
             if (activeChild) {
                 displayName = activeChild.name || displayName;
                 displayGrade = activeChild.grade || displayGrade;
-                displayPhone = phoneNumber || displayPhone;
+                // For phone display, use actual phone number (not UID)
+                if (user.phoneNumber) {
+                    displayPhone = user.phoneNumber.slice(-10);
+                } else if (userData?.phoneNumber) {
+                    displayPhone = userData.phoneNumber;
+                } else {
+                    displayPhone = ""; // No phone available
+                }
             }
         }
     }
@@ -226,11 +239,14 @@ const QuizResultClient = () => {
         try {
             setTutorSubmitting(true);
 
-            let phoneKey = "";
+            // Get user key (works for phone, Google, and email auth)
+            let userKey = "";
             if (quizSession?.userDetails?.phoneNumber) {
-                phoneKey = quizSession.userDetails.phoneNumber.slice(-10);
+                userKey = quizSession.userDetails.phoneNumber;
             } else if (user?.phoneNumber) {
-                phoneKey = user.phoneNumber.slice(-10);
+                userKey = user.phoneNumber.slice(-10);
+            } else if (user?.uid) {
+                userKey = user.uid;
             }
 
             let childId = quizSession?.userDetails?.childId || "default";
@@ -240,7 +256,7 @@ const QuizResultClient = () => {
                 if (childKeys.length > 0) {
                     let activeChildId = childKeys[0];
                     if (childKeys.length > 1 && typeof window !== "undefined") {
-                        const storedChildId = window.localStorage.getItem(`activeChild_${phoneKey}`);
+                        const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
                         if (storedChildId && childKeys.includes(storedChildId)) {
                             activeChildId = storedChildId;
                         }
@@ -250,7 +266,7 @@ const QuizResultClient = () => {
             }
 
             const bookingId = `${childId}_${Date.now()}`;
-            const bookingRef = ref(firebaseDatabase, `NMD_2025/TutorBookings/${phoneKey}/${bookingId}`);
+            const bookingRef = ref(firebaseDatabase, `NMD_2025/TutorBookings/${userKey}/${bookingId}`);
 
             const bookingPayload = {
                 parentName: tutorForm.parentName,
@@ -310,19 +326,22 @@ const QuizResultClient = () => {
         setStatusDialogOpen(true);
 
         try {
-            let phoneKey = "";
+            // Get user key (works for phone, Google, and email auth)
+            let userKey = "";
             if (quizSession?.userDetails?.phoneNumber) {
-                phoneKey = quizSession.userDetails.phoneNumber.slice(-10);
+                userKey = quizSession.userDetails.phoneNumber;
             } else if (user?.phoneNumber) {
-                phoneKey = user.phoneNumber.slice(-10);
+                userKey = user.phoneNumber.slice(-10);
+            } else if (user?.uid) {
+                userKey = user.uid;
             }
 
-            if (!phoneKey) {
+            if (!userKey) {
                 setStatusLoading(false);
                 return;
             }
 
-            const bookingsRef = ref(firebaseDatabase, `NMD_2025/TutorBookings/${phoneKey}`);
+            const bookingsRef = ref(firebaseDatabase, `NMD_2025/TutorBookings/${userKey}`);
             const snapshot = await get(bookingsRef);
             if (!snapshot.exists()) {
                 setStatusLoading(false);

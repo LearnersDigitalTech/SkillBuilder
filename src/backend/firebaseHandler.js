@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { get, getDatabase } from "firebase/database";
-import { getAuth } from "firebase/auth";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 
 
@@ -19,3 +19,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const firebaseDatabase = getDatabase(app);
 export const auth = getAuth(app);
+
+// Google Auth Provider
+export const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+    prompt: 'select_account' // Always show account selection
+});
+
+// Helper function to get user database key
+export const getUserDatabaseKey = (user) => {
+    // For backward compatibility with phone auth users
+    if (user.phoneNumber) {
+        return user.phoneNumber.slice(-10);
+    }
+    // For Google/Email auth users, use Firebase UID
+    return user.uid;
+};

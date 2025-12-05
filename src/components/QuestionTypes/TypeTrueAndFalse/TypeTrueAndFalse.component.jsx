@@ -33,7 +33,9 @@ const TypeTrueAndFalse = ({ onClick, onPrevious, onMarkForReview, onAnswerChange
                         <span>{topic}</span>
                     </div>
                 </div>
-                <h3 className={Styles.question} dangerouslySetInnerHTML={{ __html: question }}></h3>
+                <h3 className={Styles.question}>
+                    <MathRenderer content={question} />
+                </h3>
             </div>
 
             {/* Column 2: Options */}

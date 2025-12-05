@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Styles from "./TypeUserInput.module.css";
 import { Button, Input } from "@mui/material";
 import { ArrowLeft, ArrowRight, Check, Flag } from "lucide-react";
+import MathRenderer from "@/components/MathRenderer/MathRenderer.component";
 
 const TypeUserInput = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, questionPaper, activeQuestionIndex, topic, question, grade, timeTakeRef }) => {
 
@@ -61,7 +62,9 @@ const TypeUserInput = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, q
                         <span>{topic}</span>
                     </div>
                 </div>
-                <h3 className={Styles.question} dangerouslySetInnerHTML={{ __html: question }}></h3>
+                <h3 className={Styles.question}>
+                    <MathRenderer content={question} />
+                </h3>
             </div>
 
             {/* Column 2: Input & Compact Dial Pad */}

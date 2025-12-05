@@ -1,40 +1,54 @@
 .modalPaper {
-    border-radius: 16px !important;
-    padding: 16px;
+    border-radius: 20px !important;
+    padding: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+    max-width: 480px !important;
 }
 
 .modalHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+    margin-bottom: 12px;
 }
 
 .headerContent {
     font-weight: 700;
-    font-size: 1.25rem;
-    color: #333;
+    font-size: 1.75rem;
+    color: #1a1a1a;
+    letter-spacing: -0.03em;
 }
 
 .closeButton {
-    color: #666;
+    color: #999;
+    transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+    background-color: #f5f5f5 !important;
+    color: #333;
+    transform: rotate(90deg);
 }
 
 .modalContent {
     padding-top: 24px !important;
+    padding-bottom: 12px !important;
 }
 
 .stepContainer {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 18px;
 }
 
 .stepDescription {
     color: #666;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     text-align: center;
+    font-size: 1rem;
+    font-weight: 400;
 }
 
 .inputGroup {
@@ -54,32 +68,210 @@
     font-weight: 500;
 }
 
+/* ============ PRIMARY ACTION BUTTON ============ */
 .actionButton {
-    background-color: #3c91f3ff !important;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
     color: white !important;
-    padding: 12px !important;
+    padding: 16px 24px !important;
     font-weight: 600 !important;
     text-transform: none !important;
-    border-radius: 8px !important;
-    margin-top: 16px !important;
+    border-radius: 12px !important;
+    margin-top: 12px !important;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    font-size: 1.05rem !important;
+    letter-spacing: 0.01em !important;
+    border: none !important;
+}
+
+.actionButton:hover:not(:disabled) {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5) !important;
+    transform: translateY(-2px);
+}
+
+.actionButton:active:not(:disabled) {
+    transform: translateY(0px);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3) !important;
 }
 
 .actionButton:disabled {
-    background-color: #a0cbf8 !important;
+    background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%) !important;
+    box-shadow: none !important;
+    transform: none !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
 }
 
+/* ============ GOOGLE BUTTON ============ */
+.googleButton {
+    border: 2px solid #e5e7eb !important;
+    color: #374151 !important;
+    padding: 14px 20px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    border-radius: 12px !important;
+    transition: all 0.2s ease !important;
+    background-color: white !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    font-size: 1rem !important;
+}
+
+.googleButton:hover {
+    background-color: #f9fafb !important;
+    border-color: #d1d5db !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+    transform: translateY(-1px);
+}
+
+.googleButton:active {
+    transform: translateY(0px);
+}
+
+/* ============ PHONE BUTTON ============ */
+.phoneButton {
+    border: 2px solid #e5e7eb !important;
+    color: #374151 !important;
+    padding: 14px 20px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    border-radius: 12px !important;
+    transition: all 0.2s ease !important;
+    background-color: white !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    font-size: 1rem !important;
+}
+
+.phoneButton:hover {
+    background-color: #f9fafb !important;
+    border-color: #d1d5db !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+    transform: translateY(-1px);
+}
+
+.phoneButton:active {
+    transform: translateY(0px);
+}
+
+/* ============ BACK BUTTON - FIXED FOR VISIBILITY ============ */
 .backButton {
     text-transform: none !important;
-    color: #666 !important;
-    margin-top: 8px !important;
+    color: #2563eb !important;
+    margin-top: 12px !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    padding: 10px 18px !important;
+    border-radius: 8px !important;
+    background-color: white !important;
+    border: 2px solid #e5e7eb !important;
 }
 
+.backButton:hover {
+    background-color: #f0f7ff !important;
+    border-color: #2563eb !important;
+    color: #1d4ed8 !important;
+}
+
+/* ============ LINK BUTTONS - FIXED FOR VISIBILITY ============ */
+.linkContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    gap: 12px;
+}
+
+.linkButton {
+    text-transform: none !important;
+    color: #2563eb !important;
+    font-size: 0.95rem !important;
+    padding: 10px 18px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+    background-color: white !important;
+    border: 2px solid #e5e7eb !important;
+}
+
+.linkButton:hover {
+    background-color: #f0f7ff !important;
+    border-color: #2563eb !important;
+    color: #1d4ed8 !important;
+}
+
+.linkButton:disabled {
+    color: #9ca3af !important;
+    cursor: not-allowed !important;
+    background-color: #f9fafb !important;
+    border-color: #e5e7eb !important;
+}
+
+/* ============ FORM GRID ============ */
 .formGrid {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
+}
+
+/* ============ TEXT FIELDS ============ */
+.textField {
+    margin-bottom: 4px !important;
 }
 
 .textField fieldset {
-    border-radius: 8px;
+    border-radius: 12px !important;
+    border-color: #e5e7eb !important;
+    border-width: 2px !important;
+}
+
+.textField:hover fieldset {
+    border-color: #d1d5db !important;
+}
+
+.textField.Mui-focused fieldset {
+    border-color: #2563eb !important;
+    border-width: 2px !important;
+}
+
+.textField input {
+    font-size: 1rem !important;
+    padding: 14px 16px !important;
+}
+
+.textField label {
+    font-weight: 500 !important;
+    color: #6b7280 !important;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 600px) {
+    .modalPaper {
+        padding: 20px;
+        border-radius: 16px !important;
+    }
+
+    .headerContent {
+        font-size: 1.5rem;
+    }
+
+    .actionButton {
+        padding: 14px 20px !important;
+        font-size: 1rem !important;
+    }
+
+    .linkContainer {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .linkButton {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ============ DIVIDER STYLING ============ */
+.stepContainer hr {
+    margin: 8px 0 !important;
+    border-color: #e5e7eb !important;
 }

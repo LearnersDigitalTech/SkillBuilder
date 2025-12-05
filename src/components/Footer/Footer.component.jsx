@@ -8,7 +8,7 @@ const Footer = () => {
             <div className={Styles.footerContent}>
                 {/* Brand Section */}
                 <div className={Styles.footerSection}>
-                    <h3 className={Styles.footerBrand}>Skill Conquest</h3>
+                    <h3 className={Styles.footerBrand}>Math Skill Conquest</h3>
                     <p className={Styles.footerDescription}>
                         Empowering students with personalized math assessments and actionable insights for better learning outcomes.
                     </p>

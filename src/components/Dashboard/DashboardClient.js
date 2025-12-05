@@ -4,10 +4,11 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Navigation from "@/components/Navigation/Navigation.component";
 import Footer from "@/components/Footer/Footer.component";
+import PhoneNumberDialog from "@/components/Auth/PhoneNumberDialog";
 import { CircularProgress, Button, FormControl, InputLabel, Select, MenuItem, TextField, Dialog, DialogTitle, DialogContent, Card, CardContent } from "@mui/material";
-import { User, LogOut, BookOpen, Clock, Award, ChevronRight } from "lucide-react";
+import { User, LogOut, BookOpen, Clock, Award, ChevronRight, Edit2 } from "lucide-react";
 import { ref, get, set } from "firebase/database";
-import { firebaseDatabase } from "@/backend/firebaseHandler";
+import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler";
 import Styles from "../../app/dashboard/Dashboard.module.css";
 import { QuizSessionContext } from "../../app/context/QuizSessionContext";
 
@@ -20,7 +21,12 @@ const DashboardClient = () => {
     const [fetchingReports, setFetchingReports] = useState(false);
     const [reportsCache, setReportsCache] = useState({});
 
+    // Phone number dialog state
+    const [showPhoneDialog, setShowPhoneDialog] = useState(false);
+
     const [addChildOpen, setAddChildOpen] = useState(false);
+    const [editChildOpen, setEditChildOpen] = useState(false);
+    const [editingChildId, setEditingChildId] = useState(null);
     const [childForm, setChildForm] = useState({
         name: "",
         email: "",
@@ -35,13 +41,50 @@ const DashboardClient = () => {
         }
     }, [user, loading, router]);
 
+    // Check if Google/Email user needs to provide phone number
+    useEffect(() => {
+        if (!loading && user && userData) {
+            // If user signed in with Google/Email (no phoneNumber) and hasn't provided one yet
+            if (!user.phoneNumber && !userData.phoneNumber) {
+                setShowPhoneDialog(true);
+            }
+        }
+    }, [user, userData, loading]);
+
+    // Handle phone number completion
+    const handlePhoneComplete = async (phoneNumber) => {
+        setShowPhoneDialog(false);
+
+        // Refresh userData from database to get the updated phone number
+        if (user && userData) {
+            try {
+                const userKey = getUserDatabaseKey(user);
+                const userRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}`);
+                const snapshot = await get(userRef);
+
+                if (snapshot.exists()) {
+                    const updatedData = snapshot.val();
+                    setUserData(updatedData);
+                }
+            } catch (error) {
+                console.error("Error refreshing user data:", error);
+                // Fallback: update local state
+                setUserData({
+                    ...userData,
+                    phoneNumber: phoneNumber
+                });
+            }
+        }
+    };
+
     // Initialize active child based on userData and persisted preference
     useEffect(() => {
         if (!user || !userData || !userData.children) return;
 
-        const phoneKey = user.phoneNumber ? user.phoneNumber.slice(-10) : "";
+        // Get user key (works for phone, Google, and email auth)
+        const userKey = getUserDatabaseKey(user);
         const storedChildId = typeof window !== "undefined"
-            ? window.localStorage.getItem(`activeChild_${phoneKey}`)
+            ? window.localStorage.getItem(`activeChild_${userKey}`)
             : null;
 
         const childKeys = Object.keys(userData.children || {});
@@ -55,11 +98,12 @@ const DashboardClient = () => {
     // Fetch reports for the selected child, with simple per-child caching
     useEffect(() => {
         const fetchReports = async () => {
-            if (user?.phoneNumber && activeChildId) {
+            if (user && activeChildId) {
                 setFetchingReports(true);
                 try {
-                    const phoneNumber = user.phoneNumber.slice(-10);
-                    const reportsRef = ref(firebaseDatabase, `NMD_2025/Reports/${phoneNumber}/${activeChildId}`);
+                    // Get user key (works for phone, Google, and email auth)
+                    const userKey = getUserDatabaseKey(user);
+                    const reportsRef = ref(firebaseDatabase, `NMD_2025/Reports/${userKey}/${activeChildId}`);
                     const snapshot = await get(reportsRef);
                     if (snapshot.exists()) {
                         const data = snapshot.val();
@@ -112,10 +156,11 @@ const DashboardClient = () => {
     const handleChildChange = (event) => {
         const newChildId = event.target.value;
         setActiveChildId(newChildId);
-        if (user?.phoneNumber) {
-            const phoneKey = user.phoneNumber.slice(-10);
+        if (user) {
+            // Get user key (works for phone, Google, and email auth)
+            const userKey = getUserDatabaseKey(user);
             if (typeof window !== "undefined") {
-                window.localStorage.setItem(`activeChild_${phoneKey}`, newChildId);
+                window.localStorage.setItem(`activeChild_${userKey}`, newChildId);
             }
         }
     };
@@ -132,30 +177,29 @@ const DashboardClient = () => {
     };
 
     const handleSaveChild = async () => {
-        if (!user?.phoneNumber || !userData) return;
+        if (!user || !userData) return;
 
         const { name, schoolName, city, grade } = childForm;
         if (!name || !schoolName || !city || !grade) {
             return;
         }
 
-        const phoneNumber = user.phoneNumber.slice(-10);
+        // Get user database key (works for phone, Google, and email auth)
+        const userKey = getUserDatabaseKey(user);
         const childId = `child_${Date.now()}`;
         const childProfile = {
             ...childForm,
-            phoneNumber,
             createdAt: new Date().toISOString()
         };
 
         try {
-            const childRef = ref(firebaseDatabase, `NMD_2025/Registrations/${phoneNumber}/children/${childId}`);
+            const childRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}/children/${childId}`);
             await set(childRef, childProfile);
 
             setUserData((prev) => {
                 const prevChildren = prev?.children || {};
                 return {
                     ...(prev || {}),
-                    parentPhone: phoneNumber,
                     children: {
                         ...prevChildren,
                         [childId]: childProfile
@@ -164,9 +208,9 @@ const DashboardClient = () => {
             });
 
             setActiveChildId(childId);
-            const phoneKey = phoneNumber;
+            // Use userKey for localStorage as well
             if (typeof window !== "undefined") {
-                window.localStorage.setItem(`activeChild_${phoneKey}`, childId);
+                window.localStorage.setItem(`activeChild_${userKey}`, childId);
             }
             setAddChildOpen(false);
         } catch (error) {
@@ -174,47 +218,80 @@ const DashboardClient = () => {
         }
     };
 
+    const handleEditChild = () => {
+        if (!activeChild || !activeChildId) return;
+
+        setChildForm({
+            name: activeChild.name,
+            email: activeChild.email || '',
+            schoolName: activeChild.schoolName,
+            city: activeChild.city,
+            grade: activeChild.grade
+        });
+        setEditingChildId(activeChildId);
+        setEditChildOpen(true);
+    };
+
+    const handleUpdateChild = async () => {
+        if (!user || !userData || !editingChildId) return;
+
+        const { name, schoolName, city, grade } = childForm;
+        if (!name || !schoolName || !city || !grade) {
+            return;
+        }
+
+        // Get user database key (works for phone, Google, and email auth)
+        const userKey = getUserDatabaseKey(user);
+
+        const updatedProfile = {
+            ...childForm,
+            createdAt: activeChild.createdAt // Preserve original creation date
+        };
+
+        try {
+            const childRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}/children/${editingChildId}`);
+            await set(childRef, updatedProfile);
+
+            setUserData((prev) => ({
+                ...(prev || {}),
+                children: {
+                    ...prev.children,
+                    [editingChildId]: updatedProfile
+                }
+            }));
+
+            setEditChildOpen(false);
+            setEditingChildId(null);
+        } catch (error) {
+            console.error("Error updating child profile:", error);
+        }
+    };
+
     return (
         <div className={Styles.pageWrapper}>
             <Navigation />
+
+            {/* Phone Number Collection Dialog for Google/Email Users */}
+            <PhoneNumberDialog
+                open={showPhoneDialog}
+                user={user}
+                onComplete={handlePhoneComplete}
+            />
 
             <div className={Styles.dashboardContainer}>
                 {/* Profile Section */}
                 <section className={Styles.profileSection}>
                     <div className={Styles.profileHeader}>
-                        <div className={Styles.avatar}>
-                            <User size={40} color="white" />
+                        <div className={Styles.avatarSection}>
+                            <div className={Styles.avatar}>
+                                <User size={40} color="white" />
+                            </div>
+                            <div className={Styles.profileInfo}>
+                                <h1>{activeChild?.name || "Student"}</h1>
+                                <p>{activeChild?.grade} • {activeChild?.schoolName}</p>
+                            </div>
                         </div>
 
-                        {children && (
-                            <div className={Styles.childSelectorRow}>
-                                <FormControl size="small" className={Styles.childSelector}>
-                                    <InputLabel>Child Profile</InputLabel>
-                                    <Select
-                                        value={activeChildId || ""}
-                                        label="Child Profile"
-                                        onChange={handleChildChange}
-                                    >
-                                        {Object.entries(children).map(([id, child]) => (
-                                            <MenuItem key={id} value={id}>
-                                                {child.name} ({child.grade})
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                                <Button
-                                    variant="outlined"
-                                    onClick={handleOpenAddChild}
-                                    className={Styles.addChildButton}
-                                >
-                                    Add Child
-                                </Button>
-                            </div>
-                        )}
-                        <div className={Styles.profileInfo}>
-                            <h1>{activeChild?.name || "Student"}</h1>
-                            <p>{activeChild?.grade} • {activeChild?.schoolName}</p>
-                        </div>
                         <Button
                             variant="outlined"
                             color="error"
@@ -225,6 +302,41 @@ const DashboardClient = () => {
                             Sign Out
                         </Button>
                     </div>
+
+                    {children && (
+                        <div className={Styles.childSelectorRow}>
+                            <FormControl size="small" className={Styles.childSelector}>
+                                <InputLabel>Child Profile</InputLabel>
+                                <Select
+                                    value={activeChildId || ""}
+                                    label="Child Profile"
+                                    onChange={handleChildChange}
+                                >
+                                    {Object.entries(children).map(([id, child]) => (
+                                        <MenuItem key={id} value={id}>
+                                            {child.name} ({child.grade})
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <Button
+                                variant="outlined"
+                                onClick={handleEditChild}
+                                disabled={!activeChildId}
+                                startIcon={<Edit2 size={18} />}
+                                className={Styles.editChildButton}
+                            >
+                                Edit
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                onClick={handleOpenAddChild}
+                                className={Styles.addChildButton}
+                            >
+                                Add Child
+                            </Button>
+                        </div>
+                    )}
 
                     <div className={Styles.statsGrid}>
                         <div className={Styles.statCard}>
@@ -289,10 +401,14 @@ const DashboardClient = () => {
                                 variant="contained"
                                 className={Styles.startBtn}
                                 onClick={() => {
-                                    if (!user || !activeChild || !user.phoneNumber) {
+                                    if (!user || !activeChild) {
                                         router.push("/");
                                         return;
                                     }
+
+                                    // Get user key (works for phone, Google, and email auth)
+                                    const userKey = getUserDatabaseKey(user);
+
                                     try {
                                         if (typeof window !== "undefined") {
                                             window.localStorage.removeItem("quizSession");
@@ -300,10 +416,10 @@ const DashboardClient = () => {
                                     } catch (e) {
                                         // ignore storage errors
                                     }
-                                    const phoneNumber = user.phoneNumber.slice(-10);
+
                                     const userDetails = {
                                         ...activeChild,
-                                        phoneNumber,
+                                        phoneNumber: userKey, // Use userKey for backward compatibility
                                         childId: activeChildId,
                                     };
                                     setQuizContext({ userDetails, questionPaper: null });
@@ -315,7 +431,7 @@ const DashboardClient = () => {
                         </div>
                     )}
                 </section>
-            </div>
+            </div >
 
             <Footer />
 
@@ -382,7 +498,72 @@ const DashboardClient = () => {
                     </div>
                 </DialogContent>
             </Dialog>
-        </div>
+
+            {/* Edit Child Dialog */}
+            <Dialog
+                open={editChildOpen}
+                onClose={() => setEditChildOpen(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>Edit Child Profile</DialogTitle>
+                <DialogContent>
+                    <div className={Styles.addChildForm}>
+                        <TextField
+                            fullWidth
+                            label="Full Name"
+                            margin="normal"
+                            value={childForm.name}
+                            onChange={(e) => setChildForm({ ...childForm, name: e.target.value })}
+                        />
+                        <TextField
+                            fullWidth
+                            label="Email (optional)"
+                            type="email"
+                            margin="normal"
+                            value={childForm.email}
+                            onChange={(e) => setChildForm({ ...childForm, email: e.target.value })}
+                        />
+                        <TextField
+                            fullWidth
+                            label="School Name"
+                            margin="normal"
+                            value={childForm.schoolName}
+                            onChange={(e) => setChildForm({ ...childForm, schoolName: e.target.value })}
+                        />
+                        <TextField
+                            fullWidth
+                            label="City"
+                            margin="normal"
+                            value={childForm.city}
+                            onChange={(e) => setChildForm({ ...childForm, city: e.target.value })}
+                        />
+                        <FormControl fullWidth margin="normal">
+                            <InputLabel>Grade</InputLabel>
+                            <Select
+                                value={childForm.grade}
+                                label="Grade"
+                                onChange={(e) => setChildForm({ ...childForm, grade: e.target.value })}
+                            >
+                                {[...Array(10)].map((_, i) => (
+                                    <MenuItem key={i + 1} value={`Grade ${i + 1}`}>
+                                        Grade {i + 1}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <Button
+                            variant="contained"
+                            onClick={handleUpdateChild}
+                            disabled={!childForm.name || !childForm.schoolName || !childForm.city || !childForm.grade}
+                            sx={{ mt: 2 }}
+                        >
+                            Save Changes
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        </div >
     );
 };
 

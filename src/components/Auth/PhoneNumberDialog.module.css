@@ -1,0 +1,111 @@
+.dialogPaper {
+    border-radius: 16px !important;
+}
+
+.dialogTitle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.5rem !important;
+    font-weight: 600 !important;
+    padding: 24px 24px 16px !important;
+    color: #1a1a1a;
+}
+
+.icon {
+    color: #3c91f3;
+}
+
+.dialogContent {
+    padding: 0 24px 24px !important;
+}
+
+.description {
+    color: #666;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0 0 24px 0;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.inputGroup {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.inputIcon {
+    color: #3c91f3;
+    flex-shrink: 0;
+}
+
+.textField {
+    flex: 1;
+}
+
+.prefix {
+    color: #666;
+    font-weight: 500;
+    margin-right: 8px;
+}
+
+.submitButton {
+    background: linear-gradient(135deg, #3c91f3 0%, #1a73e8 100%) !important;
+    color: white !important;
+    padding: 12px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(60, 145, 243, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+.submitButton:hover:not(:disabled) {
+    box-shadow: 0 6px 16px rgba(60, 145, 243, 0.4) !important;
+    transform: translateY(-2px);
+}
+
+.submitButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.note {
+    margin: 16px 0 0 0;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: #666;
+    line-height: 1.5;
+}
+
+.note strong {
+    color: #1a1a1a;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+    .dialogTitle {
+        font-size: 1.25rem !important;
+        padding: 20px 20px 12px !important;
+    }
+
+    .dialogContent {
+        padding: 0 20px 20px !important;
+    }
+
+    .description {
+        font-size: 0.9rem;
+    }
+
+    .submitButton {
+        padding: 10px !important;
+    }
+}

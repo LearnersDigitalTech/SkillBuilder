@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import Styles from "./TypeMCQ.module.css";
 import { Button, FormControlLabel, Radio, RadioGroup } from "@mui/material";
 import { ArrowLeft, ArrowRight, Check, Flag } from "lucide-react";
+import MathRenderer from "@/components/MathRenderer/MathRenderer.component";
 
 const TypeMCQ = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, questionPaper, activeQuestionIndex, options, topic, question, grade, timeTakeRef }) => {
 
@@ -41,7 +42,9 @@ const TypeMCQ = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, questio
                         className={Styles.questionImage}
                     />
                 )}
-                <h3 className={Styles.question} dangerouslySetInnerHTML={{ __html: question }}></h3>
+                <h3 className={Styles.question}>
+                    <MathRenderer content={question} />
+                </h3>
             </div>
 
             {/* Column 2: Options */}
@@ -54,7 +57,12 @@ const TypeMCQ = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, questio
                     }
                 }} value={selectedOption}>
                     {options.map((option) => (
-                        <FormControlLabel key={option.value} value={option.value} label={option.label} control={<Radio />} />
+                        <FormControlLabel
+                            key={option.value}
+                            value={option.value}
+                            label={<MathRenderer content={option.label} />}
+                            control={<Radio />}
+                        />
                     ))}
                 </RadioGroup>
 
