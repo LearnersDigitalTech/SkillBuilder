@@ -65,7 +65,17 @@ const Navigation = () => {
                 </div>
                 <div className={Styles.navActionContainer}>
                     <Tooltip title="Take Test" arrow>
-                        <button onClick={() => router.push("/quiz")} style={{ backgroundColor: "#3c91f3ff", color: "white" }} className={Styles.navButton}>
+                        <button
+                            onClick={() => {
+                                if (user) {
+                                    router.push("/dashboard");
+                                } else {
+                                    setAuthModalOpen(true);
+                                }
+                            }}
+                            style={{ backgroundColor: "#3c91f3ff", color: "white" }}
+                            className={Styles.navButton}
+                        >
                             <Play size={16} />
                             <span className={Styles.buttonText}>Take Test</span>
                         </button>
