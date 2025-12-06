@@ -113,6 +113,8 @@ const DashboardClient = () => {
     }, [user, userData]);
 
     // Fetch reports for the selected child, with simple per-child caching
+    // Fetch reports for the selected child, with simple per-child caching
+    /*
     useEffect(() => {
         const fetchReports = async () => {
             if (activeChildId) {
@@ -161,6 +163,7 @@ const DashboardClient = () => {
             }
         }
     }, [user, activeChildId, reportsCache]);
+    */
 
     const effectiveUserData = userData || (typeof window !== "undefined" ? JSON.parse(window.localStorage.getItem("quizSession") || "{}")?.userDetails : null);
     const children = effectiveUserData?.children || null;
