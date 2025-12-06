@@ -192,14 +192,7 @@ const QuizResultClient = () => {
     const [tutorSuccess, setTutorSuccess] = useState("");
     const [tutorError, setTutorError] = useState("");
     const [tutorForm, setTutorForm] = useState({
-        parentName: "",
-        studentName: "",
-        grade: "",
         phone: "",
-        preferredDate: "",
-        preferredTimeSlot: "",
-        mode: "Online",
-        notes: "",
     });
 
     useEffect(() => {
@@ -287,14 +280,7 @@ const QuizResultClient = () => {
         setTutorError("");
 
         setTutorForm({
-            parentName: displayName || "",
-            studentName: displayName || "",
-            grade: displayGrade || "",
             phone: displayPhone || (user?.phoneNumber ? user.phoneNumber.slice(-10) : ""),
-            preferredDate: "",
-            preferredTimeSlot: "",
-            mode: "Online",
-            notes: "",
         });
 
         setTutorDialogOpen(true);
@@ -316,8 +302,8 @@ const QuizResultClient = () => {
         setTutorSuccess("");
         setTutorError("");
 
-        if (!tutorForm.preferredDate || !tutorForm.preferredTimeSlot) {
-            setTutorError("Please choose a preferred date and time slot.");
+        if (!tutorForm.phone || tutorForm.phone.trim().length < 10) {
+            setTutorError("Please enter a valid phone number.");
             return;
         }
 
@@ -353,15 +339,16 @@ const QuizResultClient = () => {
             const bookingId = `${childId}_${Date.now()}`;
             const bookingRef = ref(firebaseDatabase, `NMD_2025/TutorBookings/${userKey}/${bookingId}`);
 
+            // Auto-populate all fields from session data
             const bookingPayload = {
-                parentName: tutorForm.parentName,
-                studentName: tutorForm.studentName,
-                grade: tutorForm.grade,
+                parentName: displayName || "",
+                studentName: displayName || "",
+                grade: displayGrade || "",
                 phone: tutorForm.phone,
-                preferredDate: tutorForm.preferredDate,
-                preferredTimeSlot: tutorForm.preferredTimeSlot,
-                mode: tutorForm.mode,
-                notes: tutorForm.notes,
+                preferredDate: "", // Will be scheduled by counselor
+                preferredTimeSlot: "", // Will be scheduled by counselor
+                mode: "To be decided", // Will be decided by counselor
+                notes: "",
                 reportSummary: summary,
                 createdAt: new Date().toISOString(),
             };
@@ -395,8 +382,14 @@ const QuizResultClient = () => {
             }
 
             setTutorSuccess("Request submitted. Our academic counselor will contact you shortly.");
+
+            // Close the booking modal first
             setTutorDialogOpen(false);
-            setTutorSuccessDialogOpen(true);
+
+            // Then show the success celebration after a brief delay
+            setTimeout(() => {
+                setTutorSuccessDialogOpen(true);
+            }, 300);
         } catch (error) {
             console.error("Error saving tutor booking:", error);
             setTutorError("Something went wrong while submitting your request. Please try again.");
@@ -665,29 +658,37 @@ const QuizResultClient = () => {
                 </DialogContent>
             </Dialog >
 
-            {/* Tutor Booking Success Modal */}
-            < Dialog
-                open={tutorSuccessDialogOpen}
-                onClose={() => setTutorSuccessDialogOpen(false)}
-                maxWidth="xs"
-                fullWidth
-                PaperProps={{
-                    className: Styles.modal,
-                }}
-            >
-                <DialogTitle className={Styles.modalHeader}>
-                    <div className={Styles.modalTitleWrapper}>
-                        <BookOpen className={Styles.modalIcon} />
-                        <span>Request Submitted</span>
+            {/* Cheerful Success Celebration */}
+            {tutorSuccessDialogOpen && (
+                <div
+                    className={Styles.successCelebration}
+                    onClick={() => setTutorSuccessDialogOpen(false)}
+                >
+                    <div className={Styles.successIcon}>
+                        <CheckCircle size={60} strokeWidth={3} />
                     </div>
-                    <IconButton onClick={() => setTutorSuccessDialogOpen(false)} className={Styles.closeButton}>
-                        <X size={20} />
-                    </IconButton>
-                </DialogTitle>
-                <DialogContent className={Styles.modalContent}>
-                    <p className={Styles.tutorSuccessMessage}>{tutorSuccess}</p>
-                </DialogContent>
-            </Dialog >
+                    <div className={Styles.successMessage}>
+                        <h2 className={Styles.successTitle}>🎉 Request Submitted!</h2>
+                        <p className={Styles.successText}>
+                            Our academic counselor will contact you shortly on WhatsApp/SMS to schedule your personalized learning session.
+                        </p>
+                    </div>
+                    {/* Confetti elements */}
+                    {[...Array(30)].map((_, i) => (
+                        <div
+                            key={i}
+                            className={Styles.confetti}
+                            style={{
+                                left: `${Math.random() * 100}%`,
+                                top: `${Math.random() * 20}%`,
+                                background: ['#667eea', '#764ba2', '#10b981', '#f59e0b', '#ef4444'][Math.floor(Math.random() * 5)],
+                                animationDelay: `${Math.random() * 0.5}s`,
+                                animationDuration: `${2 + Math.random() * 2}s`
+                            }}
+                        />
+                    ))}
+                </div>
+            )}
 
             {/* Tutor Booking Status Modal */}
             < Dialog
@@ -757,101 +758,51 @@ const QuizResultClient = () => {
                 </DialogTitle>
                 <DialogContent className={Styles.modalContent}>
                     <form className={Styles.tutorForm} onSubmit={handleSubmitTutorBooking}>
-                        <div className={Styles.tutorFormRow}>
-                            <TextField
-                                label="Parent name"
-                                value={tutorForm.parentName}
-                                onChange={handleTutorFieldChange("parentName")}
-                                fullWidth
-                                size="small"
-                            />
-                            <TextField
-                                label="Student name"
-                                value={tutorForm.studentName}
-                                onChange={handleTutorFieldChange("studentName")}
-                                fullWidth
-                                size="small"
-                            />
+                        {/* Display user info as read-only */}
+                        <div className={Styles.userInfoDisplay}>
+                            <div className={Styles.infoItem}>
+                                <span className={Styles.infoLabel}>Student:</span>
+                                <span className={Styles.infoValue}>{displayName || "Not available"}</span>
+                            </div>
+                            <div className={Styles.infoItem}>
+                                <span className={Styles.infoLabel}>Grade:</span>
+                                <span className={Styles.infoValue}>{displayGrade || "Not available"}</span>
+                            </div>
                         </div>
 
-                        <div className={Styles.tutorFormRow}>
+                        {/* Phone verification field */}
+                        <div className={Styles.phoneVerification}>
                             <TextField
-                                label="Grade"
-                                value={tutorForm.grade}
-                                onChange={handleTutorFieldChange("grade")}
-                                fullWidth
-                                size="small"
-                            />
-                            <TextField
-                                label="Contact number"
+                                label="Is this your number correct?"
                                 value={tutorForm.phone}
                                 onChange={handleTutorFieldChange("phone")}
                                 fullWidth
-                                size="small"
-                                inputProps={{ maxLength: 10 }}
+                                size="medium"
+                                type="tel"
+                                inputProps={{
+                                    maxLength: 10,
+                                    inputMode: 'numeric',
+                                    pattern: '[0-9]*'
+                                }}
+                                placeholder="Enter your 10-digit phone number"
+                                required
                             />
                         </div>
-
-                        <div className={Styles.tutorFormRow}>
-                            <TextField
-                                label="Preferred date"
-                                type="date"
-                                value={tutorForm.preferredDate}
-                                onChange={handleTutorFieldChange("preferredDate")}
-                                fullWidth
-                                size="small"
-                                InputLabelProps={{ shrink: true }}
-                            />
-                            <TextField
-                                select
-                                label="Preferred time slot"
-                                value={tutorForm.preferredTimeSlot}
-                                onChange={handleTutorFieldChange("preferredTimeSlot")}
-                                fullWidth
-                                size="small"
-                            >
-                                <MenuItem value="">Select a slot</MenuItem>
-                                <MenuItem value="4:00 PM - 5:00 PM">4:00 PM - 5:00 PM</MenuItem>
-                                <MenuItem value="5:00 PM - 6:00 PM">5:00 PM - 6:00 PM</MenuItem>
-                                <MenuItem value="6:00 PM - 7:00 PM">6:00 PM - 7:00 PM</MenuItem>
-                                <MenuItem value="Weekend batch">Weekend batch (Sat/Sun)</MenuItem>
-                            </TextField>
-                        </div>
-
-                        <TextField
-                            select
-                            label="Preferred mode"
-                            value={tutorForm.mode}
-                            onChange={handleTutorFieldChange("mode")}
-                            fullWidth
-                            size="small"
-                        >
-                            <MenuItem value="Online">Online</MenuItem>
-                            <MenuItem value="Offline (in-centre)">Offline (in-centre)</MenuItem>
-                        </TextField>
-
-                        <TextField
-                            label="Anything specific you want the tutor to focus on?"
-                            value={tutorForm.notes}
-                            onChange={handleTutorFieldChange("notes")}
-                            fullWidth
-                            size="small"
-                            multiline
-                            minRows={3}
-                        />
 
                         {tutorError && (
                             <div className={Styles.tutorError}>{tutorError}</div>
                         )}
 
                         <div className={Styles.tutorSubmitRow}>
-                            <span className={Styles.tutorHelper}>Our team will confirm your slot over WhatsApp/SMS.</span>
+                            <span className={Styles.tutorHelper}>Our academic counselor will contact you on WhatsApp/SMS to schedule your session.</span>
                             <Button
                                 type="submit"
                                 variant="contained"
                                 disabled={tutorSubmitting}
+                                className={Styles.submitButton}
+                                startIcon={tutorSubmitting ? <CircularProgress size={20} color="inherit" /> : <CheckCircle size={20} />}
                             >
-                                {tutorSubmitting ? "Submitting..." : "Submit request"}
+                                {tutorSubmitting ? "Booking..." : "Book My Tutor!"}
                             </Button>
                         </div>
                     </form>

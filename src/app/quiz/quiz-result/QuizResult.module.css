@@ -1095,3 +1095,241 @@
         transform: scale(1.15);
     }
 }
+
+/* Simplified Tutor Booking Form Styles */
+.userInfoDisplay {
+    background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+    border-radius: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.infoItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.infoLabel {
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.infoValue {
+    font-size: 1rem;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.phoneVerification {
+    margin-bottom: 1rem;
+}
+
+.phoneVerification :global(.MuiTextField-root) {
+    background: white;
+    border-radius: 0.5rem;
+}
+
+.phoneVerification :global(.MuiInputLabel-root) {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.phoneVerification :global(.MuiOutlinedInput-root) {
+    border-radius: 0.5rem;
+}
+
+.phoneVerification :global(.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline) {
+    border-color: #667eea;
+}
+
+.phoneVerification :global(.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline) {
+    border-color: #667eea;
+    border-width: 2px;
+}
+
+.submitButton {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    padding: 0.75rem 1.75rem !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    border-radius: 10px !important;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3), 0 3px 10px rgba(118, 75, 162, 0.15) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    letter-spacing: 0.2px !important;
+}
+
+.submitButton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.submitButton:hover::before {
+    left: 100%;
+}
+
+.submitButton:hover {
+    transform: translateY(-3px) scale(1.02) !important;
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.45), 0 6px 16px rgba(118, 75, 162, 0.3) !important;
+}
+
+.submitButton:active {
+    transform: translateY(-1px) scale(0.98) !important;
+}
+
+.submitButton:disabled {
+    background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%) !important;
+    box-shadow: none !important;
+    transform: none !important;
+    opacity: 0.7 !important;
+}
+
+@media (max-width: 768px) {
+    .userInfoDisplay {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+
+    .tutorSubmitRow {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .submitButton {
+        width: 100% !important;
+    }
+}
+
+/* Success Celebration Animation */
+.successCelebration {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: celebrationFadeIn 0.4s ease-out;
+    cursor: pointer;
+}
+
+.successIcon {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: successBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
+}
+
+.successIcon svg {
+    width: 60px;
+    height: 60px;
+    color: white;
+    stroke-width: 3;
+}
+
+.successMessage {
+    background: white;
+    padding: 2rem 3rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    max-width: 500px;
+    animation: messageSlideUp 0.5s ease-out 0.2s both;
+}
+
+.successTitle {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0 0 0.75rem 0;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.successText {
+    font-size: 1.1rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    background: #667eea;
+    position: absolute;
+    animation: confettiFall 3s linear forwards;
+}
+
+@keyframes celebrationFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes successBounce {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes messageSlideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes confettiFall {
+    to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
