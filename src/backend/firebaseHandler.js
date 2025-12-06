@@ -28,6 +28,7 @@ googleProvider.setCustomParameters({
 
 // Helper function to get user database key
 export const getUserDatabaseKey = (user) => {
+    if (!user) return null;
     // For backward compatibility with phone auth users
     if (user.phoneNumber) {
         return user.phoneNumber.slice(-10);

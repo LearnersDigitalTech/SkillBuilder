@@ -94,20 +94,31 @@ const DashboardClient = () => {
 
         if ((!user && !currentUserData) || (!userData && !currentUserData) || !currentUserData.children) return;
 
-        // Get user key (works for phone, Google, and email auth)
-        // If user is null, try to get phone from currentUserData
-        const userKey = user ? getUserDatabaseKey(user) : (currentUserData.userKey || currentUserData.phoneNumber || currentUserData.parentPhone || currentUserData.parentEmail);
+        // Robust user key retrieval
+        let userKey = null;
+        if (user) {
+            userKey = getUserDatabaseKey(user);
+        }
+        if (!userKey && currentUserData) {
+            userKey = currentUserData.userKey || currentUserData.phoneNumber || currentUserData.parentPhone || currentUserData.parentEmail;
+        }
 
         if (!userKey) return;
 
-        const storedChildId = typeof window !== "undefined"
+        let storedChildId = typeof window !== "undefined"
             ? window.localStorage.getItem(`activeChild_${userKey}`)
             : null;
+
+        // Fallback to generic key if specific key fails
+        if (!storedChildId && typeof window !== "undefined") {
+            storedChildId = window.localStorage.getItem('lastActiveChild');
+        }
 
         const childKeys = Object.keys(currentUserData.children || {});
         if (storedChildId && childKeys.includes(storedChildId)) {
             setActiveChildId(storedChildId);
         } else if (childKeys.length > 0) {
+            // Default to first child if no preference stored
             setActiveChildId(childKeys[0]);
         }
     }, [user, userData]);
@@ -189,9 +200,17 @@ const DashboardClient = () => {
 
         // Persist preference
         if (user || userData) {
-            const userKey = getUserDatabaseKey(user) || userData.phoneNumber; // fallback
+            let userKey = null;
+            if (user) {
+                userKey = getUserDatabaseKey(user);
+            }
+            if (!userKey && userData) {
+                userKey = userData.userKey || userData.phoneNumber || userData.parentPhone || userData.parentEmail; // Robust fallback
+            }
+
             if (userKey && typeof window !== "undefined") {
                 window.localStorage.setItem(`activeChild_${userKey}`, newChildId);
+                window.localStorage.setItem('lastActiveChild', newChildId); // Generic fallback
             }
         }
     };

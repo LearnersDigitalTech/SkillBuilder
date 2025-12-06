@@ -26,19 +26,49 @@ const HomeContent = () => {
     const [alreadyAttemptedModalOpen, setAlreadyAttemptedModalOpen] = useState(false);
 
     const handleStartAssessment = async () => {
+        // Check for local session first
+        if (!user && typeof window !== "undefined") {
+            try {
+                const quizSession = window.localStorage.getItem("quizSession");
+                if (quizSession) {
+                    const parsed = JSON.parse(quizSession);
+                    if (parsed?.userDetails) {
+                        router.push("/quiz");
+                        return;
+                    }
+                }
+            } catch (e) { }
+        }
+
         if (user) {
             // Get user key (works for phone, Google, and email auth)
-            const userKey = getUserDatabaseKey(user);
+            // Robust user key retrieval
+            let userKey = null;
+            if (user) {
+                userKey = getUserDatabaseKey(user);
+            }
+            if (!userKey && userData) {
+                userKey = userData.userKey || userData.phoneNumber || userData.parentPhone || userData.parentEmail;
+            }
+
+            if (!userKey) {
+                console.warn("HomeContent: No userKey found.");
+                return;
+            }
 
             const children = userData?.children || null;
             const childKeys = children ? Object.keys(children) : [];
             let activeChildId = childKeys[0] || null;
 
             // If there are multiple children, prefer the one selected on the dashboard
-            if (childKeys.length > 1 && typeof window !== "undefined") {
+            if (typeof window !== "undefined") {
                 const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
+                const lastActiveChild = window.localStorage.getItem('lastActiveChild'); // Fallback
+
                 if (storedChildId && childKeys.includes(storedChildId)) {
                     activeChildId = storedChildId;
+                } else if (lastActiveChild && childKeys.includes(lastActiveChild)) {
+                    activeChildId = lastActiveChild;
                 }
             }
 
@@ -74,6 +104,15 @@ const HomeContent = () => {
             setQuizContext({ userDetails, questionPaper: null });
             router.push("/quiz");
         } else {
+            // Not logged in (or waiting for auth), but check if we have a mismatched local session
+            // that needs clearing?
+            // Actually, if !user, we probably shouldn't be here unless "Take Assessment" clicked.
+
+            // If !user, we open auth modal.
+            // But if we are in a state where user is technically logged in but fell through? 
+            // Logic above says "if (user) { ... } else { openModal }".
+            // So this block handles the not-logged-in case perfectly.
+
             // Not logged in, open auth modal
             setAuthModalOpen(true);
         }
