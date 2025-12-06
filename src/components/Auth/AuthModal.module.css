@@ -41,14 +41,45 @@
     display: flex;
     flex-direction: column;
     gap: 18px;
+    animation: fadeInUp 0.4s ease-out forwards;
 }
 
-.stepDescription {
-    color: #666;
-    margin-bottom: 12px;
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.welcomeText {
+    color: #4b5563;
+    margin-bottom: 20px;
     text-align: center;
     font-size: 1rem;
-    font-weight: 400;
+    line-height: 1.5;
+}
+
+.gradeSection {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.gradeLabel {
+    font-weight: 600;
+    color: #111827;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.headerIcon {
+    color: #2563eb;
 }
 
 .inputGroup {
@@ -58,8 +89,10 @@
 }
 
 .inputIcon {
-    color: #666;
-    margin-top: 4px;
+    color: #4b5563;
+    min-width: 24px;
+    display: flex;
+    justify-content: center;
 }
 
 .prefix {
@@ -68,17 +101,104 @@
     font-weight: 500;
 }
 
+/* ============ PROFILE SELECTION ============ */
+.profileGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.profileCard {
+    background-color: #ffffff;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 20px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 140px;
+}
+
+.profileCard:hover {
+    border-color: #2563eb;
+    background-color: #f0f7ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.avatarCircle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+}
+
+.profileName {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 1rem;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.profileGrade {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+.addProfileCard {
+    background-color: #f9fafb;
+    border: 2px dashed #d1d5db;
+    color: #6b7280;
+}
+
+.addProfileCard:hover {
+    border-color: #2563eb;
+    color: #2563eb;
+    background-color: #f0f7ff;
+}
+
+.addIconCircle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
+}
+
+.addProfileCard:hover .addIconCircle {
+    background-color: #dbeafe;
+    color: #2563eb;
+}
+
 /* ============ PRIMARY ACTION BUTTON ============ */
 .actionButton {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+    background: #2563eb !important;
     color: white !important;
     padding: 16px 24px !important;
     font-weight: 600 !important;
     text-transform: none !important;
-    border-radius: 12px !important;
-    margin-top: 12px !important;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4) !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-radius: 8px !important;
+    margin-top: 24px !important;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1), 0 2px 4px -1px rgba(37, 99, 235, 0.06) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     font-size: 1.05rem !important;
     letter-spacing: 0.01em !important;
     border: none !important;
@@ -219,7 +339,7 @@
 }
 
 .textField fieldset {
-    border-radius: 12px !important;
+    border-radius: 8px !important;
     border-color: #e5e7eb !important;
     border-width: 2px !important;
 }
@@ -234,8 +354,9 @@
 }
 
 .textField input {
-    font-size: 1rem !important;
-    padding: 14px 16px !important;
+    font-size: 0.95rem !important;
+    padding: 12px 14px !important;
+    color: #1f2937 !important;
 }
 
 .textField label {

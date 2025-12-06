@@ -1,38 +1,85 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle, IconButton, CircularProgress, TextField, Button, Select, MenuItem, InputLabel, FormControl, Divider, InputAdornment } from "@mui/material";
-import { X, Phone, User, Mail, School, MapPin, GraduationCap, Eye, EyeOff } from "lucide-react";
-import { RecaptchaVerifier, signInWithPhoneNumber, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { X, Phone, User, GraduationCap, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { RecaptchaVerifier, signInWithPhoneNumber, signInWithPopup } from "firebase/auth";
 import { auth, firebaseDatabase, googleProvider, getUserDatabaseKey } from "@/backend/firebaseHandler";
-import { ref, set, get } from "firebase/database";
+import { ref, set, get, update } from "firebase/database";
 import { toast } from "react-toastify";
 import { useAuth } from "@/context/AuthContext";
 import Styles from "./AuthModal.module.css";
 
 const AuthModal = ({ open, onClose, onSuccess }) => {
-    const [step, setStep] = useState("CHOOSE_METHOD"); // CHOOSE_METHOD, PHONE, OTP, EMAIL_LOGIN, EMAIL_REGISTER, FORGOT_PASSWORD, REGISTER
+
+    // Helper to handle final profile selection
+    const handleSelectProfile = (childId, childProfile) => {
+        // Re-construct full user data context
+        // We need parent info. Since we are in SELECT_PROFILE, we have fetched data.
+        // But we need to keep parent info persistent or fetch again. 
+        // For simplicity, let's assume we have parent info in context or we can infer from current flow. 
+        // HOWEVER, a cleaner way is to store the full 'parent' object in state temporarily when fetching.
+        // Let's modify handleVerifyOtp/handleGoogleSignIn to store `parentData` in state.
+
+        // OR, simpler: We construct the final object here.
+        const baseData = {
+            parentPhone: phoneNumber || undefined, // from state
+            authProvider: phoneNumber ? 'phone' : 'google', // simple inference
+            // If google, we might need email. 
+            // Better approach: We passed step where we verified user.
+        };
+
+        // Actually, let's keep it robust. We should have the full parent object.
+        // But we only stored `userProfiles` (children). 
+
+        const finalUserData = {
+            ...baseData,
+            children: userProfiles,
+            activeChildId: childId,
+            activeChild: childProfile,
+            // Inject authoritative key for consistency
+            userKey: childProfile?.uid || childProfile?.parentPhone || (auth.currentUser ? getUserDatabaseKey(auth.currentUser) : null)
+        };
+
+        // If we still don't have userKey (e.g. phone auth flow where auth.currentUser might be shaky or we just have phoneNumber in state)
+        if (!finalUserData.userKey && phoneNumber) {
+            finalUserData.userKey = phoneNumber;
+        }
+
+        setUserData(finalUserData);
+        toast.success(`Welcome ${childProfile.name}!`);
+
+        // Initialize Quiz Session
+        if (typeof window !== "undefined") {
+            window.localStorage.setItem("quizSession", JSON.stringify({
+                userDetails: finalUserData,
+                questionPaper: [],
+                activeQuestionIndex: 0,
+                remainingTime: 1800
+            }));
+        }
+
+        onSuccess && onSuccess(finalUserData);
+        router.push("/quiz");
+        onClose();
+    };
+    const [step, setStep] = useState("CHOOSE_METHOD"); // CHOOSE_METHOD, PHONE, OTP, EMAIL_LOGIN, EMAIL_REGISTER, FORGOT_PASSWORD, REGISTER, SELECT_PROFILE
     const [loading, setLoading] = useState(false);
     const [phoneNumber, setPhoneNumber] = useState("");
     const [otp, setOtp] = useState("");
     const [confirmationResult, setConfirmationResult] = useState(null);
     const { setUserData } = useAuth();
-    const [showPassword, setShowPassword] = useState(false);
+    const router = useRouter();
 
-    const [emailLoginForm, setEmailLoginForm] = useState({
-        email: "",
-        password: ""
-    });
+
+    const [userProfiles, setUserProfiles] = useState(null); // To store existing profiles (children)
 
     const [registrationData, setRegistrationData] = useState({
         name: "",
-        email: "",
-        password: "",
-        schoolName: "",
-        city: "",
         grade: ""
     });
 
-    const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+
 
     useEffect(() => {
         if (!open) {
@@ -41,17 +88,7 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
             setPhoneNumber("");
             setOtp("");
             setLoading(false);
-            setShowPassword(false);
-            setEmailLoginForm({ email: "", password: "" });
-            setRegistrationData({
-                name: "",
-                email: "",
-                password: "",
-                schoolName: "",
-                city: "",
-                grade: ""
-            });
-            setForgotPasswordEmail("");
+            setUserProfiles(null);
         }
     }, [open]);
 
@@ -77,13 +114,25 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                     normalizedData = {
                         authProvider: "google",
                         parentEmail: user.email,
+                        parentEmail: user.email,
                         children: { default: rawData }
                     };
                 }
-                setUserData(normalizedData);
-                toast.success("Logged in successfully!");
-                onSuccess && onSuccess(normalizedData);
-                onClose();
+
+                // If there are multiple children (or even one), we might want to let them select
+                // But for now, if it's existing Google login, we might follow same pattern as verifyOtp
+                // Let's adapt it to show selection if children exist
+                if (normalizedData.children && Object.keys(normalizedData.children).length > 0) {
+                    setUserProfiles(normalizedData.children);
+                    setStep("SELECT_PROFILE");
+                    toast.success("Welcome back! Select a profile.");
+                } else {
+                    // Fallback for old data or immediate login
+                    setUserData(normalizedData);
+                    toast.success("Logged in successfully!");
+                    onSuccess && onSuccess(normalizedData);
+                    onClose();
+                }
             } else {
                 // New user - go to registration
                 setRegistrationData({
@@ -105,122 +154,13 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
         }
     };
 
-    // ==================== EMAIL/PASSWORD LOGIN ====================
-    const handleEmailLogin = async () => {
-        const { email, password } = emailLoginForm;
 
-        if (!email || !password) {
-            toast.error("Please enter email and password");
-            return;
-        }
-
-        setLoading(true);
-        try {
-            const result = await signInWithEmailAndPassword(auth, email, password);
-            const user = result.user;
-
-            // Fetch user data
-            const userKey = getUserDatabaseKey(user);
-            const userRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}`);
-            const snapshot = await get(userRef);
-
-            if (snapshot.exists()) {
-                const rawData = snapshot.val();
-                let normalizedData;
-                if (rawData && rawData.children) {
-                    normalizedData = rawData;
-                } else {
-                    normalizedData = {
-                        authProvider: "email",
-                        parentEmail: user.email,
-                        children: { default: rawData }
-                    };
-                }
-                setUserData(normalizedData);
-                toast.success("Logged in successfully!");
-                onSuccess && onSuccess(normalizedData);
-                onClose();
-            } else {
-                toast.error("Profile not found. Please register first.");
-            }
-        } catch (error) {
-            console.error(error);
-            if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
-                toast.error("Invalid email or password");
-            } else if (error.code === 'auth/user-not-found') {
-                toast.error("No account found with this email");
-            } else {
-                toast.error("Login failed. Please try again.");
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // ==================== EMAIL/PASSWORD REGISTRATION ====================
-    const handleEmailRegister = async () => {
-        const { email, password, name, schoolName, city, grade } = registrationData;
-
-        if (!email || !password || !name || !schoolName || !city || !grade) {
-            toast.error("Please fill all fields");
-            return;
-        }
-
-        if (password.length < 8) {
-            toast.error("Password must be at least 8 characters");
-            return;
-        }
-
-        setLoading(true);
-        try {
-            // Create auth account
-            const result = await createUserWithEmailAndPassword(auth, email, password);
-            const user = result.user;
-
-            // Create profile in database
-            const childId = "default";
-            const childProfile = {
-                name,
-                email,
-                schoolName,
-                city,
-                grade,
-                createdAt: new Date().toISOString()
-            };
-
-            const userData = {
-                authProvider: "email",
-                parentEmail: user.email,
-                children: {
-                    [childId]: childProfile
-                }
-            };
-
-            const userKey = getUserDatabaseKey(user);
-            await set(ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}`), userData);
-            setUserData(userData);
-            toast.success("Account created successfully!");
-            onSuccess && onSuccess(userData);
-            onClose();
-        } catch (error) {
-            console.error(error);
-            if (error.code === 'auth/email-already-in-use') {
-                toast.error("Email already registered. Please login.");
-            } else if (error.code === 'auth/weak-password') {
-                toast.error("Password is too weak. Use at least 8 characters.");
-            } else {
-                toast.error("Registration failed. Please try again.");
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
 
     // ==================== GOOGLE REGISTRATION (Complete Profile) ====================
     const handleGoogleRegister = async () => {
-        const { name, schoolName, city, grade } = registrationData;
+        const { name, grade } = registrationData;
 
-        if (!name || !schoolName || !city || !grade) {
+        if (!name || !grade) {
             toast.error("Please fill all fields");
             return;
         }
@@ -233,29 +173,57 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                 return;
             }
 
-            const childId = "default";
+            const childId = `student_${Date.now()}`;
             const childProfile = {
                 name,
                 email: user.email,
-                schoolName,
-                city,
                 grade,
                 createdAt: new Date().toISOString()
             };
 
-            const userData = {
-                authProvider: "google",
-                parentEmail: user.email,
-                children: {
-                    [childId]: childProfile
-                }
+            const userDataUpdate = {
+                [`NMD_2025/Registrations/${getUserDatabaseKey(user)}/children/${childId}`]: childProfile,
+                [`NMD_2025/Registrations/${getUserDatabaseKey(user)}/authProvider`]: "google",
+                [`NMD_2025/Registrations/${getUserDatabaseKey(user)}/parentEmail`]: user.email,
             };
 
-            const userKey = getUserDatabaseKey(user);
-            await set(ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}`), userData);
-            setUserData(userData);
+            await update(ref(firebaseDatabase), userDataUpdate);
+
+            // Construct full user object for checking context
+            // We need to fetch fresh data or construct it carefully
+            const snapshot = await get(ref(firebaseDatabase, `NMD_2025/Registrations/${getUserDatabaseKey(user)}`));
+            const fullData = snapshot.val();
+
+            // If we just registered, auto-select this new profile
+            const normalizedData = {
+                authProvider: "google",
+                parentEmail: user.email,
+                children: fullData.children || { [childId]: childProfile }
+            };
+
+            // Select the newly created child
+            const selectedChildData = {
+                ...normalizedData,
+                activeChildId: childId,
+                activeChild: childProfile,
+                userKey: getUserDatabaseKey(user) // Explicitly store the correct DB key (UID for google)
+            };
+
+            setUserData(selectedChildData);
             toast.success("Profile created successfully!");
-            onSuccess && onSuccess(userData);
+
+            // Initialize Quiz Session
+            if (typeof window !== "undefined") {
+                window.localStorage.setItem("quizSession", JSON.stringify({
+                    userDetails: selectedChildData,
+                    questionPaper: [],
+                    activeQuestionIndex: 0,
+                    remainingTime: 1800
+                }));
+            }
+
+            onSuccess && onSuccess(selectedChildData);
+            router.push("/quiz");
             onClose();
         } catch (error) {
             console.error(error);
@@ -265,30 +233,7 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
         }
     };
 
-    // ==================== FORGOT PASSWORD ====================
-    const handleForgotPassword = async () => {
-        if (!forgotPasswordEmail) {
-            toast.error("Please enter your email");
-            return;
-        }
 
-        setLoading(true);
-        try {
-            await sendPasswordResetEmail(auth, forgotPasswordEmail);
-            toast.success("Password reset email sent! Check your inbox.");
-            setStep("EMAIL_LOGIN");
-            setForgotPasswordEmail("");
-        } catch (error) {
-            console.error(error);
-            if (error.code === 'auth/user-not-found') {
-                toast.error("No account found with this email");
-            } else {
-                toast.error("Failed to send reset email");
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
 
     // ==================== PHONE AUTH (Existing) ====================
     const setupRecaptcha = () => {
@@ -309,18 +254,60 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
         }
 
         setLoading(true);
-        setupRecaptcha();
-        const appVerifier = window.recaptchaVerifier;
-        const formatPh = "+91" + phoneNumber;
 
         try {
+            // CHECK IF USER EXISTS FIRST
+            const userRef = ref(firebaseDatabase, `NMD_2025/Registrations/${phoneNumber}`);
+            const snapshot = await get(userRef);
+
+            if (snapshot.exists()) {
+                // DIRECT LOGIN / PROFILE SELECTION
+                const rawData = snapshot.val();
+                let normalizedData;
+
+                // Normalize data structure (handle legacy vs new)
+                if (rawData && rawData.children) {
+                    normalizedData = rawData;
+                } else if (rawData) {
+                    normalizedData = {
+                        parentPhone: phoneNumber,
+                        authProvider: "phone",
+                        children: {
+                            default: rawData
+                        }
+                    };
+                } else {
+                    // Should not match snapshot.exists() but safety check
+                    normalizedData = null;
+                }
+
+                if (normalizedData && normalizedData.children && Object.keys(normalizedData.children).length > 0) {
+                    setUserProfiles(normalizedData.children);
+                    setStep("SELECT_PROFILE");
+                    toast.success("Welcome back!");
+                } else {
+                    // Direct Login if no children found (unlikely for valid user)
+                    setUserData(normalizedData);
+                    toast.success("Logged in successfully!");
+                    onSuccess && onSuccess(normalizedData);
+                    onClose();
+                }
+                setLoading(false);
+                return; // RETURN EARLY - DO NOT SEND OTP
+            }
+
+            // --- USER DOES NOT EXIST -> PROCEED WITH OTP ---
+            setupRecaptcha();
+            const appVerifier = window.recaptchaVerifier;
+            const formatPh = "+91" + phoneNumber;
+
             const confirmation = await signInWithPhoneNumber(auth, formatPh, appVerifier);
             setConfirmationResult(confirmation);
             setStep("OTP");
             toast.success("OTP sent successfully!");
         } catch (error) {
             console.error(error);
-            toast.error("Failed to send OTP. Please try again.");
+            toast.error("Failed to process request. Please try again.");
             if (window.recaptchaVerifier) {
                 window.recaptchaVerifier.clear();
                 window.recaptchaVerifier = null;
@@ -363,10 +350,16 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                     normalizedData = null;
                 }
 
-                setUserData(normalizedData);
-                toast.success("Logged in successfully!");
-                onSuccess && onSuccess(normalizedData);
-                onClose();
+                if (normalizedData && normalizedData.children && Object.keys(normalizedData.children).length > 0) {
+                    setUserProfiles(normalizedData.children);
+                    setStep("SELECT_PROFILE");
+                    toast.success("Verified! Select a profile.");
+                } else {
+                    setUserData(normalizedData);
+                    toast.success("Logged in successfully!");
+                    onSuccess && onSuccess(normalizedData);
+                    onClose();
+                }
             } else {
                 // User does not exist, move to registration
                 setStep("REGISTER");
@@ -380,33 +373,64 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
     };
 
     const handlePhoneRegister = async () => {
-        const { name, email, schoolName, city, grade } = registrationData;
-        if (!name || !schoolName || !city || !grade) {
+        const { name, grade } = registrationData;
+        if (!name || !grade) {
             toast.error("Please fill all fields");
             return;
         }
 
         setLoading(true);
         try {
-            const childId = "default";
+            // Generate unique child ID
+            const childId = `student_${Date.now()}`;
             const childProfile = {
                 ...registrationData,
                 phoneNumber: phoneNumber,
                 createdAt: new Date().toISOString()
             };
 
-            const userData = {
-                parentPhone: phoneNumber,
-                authProvider: "phone",
-                children: {
-                    [childId]: childProfile
-                }
+            const userDataUpdate = {
+                [`NMD_2025/Registrations/${phoneNumber}/children/${childId}`]: childProfile,
+                [`NMD_2025/Registrations/${phoneNumber}/parentPhone`]: phoneNumber,
+                [`NMD_2025/Registrations/${phoneNumber}/authProvider`]: "phone",
             };
 
-            await set(ref(firebaseDatabase, `NMD_2025/Registrations/${phoneNumber}`), userData);
-            setUserData(userData);
+            await update(ref(firebaseDatabase), userDataUpdate);
+
+            // Fetch updated data to ensure consistency
+            const snapshot = await get(ref(firebaseDatabase, `NMD_2025/Registrations/${phoneNumber}`));
+            const fullData = snapshot.val();
+
+            const normalizedData = {
+                parentPhone: phoneNumber,
+                authProvider: "phone",
+                children: fullData.children || { [childId]: childProfile }
+            };
+
+            // Select the newly created child
+            const selectedChildData = {
+                ...normalizedData,
+                activeChildId: childId,
+                activeChild: childProfile,
+                userKey: phoneNumber // Explicitly store
+            };
+
+
+            setUserData(selectedChildData);
             toast.success("Profile created successfully!");
-            onSuccess && onSuccess(userData);
+
+            // Initialize Quiz Session
+            if (typeof window !== "undefined") {
+                window.localStorage.setItem("quizSession", JSON.stringify({
+                    userDetails: selectedChildData,
+                    questionPaper: [],
+                    activeQuestionIndex: 0,
+                    remainingTime: 1800
+                }));
+            }
+
+            onSuccess && onSuccess(selectedChildData);
+            router.push("/quiz");
             onClose();
         } catch (error) {
             console.error(error);
@@ -431,10 +455,13 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                     {step === "CHOOSE_METHOD" && "Sign In / Register"}
                     {step === "PHONE" && "Phone Authentication"}
                     {step === "OTP" && "Verify OTP"}
-                    {step === "EMAIL_LOGIN" && "Email Login"}
-                    {step === "EMAIL_REGISTER" && "Create Account"}
-                    {step === "FORGOT_PASSWORD" && "Reset Password"}
-                    {step === "REGISTER" && "Complete Profile"}
+                    {step === "SELECT_PROFILE" && "Select Profile"}
+                    {step === "REGISTER" && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <GraduationCap size={28} className={Styles.headerIcon} />
+                            <span>Select Your Grade</span>
+                        </div>
+                    )}
                 </div>
                 <IconButton onClick={onClose} className={Styles.closeButton}>
                     <X size={20} />
@@ -481,67 +508,7 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                             Continue with Phone
                         </Button>
 
-                        <Divider sx={{ my: 3 }}>OR</Divider>
 
-                        {/* Email Login Form */}
-                        <TextField
-                            fullWidth
-                            label="Email"
-                            type="email"
-                            value={emailLoginForm.email}
-                            onChange={(e) => setEmailLoginForm({ ...emailLoginForm, email: e.target.value })}
-                            className={Styles.textField}
-                            margin="normal"
-                        />
-                        <TextField
-                            fullWidth
-                            label="Password"
-                            type={showPassword ? "text" : "password"}
-                            value={emailLoginForm.password}
-                            onChange={(e) => setEmailLoginForm({ ...emailLoginForm, password: e.target.value })}
-                            className={Styles.textField}
-                            margin="normal"
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            edge="end"
-                                        >
-                                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                )
-                            }}
-                        />
-
-                        <Button
-                            fullWidth
-                            variant="contained"
-                            onClick={handleEmailLogin}
-                            disabled={loading || !emailLoginForm.email || !emailLoginForm.password}
-                            className={Styles.actionButton}
-                            sx={{ mt: 2 }}
-                        >
-                            {loading ? <CircularProgress size={24} color="inherit" /> : "Login"}
-                        </Button>
-
-                        <div className={Styles.linkContainer}>
-                            <Button
-                                onClick={() => setStep("FORGOT_PASSWORD")}
-                                className={Styles.linkButton}
-                                disabled={loading}
-                            >
-                                Forgot Password?
-                            </Button>
-                            <Button
-                                onClick={() => setStep("EMAIL_REGISTER")}
-                                className={Styles.linkButton}
-                                disabled={loading}
-                            >
-                                Create Account
-                            </Button>
-                        </div>
                     </div>
                 )}
 
@@ -617,179 +584,87 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                     </div>
                 )}
 
-                {/* ==================== EMAIL REGISTER ==================== */}
-                {step === "EMAIL_REGISTER" && (
+                {/* ==================== SELECT PROFILE STEP ==================== */}
+                {step === "SELECT_PROFILE" && userProfiles && (
                     <div className={Styles.stepContainer}>
-                        <p className={Styles.stepDescription}>Create your account</p>
-                        <form className={Styles.formGrid}>
-                            <TextField
-                                fullWidth
-                                label="Full Name"
-                                value={registrationData.name}
-                                onChange={(e) => setRegistrationData({ ...registrationData, name: e.target.value })}
-                                margin="dense"
-                            />
-                            <TextField
-                                fullWidth
-                                label="Email"
-                                type="email"
-                                value={registrationData.email}
-                                onChange={(e) => setRegistrationData({ ...registrationData, email: e.target.value })}
-                                margin="dense"
-                            />
-                            <TextField
-                                fullWidth
-                                label="Password"
-                                type={showPassword ? "text" : "password"}
-                                value={registrationData.password}
-                                onChange={(e) => setRegistrationData({ ...registrationData, password: e.target.value })}
-                                margin="dense"
-                                helperText="At least 8 characters"
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton
-                                                onClick={() => setShowPassword(!showPassword)}
-                                                edge="end"
-                                            >
-                                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    )
-                                }}
-                            />
-                            <TextField
-                                fullWidth
-                                label="School Name"
-                                value={registrationData.schoolName}
-                                onChange={(e) => setRegistrationData({ ...registrationData, schoolName: e.target.value })}
-                                margin="dense"
-                            />
-                            <TextField
-                                fullWidth
-                                label="City"
-                                value={registrationData.city}
-                                onChange={(e) => setRegistrationData({ ...registrationData, city: e.target.value })}
-                                margin="dense"
-                            />
-                            <FormControl fullWidth margin="dense">
-                                <InputLabel>Grade</InputLabel>
-                                <Select
-                                    value={registrationData.grade}
-                                    label="Grade"
-                                    onChange={(e) => setRegistrationData({ ...registrationData, grade: e.target.value })}
+                        <p className={Styles.stepDescription}>Select who is taking the test</p>
+
+                        <div className={Styles.profileGrid}>
+                            {Object.entries(userProfiles).map(([key, profile]) => (
+                                <div
+                                    key={key}
+                                    className={Styles.profileCard}
+                                    onClick={() => handleSelectProfile(key, profile)}
                                 >
-                                    {[...Array(10)].map((_, i) => (
-                                        <MenuItem key={i + 1} value={`Grade ${i + 1}`}>Grade {i + 1}</MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </form>
-                        <Button
-                            fullWidth
-                            variant="contained"
-                            onClick={handleEmailRegister}
-                            disabled={loading}
-                            className={Styles.actionButton}
-                            sx={{ mt: 2 }}
-                        >
-                            {loading ? <CircularProgress size={24} color="inherit" /> : "Create Account"}
-                        </Button>
+                                    <div className={Styles.avatarCircle}>
+                                        {profile.name ? profile.name.charAt(0).toUpperCase() : "U"}
+                                    </div>
+                                    <div className={Styles.profileName}>{profile.name}</div>
+                                    <div className={Styles.profileGrade}>{profile.grade}</div>
+                                </div>
+                            ))}
+
+                            {/* Add New Student Card */}
+                            <div
+                                className={`${Styles.profileCard} ${Styles.addProfileCard}`}
+                                onClick={() => setStep("REGISTER")}
+                            >
+                                <div className={Styles.addIconCircle}>
+                                    <Plus size={24} />
+                                </div>
+                                <div className={Styles.profileName}>Add Student</div>
+                            </div>
+                        </div>
+
                         <Button
                             onClick={() => setStep("CHOOSE_METHOD")}
                             className={Styles.backButton}
                             disabled={loading}
                         >
-                            Back to Sign In
+                            Sign in with different account
                         </Button>
                     </div>
                 )}
 
-                {/* ==================== FORGOT PASSWORD ==================== */}
-                {step === "FORGOT_PASSWORD" && (
-                    <div className={Styles.stepContainer}>
-                        <p className={Styles.stepDescription}>Enter your email to reset your password</p>
-                        <TextField
-                            fullWidth
-                            label="Email"
-                            type="email"
-                            value={forgotPasswordEmail}
-                            onChange={(e) => setForgotPasswordEmail(e.target.value)}
-                            className={Styles.textField}
-                            margin="normal"
-                        />
-                        <Button
-                            fullWidth
-                            variant="contained"
-                            onClick={handleForgotPassword}
-                            disabled={loading || !forgotPasswordEmail}
-                            className={Styles.actionButton}
-                        >
-                            {loading ? <CircularProgress size={24} color="inherit" /> : "Send Reset Link"}
-                        </Button>
-                        <Button
-                            onClick={() => setStep("CHOOSE_METHOD")}
-                            className={Styles.backButton}
-                            disabled={loading}
-                        >
-                            Back to Sign In
-                        </Button>
-                    </div>
-                )}
+
 
                 {/* ==================== REGISTER (Complete Profile) ==================== */}
                 {step === "REGISTER" && (
                     <div className={Styles.stepContainer}>
-                        <p className={Styles.stepDescription}>Tell us a bit about yourself</p>
+                        <div className={Styles.welcomeText}>
+                            Welcome! Let's get started with your math assessment.
+                        </div>
+
                         <form className={Styles.formGrid}>
                             <div className={Styles.inputGroup}>
                                 <User className={Styles.inputIcon} size={20} />
                                 <TextField
                                     fullWidth
-                                    label="Full Name"
+                                    placeholder="Enter your full name"
+                                    variant="outlined"
                                     value={registrationData.name}
                                     onChange={(e) => setRegistrationData({ ...registrationData, name: e.target.value })}
+                                    className={Styles.textField}
                                 />
                             </div>
-                            {!registrationData.email && (
-                                <div className={Styles.inputGroup}>
-                                    <Mail className={Styles.inputIcon} size={20} />
-                                    <TextField
-                                        fullWidth
-                                        label="Email Address (optional)"
-                                        type="email"
-                                        value={registrationData.email}
-                                        onChange={(e) => setRegistrationData({ ...registrationData, email: e.target.value })}
-                                    />
-                                </div>
-                            )}
-                            <div className={Styles.inputGroup}>
-                                <School className={Styles.inputIcon} size={20} />
-                                <TextField
-                                    fullWidth
-                                    label="School Name"
-                                    value={registrationData.schoolName}
-                                    onChange={(e) => setRegistrationData({ ...registrationData, schoolName: e.target.value })}
-                                />
-                            </div>
-                            <div className={Styles.inputGroup}>
-                                <MapPin className={Styles.inputIcon} size={20} />
-                                <TextField
-                                    fullWidth
-                                    label="City"
-                                    value={registrationData.city}
-                                    onChange={(e) => setRegistrationData({ ...registrationData, city: e.target.value })}
-                                />
-                            </div>
-                            <div className={Styles.inputGroup}>
-                                <GraduationCap className={Styles.inputIcon} size={20} />
-                                <FormControl fullWidth>
-                                    <InputLabel>Grade</InputLabel>
+
+                            <div className={Styles.gradeSection}>
+                                <label className={Styles.gradeLabel}>Which grade are you in?</label>
+                                <FormControl fullWidth variant="outlined" className={Styles.gradeSelect}>
                                     <Select
                                         value={registrationData.grade}
-                                        label="Grade"
+                                        displayEmpty
                                         onChange={(e) => setRegistrationData({ ...registrationData, grade: e.target.value })}
+                                        renderValue={(selected) => {
+                                            if (!selected) {
+                                                return <span style={{ color: '#9ca3af' }}>Grade</span>;
+                                            }
+                                            return selected;
+                                        }}
                                     >
+                                        <MenuItem disabled value="">
+                                            <em>Grade</em>
+                                        </MenuItem>
                                         {[...Array(10)].map((_, i) => (
                                             <MenuItem key={i + 1} value={`Grade ${i + 1}`}>Grade {i + 1}</MenuItem>
                                         ))}
@@ -804,7 +679,7 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                             disabled={loading}
                             className={Styles.actionButton}
                         >
-                            {loading ? <CircularProgress size={24} color="inherit" /> : "Create Profile"}
+                            {loading ? <CircularProgress size={24} color="inherit" /> : "Start Assessment →"}
                         </Button>
                     </div>
                 )}

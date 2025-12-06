@@ -10,8 +10,31 @@ import { useAuth } from "@/context/AuthContext";
 const Navigation = () => {
     const [scrolled, setScrolled] = useState(false);
     const [authModalOpen, setAuthModalOpen] = useState(false);
+    const [hasSession, setHasSession] = useState(false);
     const { user } = useAuth();
     const router = useRouter();
+
+    useEffect(() => {
+        // Check for active quiz session or stored child session
+        const checkSession = () => {
+            if (typeof window !== "undefined") {
+                const quizSession = window.localStorage.getItem("quizSession");
+                // functionality to check if user is logged in via firebase is handled by useAuth
+                // but sometimes we want to show profile if we have local user details
+                if (quizSession) {
+                    try {
+                        const parsed = JSON.parse(quizSession);
+                        if (parsed?.userDetails) {
+                            setHasSession(true);
+                            return;
+                        }
+                    } catch (e) { }
+                }
+            }
+            setHasSession(false);
+        };
+        checkSession();
+    }, [user]);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -48,7 +71,7 @@ const Navigation = () => {
                         </button>
                     </Tooltip>
 
-                    {user ? (
+                    {user || hasSession ? (
                         <Tooltip title="View Dashboard" arrow>
                             <button onClick={() => router.push("/dashboard")} className={`${Styles.navButton} ${Styles.outlined}`}>
                                 <User size={16} />

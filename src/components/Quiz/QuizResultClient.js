@@ -100,9 +100,10 @@ const QuizResultClient = () => {
     useEffect(() => {
         const loadReport = async () => {
             try {
+                const userGrade = quizSession?.userDetails?.activeChild?.grade || quizSession?.userDetails?.grade;
                 // Case 1: We have an in-memory quizSession with questionPaper (coming directly from quiz)
-                if (quizSession?.questionPaper && quizSession?.userDetails?.grade) {
-                    const computed = analyzeResponses(quizSession.questionPaper, quizSession.userDetails.grade);
+                if (quizSession?.questionPaper && userGrade) {
+                    const computed = analyzeResponses(quizSession.questionPaper, userGrade);
                     setReportState({
                         summary: computed.summary,
                         topicFeedback: computed.topicFeedback,
@@ -206,12 +207,20 @@ const QuizResultClient = () => {
             return;
         }
         // Get user key from quizSession (already set correctly in Start Assessment)
-        const userKey = quizSession?.userDetails?.phoneNumber || "";
-        const childId = quizSession?.userDetails?.childId || "default";
+        // For multi-profile, we need the parent key and the child key
+        const userKey = quizSession?.userDetails?.userKey || quizSession?.userDetails?.parentPhone || quizSession?.userDetails?.parentEmail || quizSession?.userDetails?.phoneNumber;
+        // fallback to phoneNumber if parentPhone is missing (legacy single user) uses phoneNumber as key
+
+        const childId = quizSession?.userDetails?.activeChildId || "default";
 
         if (!userKey) return;
 
-        const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${userKey}/${childId}`);
+        // Correct path: NMD_2025/Reports/{parentKey}/{childId}
+        // If it's a legacy user (no activeChildId), they might be stored at root or default? 
+        // Let's stick to the new structure: Reports/ParentKey/ChildKey
+        const finalParentKey = userKey.replace('.', '_'); // sanitize email if needed, though phone is preferred
+
+        const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${finalParentKey}/${childId}`);
         set(reportRef, {
             summary,
             generalFeedbackStringified: JSON.stringify({
@@ -240,9 +249,9 @@ const QuizResultClient = () => {
     const learningPlan = parseLearningPlan(learningPlanSummary);
 
     // Determine which student's identity to show in the header.
-    let displayName = quizSession?.userDetails?.name || "";
-    let displayGrade = quizSession?.userDetails?.grade || "";
-    let displayPhone = quizSession?.userDetails?.phoneNumber || "";
+    let displayName = quizSession?.userDetails?.activeChild?.name || quizSession?.userDetails?.name || "";
+    let displayGrade = quizSession?.userDetails?.activeChild?.grade || quizSession?.userDetails?.grade || "";
+    let displayPhone = quizSession?.userDetails?.phoneNumber || quizSession?.userDetails?.parentPhone || "";
 
     if ((!displayName || !displayGrade) && user && userData?.children) {
         // Get user key (works for phone, Google, and email auth)

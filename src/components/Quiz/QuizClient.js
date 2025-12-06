@@ -83,7 +83,9 @@ const QuizClient = () => {
             return;
         }
 
-        switch (quizContext.userDetails.grade) {
+        const userGrade = quizContext.userDetails.activeChild?.grade || quizContext.userDetails.grade;
+
+        switch (userGrade) {
             case "Grade 1": {
                 gradeQuestionPaper = { ...GetGrade1Question };
                 break;
@@ -422,7 +424,7 @@ const QuizClient = () => {
                             question={questionPaper[activeQuestionIndex].question}
                             topic={questionPaper[activeQuestionIndex].topic}
                             options={questionPaper[activeQuestionIndex].options}
-                            grade={quizContext.userDetails?.grade}
+                            grade={quizContext.userDetails.activeChild?.grade || quizContext.userDetails.grade}
                             timeTakeRef={timeTakeRef}
                             image={questionPaper[activeQuestionIndex].image}
                         /> : null
@@ -438,7 +440,7 @@ const QuizClient = () => {
                             activeQuestionIndex={activeQuestionIndex}
                             question={questionPaper[activeQuestionIndex].question}
                             topic={questionPaper[activeQuestionIndex].topic}
-                            grade={quizContext.userDetails?.grade}
+                            grade={quizContext.userDetails.activeChild?.grade || quizContext.userDetails.grade}
                             timeTakeRef={timeTakeRef}
                         /> : null
                 }
@@ -451,7 +453,7 @@ const QuizClient = () => {
                             questionPaper={questionPaper}
                             activeQuestionIndex={activeQuestionIndex}
                             topic={questionPaper[activeQuestionIndex].topic}
-                            grade={quizContext.userDetails?.grade}
+                            grade={quizContext.userDetails.activeChild?.grade || quizContext.userDetails.grade}
                             timeTakeRef={timeTakeRef}
                         /> : null
                 }
@@ -466,7 +468,7 @@ const QuizClient = () => {
                             activeQuestionIndex={activeQuestionIndex}
                             question={questionPaper[activeQuestionIndex].question}
                             topic={questionPaper[activeQuestionIndex].topic}
-                            grade={quizContext.userDetails?.grade}
+                            grade={quizContext.userDetails.activeChild?.grade || quizContext.userDetails.grade}
                             timeTakeRef={timeTakeRef}
                         /> : null
                 }
