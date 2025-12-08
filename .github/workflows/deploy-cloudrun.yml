@@ -54,11 +54,12 @@ jobs:
             NEXT_PUBLIC_TUTOR_BOOKING_WEBHOOK=${{ secrets.NEXT_PUBLIC_TUTOR_BOOKING_WEBHOOK }}
 
       - name: Set IMAGE env
-        run: echo "IMAGE=gcr.io/${{ secrets.GCP_PROJECT }}/${{ github.repository }}:${{ github.sha }}" >> $GITHUB_ENV
+        run: |
+          echo "IMAGE=gcr.io/${{ secrets.GCP_PROJECT }}/${{ github.repository }}:${{ github.sha }}" >> $GITHUB_ENV
 
       - name: Create Cloud Run env file (runtime envs)
         run: |
-          cat > cloudrun-env.yaml <<EOF
+          cat > cloudrun-env.yaml <<'EOF'
 NEXT_PUBLIC_FIREBASE_API_KEY: "${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}"
 NEXT_PUBLIC_FIREBASE_APP_ID: "${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}"
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}"
