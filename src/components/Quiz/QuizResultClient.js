@@ -44,9 +44,9 @@ import { CheckCircle, XCircle, HelpCircle, Clock, Target, BookOpen, TrendingUp, 
 import { QuizSessionContext } from "../../app/context/QuizSessionContext";
 import analyzeResponses from "@/app/workload/GenerateReport";
 import Footer from "@/components/Footer/Footer.component";
-import { ref, set, get } from "firebase/database";
+import { ref, set, get, push } from "firebase/database";
 import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Dialog, DialogTitle, DialogContent, IconButton, CircularProgress, TextField, MenuItem, Link as MuiLink } from "@mui/material";
 import { useAuth } from "@/context/AuthContext";
 
@@ -93,6 +93,11 @@ const QuizResultClient = () => {
     const [quizSession, setQuizSession] = useContext(QuizSessionContext);
     const { user, userData } = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const reportId = searchParams.get("reportId");
+
+    // Guard to prevent double-save in Strict Mode
+    const hasSavedRef = React.useRef(false);
 
     const [reportState, setReportState] = useState(null);
     const [loadingReport, setLoadingReport] = useState(true);
@@ -139,15 +144,48 @@ const QuizResultClient = () => {
                 }
 
                 const data = snapshot.val();
+                let targetReport = data;
+
+                // Handle multiple reports (list) vs single report (legacy)
+                // If reportId is provided, look for that specific report
+                if (reportId === 'root') {
+                    targetReport = data;
+                } else if (reportId && data[reportId]) {
+                    targetReport = data[reportId];
+                } else {
+                    // No reportId provided (or invalid). Find the LATEST report.
+                    // This handles Hybrid (Root + Children) and New (Children only).
+
+                    let allReports = [];
+
+                    // 1. Root Legacy
+                    if (data.summary) {
+                        allReports.push(data);
+                    }
+
+                    // 2. Children New
+                    Object.entries(data).forEach(([key, val]) => {
+                        if (key !== 'summary' && val && typeof val === 'object' && val.summary) {
+                            allReports.push(val);
+                        }
+                    });
+
+                    if (allReports.length > 0) {
+                        // Sort by timestamp descending
+                        allReports.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+                        targetReport = allReports[0];
+                    }
+                }
+
                 let parsed = {};
                 try {
-                    parsed = data.generalFeedbackStringified ? JSON.parse(data.generalFeedbackStringified) : {};
+                    parsed = targetReport.generalFeedbackStringified ? JSON.parse(targetReport.generalFeedbackStringified) : {};
                 } catch (e) {
                     parsed = {};
                 }
 
                 setReportState({
-                    summary: data.summary,
+                    summary: targetReport.summary,
                     topicFeedback: parsed.topicFeedback || {},
                     perQuestionReport: parsed.perQuestionReport || [],
                     learningPlanSummary: parsed.learningPlanSummary || "",
@@ -213,8 +251,15 @@ const QuizResultClient = () => {
         // Let's stick to the new structure: Reports/ParentKey/ChildKey
         const finalParentKey = userKey.replace('.', '_'); // sanitize email if needed, though phone is preferred
 
+        // Check if we already saved this session
+        if (hasSavedRef.current) return;
+        hasSavedRef.current = true;
+
         const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${finalParentKey}/${childId}`);
-        set(reportRef, {
+        // Use push to create a new entry instead of overwriting
+        const newReportRef = push(reportRef);
+
+        set(newReportRef, {
             summary,
             generalFeedbackStringified: JSON.stringify({
                 topicFeedback,
@@ -226,6 +271,7 @@ const QuizResultClient = () => {
             console.log("Report saved successfully");
         }).catch((error) => {
             console.error("Error saving report:", error);
+            // If error, maybe allow retry? But usually network retry is handled by FB.
         });
     }, [quizSession?.questionPaper, summary, topicFeedback, perQuestionReport, learningPlanSummary]);
 

@@ -410,32 +410,72 @@ const DashboardClient = () => {
                             <div className={Styles.loaderText}>Loading report...</div>
                         </div>
                     ) : reports ? (
-                        <Card className={`${Styles.reportCard} ${fetchingReports ? Styles.reportCardLoading : ""}`}>
-                            <CardContent className={Styles.reportContent}>
-                                <div className={Styles.reportInfo}>
-                                    <div className={Styles.reportIcon}>
-                                        <Award size={24} />
-                                    </div>
-                                    <div>
-                                        <h3>Math Skill Proficiency Test</h3>
-                                        <p className={Styles.reportDate}>
-                                            {new Date(reports.timestamp).toLocaleDateString()} • {new Date(reports.timestamp).toLocaleTimeString()}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className={Styles.reportScore}>
-                                    <div className={Styles.scoreBadge}>
-                                        {reports.summary.accuracyPercent}% Score
-                                    </div>
-                                    <Button
-                                        endIcon={<ChevronRight />}
-                                        onClick={() => router.push("/quiz/quiz-result")}
-                                    >
-                                        View Full Report
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <div className={Styles.reportsList}>
+                            {/* Handle hybrid structure: Root (Legacy) + Children (New) */}
+                            {(() => {
+                                let reportList = [];
+
+                                // 1. Check for Legacy Report at Root
+                                if (reports.summary) {
+                                    reportList.push({
+                                        id: 'root',
+                                        ...reports
+                                    });
+                                }
+
+                                // 2. Check for New Reports (Children)
+                                Object.entries(reports).forEach(([key, val]) => {
+                                    // Identify report objects by presence of 'summary' field, excluding the root keys we already processed
+                                    if (key !== 'summary' && val && typeof val === 'object' && val.summary) {
+                                        reportList.push({ id: key, ...val });
+                                    }
+                                });
+
+                                // 3. Sort by timestamp (newest first)
+                                reportList.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+
+                                // 4. Filter out duplicates (same timestamp) - Fix for strict mode double-save issue
+                                const uniqueReports = [];
+                                const seenTimestamps = new Set();
+                                reportList.forEach(report => {
+                                    const time = new Date(report.timestamp).getTime();
+                                    // Allow some tolerance or exact match? Exact match is likely for double-invoke
+                                    if (!seenTimestamps.has(time)) {
+                                        seenTimestamps.add(time);
+                                        uniqueReports.push(report);
+                                    }
+                                });
+
+                                return uniqueReports.map((report, index) => (
+                                    <Card key={report.id || index} className={Styles.reportCard}>
+                                        <CardContent className={Styles.reportContent}>
+                                            <div className={Styles.reportInfo}>
+                                                <div className={Styles.reportIcon}>
+                                                    <Award size={24} />
+                                                </div>
+                                                <div>
+                                                    <h3>Math Skill Proficiency Test {uniqueReports.length > 1 ? `#${uniqueReports.length - index}` : ""}</h3>
+                                                    <p className={Styles.reportDate}>
+                                                        {new Date(report.timestamp).toLocaleDateString()} • {new Date(report.timestamp).toLocaleTimeString()}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className={Styles.reportScore}>
+                                                <div className={Styles.scoreBadge}>
+                                                    {report.summary.accuracyPercent}% Score
+                                                </div>
+                                                <Button
+                                                    endIcon={<ChevronRight />}
+                                                    onClick={() => router.push(`/quiz/quiz-result?reportId=${report.id}`)}
+                                                >
+                                                    View Full Report
+                                                </Button>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ));
+                            })()}
+                        </div>
                     ) : (
                         <div className={Styles.emptyState}>
                             <img src="/empty-state.svg" alt="No assessments" className={Styles.emptyImage} />

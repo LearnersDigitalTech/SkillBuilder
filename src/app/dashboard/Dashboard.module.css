@@ -138,8 +138,17 @@
     border-radius: 12px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
     border: 1px solid #eee;
-    min-height: 500px;
     /* Ensure visual balance */
+    display: flex;
+    flex-direction: column;
+}
+
+.reportsList {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100%;
+    margin-top: 10px;
 }
 
 .reportsSection h2 {
@@ -170,7 +179,7 @@
     box-shadow: none !important;
     border: 1px solid #eee;
     transition: all 0.2s;
-    margin-bottom: 12px;
+    margin-bottom: 0;
 }
 
 .reportCardLoading {
