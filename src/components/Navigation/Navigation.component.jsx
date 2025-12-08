@@ -110,6 +110,7 @@ const Navigation = () => {
                                                 ...activeChild,
                                                 phoneNumber: userKey,
                                                 childId: activeChildId,
+                                                activeChildId: activeChildId,
                                             };
 
                                             // Reset session for this specific child

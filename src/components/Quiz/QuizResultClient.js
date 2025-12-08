@@ -204,7 +204,7 @@ const QuizResultClient = () => {
         const userKey = quizSession?.userDetails?.userKey || quizSession?.userDetails?.parentPhone || quizSession?.userDetails?.parentEmail || quizSession?.userDetails?.phoneNumber;
         // fallback to phoneNumber if parentPhone is missing (legacy single user) uses phoneNumber as key
 
-        const childId = quizSession?.userDetails?.activeChildId || "default";
+        const childId = quizSession?.userDetails?.activeChildId || quizSession?.userDetails?.childId || "default";
 
         if (!userKey) return;
 
@@ -320,7 +320,7 @@ const QuizResultClient = () => {
                 userKey = user.uid;
             }
 
-            let childId = quizSession?.userDetails?.childId || "default";
+            let childId = quizSession?.userDetails?.childId || quizSession?.userDetails?.activeChildId || "default";
             if (!quizSession?.userDetails?.childId && userData?.children) {
                 const children = userData.children;
                 const childKeys = Object.keys(children);

@@ -477,6 +477,7 @@ const DashboardClient = () => {
                                         ...activeChild,
                                         phoneNumber: userKey, // Use userKey for backward compatibility
                                         childId: activeChildId,
+                                        activeChildId: activeChildId,
                                     };
                                     setQuizContext({ userDetails, questionPaper: null });
                                     router.push("/quiz");
