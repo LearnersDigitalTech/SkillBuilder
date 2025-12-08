@@ -13,7 +13,7 @@ const TypeUserInput = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, q
 
     // Logic to hide operators for Grade 1
     const isGrade1 = grade && grade.toString().includes("Grade 1");
-    const showOperators = !isGrade1;
+    const showOperators = isGrade1;
 
     const handleChange = (character) => {
         const next = `${inputValue}${character}`;

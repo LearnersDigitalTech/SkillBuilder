@@ -29,7 +29,6 @@
     position: sticky;
     top: calc(1.5rem + 120px);
     max-height: calc(100vh - 180px);
-    overflow-y: auto;
 }
 
 /* Tablet Design (1024px and below) */

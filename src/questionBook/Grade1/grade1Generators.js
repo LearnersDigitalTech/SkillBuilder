@@ -19,21 +19,21 @@ export const generateCountForward = () => {
   const answer = start + 4;
 
   // 50% chance for userInput
-  if (Math.random() > 0) {
-    return {
-      type: "userInput",
-      question: `What comes next: </br>${sequence.join(", ")}, ...?`,
-      topic: "Number Sense / Counting",
-      answer: String(answer)
-    };
-  }
+  // if (Math.random() > 0) {
+  //   return {
+  //     type: "userInput",
+  //     question: `What comes next: </br>${sequence.join(", ")}, ...?`,
+  //     topic: "Number Sense / Counting",
+  //     answer: String(answer)
+  //   };
+  // }
 
-  const options = shuffleArray([
-    { value: String(answer), label: String(answer) },
-    { value: String(answer + 1), label: String(answer + 1) },
-    { value: String(answer - 1), label: String(answer - 1) },
-    { value: String(answer + 2), label: String(answer + 2) }
-  ]);
+  // const options = shuffleArray([
+  //   { value: String(answer), label: String(answer) },
+  //   { value: String(answer + 1), label: String(answer + 1) },
+  //   { value: String(answer - 1), label: String(answer - 1) },
+  //   { value: String(answer + 2), label: String(answer + 2) }
+  // ]);
 
   return {
     type: "userInput",

@@ -18,7 +18,7 @@ export const generateAddition = () => {
 
     const question = `Add: ${num1} + ${num2} = ?`;
 
-    if (Math.random() > 0.5) {
+    if (true) {
         return {
             type: "userInput",
             question: question,

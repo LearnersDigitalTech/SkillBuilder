@@ -137,6 +137,13 @@
     align-items: center;
 }
 
+/* Hide navigation on desktop - buttons are in the sidebar palette */
+@media (min-width: 1025px) {
+    .navigationContainer {
+        display: none;
+    }
+}
+
 .leftButtons {
     display: flex;
     gap: 0.75rem;

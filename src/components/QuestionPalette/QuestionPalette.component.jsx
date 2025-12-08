@@ -1,9 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Drawer, Button, IconButton, Typography, Box } from '@mui/material';
-import { Grid, X } from 'lucide-react';
+import { Grid, X, ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import Styles from './QuestionPalette.module.css';
 
-const QuestionPalette = ({ questions, activeQuestionIndex, onSelect }) => {
+const QuestionPalette = ({
+    questions,
+    activeQuestionIndex,
+    onSelect,
+    onPrevious,
+    onNext,
+    isLastQuestion
+}) => {
     const [isOpen, setIsOpen] = useState(false);
     const gridRef = useRef(null);
 
@@ -80,11 +87,36 @@ const QuestionPalette = ({ questions, activeQuestionIndex, onSelect }) => {
     );
 
     useEffect(() => {
-        if (!gridRef.current) return;
-        const button = gridRef.current.querySelector(`[data-index="${activeQuestionIndex}"]`);
-        if (button && typeof button.scrollIntoView === 'function') {
-            button.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-        }
+        // Use setTimeout to ensure DOM is fully rendered
+        const scrollTimer = setTimeout(() => {
+            if (!gridRef.current) return;
+
+            const button = gridRef.current.querySelector(`[data-index="${activeQuestionIndex}"]`);
+            if (!button) return;
+
+            // Try scrollIntoView first
+            if (typeof button.scrollIntoView === 'function') {
+                button.scrollIntoView({
+                    block: 'center',
+                    inline: 'nearest',
+                    behavior: 'smooth'
+                });
+            } else {
+                // Fallback: manually scroll the container
+                const container = gridRef.current;
+                const buttonTop = button.offsetTop;
+                const buttonHeight = button.offsetHeight;
+                const containerHeight = container.clientHeight;
+                const scrollTop = buttonTop - (containerHeight / 2) + (buttonHeight / 2);
+
+                container.scrollTo({
+                    top: scrollTop,
+                    behavior: 'smooth'
+                });
+            }
+        }, 100); // Small delay to ensure rendering is complete
+
+        return () => clearTimeout(scrollTimer);
     }, [activeQuestionIndex]);
 
     return (
@@ -92,6 +124,29 @@ const QuestionPalette = ({ questions, activeQuestionIndex, onSelect }) => {
             {/* Desktop View: Expanded Palette */}
             <div className={Styles.desktopPalette}>
                 <PaletteContent />
+
+                {/* Navigation Buttons for Desktop */}
+                {(onPrevious || onNext) && (
+                    <div className={Styles.navigationContainer}>
+                        <Button
+                            onClick={onPrevious}
+                            disabled={activeQuestionIndex === 0}
+                            startIcon={<ArrowLeft size={18} />}
+                            className={Styles.navButton}
+                            variant="outlined"
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            onClick={onNext}
+                            endIcon={isLastQuestion ? <Check size={18} /> : <ArrowRight size={18} />}
+                            className={isLastQuestion ? Styles.submitButton : Styles.nextButton}
+                            variant="contained"
+                        >
+                            {isLastQuestion ? 'Submit' : 'Next'}
+                        </Button>
+                    </div>
+                )}
             </div>
 
             {/* Mobile View: Button + Drawer */}
@@ -134,3 +189,4 @@ const QuestionPalette = ({ questions, activeQuestionIndex, onSelect }) => {
 };
 
 export default QuestionPalette;
+
