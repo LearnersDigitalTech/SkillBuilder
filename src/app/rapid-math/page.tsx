@@ -4,18 +4,61 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Sparkles, Brain, Trophy, Zap, GraduationCap } from "lucide-react"
+import { Sparkles, Brain, Trophy, Zap, GraduationCap, LogIn, ChevronRight, Calculator } from "lucide-react"
 
 import Navigation from "@/components/Navigation/Navigation.component"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { useAuth } from "@/context/AuthContext"
+import { signInWithPopup } from "firebase/auth"
+import { auth, googleProvider } from "@/backend/firebaseHandler"
 
 export default function Home() {
   const router = useRouter()
+  const { user } = useAuth()
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("normal")
   const [questionCount, setQuestionCount] = useState(10)
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
+  const [isLoggingIn, setIsLoggingIn] = useState(false)
 
-  const handleStartTest = () => {
+  const handleStartRequest = () => {
     if (!selectedDifficulty) return
+
+    // If user is already logged in, go straight to test
+    if (user) {
+      startTest()
+    } else {
+      // Otherwise prompt them
+      setShowLoginPrompt(true)
+    }
+  }
+
+  const startTest = () => {
     router.push(`/rapid-math/test?difficulty=${selectedDifficulty}&questions=${questionCount}`)
+  }
+
+  const handleLogin = async () => {
+    setIsLoggingIn(true)
+    try {
+      await signInWithPopup(auth, googleProvider)
+      // Values will update via context, we can just proceed to test or let them click start
+      // user state might take a moment, so let's just push to test?
+      // Actually, better to just close modal and let them see they are logged in, or auto-start?
+      // Let's auto-start for convenience
+      setShowLoginPrompt(false)
+      startTest()
+    } catch (error) {
+      console.error("Login failed", error)
+      // Toast error?
+    } finally {
+      setIsLoggingIn(false)
+    }
   }
 
   const difficultyInfo: Record<string, any> = {
@@ -170,7 +213,7 @@ export default function Home() {
 
               {/* Action Button */}
               <Button
-                onClick={handleStartTest}
+                onClick={handleStartRequest}
                 size="lg"
                 className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/25 py-6 text-xl font-bold rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99]"
               >
@@ -181,6 +224,57 @@ export default function Home() {
           </Card>
         </div>
       </div>
+
+      {/* Login Prompt Dialog */}
+      <Dialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+              <Trophy className="text-yellow-500" /> Save your progress?
+            </DialogTitle>
+            <DialogDescription className="text-lg pt-2">
+              Log in to save your quiz history and track your improvement over time.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 py-4">
+            {/* Visual Graphic */}
+            <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-6 flex flex-col items-center text-center gap-2">
+              <div className="flex gap-4 mb-2">
+                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><Calculator size={24} /></div>
+                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600"><Trophy size={24} /></div>
+              </div>
+              <p className="text-sm text-slate-500 font-medium">Join thousands of students mastering math!</p>
+            </div>
+
+            <Button
+              size="lg"
+              className="w-full bg-white border-2 border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+              onClick={handleLogin}
+              disabled={isLoggingIn}
+            >
+              {isLoggingIn ? "Signing in..." : (
+                <span className="flex items-center gap-2">
+                  <img src="https://www.google.com/favicon.ico" alt="G" className="w-5 h-5" />
+                  Sign in with Google
+                </span>
+              )}
+            </Button>
+          </div>
+          <DialogFooter className="sm:justify-between flex-row items-center gap-4">
+            <Button
+              variant="ghost"
+              className="text-slate-400 hover:text-slate-600"
+              onClick={() => {
+                setShowLoginPrompt(false)
+                startTest()
+              }}
+            >
+              Skip & Start Quiz <ChevronRight size={16} />
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </main>
   )
 }

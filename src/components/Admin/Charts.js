@@ -28,7 +28,8 @@ export const MarksBarChart = ({ data }) => (
                         <YAxis axisLine={false} tickLine={false} />
                         <Tooltip
                             cursor={{ fill: 'transparent' }}
-                            contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                            contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backgroundColor: '#fff' }}
+                            itemStyle={{ color: '#000' }}
                         />
                         <Bar dataKey="avg" fill="#4caf50" radius={[4, 4, 0, 0]} barSize={40} />
                     </BarChart>
@@ -74,7 +75,9 @@ export const StudentsAreaChart = ({ data, filter, onFilterChange }) => (
                         <XAxis dataKey="name" axisLine={false} tickLine={false} />
                         <YAxis axisLine={false} tickLine={false} />
                         <Tooltip
-                            contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                            cursor={{ stroke: '#ccc' }}
+                            contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backgroundColor: '#fff' }}
+                            itemStyle={{ color: '#000' }}
                         />
                         <Area
                             type="monotone"

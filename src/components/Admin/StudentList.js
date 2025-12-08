@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
     Table,
     TableBody,
@@ -25,7 +25,9 @@ import {
     IconButton,
     Avatar,
     Divider,
-    useTheme
+    useTheme,
+    ToggleButton,
+    ToggleButtonGroup
 } from '@mui/material';
 import {
     Eye,
@@ -40,15 +42,16 @@ import {
     XCircle,
     AlertCircle,
     Trash2,
-    FileSpreadsheet
+    FileSpreadsheet,
+    Zap,
+    BookOpen
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
-import { useState, useMemo, useRef } from 'react';
 import * as XLSX from 'xlsx';
 
-const StudentList = ({ students, onDelete }) => {
+const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
     const theme = useTheme();
     const chartRef = useRef(null);
     const [selectedGrade, setSelectedGrade] = useState('All');
@@ -57,6 +60,9 @@ const StudentList = ({ students, onDelete }) => {
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [studentToDelete, setStudentToDelete] = useState(null);
+
+    // Derived view mode from prop
+    const viewMode = assessmentType;
 
     // Get unique grades for filter dropdown
     const uniqueGrades = useMemo(() => {
@@ -72,11 +78,18 @@ const StudentList = ({ students, onDelete }) => {
     const filteredStudents = useMemo(() => {
         return students.filter(student => {
             const gradeMatch = selectedGrade === 'All' || student.grade === selectedGrade;
-            const score = (student.marks !== null && student.marks !== undefined) ? student.marks : 0;
+
+            let score = 0;
+            if (viewMode === 'standard') {
+                score = (student.marks !== null && student.marks !== undefined) ? student.marks : 0;
+            } else {
+                score = (student.rapidMath?.marks !== undefined) ? student.rapidMath.marks : 0;
+            }
+
             const scoreMatch = score >= minScore;
             return gradeMatch && scoreMatch;
         });
-    }, [students, selectedGrade, minScore]);
+    }, [students, selectedGrade, minScore, viewMode]);
 
     const handleView = (student) => {
         setSelectedStudent(student);
@@ -107,26 +120,64 @@ const StudentList = ({ students, onDelete }) => {
     };
 
     const handleExportExcel = () => {
-        const dataToExport = filteredStudents.map(student => ({
-            Name: student.name,
-            Grade: student.grade,
-            PhoneNumber: student.phoneNumber,
-            Email: student.email || 'N/A',
-            Marks: (student.marks !== null && student.marks !== undefined) ? `${student.marks}%` : 'Not Attempted',
-            DateJoined: student.date ? new Date(student.date).toLocaleDateString() : 'N/A',
-            Status: (student.marks !== null && student.marks !== undefined)
-                ? (student.marks >= 40 ? "PASSED" : "FAILED")
-                : "NOT ATTEMPTED"
-        }));
+        const dataToExport = filteredStudents.map(student => {
+            if (viewMode === 'standard') {
+                return {
+                    Name: student.name,
+                    Grade: student.grade,
+                    PhoneNumber: student.phoneNumber,
+                    Email: student.email || 'N/A',
+                    Marks: (student.marks !== null && student.marks !== undefined) ? `${student.marks}%` : 'Not Attempted',
+                    DateJoined: student.date ? new Date(student.date).toLocaleDateString() : 'N/A',
+                    Status: (student.marks !== null && student.marks !== undefined)
+                        ? (student.marks >= 40 ? "PASSED" : "FAILED")
+                        : "NOT ATTEMPTED"
+                };
+            } else {
+                return {
+                    Name: student.name,
+                    Email: student.email || 'N/A',
+                    RapidMathScore: (student.rapidMath?.marks !== undefined) ? `${student.rapidMath.marks}%` : 'Not Attempted',
+                    TimeTaken: student.rapidMath?.timeTaken ? `${Math.floor(student.rapidMath.timeTaken / 60)}m ${student.rapidMath.timeTaken % 60}s` : 'N/A',
+                    TotalQuestions: student.rapidMath?.totalQuestions || 'N/A',
+                    Date: student.rapidMath?.date ? new Date(student.rapidMath.date).toLocaleDateString() : 'N/A',
+                    Status: (student.rapidMath?.marks !== undefined) ? "COMPLETED" : "NOT ATTEMPTED"
+                };
+            }
+        });
 
+        const sheetName = viewMode === 'standard' ? "Standard_Assessment" : "Rapid_Math";
         const worksheet = XLSX.utils.json_to_sheet(dataToExport);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
-        XLSX.writeFile(workbook, "Student_List.xlsx");
+        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+        XLSX.writeFile(workbook, `Student_List_${sheetName}.xlsx`);
     };
 
     const handleDownload = async () => {
         if (!selectedStudent) return;
+
+        // Helper to load logo
+        const loadLogo = () => new Promise(resolve => {
+            const img = new Image();
+            img.src = '/logo.svg';
+            img.crossOrigin = 'Anonymous';
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                resolve({ data: canvas.toDataURL('image/png'), w: img.width, h: img.height });
+            };
+            img.onerror = () => resolve(null);
+        });
+
+        const logo = await loadLogo();
+
+        // Determine which data to show
+        const isRapid = viewMode === 'rapid';
+        const marks = isRapid ? (selectedStudent.rapidMath?.marks) : selectedStudent.marks;
+        const date = isRapid ? (selectedStudent.rapidMath?.date) : selectedStudent.date;
 
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();
@@ -135,23 +186,43 @@ const StudentList = ({ students, onDelete }) => {
         // --- Design Elements ---
 
         // 1. Page Border
-        doc.setDrawColor(33, 150, 243); // Primary Blue
-        doc.setLineWidth(1);
-        doc.rect(5, 5, pageWidth - 10, pageHeight - 10); // Outer border
+        doc.setDrawColor(0, 0, 0); // Black
+        doc.setLineWidth(3); // Thick
+        doc.rect(6, 6, pageWidth - 12, pageHeight - 12); // Outer border (Adjusted for clipping)
 
-        // 2. Header Background
-        doc.setFillColor(33, 150, 243); // Primary Blue
-        doc.rect(5, 5, pageWidth - 10, 35, 'F'); // Header block
+        // 2. Header Background (White)
+        doc.setFillColor(255, 255, 255);
+        doc.rect(6, 6, pageWidth - 12, 40, 'F');
+
+        // Logo Container removed (background is already white)
+
+        // Add Logo (Centered in white box)
+        if (logo) {
+            const maxH = 24;
+            const maxW = 44;
+            let logoH = maxH;
+            let logoW = (logo.w / logo.h) * logoH;
+
+            if (logoW > maxW) {
+                logoW = maxW;
+                logoH = (logo.h / logo.w) * logoW;
+            }
+
+            const xPos = 12 + (50 - logoW) / 2;
+            const yPosLogo = 10 + (30 - logoH) / 2;
+
+            doc.addImage(logo.data, 'PNG', xPos, yPosLogo, logoW, logoH);
+        }
 
         // 3. Header Text
-        doc.setTextColor(255, 255, 255); // White
-        doc.setFontSize(24);
+        doc.setTextColor(0, 0, 0); // Black
+        doc.setFontSize(22);
         doc.setFont("helvetica", "bold");
-        doc.text("STUDENT REPORT CARD", pageWidth / 2, 25, { align: "center" });
+        doc.text(isRapid ? "RAPID MATH REPORT" : "STUDENT REPORT CARD", 70, 27);
 
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
-        doc.text("Skill Conquest Academy", pageWidth / 2, 33, { align: "center" });
+        doc.text("Skill Conquest Academy", 70, 35);
 
         // --- Student Details Section ---
 
@@ -167,7 +238,7 @@ const StudentList = ({ students, onDelete }) => {
 
         // Divider Line
         doc.setDrawColor(200, 200, 200); // Light Gray
-        doc.setLineWidth(0.5);
+        doc.setLineWidth(1.5);
         doc.line(20, yPos + 2, pageWidth - 20, yPos + 2);
 
         yPos += 15;
@@ -192,22 +263,21 @@ const StudentList = ({ students, onDelete }) => {
         addDetail("Email", selectedStudent.email, rightColX, yPos);
 
         yPos += 10;
-        addDetail("Date Joined", selectedStudent.date ? new Date(selectedStudent.date).toLocaleDateString() : 'N/A', leftColX, yPos);
+        addDetail("Date", date ? new Date(date).toLocaleDateString() : 'N/A', leftColX, yPos);
 
         // Status Badge (Text representation)
-        const status = (selectedStudent.marks !== null && selectedStudent.marks !== undefined)
-            ? (selectedStudent.marks >= 40 ? "PASSED" : "FAILED")
+        const status = (marks !== null && marks !== undefined)
+            ? (marks >= 40 ? "PASSED" : "FAILED") // Or logic for Rapid Math?
             : "NOT ATTEMPTED";
 
-        doc.setFont("helvetica", "bold");
-        doc.text("Status:", rightColX, yPos);
-
-        // Color code status
-        if (status === "PASSED") doc.setTextColor(0, 128, 0); // Green
-        else if (status === "FAILED") doc.setTextColor(255, 0, 0); // Red
-        else doc.setTextColor(100, 100, 100); // Gray
-
-        doc.text(status, rightColX + 35, yPos);
+        if (!isRapid) {
+            doc.setFont("helvetica", "bold");
+            doc.text("Status:", rightColX, yPos);
+            if (status === "PASSED") doc.setTextColor(0, 128, 0);
+            else if (status === "FAILED") doc.setTextColor(255, 0, 0);
+            else doc.setTextColor(100, 100, 100);
+            doc.text(status, rightColX + 35, yPos);
+        }
 
         // --- Performance Section ---
 
@@ -224,33 +294,12 @@ const StudentList = ({ students, onDelete }) => {
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
-        const marksText = (selectedStudent.marks !== null && selectedStudent.marks !== undefined)
-            ? `Final Score: ${selectedStudent.marks}%`
+        const marksText = (marks !== null && marks !== undefined)
+            ? `Final Score: ${marks}%`
             : "Final Score: Not Attempted";
         doc.text(marksText, 20, yPos);
 
-        // Capture and add chart if available
-        if (chartRef.current && selectedStudent.marks !== null && selectedStudent.marks !== undefined) {
-            try {
-                const canvas = await html2canvas(chartRef.current);
-                const imgData = canvas.toDataURL('image/png');
-
-                // Add chart image to PDF
-                yPos += 10;
-                const imgWidth = 100;
-                const imgHeight = 80;
-                const xCentered = (pageWidth - imgWidth) / 2;
-
-                doc.addImage(imgData, 'PNG', xCentered, yPos, imgWidth, imgHeight);
-
-                // Add border around chart
-                doc.setDrawColor(230, 230, 230);
-                doc.rect(xCentered - 5, yPos - 5, imgWidth + 10, imgHeight + 10);
-
-            } catch (error) {
-                console.error("Error capturing chart:", error);
-            }
-        }
+        // Chart removed from PDF by user request
 
         // --- Footer ---
         const footerY = pageHeight - 15;
@@ -260,13 +309,17 @@ const StudentList = ({ students, onDelete }) => {
         doc.text("Skill Conquest - Empowering Learners", pageWidth - 20, footerY, { align: "right" });
 
         // Save the PDF
-        doc.save(`${selectedStudent.name.replace(/\s+/g, '_')}_Report.pdf`);
+        doc.save(`${selectedStudent.name.replace(/\s+/g, '_')}_${isRapid ? 'RapidMath' : 'Report'}.pdf`);
     };
+
     const getChartData = (student) => {
-        if (!student || student.marks === null || student.marks === undefined) return [];
+        const isRapid = viewMode === 'rapid';
+        let val = isRapid ? student.rapidMath?.marks : student.marks;
+
+        if (val === null || val === undefined) return [];
         return [
-            { name: 'Score', value: student.marks },
-            { name: 'Lost', value: 100 - student.marks }
+            { name: 'Score', value: val },
+            { name: 'Lost', value: 100 - val }
         ];
     };
 
@@ -274,11 +327,13 @@ const StudentList = ({ students, onDelete }) => {
 
     return (
         <Box>
-            <Typography variant="h5" gutterBottom fontWeight="bold" sx={{ mb: 3 }}>
-                Student Details
-            </Typography>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                <Typography variant="h5" fontWeight="bold">
+                    {viewMode === 'standard' ? 'Student Details' : 'Rapid Math Results'}
+                </Typography>
 
-
+                {/* Toggle removed, controlled by props now */}
+            </Box>
 
             {/* Filters */}
             <Paper sx={{ p: 2, mb: 3, borderRadius: 2 }}>
@@ -338,10 +393,14 @@ const StudentList = ({ students, onDelete }) => {
                     <TableHead sx={{ bgcolor: '#f5f5f5' }}>
                         <TableRow>
                             <TableCell sx={{ fontWeight: 'bold' }}>Student Name</TableCell>
-                            <TableCell sx={{ fontWeight: 'bold' }}>Grade</TableCell>
-                            <TableCell sx={{ fontWeight: 'bold' }}>Phone Number</TableCell>
+                            {/* Standard Columns */}
+                            {viewMode === 'standard' && <TableCell sx={{ fontWeight: 'bold' }}>Grade</TableCell>}
+                            {viewMode === 'standard' && <TableCell sx={{ fontWeight: 'bold' }}>Phone Number</TableCell>}
+
                             <TableCell sx={{ fontWeight: 'bold' }}>Email</TableCell>
-                            <TableCell sx={{ fontWeight: 'bold' }}>Latest Marks</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>{viewMode === 'standard' ? 'Latest Marks' : 'Rapid Math Score'}</TableCell>
+                            {viewMode === 'rapid' && <TableCell sx={{ fontWeight: 'bold' }}>Time Taken</TableCell>}
+                            {viewMode === 'rapid' && <TableCell sx={{ fontWeight: 'bold' }}>Total Ques.</TableCell>}
                             <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
                             <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
                             <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
@@ -349,45 +408,64 @@ const StudentList = ({ students, onDelete }) => {
                     </TableHead>
                     <TableBody>
                         {filteredStudents.length > 0 ? (
-                            filteredStudents.map((student, index) => (
-                                <TableRow
-                                    key={index}
-                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                >
-                                    <TableCell component="th" scope="row" sx={{ fontWeight: 500 }}>
-                                        {student.name}
-                                    </TableCell>
-                                    <TableCell>{student.grade}</TableCell>
-                                    <TableCell>{student.phoneNumber}</TableCell>
-                                    <TableCell>{student.email || 'N/A'}</TableCell>
-                                    <TableCell>
-                                        {(student.marks !== null && student.marks !== undefined) ? `${student.marks}%` : 'N/A'}
-                                    </TableCell>
-                                    <TableCell>
-                                        {student.date ? new Date(student.date).toLocaleDateString() : 'N/A'}
-                                    </TableCell>
-                                    <TableCell>
-                                        {(student.marks !== null && student.marks !== undefined) ? (
-                                            <Chip
-                                                label={student.marks >= 40 ? "Passed" : "Failed"}
-                                                color={student.marks >= 40 ? "success" : "error"}
-                                                size="small"
-                                                variant="outlined"
-                                            />
-                                        ) : (
-                                            <Chip label="Not Attempted" size="small" />
+                            filteredStudents.map((student, index) => {
+                                const marks = viewMode === 'rapid' ? student.rapidMath?.marks : student.marks;
+                                const date = viewMode === 'rapid' ? student.rapidMath?.date : student.date;
+
+                                return (
+                                    <TableRow
+                                        key={index}
+                                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                    >
+                                        <TableCell component="th" scope="row" sx={{ fontWeight: 500 }}>
+                                            {student.name}
+                                        </TableCell>
+
+                                        {viewMode === 'standard' && <TableCell>{student.grade}</TableCell>}
+                                        {viewMode === 'standard' && <TableCell>{student.phoneNumber}</TableCell>}
+
+                                        <TableCell>{student.email || 'N/A'}</TableCell>
+                                        <TableCell>
+                                            {(marks !== null && marks !== undefined) ? `${marks}%` : 'N/A'}
+                                        </TableCell>
+
+                                        {viewMode === 'rapid' && (
+                                            <TableCell>
+                                                {student.rapidMath?.timeTaken ? `${Math.floor(student.rapidMath.timeTaken / 60)}m ${student.rapidMath.timeTaken % 60}s` : '-'}
+                                            </TableCell>
                                         )}
-                                    </TableCell>
-                                    <TableCell>
-                                        <IconButton size="small" color="primary" onClick={() => handleView(student)}>
-                                            <Eye size={20} />
-                                        </IconButton>
-                                        <IconButton size="small" color="error" onClick={() => handleDeleteClick(student)}>
-                                            <Trash2 size={20} />
-                                        </IconButton>
-                                    </TableCell>
-                                </TableRow>
-                            ))
+                                        {viewMode === 'rapid' && (
+                                            <TableCell>
+                                                {student.rapidMath?.totalQuestions || '-'}
+                                            </TableCell>
+                                        )}
+
+                                        <TableCell>
+                                            {date ? new Date(date).toLocaleDateString() : 'N/A'}
+                                        </TableCell>
+                                        <TableCell>
+                                            {(marks !== null && marks !== undefined) ? (
+                                                <Chip
+                                                    label={marks >= 40 ? "Passed" : "Failed"}
+                                                    color={marks >= 40 ? "success" : "error"}
+                                                    size="small"
+                                                    variant="outlined"
+                                                />
+                                            ) : (
+                                                <Chip label="Not Attempted" size="small" />
+                                            )}
+                                        </TableCell>
+                                        <TableCell>
+                                            <IconButton size="small" color="primary" onClick={() => handleView(student)}>
+                                                <Eye size={20} />
+                                            </IconButton>
+                                            <IconButton size="small" color="error" onClick={() => handleDeleteClick(student)}>
+                                                <Trash2 size={20} />
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            })
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
@@ -431,7 +509,9 @@ const StudentList = ({ students, onDelete }) => {
                                 {selectedStudent?.name}
                             </Typography>
                             <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
-                                Grade {selectedStudent?.grade} Student
+                                {viewMode === 'standard'
+                                    ? `Grade ${selectedStudent?.grade} Student`
+                                    : "Rapid Math Challenger"}
                             </Typography>
                         </Box>
                     </Box>
@@ -473,7 +553,10 @@ const StudentList = ({ students, onDelete }) => {
                                             <Box>
                                                 <Typography variant="caption" color="text.secondary">Date Joined</Typography>
                                                 <Typography variant="body1" fontWeight="500">
-                                                    {selectedStudent.date ? new Date(selectedStudent.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}
+                                                    {/* We can use reg date, or last test date */}
+                                                    {selectedStudent.date // Fallback if no specific date for Rapid Math
+                                                        ? new Date(selectedStudent.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+                                                        : 'N/A'}
                                                 </Typography>
                                             </Box>
                                         </Box>
@@ -489,97 +572,122 @@ const StudentList = ({ students, onDelete }) => {
                                     </Typography>
                                     <Divider sx={{ mb: 2 }} />
 
-                                    {(selectedStudent.marks !== null && selectedStudent.marks !== undefined) ? (
-                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                            <Box ref={chartRef} sx={{ width: '100%', height: 200, position: 'relative', bgcolor: 'white' }}>
-                                                <ResponsiveContainer width="100%" height="100%">
-                                                    <PieChart>
-                                                        <Pie
-                                                            data={getChartData(selectedStudent)}
-                                                            cx="50%"
-                                                            cy="50%"
-                                                            innerRadius={60}
-                                                            outerRadius={80}
-                                                            fill="#8884d8"
-                                                            paddingAngle={5}
-                                                            dataKey="value"
-                                                        >
-                                                            {getChartData(selectedStudent).map((entry, index) => (
-                                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                                            ))}
-                                                        </Pie>
-                                                        <RechartsTooltip />
-                                                        <Legend verticalAlign="bottom" height={36} />
-                                                    </PieChart>
-                                                </ResponsiveContainer>
-                                                <Box sx={{
-                                                    position: 'absolute',
-                                                    top: '50%',
-                                                    left: '50%',
-                                                    transform: 'translate(-50%, -65%)',
-                                                    textAlign: 'center'
-                                                }}>
-                                                    <Typography variant="h4" fontWeight="bold" color="text.primary">
-                                                        {selectedStudent.marks}%
-                                                    </Typography>
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        Score
-                                                    </Typography>
-                                                </Box>
-                                            </Box>
+                                    {(() => {
+                                        const marks = viewMode === 'rapid' ? selectedStudent.rapidMath?.marks : selectedStudent.marks;
 
-                                            <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1, bgcolor: selectedStudent.marks >= 40 ? '#e8f5e9' : '#ffebee', p: 1, px: 2, borderRadius: 10 }}>
-                                                {selectedStudent.marks >= 40 ? <CheckCircle size={18} color="green" /> : <XCircle size={18} color="red" />}
-                                                <Typography variant="subtitle2" color={selectedStudent.marks >= 40 ? "success.main" : "error.main"} fontWeight="bold">
-                                                    Result: {selectedStudent.marks >= 40 ? "PASSED" : "FAILED"}
-                                                </Typography>
-                                            </Box>
-
-                                            {/* Feedback Section */}
-                                            <Box sx={{ mt: 3, width: '100%', p: 2, bgcolor: '#f8f9fa', borderRadius: 2, border: '1px solid #e0e0e0', textAlign: 'left' }}>
-                                                <Typography variant="subtitle2" color="text.secondary" gutterBottom fontWeight="bold">
-                                                    Detailed Feedback
-                                                </Typography>
-
-                                                {selectedStudent.topicFeedback ? (
-                                                    Object.entries(selectedStudent.topicFeedback).map(([topic, data]) => (
-                                                        <Box key={topic} sx={{ mb: 2, p: 1.5, bgcolor: 'white', borderRadius: 1, border: '1px solid #eee' }}>
-                                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom color="primary">
-                                                                {topic}
+                                        if (marks !== null && marks !== undefined) {
+                                            return (
+                                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                    <Box
+                                                        ref={chartRef}
+                                                        key={`chart-${selectedStudent.id}-${marks}`} // Force remount on data change
+                                                        sx={{ width: '100%', maxWidth: 300, height: 200, position: 'relative', bgcolor: 'white', mx: 'auto', '& *': { color: '#000000 !important' } }}
+                                                    >
+                                                        <ResponsiveContainer width="100%" height="100%">
+                                                            <PieChart>
+                                                                <Pie
+                                                                    data={getChartData(selectedStudent)}
+                                                                    cx="50%"
+                                                                    cy="50%"
+                                                                    innerRadius={60}
+                                                                    outerRadius={80}
+                                                                    fill="#8884d8"
+                                                                    paddingAngle={5}
+                                                                    dataKey="value"
+                                                                    isAnimationActive={false}
+                                                                    stroke="#ffffff"
+                                                                >
+                                                                    {getChartData(selectedStudent).map((entry, index) => (
+                                                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                                    ))}
+                                                                </Pie>
+                                                                <RechartsTooltip
+                                                                    contentStyle={{ backgroundColor: '#fff', borderColor: '#ccc' }}
+                                                                    itemStyle={{ color: '#000' }}
+                                                                    cursor={false}
+                                                                />
+                                                                <Legend verticalAlign="bottom" height={36} wrapperStyle={{ color: '#000000' }} />
+                                                            </PieChart>
+                                                        </ResponsiveContainer>
+                                                        <Box sx={{
+                                                            position: 'absolute',
+                                                            top: '50%',
+                                                            left: '50%',
+                                                            transform: 'translate(-50%, -65%)',
+                                                            textAlign: 'center'
+                                                        }}>
+                                                            <Typography variant="h4" fontWeight="bold" color="text.primary">
+                                                                {marks}%
                                                             </Typography>
-
-                                                            <Box sx={{ mb: 1 }}>
-                                                                <Typography variant="caption" color="success.main" fontWeight="bold" display="block">
-                                                                    What went well:
-                                                                </Typography>
-                                                                <Typography variant="body2" color="text.secondary">
-                                                                    {data.positiveFeedback}
-                                                                </Typography>
-                                                            </Box>
-
-                                                            <Box>
-                                                                <Typography variant="caption" color="error.main" fontWeight="bold" display="block">
-                                                                    Needs Improvement:
-                                                                </Typography>
-                                                                <Typography variant="body2" color="text.secondary">
-                                                                    {data.improvementFeedback}
-                                                                </Typography>
-                                                            </Box>
+                                                            <Typography variant="caption" color="text.secondary">
+                                                                Score
+                                                            </Typography>
                                                         </Box>
-                                                    ))
-                                                ) : (
-                                                    <Typography variant="body2" color="text.primary" sx={{ fontStyle: 'italic' }}>
-                                                        "{selectedStudent.feedback}"
-                                                    </Typography>
-                                                )}
-                                            </Box>
-                                        </Box>
-                                    ) : (
-                                        <Box sx={{ height: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'text.secondary', gap: 2 }}>
-                                            <AlertCircle size={48} opacity={0.5} />
-                                            <Typography>No performance data available</Typography>
-                                        </Box>
-                                    )}
+                                                    </Box>
+
+                                                    <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1, bgcolor: marks >= 40 ? '#e8f5e9' : '#ffebee', p: 1, px: 2, borderRadius: 10 }}>
+                                                        {marks >= 40 ? <CheckCircle size={18} color="green" /> : <XCircle size={18} color="red" />}
+                                                        <Typography variant="subtitle2" color={marks >= 40 ? "success.main" : "error.main"} fontWeight="bold">
+                                                            Result: {marks >= 40 ? "PASSED" : "FAILED"}
+                                                        </Typography>
+                                                    </Box>
+
+                                                    {/* Feedback Section - Specific to report type */}
+                                                    <Box sx={{ mt: 3, width: '100%', p: 2, bgcolor: '#f8f9fa', borderRadius: 2, border: '1px solid #e0e0e0', textAlign: 'left' }}>
+                                                        <Typography variant="subtitle2" color="text.secondary" gutterBottom fontWeight="bold">
+                                                            Detailed Feedback
+                                                        </Typography>
+
+                                                        {viewMode === 'standard' ? (
+                                                            selectedStudent.topicFeedback ? (
+                                                                Object.entries(selectedStudent.topicFeedback).map(([topic, data]) => (
+                                                                    <Box key={topic} sx={{ mb: 2, p: 1.5, bgcolor: 'white', borderRadius: 1, border: '1px solid #eee' }}>
+                                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom color="primary">
+                                                                            {topic}
+                                                                        </Typography>
+
+                                                                        <Box sx={{ mb: 1 }}>
+                                                                            <Typography variant="caption" color="success.main" fontWeight="bold" display="block">
+                                                                                What went well:
+                                                                            </Typography>
+                                                                            <Typography variant="body2" color="text.secondary">
+                                                                                {data.positiveFeedback}
+                                                                            </Typography>
+                                                                        </Box>
+
+                                                                        <Box>
+                                                                            <Typography variant="caption" color="error.main" fontWeight="bold" display="block">
+                                                                                Needs Improvement:
+                                                                            </Typography>
+                                                                            <Typography variant="body2" color="text.secondary">
+                                                                                {data.improvementFeedback}
+                                                                            </Typography>
+                                                                        </Box>
+                                                                    </Box>
+                                                                ))
+                                                            ) : (
+                                                                <Typography variant="body2" color="text.primary" sx={{ fontStyle: 'italic' }}>
+                                                                    "{selectedStudent.feedback}"
+                                                                </Typography>
+                                                            )
+                                                        ) : (
+                                                            // Rapid Math Feedback (Usually simpler)
+                                                            <Typography variant="body2" color="text.primary">
+                                                                Rapid Math Challenge completed with {selectedStudent.rapidMath?.marks}% accuracy.
+                                                            </Typography>
+                                                        )}
+                                                    </Box>
+                                                </Box>
+                                            );
+                                        } else {
+                                            return (
+                                                <Box sx={{ height: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'text.secondary', gap: 2 }}>
+                                                    <AlertCircle size={48} opacity={0.5} />
+                                                    <Typography>No performance data available</Typography>
+                                                </Box>
+                                            );
+                                        }
+                                    })()}
                                 </Paper>
                             </Grid>
                         </Grid>

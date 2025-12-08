@@ -1,11 +1,14 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useState, useRef } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { CheckCircle2, XCircle, Clock, Zap, RotateCcw, Home, Trophy, AlertTriangle } from "lucide-react"
 import Navigation from "@/components/Navigation/Navigation.component"
+import { useAuth } from "@/context/AuthContext"
+import { ref, set, get, push } from "firebase/database"
+import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler"
 
 interface TestResult {
   question: string
@@ -21,27 +24,163 @@ interface TestResult {
 
 export default function SummaryPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const reportId = searchParams.get("reportId")
+  const { user, userData, loading: authLoading } = useAuth()
+
   const [results, setResults] = useState<TestResult[]>([])
   const [loading, setLoading] = useState(true)
+  const savedRef = useRef(false) // Prevent double saving
 
   useEffect(() => {
-    const stored = sessionStorage.getItem("testResults")
-    if (stored) {
-      try {
-        setResults(JSON.parse(stored))
-      } catch (e) {
-        console.error("Parse error:", e)
+    const fetchData = async () => {
+      // 0. Wait for Auth to load
+      if (authLoading) return;
+
+      // Mode 1: Viewing past report
+      if (reportId && user) {
+        try {
+          const userKey = getUserDatabaseKey(user)
+          // Since we typically sanitize in the dashboard, let's look there first.
+          // Or if the key is just correct from the helper. 
+          // Note: DashboardClient uses `userKey.replace('.', '_')`. Let's match that just in case.
+          const sanitizedKey = userKey?.replace('.', '_');
+
+          // We need to find where the report is located. 
+          // Try user root and children.
+
+          let foundReport = null;
+
+          // Try sanitized path first (standard for this app apparently)
+          if (sanitizedKey) {
+            const reportsRef = ref(firebaseDatabase, `NMD_2025/Reports/${sanitizedKey}`)
+            const snapshot = await get(reportsRef);
+            if (snapshot.exists()) {
+              const data = snapshot.val();
+              if (data[reportId]) foundReport = data[reportId]; // Check root
+              else {
+                Object.values(data).forEach((childData: any) => {
+                  if (childData && childData[reportId]) {
+                    foundReport = childData[reportId];
+                  }
+                })
+              }
+            }
+          }
+
+          // If not found, maybe try raw key? (Just in case)
+          if (!foundReport && userKey && userKey !== sanitizedKey) {
+            const reportsRef = ref(firebaseDatabase, `NMD_2025/Reports/${userKey}`)
+            const snapshot = await get(reportsRef);
+            if (snapshot.exists()) {
+              const data = snapshot.val();
+              if (data[reportId]) foundReport = data[reportId];
+              else {
+                Object.values(data).forEach((childData: any) => {
+                  if (childData && childData[reportId]) {
+                    foundReport = childData[reportId];
+                  }
+                })
+              }
+            }
+          }
+
+          if (foundReport && foundReport.questions) {
+            setResults(foundReport.questions)
+          }
+
+        } catch (e) {
+          console.error("Error fetching report", e)
+        } finally {
+          setLoading(false)
+        }
+        return
       }
+
+      // Mode 2: New Result (from Session Storage)
+      const stored = sessionStorage.getItem("testResults")
+      if (stored) {
+        try {
+          const parsedResults = JSON.parse(stored)
+          setResults(parsedResults)
+
+          // SAVE TO FIREBASE logic
+          // Only save if:
+          // 1. User is authenticated
+          // 2. Auth loading is finished (so we have userData)
+          // 3. Not already saved
+          // 4. Not viewing a past report
+          if (user && !authLoading && !savedRef.current && !reportId) {
+            savedRef.current = true; // Mark as saved immediately
+
+            let userKey = getUserDatabaseKey(user)
+            if (userKey) userKey = userKey.replace('.', '_'); // SANITIZE KEY
+
+            // determine active child
+            let activeChildId = "default";
+            // Wait for userData to be present if we want to associate with a child
+            if (userData && userData.children) {
+              const childKeys = Object.keys(userData.children)
+              if (childKeys.length > 0) {
+                activeChildId = childKeys[0]; // Default to first
+                // Try to get from local storage preference
+                if (typeof window !== "undefined") {
+                  // Re-use valid userKey for local storage lookup
+                  const storedId = window.localStorage.getItem(`activeChild_${userKey}`)
+                  if (storedId && childKeys.includes(storedId)) activeChildId = storedId
+                }
+              }
+            } else if (!userData) {
+              // If userData is missing but user is logged in, it might still be loading or failed.
+              // But we checked !authLoading. So it means no profile exists?
+              // We will save to 'default' in that case.
+              console.warn("Saving report without full user profile data.");
+            }
+
+            const correct = parsedResults.filter((r: any) => r.isCorrect).length
+            const total = parsedResults.length
+            const totalTime = parsedResults.reduce((sum: any, r: any) => sum + r.timeTaken, 0)
+            const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0
+
+            const newReportId = `rapid_math_${Date.now()}`
+            const reportData = {
+              id: newReportId,
+              type: 'RAPID_MATH',
+              timestamp: new Date().toISOString(),
+              summary: {
+                totalQuestions: total,
+                correctAnswers: correct,
+                accuracyPercent: accuracy,
+                timeTaken: totalTime,
+                accuracy: `${accuracy}%` // Backup for display
+              },
+              questions: parsedResults
+            }
+
+            // Save to NMD_2025/Reports/{userKey}/{childId}/{reportId}
+            const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${userKey}/${activeChildId}/${newReportId}`)
+            await set(reportRef, reportData)
+            // console.log("Rapid Math result saved!")
+
+            // Optionally clear session storage now? No, keep it for refresh until "New Test"
+          }
+
+        } catch (e) {
+          console.error("Parse error:", e)
+        }
+      }
+      setLoading(false)
     }
-    setLoading(false)
-  }, [])
+
+    fetchData()
+  }, [user, userData, authLoading, reportId]) // Re-run if user auth loads late
 
   if (loading) {
     return (
       <main className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
         <div className="flex flex-col items-center gap-4 text-slate-500 animate-pulse">
           <div className="w-12 h-12 rounded-full border-4 border-t-blue-500 animate-spin"></div>
-          <span className="text-xl font-medium">Calculating Results...</span>
+          <span className="text-xl font-medium">Loading Results...</span>
         </div>
       </main>
     )

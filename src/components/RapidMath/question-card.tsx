@@ -58,29 +58,54 @@ export function QuestionCard({
   }, [userAnswer, question.correctAnswer, submitted, onSubmit])
 
   const handleAnswerChange = (value: string) => {
-    const answer = Number(value)
-    // Only flag incorrect if the length matches or exceeds expected digit length? 
-    // Actually, immediate incorrect feedback can be jarring if user is still typing. 
-    // Let's keep the logic simple: if they type the correct answer, it submits. 
-    // If they type something else, we just update the value.
-    // The previous logic cleared it after 5s. We'll simplify:
+    // If we're already showing feedback (especially 'correct'), ignore input
+    if (submitted || feedback === "correct") return
 
-    // Check if the input value *could* be the start of the answer? No, for rapid math, 
-    // we often want to know if it's WRONG immediately or let them verify. 
-    // Since we don't have an "Enter" key, we rely on auto-match. 
-    // We will clear invalid input only if it exceeds reasonable length or user backspaces.
-
-    // Original logic:
-    if (value && !isNaN(answer) && answer !== question.correctAnswer) {
-      // If the number of digits matches the correct answer digits, maybe show error?
-      // For now, just update state.
-      setUserAnswer(value)
-    } else {
-      setUserAnswer(value)
+    // Allow empty value (clearing)
+    if (value === "") {
+      setUserAnswer("")
+      setFeedback(null)
+      return
     }
 
-    // Reset feedback if they type
-    if (feedback === "incorrect") setFeedback(null)
+    // Special case for negative numbers: Allow a single "-" as a start
+    if (value === "-") {
+      setUserAnswer("-")
+      setFeedback(null)
+      return
+    }
+
+    // Check if the input is numeric
+    if (isNaN(Number(value))) return
+
+    const answer = Number(value)
+    const correctStr = question.correctAnswer.toString()
+    const valueStr = value.toString()
+
+    // 1. Exact Match: It's correct!
+    if (answer === question.correctAnswer) {
+      setUserAnswer(value)
+      // Feedback logic handled in useEffect
+    }
+    // 2. Prefix Match: It's defined as a valid start of the answer?
+    // e.g. correct=123, input=1 (ok), input=12 (ok) -> wait for more
+    // e.g. correct=-15, input=- (ok via special case), input=-1 (ok)
+    else if (correctStr.startsWith(valueStr)) {
+      setUserAnswer(value)
+      setFeedback(null)
+    }
+    // 3. Wrong Input
+    else {
+      // Show wrong feedback immediately
+      setUserAnswer(value)
+      setFeedback("incorrect")
+
+      // Clear the WRONG input after a short delay
+      setTimeout(() => {
+        setUserAnswer("")
+        setFeedback(null)
+      }, 500)
+    }
   }
 
   // Calculate progress percentage
