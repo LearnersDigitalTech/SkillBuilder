@@ -1,0 +1,80 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      PROJECT_ID: skill-builder-480609
+      REGION: asia-south1
+      SERVICE: skill-builder
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Setup gcloud CLI
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker for GCR
+        run: |
+          gcloud auth configure-docker --quiet
+
+      - name: Build and push image (Docker on runner)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: gcr.io/${{ secrets.GCP_PROJECT }}/${{ github.repository }}:${{ github.sha }}
+          build-args: |
+            NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+            NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+            NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+            NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID }}
+            NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+            NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+            NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+            NEXT_PUBLIC_TUTOR_BOOKING_WEBHOOK=${{ secrets.NEXT_PUBLIC_TUTOR_BOOKING_WEBHOOK }}
+
+      - name: Set IMAGE env
+        run: echo "IMAGE=gcr.io/${{ secrets.GCP_PROJECT }}/${{ github.repository }}:${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Create Cloud Run env file (runtime envs)
+        run: |
+          cat > cloudrun-env.yaml <<EOF
+NEXT_PUBLIC_FIREBASE_API_KEY: "${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}"
+NEXT_PUBLIC_FIREBASE_APP_ID: "${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}"
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}"
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: "${{ secrets.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID }}"
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}"
+NEXT_PUBLIC_FIREBASE_PROJECT_ID: "${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}"
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}"
+NEXT_PUBLIC_TUTOR_BOOKING_WEBHOOK: "${{ secrets.NEXT_PUBLIC_TUTOR_BOOKING_WEBHOOK }}"
+EOF
+
+      - name: Deploy to Cloud Run
+        run: |
+          echo "Deploying to Cloud Run service: ${{ env.SERVICE }} in region ${{ env.REGION }}"
+          gcloud run deploy "${{ env.SERVICE }}" \
+            --image "$IMAGE" \
+            --platform managed \
+            --region "${{ env.REGION }}" \
+            --env-vars-file cloudrun-env.yaml \
+            --allow-unauthenticated
