@@ -4,7 +4,7 @@ import Styles from "../../app/page.module.css";
 import { Button, CircularProgress } from "@mui/material";
 import { Award, Clock, Contact, ArrowRight, Target } from "lucide-react";
 import dynamic from "next/dynamic";
-const LandingIllustration = dynamic(() => import("@/components/LottieAnimations/Landing/Landing.component"), { ssr: false });
+// const LandingIllustration = dynamic(() => import("@/components/LottieAnimations/Landing/Landing.component"), { ssr: false });
 import SampleDashboard from "@/components/SampleDashboard/SampleDashboard.component";
 import Footer from "@/components/Footer/Footer.component";
 import { useRouter } from "next/navigation";
@@ -26,19 +26,49 @@ const HomeContent = () => {
     const [alreadyAttemptedModalOpen, setAlreadyAttemptedModalOpen] = useState(false);
 
     const handleStartAssessment = async () => {
+        // Check for local session first
+        if (!user && typeof window !== "undefined") {
+            try {
+                const quizSession = window.localStorage.getItem("quizSession");
+                if (quizSession) {
+                    const parsed = JSON.parse(quizSession);
+                    if (parsed?.userDetails) {
+                        router.push("/quiz");
+                        return;
+                    }
+                }
+            } catch (e) { }
+        }
+
         if (user) {
             // Get user key (works for phone, Google, and email auth)
-            const userKey = getUserDatabaseKey(user);
+            // Robust user key retrieval
+            let userKey = null;
+            if (user) {
+                userKey = getUserDatabaseKey(user);
+            }
+            if (!userKey && userData) {
+                userKey = userData.userKey || userData.phoneNumber || userData.parentPhone || userData.parentEmail;
+            }
+
+            if (!userKey) {
+                console.warn("HomeContent: No userKey found.");
+                return;
+            }
 
             const children = userData?.children || null;
             const childKeys = children ? Object.keys(children) : [];
             let activeChildId = childKeys[0] || null;
 
             // If there are multiple children, prefer the one selected on the dashboard
-            if (childKeys.length > 1 && typeof window !== "undefined") {
+            if (typeof window !== "undefined") {
                 const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
+                const lastActiveChild = window.localStorage.getItem('lastActiveChild'); // Fallback
+
                 if (storedChildId && childKeys.includes(storedChildId)) {
                     activeChildId = storedChildId;
+                } else if (lastActiveChild && childKeys.includes(lastActiveChild)) {
+                    activeChildId = lastActiveChild;
                 }
             }
 
@@ -74,6 +104,15 @@ const HomeContent = () => {
             setQuizContext({ userDetails, questionPaper: null });
             router.push("/quiz");
         } else {
+            // Not logged in (or waiting for auth), but check if we have a mismatched local session
+            // that needs clearing?
+            // Actually, if !user, we probably shouldn't be here unless "Take Assessment" clicked.
+
+            // If !user, we open auth modal.
+            // But if we are in a state where user is technically logged in but fell through? 
+            // Logic above says "if (user) { ... } else { openModal }".
+            // So this block handles the not-logged-in case perfectly.
+
             // Not logged in, open auth modal
             setAuthModalOpen(true);
         }
@@ -82,7 +121,9 @@ const HomeContent = () => {
     const handleAuthSuccess = (data) => {
         const children = data?.children || null;
         const childKeys = children ? Object.keys(children) : [];
-        const activeChildId = childKeys[0] || null;
+
+        // Use the activeChildId from the data if provided, otherwise fall back to first child
+        const activeChildId = data?.activeChildId || childKeys[0] || null;
 
         if (!children || !activeChildId) {
             return;
@@ -112,7 +153,7 @@ const HomeContent = () => {
                     </div>
                     <h1>Math Skills Proficiency Test</h1>
                     <p className={Styles.subtitle}>Discover Your Math Mastery Level</p>
-                    <div className={Styles.badgesContainer}>
+                    {/* <div className={Styles.badgesContainer}>
                         <div className={Styles.badge}>
                             <Target className={Styles.badgeIcon} />
                             <span>Assess</span>
@@ -125,7 +166,7 @@ const HomeContent = () => {
                             <Clock className={Styles.badgeIcon} />
                             <span>Celebrate Math Skills</span>
                         </div>
-                    </div>
+                    </div> */}
 
                     <div style={{ marginTop: '32px' }}>
                         <Button
@@ -149,7 +190,7 @@ const HomeContent = () => {
                         </Button>
                     </div>
 
-                    <div className={Styles.featuresContainer}>
+                    {/* <div className={Styles.featuresContainer}>
                         <div className={Styles.featureItem}>
                             <Clock />
                             <p>30 Minutes</p>
@@ -164,10 +205,15 @@ const HomeContent = () => {
                             <Award />
                             <p>Instant Result</p>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
                 <div className={Styles.illustrationContainer}>
-                    <LandingIllustration />
+                    {/* <LandingIllustration /> */}
+                    <img
+                        src="/HeroIllustration.gif"
+                        alt="Landing Illustration"
+                        style={{ width: '90%', height: 'auto' }}
+                    />
                 </div>
             </div>
 

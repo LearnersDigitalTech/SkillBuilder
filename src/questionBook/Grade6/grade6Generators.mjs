@@ -55,15 +55,6 @@ export const generateIntegerUnderstanding = () => {
         uniqueOptions.push({ value: String(r), label: String(r) });
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Integers / Understanding",
-            answer: answer
-        };
-    }
-
     return {
         type: "mcq",
         question: question,
@@ -127,20 +118,10 @@ export const generateIntegerOps = () => {
         uniqueOptions.push({ value: String(r), label: String(r) });
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: `Integers / ${op}`,
-            answer: answer
-        };
-    }
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: `Integers / ${op}`,
-        options: uniqueOptions,
         answer: answer
     };
 };
@@ -203,20 +184,10 @@ export const generateWholeNumberPattern = () => {
         { value: String(nextVal + 10), label: String(nextVal + 10) }
     ]);
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Whole Numbers / Patterns",
-            answer: answer
-        };
-    }
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Whole Numbers / Patterns",
-        options: options,
         answer: answer
     };
 };
@@ -294,15 +265,6 @@ export const generateFractionOps = () => {
         }
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: `Fractions / ${op}`,
-            answer: answer
-        };
-    }
-
     return {
         type: "mcq",
         question: question,
@@ -331,20 +293,10 @@ export const generateDecimalConversion = () => {
             { value: String(val * 10), label: String(val * 10) },
             { value: String((val + 0.01).toFixed(2)), label: String((val + 0.01).toFixed(2)) }
         ]);
-        if (Math.random() > 0.5) {
-            return {
-                type: "userInput",
-                question: question,
-                topic: "Decimals / Conversion",
-                answer: answer
-            };
-        }
-
         return {
-            type: "mcq",
+            type: "userInput",
             question: question,
             topic: "Decimals / Conversion",
-            options: options,
             answer: answer
         };
     } else {
@@ -381,15 +333,6 @@ export const generateDecimalConversion = () => {
                 seen.add(val);
                 uniqueOptions.push({ value: val, label: val });
             }
-        }
-
-        if (Math.random() > 0.5) {
-            return {
-                type: "userInput",
-                question: question,
-                topic: "Decimals / Conversion",
-                answer: answer
-            };
         }
 
         return {
@@ -483,20 +426,10 @@ export const generateProportion = () => {
         uniqueOptions.push({ value: String(r), label: String(r) });
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Proportion / Missing Term",
-            answer: answer
-        };
-    }
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Proportion / Missing Term",
-        options: uniqueOptions,
         answer: answer
     };
 };
@@ -603,20 +536,10 @@ export const generateSimpleEquation = () => {
         uniqueOptions.push({ value: String(r), label: String(r) });
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Algebra / Equations",
-            answer: answer
-        };
-    }
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Algebra / Equations",
-        options: uniqueOptions,
         answer: answer
     };
 };
@@ -644,20 +567,10 @@ export const generatePolygonSides = () => {
         { value: String(poly.sides + 2), label: String(poly.sides + 2) }
     ]);
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Geometry / Polygons",
-            answer: answer
-        };
-    }
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Geometry / Polygons",
-        options: options,
         answer: answer
     };
 };
@@ -720,21 +633,11 @@ export const generateAreaRect = () => {
         uniqueOptions.push({ value: `${r} sq cm`, label: `${r} sq cm` });
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question + " (number only)",
-            topic: "Mensuration / Area",
-            answer: String(area)
-        };
-    }
-
     return {
-        type: "mcq",
-        question: question,
+        type: "userInput",
+        question: question + " (number only)",
         topic: "Mensuration / Area",
-        options: uniqueOptions,
-        answer: answer
+        answer: String(area)
     };
 };
 
@@ -767,21 +670,11 @@ export const generatePerimeterRect = () => {
         uniqueOptions.push({ value: `${r} cm`, label: `${r} cm` });
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question + " (number only)",
-            topic: "Mensuration / Perimeter",
-            answer: String(perim)
-        };
-    }
-
     return {
-        type: "mcq",
-        question: question,
+        type: "userInput",
+        question: question + " (number only)",
         topic: "Mensuration / Perimeter",
-        options: uniqueOptions,
-        answer: answer
+        answer: String(perim)
     };
 };
 
@@ -854,20 +747,10 @@ export const generateDataInterpretation = () => {
         }
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: `Data Handling / ${type}`,
-            answer: answer
-        };
-    }
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: `Data Handling / ${type}`,
-        options: uniqueOptions,
         answer: answer
     };
 };
@@ -896,15 +779,6 @@ export const generatePrimeComposite = () => {
             { value: String(dists[1]), label: String(dists[1]) },
             { value: String(dists[2]), label: String(dists[2]) }
         ]);
-        if (Math.random() > 0.5) {
-            return {
-                type: "userInput",
-                question: question,
-                topic: "Number Theory / Prime",
-                answer: answer
-            };
-        }
-
         return {
             type: "mcq",
             question: question,
@@ -950,18 +824,10 @@ export const generateLCM = () => {
 
     const question = `Find the LCM of ${n1} and ${n2}.`;
 
-    const options = shuffleArray([
-        { value: String(lcm), label: String(lcm) },
-        { value: String(lcm + 1), label: String(lcm + 1) },
-        { value: String(lcm - 1), label: String(lcm - 1) },
-        { value: String(lcm * 2 + 1), label: String(lcm * 2 + 1) }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Number Theory / LCM",
-        options: options,
         answer: String(lcm)
     };
 };

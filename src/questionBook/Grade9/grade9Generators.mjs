@@ -125,20 +125,10 @@ export const generatePolynomialBasics = () => {
         }
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Polynomials / Basics",
-            answer: answer
-        };
-    }
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Polynomials / Basics",
-        options: uniqueOptions,
         answer: answer
     };
 };
@@ -267,20 +257,10 @@ export const generatePolynomialZeroes = () => {
         }
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Polynomials / Zeroes",
-            answer: answer
-        };
-    }
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Polynomials / Zeroes",
-        options: uniqueOptions,
         answer: answer
     };
 };
@@ -365,20 +345,10 @@ export const generateLinearEquationSolving = () => {
         }
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Linear Equations / Solving",
-            answer: answer
-        };
-    }
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Linear Equations / Solving",
-        options: uniqueOptions,
         answer: answer
     };
 };
@@ -449,20 +419,10 @@ export const generateCoordinateFormulas = () => {
         }
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Coordinate Geometry / Formulas",
-            answer: answer
-        };
-    }
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Coordinate Geometry / Formulas",
-        options: uniqueOptions,
         answer: answer
     };
 };
@@ -504,21 +464,11 @@ export const generateMensurationArea = () => {
         }
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question + " (number only)",
-            topic: "Mensuration / Area",
-            answer: String(area)
-        };
-    }
-
     return {
-        type: "mcq",
-        question: question,
+        type: "userInput",
+        question: question + " (number only)",
         topic: "Mensuration / Area",
-        options: uniqueOptions,
-        answer: answer
+        answer: String(area)
     };
 };
 
@@ -567,21 +517,11 @@ export const generateMensurationVolume = () => {
         }
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question + " (number only)",
-            topic: "Mensuration / Volume & SA",
-            answer: String(val)
-        };
-    }
-
     return {
-        type: "mcq",
-        question: question,
+        type: "userInput",
+        question: question + " (number only)",
         topic: "Mensuration / Volume & SA",
-        options: uniqueOptions,
-        answer: answer
+        answer: String(val)
     };
 };
 
@@ -638,20 +578,10 @@ export const generateStatistics = () => {
         }
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Statistics",
-            answer: answer
-        };
-    }
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Statistics",
-        options: uniqueOptions,
         answer: answer
     };
 };
@@ -699,15 +629,6 @@ export const generateProbability = () => {
             seen.add(val);
             uniqueOptions.push({ value: val, label: `$\\frac{1}{${r}}$` });
         }
-    }
-
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Probability",
-            answer: answer
-        };
     }
 
     return {

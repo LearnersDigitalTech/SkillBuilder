@@ -19,21 +19,21 @@ export const generateCountForward = () => {
   const answer = start + 4;
 
   // 50% chance for userInput
-  if (Math.random() > 0) {
-    return {
-      type: "userInput",
-      question: `What comes next: </br>${sequence.join(", ")}, ...?`,
-      topic: "Number Sense / Counting",
-      answer: String(answer)
-    };
-  }
+  // if (Math.random() > 0) {
+  //   return {
+  //     type: "userInput",
+  //     question: `What comes next: </br>${sequence.join(", ")}, ...?`,
+  //     topic: "Number Sense / Counting",
+  //     answer: String(answer)
+  //   };
+  // }
 
-  const options = shuffleArray([
-    { value: String(answer), label: String(answer) },
-    { value: String(answer + 1), label: String(answer + 1) },
-    { value: String(answer - 1), label: String(answer - 1) },
-    { value: String(answer + 2), label: String(answer + 2) }
-  ]);
+  // const options = shuffleArray([
+  //   { value: String(answer), label: String(answer) },
+  //   { value: String(answer + 1), label: String(answer + 1) },
+  //   { value: String(answer - 1), label: String(answer - 1) },
+  //   { value: String(answer + 2), label: String(answer + 2) }
+  // ]);
 
   return {
     type: "userInput",
@@ -351,6 +351,7 @@ export const generateSubtractionWordProblems = () => {
 
 // --- Geometry ---
 
+
 export const generateIdentifyShapes = () => {
   const shapes = [
     {
@@ -359,9 +360,10 @@ export const generateIdentifyShapes = () => {
         { name: "Clock", img: "⏰" },
         { name: "Coin", img: "🪙" },
         { name: "Wheel", img: "🛞" },
-        { name: "Pizza", img: "🍕" }, // Whole pizza usually implies circle context, or use 🌕 Full Moon
+        // { name: "Pizza", img: "🍕" }, // Whole pizza usually implies circle context, or use 🌕 Full Moon
         { name: "Ball", img: "⚽" },
-        { name: "Sun", img: "☀️" }
+        { name: "Sun", img: "☀️" },
+        { name: "Moon", img: "🌕" }
       ]
     },
     {
@@ -369,7 +371,7 @@ export const generateIdentifyShapes = () => {
       objects: [
         { name: "Window", img: "🪟" },
         // { name: "Slice of Bread", img: "🍞" },
-        { name: "Gift Box", img: "🎁" },
+        // { name: "Gift Box", img: "🎁" },
         { name: "Frame", img: "🖼️" },
         { name: "Dice", img: "🎲" } // Face of a dice is square
       ]
@@ -379,9 +381,9 @@ export const generateIdentifyShapes = () => {
       objects: [
         { name: "Slice of Pizza", img: "🍕" },
         { name: "Traffic Sign", img: "⚠️" }, // Warning sign
-        { name: "Cheese", img: "🧀" },
+        // { name: "Cheese", img: "🧀" },
         { name: "Tent", img: "⛺" },
-        { name: "Party Hat", img: "🎉" } // Cone looks like triangle in 2D
+        // { name: "Party Hat", img: "🎉" } // Cone looks like triangle in 2D
       ]
     },
     {

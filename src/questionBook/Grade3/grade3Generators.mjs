@@ -9,136 +9,132 @@ const shuffleArray = (array) => {
 };
 
 // --- Number Sense & Operations ---
+export const generateAddition2digit = () => {
+    // 2-digit addition with carry
+    const num1 = getRandomInt(10, 99);
+    const num2 = getRandomInt(10, 99);
+    const answer = num1 + num2;
 
-export const generateAddition = () => {
+    const question = `Add: $$ ${num1} + ${num2} = ? $$`;
+
+    return {
+        type: "userInput",
+        question: question,
+        topic: "Number Sense / Addition",
+        answer: String(answer)
+    };
+};
+
+export const generateAddition3digit = () => {
     // 3-digit addition with carry
     const num1 = getRandomInt(100, 500);
     const num2 = getRandomInt(100, 499);
     const answer = num1 + num2;
 
-    const question = `Add: ${num1} + ${num2} = ?`;
-
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Number Sense / Addition",
-            answer: String(answer)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(answer), label: String(answer) },
-        { value: String(answer + 10), label: String(answer + 10) },
-        { value: String(answer - 10), label: String(answer - 10) },
-        { value: String(answer + 1), label: String(answer + 1) }
-    ]);
+    const question = `Add: $$ ${num1} + ${num2} = ? $$`;
 
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Number Sense / Addition",
-        options: options,
         answer: String(answer)
     };
 };
 
-export const generateSubtraction = () => {
+export const generateSubtraction2digit = () => {
+    // 2-digit subtraction with borrow
+    const num1 = getRandomInt(10, 99);
+    const num2 = getRandomInt(10, num1);
+    const answer = num1 - num2;
+
+    const question = `Subtract: $$ ${num1} - ${num2} = ? $$`;
+
+    return {
+        type: "userInput",
+        question: question,
+        topic: "Number Sense / Subtraction",
+        answer: String(answer)
+    };
+};
+
+export const generateSubtraction3digit = () => {
     // 3-digit subtraction with borrow
     const num1 = getRandomInt(500, 999);
     const num2 = getRandomInt(100, 499);
     const answer = num1 - num2;
 
-    const question = `Subtract: ${num1} - ${num2} = ?`;
-
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Number Sense / Subtraction",
-            answer: String(answer)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(answer), label: String(answer) },
-        { value: String(answer + 10), label: String(answer + 10) },
-        { value: String(answer - 10), label: String(answer - 10) },
-        { value: String(answer + 5), label: String(answer + 5) }
-    ]);
+    const question = `Subtract: $$ ${num1} - ${num2} = ? $$`;
 
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Number Sense / Subtraction",
-        options: options,
         answer: String(answer)
     };
 };
 
-export const generateMultiplication = () => {
-    // 1-digit x 1-digit or 2-digit x 1-digit
-    const isTwoDigit = Math.random() > 0.5;
-    const num1 = isTwoDigit ? getRandomInt(10, 20) : getRandomInt(2, 9);
-    const num2 = getRandomInt(2, 9);
+export const generateMultiplication7and8and9and12 = () => {
+    // Only 9 and 12 times tables
+    const tables = [7, 8, 9, 12];
+    const num1 = tables[getRandomInt(0, tables.length - 1)];
+    const num2 = getRandomInt(1, 10);
     const answer = num1 * num2;
 
-    const question = `Multiply: ${num1} × ${num2} = ?`;
-
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Number Sense / Multiplication",
-            answer: String(answer)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(answer), label: String(answer) },
-        { value: String(answer + num2), label: String(answer + num2) },
-        { value: String(answer - num2), label: String(answer - num2) },
-        { value: String(answer + 1), label: String(answer + 1) }
-    ]);
+    const question = `Multiply: $$ ${num1} × ${num2} = ? $$`;
 
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Number Sense / Multiplication",
-        options: options,
         answer: String(answer)
     };
 };
 
-export const generateDivision = () => {
+export const generateMultiplication13to19 = () => {
+    // Only 9 and 12 times tables
+    const tables = [13, 14, 15, 16, 17, 18, 19];
+    const num1 = tables[getRandomInt(0, tables.length - 1)];
+    const num2 = getRandomInt(1, 10);
+    const answer = num1 * num2;
+
+    const question = `Multiply: $$ ${num1} × ${num2} = ? $$`;
+
+    return {
+        type: "userInput",
+        question: question,
+        topic: "Number Sense / Multiplication",
+        answer: String(answer)
+    };
+};
+
+export const generateDivision1stlevel = () => {
     // Simple division without remainder
     const divisor = getRandomInt(2, 9);
     const quotient = getRandomInt(2, 12);
     const dividend = divisor * quotient;
 
-    const question = `Divide: ${dividend} ÷ ${divisor} = ?`;
-
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Number Sense / Division",
-            answer: String(quotient)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(quotient), label: String(quotient) },
-        { value: String(quotient + 1), label: String(quotient + 1) },
-        { value: String(quotient - 1), label: String(quotient - 1) },
-        { value: String(quotient + 2), label: String(quotient + 2) }
-    ]);
+    const question = `Divide: $$ ${dividend} \\div ${divisor} = ? $$`;
 
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Number Sense / Division",
-        options: options,
+        answer: String(quotient)
+    };
+};
+
+export const generateDivision2ndlevel = () => {
+    // Simple division without remainder
+    const divisor = getRandomInt(10, 15);
+    const quotient = getRandomInt(2, 10);
+    const dividend = divisor * quotient;
+
+    const question = `Divide: $$ ${dividend} \\div ${divisor} = ? $$`;
+
+    return {
+        type: "userInput",
+        question: question,
+        topic: "Number Sense / Division",
         answer: String(quotient)
     };
 };
@@ -152,29 +148,12 @@ export const generateMissingNumber = () => {
         const missing = getRandomInt(5, 20);
         const total = num1 + missing;
 
-        const question = `Find the missing number: ${num1} + ? = ${total}`;
-
-        if (Math.random() > 0.5) {
-            return {
-                type: "userInput",
-                question: question,
-                topic: "Number Sense / Missing Number",
-                answer: String(missing)
-            };
-        }
-
-        const options = shuffleArray([
-            { value: String(missing), label: String(missing) },
-            { value: String(missing + 1), label: String(missing + 1) },
-            { value: String(missing - 1), label: String(missing - 1) },
-            { value: String(missing + 5), label: String(missing + 5) }
-        ]);
+        const question = `Find the missing number: $$ ${num1} +  ?  = ${total} $$`;
 
         return {
-            type: "mcq",
+            type: "userInput",
             question: question,
             topic: "Number Sense / Missing Number",
-            options: options,
             answer: String(missing)
         };
     } else {
@@ -184,27 +163,10 @@ export const generateMissingNumber = () => {
 
         const question = `Find the missing number: ${num1} - ? = ${result}`;
 
-        if (Math.random() > 0.5) {
-            return {
-                type: "userInput",
-                question: question,
-                topic: "Number Sense / Missing Number",
-                answer: String(missing)
-            };
-        }
-
-        const options = shuffleArray([
-            { value: String(missing), label: String(missing) },
-            { value: String(missing + 1), label: String(missing + 1) },
-            { value: String(missing - 1), label: String(missing - 1) },
-            { value: String(missing + 2), label: String(missing + 2) }
-        ]);
-
         return {
-            type: "mcq",
+            type: "userInput",
             question: question,
             topic: "Number Sense / Missing Number",
-            options: options,
             answer: String(missing)
         };
     }
@@ -217,29 +179,12 @@ export const generateMixedOperations = () => {
     const num3 = getRandomInt(1, 5);
 
     const answer = num1 + num2 - num3;
-    const question = `Solve: ${num1} + ${num2} - ${num3} = ?`;
-
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Number Sense / Mixed Operations",
-            answer: String(answer)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(answer), label: String(answer) },
-        { value: String(answer + 1), label: String(answer + 1) },
-        { value: String(answer - 1), label: String(answer - 1) },
-        { value: String(answer + 2), label: String(answer + 2) }
-    ]);
+    const question = `Solve: $$ ${num1} + ${num2} - ${num3} = ? $$`;
 
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Number Sense / Mixed Operations",
-        options: options,
         answer: String(answer)
     };
 };
@@ -251,22 +196,13 @@ export const generateFractions = () => {
     const numerator = getRandomInt(1, denominator - 1);
 
     const question = `What fraction represents ${numerator} part${numerator > 1 ? 's' : ''} out of ${denominator} equal parts?`;
-    const answer = `${numerator}/${denominator}`;
-
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Number Sense / Fractions",
-            answer: answer
-        };
-    }
+    const answer = `$\\frac{${numerator}}{${denominator}}$`;
 
     const options = shuffleArray([
         { value: answer, label: answer },
-        { value: `${denominator}/${numerator}`, label: `${denominator}/${numerator}` },
-        { value: `${numerator}/${denominator + 1}`, label: `${numerator}/${denominator + 1}` },
-        { value: `${numerator + 1}/${denominator}`, label: `${numerator + 1}/${denominator}` }
+        { value: `$\\frac{${denominator}}{${numerator}}$`, label: `$\\frac{${denominator}}{${numerator}}$` },
+        { value: `$\\frac{${numerator}}{${denominator + 1}}$`, label: `$\\frac{${numerator}}{${denominator + 1}}$` },
+        { value: `$\\frac{${numerator + 1}}{${denominator}}$`, label: `$\\frac{${numerator + 1}}{${denominator}}$` }
     ]);
 
     return {
@@ -286,12 +222,12 @@ export const generateCompareFractions = () => {
     while (den1 === den2) den2 = getRandomInt(2, 5);
 
     const answer = den1 < den2 ? ">" : "<"; // Smaller denominator means larger fraction
-    const question = `Compare: ${num}/${den1} _ ${num}/${den2}`;
+    const question = `Compare: $\\frac{${num}}{${den1}}$   ?    $\\frac{${num}}{${den2}}$`;
 
     const options = shuffleArray([
-        { value: ">", label: ">" },
-        { value: "<", label: "<" },
-        { value: "=", label: "=" }
+        { value: ">", label: "> More than" },
+        { value: "<", label: "< Less than" },
+        { value: "=", label: "= Equal to" }
     ]);
 
     return {
@@ -308,7 +244,7 @@ export const generateCompareFractions = () => {
 export const generateShapes = () => {
     const shapes = [
         { name: "Cube", properties: "6 faces, 12 edges, 8 vertices" },
-        { name: "Cuboid", properties: "6 rectangular faces, 12 edges, 8 vertices" },
+        // { name: "Cuboid", properties: "6 rectangular faces, 12 edges, 8 vertices" },
         { name: "Cone", properties: "1 circular face, 1 vertex" },
         { name: "Cylinder", properties: "2 circular faces, 0 vertices" },
         { name: "Sphere", properties: "0 faces, 0 edges, 0 vertices" }
@@ -365,29 +301,12 @@ export const generateLengthConversion = () => {
     // m to cm
     const m = getRandomInt(1, 9);
     const cm = m * 100;
-    const question = `Convert ${m} meters to centimeters.`;
-
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Measurement / Length",
-            answer: String(cm)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(cm), label: `${cm} cm` },
-        { value: String(cm + 10), label: `${cm + 10} cm` },
-        { value: String(m * 10), label: `${m * 10} cm` },
-        { value: String(cm + 100), label: `${cm + 100} cm` }
-    ]);
+    const question = `Convert ${m} meter to centimeters.`;
 
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Measurement / Length",
-        options: options,
         answer: String(cm)
     };
 };
@@ -398,27 +317,10 @@ export const generateWeightConversion = () => {
     const g = kg * 1000;
     const question = `Convert ${kg} kg to grams.`;
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Measurement / Weight",
-            answer: String(g)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(g), label: `${g} g` },
-        { value: String(g + 100), label: `${g + 100} g` },
-        { value: String(kg * 100), label: `${kg * 100} g` },
-        { value: String(g + 500), label: `${g + 500} g` }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Measurement / Weight",
-        options: options,
         answer: String(g)
     };
 };
@@ -429,27 +331,10 @@ export const generateCapacityConversion = () => {
     const ml = l * 1000;
     const question = `Convert ${l} liters to milliliters.`;
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Measurement / Capacity",
-            answer: String(ml)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(ml), label: `${ml} mL` },
-        { value: String(ml + 100), label: `${ml + 100} mL` },
-        { value: String(l * 100), label: `${l * 100} mL` },
-        { value: String(ml + 250), label: `${ml + 250} mL` }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Measurement / Capacity",
-        options: options,
         answer: String(ml)
     };
 };
@@ -481,34 +366,35 @@ export const generateTimeReading = () => {
 // --- Money ---
 
 export const generateIdentifyMoney = () => {
-    // Identify notes/coins or simple addition
     const notes = [10, 20, 50, 100, 200, 500];
     const note = notes[getRandomInt(0, notes.length - 1)];
 
-    const question = `Identify the value of a ₹${note} note.`;
+    const question = `Identify the note </br>₹${note}`;
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Money / Identification",
-            answer: String(note)
-        };
+    // Create options with other note values
+    const uniqueOptions = new Set();
+    uniqueOptions.add(note);
+
+    // Add 3 random different notes as distractors
+    while (uniqueOptions.size < 4) {
+        const randomNote = notes[getRandomInt(0, notes.length - 1)];
+        uniqueOptions.add(randomNote);
     }
 
-    const options = shuffleArray([
-        { value: String(note), label: `₹${note}` },
-        { value: String(note + 10), label: `₹${note + 10}` },
-        { value: String(note * 2), label: `₹${note * 2}` },
-        { value: String(note / 2), label: `₹${note / 2}` }
-    ]);
+    // Convert to array and create MCQ options with images
+    const optionsArray = Array.from(uniqueOptions).map(value => ({
+        value: `/assets/grade2/rupee_${value}.jpg`,
+        // label: `₹${value}`,
+        image: `/assets/grade2/rupee_${value}.jpg`
+    }));
 
     return {
         type: "mcq",
         question: question,
-        topic: "Money / Identification",
-        options: options,
-        answer: String(note)
+        topic: "Money / Basics",
+        answer: `/assets/grade2/rupee_${note}.jpg`,
+        // image: `/assets/grade2/rupee_${note}.jpg`,
+        options: shuffleArray(optionsArray)
     };
 };
 
@@ -522,54 +408,20 @@ export const generateMoneyOperations = () => {
         const total = amount1 + amount2;
         const question = `Add: ₹${amount1} + ₹${amount2} = ?`;
 
-        if (Math.random() > 0.5) {
-            return {
-                type: "userInput",
-                question: question,
-                topic: "Money / Operations",
-                answer: String(total)
-            };
-        }
-
-        const options = shuffleArray([
-            { value: String(total), label: `₹${total}` },
-            { value: String(total + 10), label: `₹${total + 10}` },
-            { value: String(total - 5), label: `₹${total - 5}` },
-            { value: String(total + 5), label: `₹${total + 5}` }
-        ]);
-
         return {
-            type: "mcq",
+            type: "userInput",
             question: question,
             topic: "Money / Operations",
-            options: options,
             answer: String(total)
         };
     } else {
         const total = amount1 - amount2;
         const question = `Subtract: ₹${amount1} - ₹${amount2} = ?`;
 
-        if (Math.random() > 0.5) {
-            return {
-                type: "userInput",
-                question: question,
-                topic: "Money / Operations",
-                answer: String(total)
-            };
-        }
-
-        const options = shuffleArray([
-            { value: String(total), label: `₹${total}` },
-            { value: String(total + 10), label: `₹${total + 10}` },
-            { value: String(total - 5), label: `₹${total - 5}` },
-            { value: String(total + 2), label: `₹${total + 2}` }
-        ]);
-
         return {
-            type: "mcq",
+            type: "userInput",
             question: question,
             topic: "Money / Operations",
-            options: options,
             answer: String(total)
         };
     }
@@ -585,29 +437,12 @@ export const generateTally = () => {
         tally += "|";
     }
 
-    const question = `Count the tally marks: ${tally}`;
-
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Data Handling / Tally",
-            answer: String(count)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(count), label: String(count) },
-        { value: String(count + 1), label: String(count + 1) },
-        { value: String(count - 1), label: String(count - 1) },
-        { value: String(count + 2), label: String(count + 2) }
-    ]);
+    const question = `Count the tally marks:</br> ${tally}`;
 
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Data Handling / Tally",
-        options: options,
         answer: String(count)
     };
 };
@@ -621,29 +456,12 @@ export const generateNumberPattern = () => {
     const seq = [start, start + step, start + step * 2, start + step * 3];
     const next = start + step * 4;
 
-    const question = `Complete the pattern: ${seq.join(", ")}, ?`;
-
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Patterns / Number Patterns",
-            answer: String(next)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(next), label: String(next) },
-        { value: String(next + step), label: String(next + step) },
-        { value: String(next - 1), label: String(next - 1) },
-        { value: String(next + 1), label: String(next + 1) }
-    ]);
+    const question = `Complete the pattern:</br> ${seq.join(", ")}, ?`;
 
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Patterns / Number Patterns",
-        options: options,
         answer: String(next)
     };
 };

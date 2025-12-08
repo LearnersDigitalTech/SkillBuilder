@@ -37,32 +37,10 @@ export const generatePlaceValueLarge = () => {
 
     const question = `What is the place value of the digit ${digit} in ${num}?`; // Simplified question
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Number Sense / Place Value",
-            answer: String(placeValue)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(placeValue), label: String(placeValue) },
-        { value: String(placeValue * 10), label: String(placeValue * 10) },
-        { value: String(placeValue / 10), label: String(placeValue / 10) }, // Assuming power > 0, if power=0 this might be float, handled below
-        { value: String(Number(digit) * Math.pow(10, (power + 2) % 7)), label: String(Number(digit) * Math.pow(10, (power + 2) % 7)) }
-    ]);
-
-    // Fix potential float or duplicate if power is small
-    if (power === 0) {
-        options[2] = { value: String(Number(digit) * 1000), label: String(Number(digit) * 1000) };
-    }
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Number Sense / Place Value",
-        options: options,
         answer: String(placeValue)
     };
 };
@@ -144,27 +122,10 @@ export const generateAdditionLarge = () => {
 
     const question = `Add: ${num1} + ${num2} = ?`;
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Operations / Addition",
-            answer: String(answer)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(answer), label: String(answer) },
-        { value: String(answer + 100), label: String(answer + 100) },
-        { value: String(answer - 100), label: String(answer - 100) },
-        { value: String(answer + 10), label: String(answer + 10) }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Operations / Addition",
-        options: options,
         answer: String(answer)
     };
 };
@@ -176,27 +137,10 @@ export const generateSubtractionLarge = () => {
 
     const question = `Subtract: ${num1} - ${num2} = ?`;
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Operations / Subtraction",
-            answer: String(answer)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(answer), label: String(answer) },
-        { value: String(answer + 100), label: String(answer + 100) },
-        { value: String(answer - 100), label: String(answer - 100) },
-        { value: String(answer + 10), label: String(answer + 10) }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Operations / Subtraction",
-        options: options,
         answer: String(answer)
     };
 };
@@ -210,27 +154,10 @@ export const generateMultiplicationLarge = () => {
     const answer = num1 * num2;
     const question = `Multiply: ${num1} × ${num2} = ?`;
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Operations / Multiplication",
-            answer: String(answer)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(answer), label: String(answer) },
-        { value: String(answer + num2), label: String(answer + num2) }, // Forgot to carry?
-        { value: String(answer - num2), label: String(answer - num2) },
-        { value: String(answer + 100), label: String(answer + 100) }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Operations / Multiplication",
-        options: options,
         answer: String(answer)
     };
 };
@@ -290,27 +217,10 @@ export const generateEstimationOps = () => {
 
     const question = `Estimate the ${opName} of ${num1} and ${num2} by rounding to the nearest 1000.`;
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Operations / Estimation",
-            answer: String(val)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(val), label: String(val) },
-        { value: String(val + 1000), label: String(val + 1000) },
-        { value: String(val - 1000), label: String(val - 1000) },
-        { value: String(val + 500), label: String(val + 500) }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Operations / Estimation",
-        options: options,
         answer: String(val)
     };
 };
@@ -327,15 +237,6 @@ export const generateEquivalentFractions = () => {
 
     const question = `Which fraction is equivalent to ${num}/${den}?`;
     const answer = `${eqNum}/${eqDen}`;
-
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Fractions / Equivalent",
-            answer: answer
-        };
-    }
 
     const options = shuffleArray([
         { value: answer, label: answer },
@@ -372,15 +273,6 @@ export const generateSimplifyFractions = () => {
     const question = `Reduce ${bigNum}/${bigDen} to its lowest terms.`;
     const answer = `${num}/${den}`;
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Fractions / Simplify",
-            answer: answer
-        };
-    }
-
     const options = shuffleArray([
         { value: answer, label: answer },
         { value: `${num + 1}/${den}`, label: `${num + 1}/${den}` },
@@ -411,15 +303,6 @@ export const generateAddUnlikeFractions = () => {
 
     const question = `Add: ${n1}/${d1} + ${n2}/${d2} = ?`;
     const answer = `${numSum}/${commonDen}`;
-
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Fractions / Addition",
-            answer: answer
-        };
-    }
 
     const options = shuffleArray([
         { value: answer, label: answer },
@@ -503,27 +386,10 @@ export const generateDecimalPlaceValue = () => {
 
     const question = `What is the place value of ${digit} in ${num}?`;
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Decimals / Place Value",
-            answer: val
-        };
-    }
-
-    const options = shuffleArray([
-        { value: val, label: val },
-        { value: String(digit), label: String(digit) },
-        { value: String(digit * 10), label: String(digit * 10) },
-        { value: isTenth ? `0.0${digit}` : `0.${digit}`, label: isTenth ? `0.0${digit}` : `0.${digit}` }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Decimals / Place Value",
-        options: options,
         answer: val
     };
 };
@@ -544,27 +410,10 @@ export const generateDecimalOps = () => {
         question = `Subtract: ${big} - ${small} = ?`;
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Decimals / Operations",
-            answer: ans
-        };
-    }
-
-    const options = shuffleArray([
-        { value: ans, label: ans },
-        { value: (Number(ans) + 0.1).toFixed(1), label: (Number(ans) + 0.1).toFixed(1) },
-        { value: (Number(ans) - 0.1).toFixed(1), label: (Number(ans) - 0.1).toFixed(1) },
-        { value: (Number(ans) + 1).toFixed(1), label: (Number(ans) + 1).toFixed(1) }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Decimals / Operations",
-        options: options,
         answer: ans
     };
 };
@@ -594,28 +443,11 @@ export const generateUnitConversion = () => {
     const val = parseInt(answer);
     const unit = answer.split(" ")[1];
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question + " (number only)",
-            topic: `Measurement / ${type}`,
-            answer: String(val)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: answer, label: answer },
-        { value: `${val / 10} ${unit}`, label: `${val / 10} ${unit}` },
-        { value: `${val * 10} ${unit}`, label: `${val * 10} ${unit}` },
-        { value: `${val + 100} ${unit}`, label: `${val + 100} ${unit}` }
-    ]);
-
     return {
-        type: "mcq",
-        question: question,
+        type: "userInput",
+        question: question + " (number only)",
         topic: `Measurement / ${type}`,
-        options: options,
-        answer: answer
+        answer: String(val)
     };
 };
 
@@ -682,51 +514,19 @@ export const generateAreaPerimeterShapes = () => {
     if (isArea) {
         const area = side * side;
         const question = `Find the area of a square with side ${side} cm.`;
-        if (Math.random() > 0.5) {
-            return {
-                type: "userInput",
-                question: question,
-                topic: "Geometry / Area",
-                answer: String(area)
-            };
-        }
-
-        const options = shuffleArray([
-            { value: String(area), label: `${area} sq cm` },
-            { value: String(side * 4), label: `${side * 4} sq cm` }, // Perimeter distractor
-            { value: String(area + 10), label: `${area + 10} sq cm` },
-            { value: String(area * 2), label: `${area * 2} sq cm` }
-        ]);
         return {
-            type: "mcq",
+            type: "userInput",
             question: question,
             topic: "Geometry / Area",
-            options: options,
             answer: String(area)
         };
     } else {
         const perimeter = side * 4;
         const question = `Find the perimeter of a square with side ${side} cm.`;
-        if (Math.random() > 0.5) {
-            return {
-                type: "userInput",
-                question: question,
-                topic: "Geometry / Perimeter",
-                answer: String(perimeter)
-            };
-        }
-
-        const options = shuffleArray([
-            { value: String(perimeter), label: `${perimeter} cm` },
-            { value: String(side * side), label: `${side * side} cm` }, // Area distractor
-            { value: String(perimeter + 4), label: `${perimeter + 4} cm` },
-            { value: String(perimeter + 10), label: `${perimeter + 10} cm` }
-        ]);
         return {
-            type: "mcq",
+            type: "userInput",
             question: question,
             topic: "Geometry / Perimeter",
-            options: options,
             answer: String(perimeter)
         };
     }
@@ -739,27 +539,10 @@ export const generatePieChart = () => {
     const question = "In a pie chart representing 100 students, if 50% like Cricket, how many students like Cricket?";
     const answer = "50";
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Data Handling / Pie Chart",
-            answer: answer
-        };
-    }
-
-    const options = shuffleArray([
-        { value: "50", label: "50" },
-        { value: "25", label: "25" },
-        { value: "100", label: "100" },
-        { value: "10", label: "10" }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Data Handling / Pie Chart",
-        options: options,
         answer: answer
     };
 };
@@ -786,27 +569,10 @@ export const generateFactors = () => {
         }
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Number Theory / Factors",
-            answer: String(correct)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(correct), label: String(correct) },
-        { value: String(distractors[0]), label: String(distractors[0]) },
-        { value: String(distractors[1]), label: String(distractors[1]) },
-        { value: String(distractors[2]), label: String(distractors[2]) }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Number Theory / Factors",
-        options: options,
         answer: String(correct)
     };
 };
@@ -821,27 +587,10 @@ export const generateHCF = () => {
 
     const question = `Find the HCF of ${n1} and ${n2}.`;
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Number Theory / HCF",
-            answer: String(hcf)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(hcf), label: String(hcf) },
-        { value: String(hcf - 1), label: String(hcf - 1) },
-        { value: String(hcf * 2), label: String(hcf * 2) },
-        { value: "1", label: "1" }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Number Theory / HCF",
-        options: options,
         answer: String(hcf)
     };
 };

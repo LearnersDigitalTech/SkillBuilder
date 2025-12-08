@@ -59,20 +59,10 @@ export const generateIntegerOps = () => {
         uniqueOptions.push({ value: String(r), label: String(r) });
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: `Integers / ${op}`,
-            answer: answer
-        };
-    }
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: `Integers / ${op}`,
-        options: uniqueOptions,
         answer: answer
     };
 };
@@ -120,15 +110,6 @@ export const generateRationalOps = () => {
             seen.add(val);
             uniqueOptions.push({ value: val, label: `$\\frac{${r1}}{${r2}}$` });
         }
-    }
-
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Rational Numbers / Operations",
-            answer: answer
-        };
     }
 
     return {
@@ -256,20 +237,10 @@ export const generateBODMAS = () => {
         }
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "BODMAS",
-            answer: answer
-        };
-    }
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "BODMAS",
-        options: uniqueOptions,
         answer: answer
     };
 };
@@ -318,20 +289,10 @@ export const generateAlgebraTerms = () => {
         }
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Algebra / Basics",
-            answer: answer
-        };
-    }
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Algebra / Basics",
-        options: uniqueOptions,
         answer: answer
     };
 };
@@ -365,20 +326,10 @@ export const generateLinearEquation = () => {
         uniqueOptions.push({ value: String(r), label: String(r) });
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Algebra / Linear Equations",
-            answer: answer
-        };
-    }
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Algebra / Linear Equations",
-        options: uniqueOptions,
         answer: answer
     };
 };
@@ -412,20 +363,10 @@ export const generateAlgebraWordProblem = () => {
         { value: String(Number(answer) * 2), label: String(Number(answer) * 2) }
     ]);
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Algebra / Word Problems",
-            answer: answer
-        };
-    }
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Algebra / Word Problems",
-        options: options,
         answer: answer
     };
 };
@@ -476,21 +417,11 @@ export const generatePercentage = () => {
         }
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question + (type === "Convert" ? " (number only, without %)" : ""),
-            topic: "Commercial Math / Percentage",
-            answer: answer.replace("%", "")
-        };
-    }
-
     return {
-        type: "mcq",
-        question: question,
+        type: "userInput",
+        question: question + (type === "Convert" ? " (number only, without %)" : ""),
         topic: "Commercial Math / Percentage",
-        options: uniqueOptions,
-        answer: answer
+        answer: answer.replace("%", "")
     };
 };
 
@@ -536,21 +467,11 @@ export const generateProfitLoss = () => {
         }
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question + " (number only)",
-            topic: "Commercial Math / Profit & Loss",
-            answer: answer.replace("₹", "")
-        };
-    }
-
     return {
-        type: "mcq",
-        question: question,
+        type: "userInput",
+        question: question + " (number only)",
         topic: "Commercial Math / Profit & Loss",
-        options: uniqueOptions,
-        answer: answer
+        answer: answer.replace("₹", "")
     };
 };
 
@@ -587,20 +508,10 @@ export const generateSimpleInterest = () => {
         }
     }
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question + " (number only)",
-            topic: "Commercial Math / Simple Interest",
-            answer: answer.replace("₹", "")
-        };
-    }
-
     return {
-        type: "mcq",
-        question: question,
+        type: "userInput",
+        question: question + " (number only)",
         topic: "Commercial Math / Simple Interest",
-        options: uniqueOptions,
-        answer: answer
+        answer: answer.replace("₹", "")
     };
 };

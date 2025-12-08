@@ -253,6 +253,13 @@
     justify-content: space-between;
 }
 
+/* Hide navigation on desktop - buttons are in the sidebar palette */
+@media (min-width: 1025px) {
+    .navigationContainer {
+        display: none;
+    }
+}
+
 .submitButton {
     background: linear-gradient(135deg, #16a34a, #15803d);
     color: white !important;

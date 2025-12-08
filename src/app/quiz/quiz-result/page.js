@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import QuizResultClient from "@/components/Quiz/QuizResultClient";
+import { CircularProgress } from "@mui/material";
 
 export const metadata = {
     title: "Quiz Results - Skill Conquest",
@@ -10,5 +12,13 @@ export const metadata = {
 };
 
 export default function QuizResult() {
-    return <QuizResultClient />;
+    return (
+        <Suspense fallback={
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <CircularProgress />
+            </div>
+        }>
+            <QuizResultClient />
+        </Suspense>
+    );
 }

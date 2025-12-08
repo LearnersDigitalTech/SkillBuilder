@@ -86,6 +86,7 @@ function analyzeResponses(responses, grade) {
 
     // Step 1: Iterate and compute per-question stats
     responses.forEach((item) => {
+        if (!item) return;
         const {
             questionId,
             question,

@@ -26,27 +26,10 @@ export const generatePlaceValue5Digit = () => {
     const placeValue = Number(digit) * values[pos];
     const question = `What is the place value of the digit ${digit} in the ${places[pos]} place of ${num}?`;
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Number Sense / Place Value",
-            answer: String(placeValue)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(placeValue), label: String(placeValue) },
-        { value: String(Number(digit) * values[(pos + 1) % 5]), label: String(Number(digit) * values[(pos + 1) % 5]) },
-        { value: String(Number(digit) * values[(pos + 2) % 5]), label: String(Number(digit) * values[(pos + 2) % 5]) },
-        { value: String(placeValue * 10), label: String(placeValue * 10) }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Number Sense / Place Value",
-        options: options,
         answer: String(placeValue)
     };
 };
@@ -58,27 +41,10 @@ export const generateAddition4Digit = () => {
 
     const question = `Add: ${num1} + ${num2} = ?`;
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Number Sense / Addition",
-            answer: String(answer)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(answer), label: String(answer) },
-        { value: String(answer + 100), label: String(answer + 100) },
-        { value: String(answer - 100), label: String(answer - 100) },
-        { value: String(answer + 10), label: String(answer + 10) }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Number Sense / Addition",
-        options: options,
         answer: String(answer)
     };
 };
@@ -90,27 +56,10 @@ export const generateSubtraction4Digit = () => {
 
     const question = `Subtract: ${num1} - ${num2} = ?`;
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Number Sense / Subtraction",
-            answer: String(answer)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(answer), label: String(answer) },
-        { value: String(answer + 100), label: String(answer + 100) },
-        { value: String(answer - 100), label: String(answer - 100) },
-        { value: String(answer + 10), label: String(answer + 10) }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Number Sense / Subtraction",
-        options: options,
         answer: String(answer)
     };
 };
@@ -131,27 +80,10 @@ export const generateMultiplication = () => {
     const answer = num1 * num2;
     const question = `Multiply: ${num1} × ${num2} = ?`;
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Number Sense / Multiplication",
-            answer: String(answer)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(answer), label: String(answer) },
-        { value: String(answer + num2), label: String(answer + num2) },
-        { value: String(answer - num2), label: String(answer - num2) },
-        { value: String(answer + 1), label: String(answer + 1) }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Number Sense / Multiplication",
-        options: options,
         answer: String(answer)
     };
 };
@@ -164,27 +96,10 @@ export const generateDivision = () => {
 
     const question = `Divide: ${dividend} ÷ ${divisor} = ?`;
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Number Sense / Division",
-            answer: String(quotient)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(quotient), label: String(quotient) },
-        { value: String(quotient + 10), label: String(quotient + 10) },
-        { value: String(quotient - 10), label: String(quotient - 10) },
-        { value: String(quotient + 1), label: String(quotient + 1) }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Number Sense / Division",
-        options: options,
         answer: String(quotient)
     };
 };
@@ -200,27 +115,10 @@ export const generateEstimation = () => {
 
     const question = `Estimate the sum of ${num1} and ${num2} by rounding to the nearest 100.`;
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Number Sense / Estimation",
-            answer: String(estimatedSum)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(estimatedSum), label: String(estimatedSum) },
-        { value: String(estimatedSum + 100), label: String(estimatedSum + 100) },
-        { value: String(estimatedSum - 100), label: String(estimatedSum - 100) },
-        { value: String(estimatedSum + 200), label: String(estimatedSum + 200) }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Number Sense / Estimation",
-        options: options,
         answer: String(estimatedSum)
     };
 };
@@ -288,15 +186,6 @@ export const generateFractionOperations = () => {
     }
 
     const answer = `${answerNum}/${den}`;
-
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Fractions / Operations",
-            answer: answer
-        };
-    }
 
     const options = shuffleArray([
         { value: answer, label: answer },
@@ -386,51 +275,19 @@ export const generateAreaPerimeter = () => {
     if (isArea) {
         const area = l * b;
         const question = `Find the area of a rectangle with length ${l}cm and breadth ${b}cm.`;
-        if (Math.random() > 0.5) {
-            return {
-                type: "userInput",
-                question: question,
-                topic: "Measurement / Area",
-                answer: String(area)
-            };
-        }
-
-        const options = shuffleArray([
-            { value: String(area), label: `${area} sq cm` },
-            { value: String(area + 2), label: `${area + 2} sq cm` },
-            { value: String(2 * (l + b)), label: `${2 * (l + b)} sq cm` }, // Perimeter as distractor
-            { value: String(area + 5), label: `${area + 5} sq cm` }
-        ]);
         return {
-            type: "mcq",
+            type: "userInput",
             question: question,
             topic: "Measurement / Area",
-            options: options,
             answer: String(area)
         };
     } else {
         const perimeter = 2 * (l + b);
         const question = `Find the perimeter of a rectangle with length ${l}cm and breadth ${b}cm.`;
-        if (Math.random() > 0.5) {
-            return {
-                type: "userInput",
-                question: question,
-                topic: "Measurement / Perimeter",
-                answer: String(perimeter)
-            };
-        }
-
-        const options = shuffleArray([
-            { value: String(perimeter), label: `${perimeter} cm` },
-            { value: String(perimeter + 2), label: `${perimeter + 2} cm` },
-            { value: String(l * b), label: `${l * b} cm` }, // Area as distractor
-            { value: String(perimeter + 5), label: `${perimeter + 5} cm` }
-        ]);
         return {
-            type: "mcq",
+            type: "userInput",
             question: question,
             topic: "Measurement / Perimeter",
-            options: options,
             answer: String(perimeter)
         };
     }
@@ -442,27 +299,10 @@ export const generateTimeConversion = () => {
     const minutes = hours * 60;
     const question = `Convert ${hours} hours to minutes.`;
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Measurement / Time",
-            answer: String(minutes)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(minutes), label: `${minutes} min` },
-        { value: String(minutes + 60), label: `${minutes + 60} min` },
-        { value: String(minutes - 30), label: `${minutes - 30} min` },
-        { value: String(hours * 100), label: `${hours * 100} min` }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Measurement / Time",
-        options: options,
         answer: String(minutes)
     };
 };
@@ -516,27 +356,10 @@ export const generatePattern = () => {
 
     const question = `Complete the pattern: ${seq.join(", ")}, ?`;
 
-    if (Math.random() > 0.5) {
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Logical Thinking / Patterns",
-            answer: String(next)
-        };
-    }
-
-    const options = shuffleArray([
-        { value: String(next), label: String(next) },
-        { value: String(next + 10), label: String(next + 10) },
-        { value: String(next * 2), label: String(next * 2) },
-        { value: String(next - 5), label: String(next - 5) }
-    ]);
-
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Logical Thinking / Patterns",
-        options: options,
         answer: String(next)
     };
 };

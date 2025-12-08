@@ -44,9 +44,9 @@ import { CheckCircle, XCircle, HelpCircle, Clock, Target, BookOpen, TrendingUp, 
 import { QuizSessionContext } from "../../app/context/QuizSessionContext";
 import analyzeResponses from "@/app/workload/GenerateReport";
 import Footer from "@/components/Footer/Footer.component";
-import { ref, set, get } from "firebase/database";
+import { ref, set, get, push } from "firebase/database";
 import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Dialog, DialogTitle, DialogContent, IconButton, CircularProgress, TextField, MenuItem, Link as MuiLink } from "@mui/material";
 import { useAuth } from "@/context/AuthContext";
 
@@ -93,6 +93,11 @@ const QuizResultClient = () => {
     const [quizSession, setQuizSession] = useContext(QuizSessionContext);
     const { user, userData } = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const reportId = searchParams.get("reportId");
+
+    // Guard to prevent double-save in Strict Mode
+    const hasSavedRef = React.useRef(false);
 
     const [reportState, setReportState] = useState(null);
     const [loadingReport, setLoadingReport] = useState(true);
@@ -139,15 +144,48 @@ const QuizResultClient = () => {
                 }
 
                 const data = snapshot.val();
+                let targetReport = data;
+
+                // Handle multiple reports (list) vs single report (legacy)
+                // If reportId is provided, look for that specific report
+                if (reportId === 'root') {
+                    targetReport = data;
+                } else if (reportId && data[reportId]) {
+                    targetReport = data[reportId];
+                } else {
+                    // No reportId provided (or invalid). Find the LATEST report.
+                    // This handles Hybrid (Root + Children) and New (Children only).
+
+                    let allReports = [];
+
+                    // 1. Root Legacy
+                    if (data.summary) {
+                        allReports.push(data);
+                    }
+
+                    // 2. Children New
+                    Object.entries(data).forEach(([key, val]) => {
+                        if (key !== 'summary' && val && typeof val === 'object' && val.summary) {
+                            allReports.push(val);
+                        }
+                    });
+
+                    if (allReports.length > 0) {
+                        // Sort by timestamp descending
+                        allReports.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+                        targetReport = allReports[0];
+                    }
+                }
+
                 let parsed = {};
                 try {
-                    parsed = data.generalFeedbackStringified ? JSON.parse(data.generalFeedbackStringified) : {};
+                    parsed = targetReport.generalFeedbackStringified ? JSON.parse(targetReport.generalFeedbackStringified) : {};
                 } catch (e) {
                     parsed = {};
                 }
 
                 setReportState({
-                    summary: data.summary,
+                    summary: targetReport.summary,
                     topicFeedback: parsed.topicFeedback || {},
                     perQuestionReport: parsed.perQuestionReport || [],
                     learningPlanSummary: parsed.learningPlanSummary || "",
@@ -204,7 +242,7 @@ const QuizResultClient = () => {
         const userKey = quizSession?.userDetails?.userKey || quizSession?.userDetails?.parentPhone || quizSession?.userDetails?.parentEmail || quizSession?.userDetails?.phoneNumber;
         // fallback to phoneNumber if parentPhone is missing (legacy single user) uses phoneNumber as key
 
-        const childId = quizSession?.userDetails?.activeChildId || "default";
+        const childId = quizSession?.userDetails?.activeChildId || quizSession?.userDetails?.childId || "default";
 
         if (!userKey) return;
 
@@ -213,8 +251,15 @@ const QuizResultClient = () => {
         // Let's stick to the new structure: Reports/ParentKey/ChildKey
         const finalParentKey = userKey.replace('.', '_'); // sanitize email if needed, though phone is preferred
 
+        // Check if we already saved this session
+        if (hasSavedRef.current) return;
+        hasSavedRef.current = true;
+
         const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${finalParentKey}/${childId}`);
-        set(reportRef, {
+        // Use push to create a new entry instead of overwriting
+        const newReportRef = push(reportRef);
+
+        set(newReportRef, {
             summary,
             generalFeedbackStringified: JSON.stringify({
                 topicFeedback,
@@ -226,6 +271,7 @@ const QuizResultClient = () => {
             console.log("Report saved successfully");
         }).catch((error) => {
             console.error("Error saving report:", error);
+            // If error, maybe allow retry? But usually network retry is handled by FB.
         });
     }, [quizSession?.questionPaper, summary, topicFeedback, perQuestionReport, learningPlanSummary]);
 
@@ -320,7 +366,7 @@ const QuizResultClient = () => {
                 userKey = user.uid;
             }
 
-            let childId = quizSession?.userDetails?.childId || "default";
+            let childId = quizSession?.userDetails?.childId || quizSession?.userDetails?.activeChildId || "default";
             if (!quizSession?.userDetails?.childId && userData?.children) {
                 const children = userData.children;
                 const childKeys = Object.keys(children);
@@ -473,7 +519,7 @@ const QuizResultClient = () => {
                             <span>{displayGrade}</span>
                         </div>
                         <h1 className={Styles.mainTitle}>Quiz Results</h1>
-                        <p className={Styles.subtitle}>Math Skill Report – Number Series</p>
+                        <p className={Styles.subtitle}>Math Skill Report - Powered by Learners</p>
                     </div>
 
                     <div className={Styles.heroStats}>
@@ -560,7 +606,7 @@ const QuizResultClient = () => {
                 <section className={Styles.learningSection}>
                     <div className={Styles.sectionHeader}>
                         <BookOpen className={Styles.sectionIcon} />
-                        <h2 className={Styles.sectionTitle}>Your Learning Plan</h2>
+                        <h2 className={Styles.sectionTitle}>Your Personalized Learning Plan</h2>
                     </div>
                     <div className={Styles.learningCard}>
                         <p className={Styles.learningIntro}>{learningPlan.intro}</p>
@@ -773,7 +819,7 @@ const QuizResultClient = () => {
                         {/* Phone verification field */}
                         <div className={Styles.phoneVerification}>
                             <TextField
-                                label="Is this your number correct?"
+                                label="Please Enter Your Phone Number"
                                 value={tutorForm.phone}
                                 onChange={handleTutorFieldChange("phone")}
                                 fullWidth
