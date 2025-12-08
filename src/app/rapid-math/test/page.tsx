@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Timer } from "@/components/RapidMath/timer"
 import { QuestionCard } from "@/components/RapidMath/question-card"
-import { Card } from "@/components/ui/card"
+import { Loader2 } from "lucide-react"
+import Navigation from "@/components/Navigation/Navigation.component"
 
 interface Question {
   id: number
@@ -101,11 +102,9 @@ export default function TestPage() {
 
   useEffect(() => {
     if (!timerActive) return
-
     const interval = setInterval(() => {
       setQuestionTimer(Math.floor((Date.now() - questionStartTime) / 1000))
     }, 100)
-
     return () => clearInterval(interval)
   }, [timerActive, questionStartTime])
 
@@ -132,7 +131,6 @@ export default function TestPage() {
 
       const newResults = [...results, result]
       setResults(newResults)
-
       moveToNextQuestion(newResults)
     },
     [currentQuestion, currentQuestionIndex, totalQuestions, questionStartTime],
@@ -140,9 +138,7 @@ export default function TestPage() {
 
   const handleSkipQuestion = useCallback(() => {
     if (!currentQuestion) return
-
     const timeTaken = Math.round((Date.now() - questionStartTime) / 1000)
-
     const result: TestResult = {
       question: currentQuestion.question,
       correctAnswer: currentQuestion.correctAnswer,
@@ -154,10 +150,8 @@ export default function TestPage() {
       num2: currentQuestion.num2,
       skipped: true,
     }
-
     const newResults = [...results, result]
     setResults(newResults)
-
     moveToNextQuestion(newResults)
   }, [currentQuestion, currentQuestionIndex, totalQuestions, questionStartTime])
 
@@ -174,6 +168,7 @@ export default function TestPage() {
     }
   }
 
+  // Pre-load results to session storage on unload to prevent data loss on accidental refresh/close
   useEffect(() => {
     const handleUnload = () => {
       if (results.length > 0) {
@@ -184,39 +179,46 @@ export default function TestPage() {
     return () => window.removeEventListener("beforeunload", handleUnload)
   }, [results])
 
-  if (isLoading) {
-    return (
-      <main className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center p-4">
-        <Card className="p-8">
-          <div className="text-center space-y-4">
-            <div className="text-xl font-semibold">Loading...</div>
-          </div>
-        </Card>
-      </main>
-    )
-  }
-
   const labels: any = { normal: "Normal", easy: "Easy", medium: "Medium", hard: "Hard" }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-background to-secondary p-2 overflow-hidden">
-      <div className="max-w-sm mx-auto space-y-3 h-screen flex flex-col">
-        <div className="flex justify-between items-center">
-          <h1 className="text-xl font-bold">{labels[difficulty]}</h1>
-          <Timer isActive={timerActive} />
-        </div>
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex flex-col font-sans overflow-hidden">
+      <Navigation />
 
-        {currentQuestion && (
-          <div className="flex-1 flex items-center justify-center overflow-hidden">
-            <QuestionCard
-              question={currentQuestion}
-              onSubmit={handleSubmitAnswer}
-              onSkip={handleSkipQuestion}
-              questionNumber={currentQuestionIndex + 1}
-              totalQuestions={totalQuestions}
-              secondsElapsed={questionTimer}
-            />
+      {/* Floating Header */}
+      <div className="fixed top-20 left-0 right-0 z-10 px-4 md:px-8 pointer-events-none">
+        <div className="max-w-7xl mx-auto flex justify-between items-start">
+          <div className="bg-white/80 dark:bg-black/40 backdrop-blur-md px-4 py-2 rounded-2xl shadow-sm border border-slate-200/50 dark:border-slate-800/50 pointer-events-auto">
+            <span className="text-sm uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400 mr-2">Mode</span>
+            <span className="text-lg font-bold text-slate-800 dark:text-slate-200">{labels[difficulty]}</span>
           </div>
+
+          <div className="pointer-events-auto">
+            <Timer isActive={timerActive} />
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex items-center justify-center p-4 pt-20">
+        {isLoading ? (
+          <div className="flex flex-col items-center gap-4 text-slate-500 animate-pulse">
+            <Loader2 size={48} className="animate-spin text-blue-500" />
+            <span className="text-xl font-medium">Preparing your quiz...</span>
+          </div>
+        ) : (
+          currentQuestion && (
+            <div className="w-full max-w-5xl animate-in zoom-in-95 duration-500">
+              <QuestionCard
+                question={currentQuestion}
+                onSubmit={handleSubmitAnswer}
+                onSkip={handleSkipQuestion}
+                questionNumber={currentQuestionIndex + 1}
+                totalQuestions={totalQuestions}
+                secondsElapsed={questionTimer}
+              />
+            </div>
+          )
         )}
       </div>
     </main>
