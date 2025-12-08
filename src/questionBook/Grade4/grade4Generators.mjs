@@ -134,18 +134,18 @@ export const generateFractionTypes = () => {
     if (type === "Proper Fraction") {
         const den = getRandomInt(3, 9);
         const num = getRandomInt(1, den - 1);
-        question = `Identify the type of fraction: ${num}/${den}`;
+        question = `Identify the type of fraction: $$ ${num}/${den} $$`;
         answer = "Proper Fraction";
     } else if (type === "Improper Fraction") {
         const num = getRandomInt(5, 12);
         const den = getRandomInt(2, num - 1);
-        question = `Identify the type of fraction: ${num}/${den}`;
+        question = `Identify the type of fraction: $$ ${num}/${den} $$`;
         answer = "Improper Fraction";
     } else {
         const whole = getRandomInt(1, 5);
         const den = getRandomInt(3, 9);
         const num = getRandomInt(1, den - 1);
-        question = `Identify the type of fraction: ${whole} ${num}/${den}`;
+        question = `Identify the type of fraction: $$ ${whole} ${num}/${den} $$`;
         answer = "Mixed Fraction";
     }
 
@@ -176,22 +176,22 @@ export const generateFractionOperations = () => {
 
     if (isAddition) {
         answerNum = num1 + num2;
-        question = `Solve: ${num1}/${den} + ${num2}/${den} = ?`;
+        question = `Solve: $$ ${num1}/${den} + ${num2}/${den} = ? $$`;
     } else {
         // Ensure num1 > num2 for subtraction
         const n1 = Math.max(num1, num2);
         const n2 = Math.min(num1, num2);
         answerNum = n1 - n2;
-        question = `Solve: ${n1}/${den} - ${n2}/${den} = ?`;
+        question = `Solve: $$ ${n1}/${den} - ${n2}/${den} = ? $$`;
     }
 
-    const answer = `${answerNum}/${den}`;
+    const answer = `$$ ${answerNum}/${den} $$`;
 
     const options = shuffleArray([
         { value: answer, label: answer },
-        { value: `${answerNum + 1}/${den}`, label: `${answerNum + 1}/${den}` },
-        { value: `${answerNum}/${den + 1}`, label: `${answerNum}/${den + 1}` },
-        { value: `${den}/${answerNum}`, label: `${den}/${answerNum}` }
+        { value: `${answerNum + 1}/${den}`, label: `$$ ${answerNum + 1}/${den} $$` },
+        { value: `${answerNum}/${den + 1}`, label: `$$ ${answerNum}/${den + 1} $$` },
+        { value: `${den}/${answerNum}`, label: `$$ ${den}/${answerNum} $$` }
     ]);
 
     return {
@@ -293,9 +293,23 @@ export const generateAreaPerimeter = () => {
     }
 };
 
-export const generateTimeConversion = () => {
+export const generateTimeConversion2to5 = () => {
     // Hours to Minutes
-    const hours = getRandomInt(2, 10);
+    const hours = getRandomInt(2, 5);
+    const minutes = hours * 60;
+    const question = `Convert ${hours} hours to minutes.`;
+
+    return {
+        type: "userInput",
+        question: question,
+        topic: "Measurement / Time",
+        answer: String(minutes)
+    };
+};
+
+export const generateTimeConversion5to10 = () => {
+    // Hours to Minutes
+    const hours = getRandomInt(5, 10);
     const minutes = hours * 60;
     const question = `Convert ${hours} hours to minutes.`;
 
@@ -349,17 +363,76 @@ export const generateBarGraph = () => {
 
 export const generatePattern = () => {
     // Number pattern
-    const start = getRandomInt(2, 10);
-    const mult = getRandomInt(2, 4);
-    const seq = [start, start * mult, start * mult * mult];
-    const next = start * mult * mult * mult;
+    const start = getRandomInt(2, 5);
+    const mult = getRandomInt(1, 3);
+    const seq = [start, start * mult];
+    const next = start * mult * mult;
 
-    const question = `Complete the pattern: ${seq.join(", ")}, ?`;
+    const question = `Complete the pattern: </br> ${seq.join(", ")}, ?`;
 
     return {
         type: "userInput",
         question: question,
         topic: "Logical Thinking / Patterns",
+        answer: String(next)
+    };
+};
+
+
+
+export const generateSimpleGrade4Pattern = () => {
+    const patternType = getRandomInt(1, 3); // 1=addition, 2=subtraction, 3=multiplication
+
+    let start, step, seq, next;
+
+    switch (patternType) {
+        case 1:
+            // ➕ Addition pattern
+            start = getRandomInt(2, 20);
+            step = getRandomInt(2, 10);
+
+            seq = [
+                start,
+                start + step,
+                start + step * 2
+            ];
+
+            next = start + step * 3;
+            break;
+
+        case 2:
+            // ➖ Subtraction pattern (safe: no negative results)
+            start = getRandomInt(30, 60);
+            step = getRandomInt(2, 10);
+
+            seq = [
+                start,
+                start - step,
+                start - step * 2
+            ];
+
+            next = start - step * 3;
+            break;
+
+        case 3:
+            // ✖ Multiplication pattern (×2 or ×3, small numbers)
+            start = getRandomInt(1, 5);
+            step = getRandomInt(2, 3); // ×2 or ×3
+
+            seq = [
+                start,
+                start * step,
+                start * step * step
+            ];
+
+            next = start * step * step * step;
+            break;
+    }
+
+    return {
+        type: "userInput",
+        question: `Complete the pattern: </br> ${seq.join(", ")}, ?`,
+        topic: "Number Patterns (Grade 4)",
         answer: String(next)
     };
 };
