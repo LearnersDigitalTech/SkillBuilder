@@ -59,7 +59,7 @@ export const generatePlaceValue = () => {
 
   return {
     type: "mcq",
-    question: `What is the place value of ${number}?`,
+    question: `What is the place value of  ${number}?`,
     topic: "Number Sense / Place Value",
     options: options,
     answer: answer
