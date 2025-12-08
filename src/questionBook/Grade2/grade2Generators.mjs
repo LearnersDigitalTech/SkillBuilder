@@ -41,8 +41,6 @@ export const generatePlaceValue = () => {
   let hundreds = getRandomInt(1, 9);
   let tens = getRandomInt(0, 9);
   let ones = getRandomInt(0, 9);
-  const values = [hundreds, tens, ones];
-  const answer = values[Math.floor(Math.random() * 3)];
 
   // Ensure digits are distinct to avoid duplicate options
   while (tens === hundreds) tens = getRandomInt(0, 9);
@@ -50,17 +48,18 @@ export const generatePlaceValue = () => {
 
   const number = hundreds * 100 + tens * 10 + ones;
 
+  const answer = `${hundreds}H ${tens}T ${ones}O`;
+
   const options = shuffleArray([
-    { value: `Ones`, label: `Ones` },
-    { value: `Tens`, label: `Tens` },
-    { value: `Hundreds`, label: `Hundreds` },
-    // { value: `Thousands`, label: `Thousands` }
+    { value: answer, label: answer },
+    { value: `${tens}H ${hundreds}T ${ones}O`, label: `${tens}H ${hundreds}T ${ones}O` },
+    { value: `${hundreds}H ${ones}T ${tens}O`, label: `${hundreds}H ${ones}T ${tens}O` },
+    { value: `${ones}H ${tens}T ${hundreds}O`, label: `${ones}H ${tens}T ${hundreds}O` }
   ]);
 
   return {
     type: "mcq",
-    // question: `In the number ${number}, what place is the digit ${answer} in?`,
-    question: `In the number ${number}, the digit ${answer} is in the ____ place?`,
+    question: `what is the place value ${number}?`,
     topic: "Number Sense / Place Value",
     options: options,
     answer: answer
