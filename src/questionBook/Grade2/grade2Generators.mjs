@@ -41,6 +41,8 @@ export const generatePlaceValue = () => {
   let hundreds = getRandomInt(1, 9);
   let tens = getRandomInt(0, 9);
   let ones = getRandomInt(0, 9);
+const values = [hundreds, tens, ones];
+const answer = values[Math.floor(Math.random() * 3)];
 
   // Ensure digits are distinct to avoid duplicate options
   while (tens === hundreds) tens = getRandomInt(0, 9);
@@ -48,18 +50,46 @@ export const generatePlaceValue = () => {
 
   const number = hundreds * 100 + tens * 10 + ones;
 
-  const answer = `${hundreds}H ${tens}T ${ones}O`;
-
   const options = shuffleArray([
-    { value: answer, label: answer },
-    { value: `${tens}H ${hundreds}T ${ones}O`, label: `${tens}H ${hundreds}T ${ones}O` },
-    { value: `${hundreds}H ${ones}T ${tens}O`, label: `${hundreds}H ${ones}T ${tens}O` },
-    { value: `${ones}H ${tens}T ${hundreds}O`, label: `${ones}H ${tens}T ${hundreds}O` }
+    { value: `Ones`, label: `Ones` },
+    { value: `Tens`, label: `Tens` },
+    { value: `Hundreds`, label: `Hundreds` },
+    // { value: `Thousands`, label: `Thousands` }
   ]);
 
   return {
     type: "mcq",
-    question: `What is the place value of ${number}?`,
+    // question: `In the number ${number}, what place is the digit ${answer} in?`,
+    question: `In the number ${number}, the digit ${answer} is in the ____ place?`,
+    topic: "Number Sense / Place Value",
+    options: options,
+    answer: answer
+  };
+};
+
+export const generateValue = () => {
+  let hundreds = getRandomInt(1, 9);
+  let tens = getRandomInt(0, 9);
+  let ones = getRandomInt(0, 9);
+const values = [hundreds, tens, ones];
+const answer = values[Math.floor(Math.random() * 3)];
+
+  // Ensure digits are distinct to avoid duplicate options
+  while (tens === hundreds) tens = getRandomInt(0, 9);
+  while (ones === hundreds || ones === tens) ones = getRandomInt(0, 9);
+
+  const number = hundreds * 100 + tens * 10 + ones;
+
+  const options = shuffleArray([
+    // { value: `${answer}000`, label: `${answer}000` },
+    { value: `${answer}0`, label: `${answer}0` },
+    { value: `${answer}`, label: `${answer}` },
+    { value: `${answer}00`, label: `${answer}00` }
+  ]);
+
+  return {
+    type: "mcq",
+    question: `What is the value of ${answer} in ${number}?`,
     topic: "Number Sense / Place Value",
     options: options,
     answer: answer
