@@ -163,13 +163,8 @@ const DashboardClient = () => {
             }
         };
         if (activeChildId) {
-            // If we have a cached value for this child, use it immediately for snappy UI
-            if (reportsCache.hasOwnProperty(activeChildId)) {
-                setReports(reportsCache[activeChildId]);
-                setFetchingReports(false);
-            } else {
-                fetchReports();
-            }
+            // Always fetch fresh data to ensure we show the latest reports
+            fetchReports();
         }
     }, [user, activeChildId]);
 
@@ -447,16 +442,21 @@ const DashboardClient = () => {
                                     }
                                 });
 
+                                // console.log(allReports);
                                 // 2. Sort all reports first
                                 allReports.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
 
-                                // 3. Deduplicate
-                                const seenTimestamps = new Set();
+                                // 3. Deduplicate using IDs and filter invalid reports
+                                const seenIds = new Set();
                                 const uniqueReports = [];
                                 allReports.forEach(report => {
-                                    const time = new Date(report.timestamp).getTime();
-                                    if (!seenTimestamps.has(time)) {
-                                        seenTimestamps.add(time);
+                                    // Skip reports with invalid/missing data
+                                    if (!report.summary || !report.summary.totalQuestions) return;
+
+                                    // Use ID for deduplication, fallback to timestamp
+                                    const identifier = report.id || new Date(report.timestamp).getTime();
+                                    if (!seenIds.has(identifier)) {
+                                        seenIds.add(identifier);
                                         uniqueReports.push(report);
                                     }
                                 });
@@ -491,7 +491,9 @@ const DashboardClient = () => {
                                                             </div>
                                                             <div className={Styles.reportScore}>
                                                                 <div className={Styles.scoreBadge}>
-                                                                    {report.summary.accuracyPercent}% Score
+                                                                    {report.summary.totalQuestions > 0
+                                                                        ? Math.round(report.summary.accuracyPercent)
+                                                                        : 0}%
                                                                 </div>
                                                                 <Button
                                                                     endIcon={<ChevronRight />}
