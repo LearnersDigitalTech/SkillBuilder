@@ -772,7 +772,7 @@ const QuizResultClient = () => {
                     <div className={Styles.sectionHeader}>
                         <BookOpen className={Styles.sectionIcon} />
                         <h2 className={Styles.sectionTitle}>Your Personalized Learning Plan</h2>
-                        {reportState?.learningPlan && reportState.learningPlan.length > 0 && (
+                        {/* {reportState?.learningPlan && reportState.learningPlan.length > 0 && (
                             <button
                                 className={Styles.downloadButton}
                                 onClick={handleDownloadPDF}
@@ -781,7 +781,7 @@ const QuizResultClient = () => {
                                 <Download size={18} />
                                 <span>Download PDF</span>
                             </button>
-                        )}
+                        )} */}
                     </div>
 
                     {reportState?.learningPlan && reportState.learningPlan.length > 0 ? (
