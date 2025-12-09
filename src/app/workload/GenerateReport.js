@@ -157,10 +157,10 @@ function analyzeResponses(responses, grade) {
         });
     });
 
-    // Step 2: Accuracy
-    if (result.summary.attempted > 0) {
+    // Step 2: Accuracy (based on total questions, not just attempted)
+    if (result.summary.totalQuestions > 0) {
         result.summary.accuracyPercent = Math.round(
-            (result.summary.correct / result.summary.attempted) * 100
+            (result.summary.correct / result.summary.totalQuestions) * 100
         );
     } else {
         result.summary.accuracyPercent = 0;
