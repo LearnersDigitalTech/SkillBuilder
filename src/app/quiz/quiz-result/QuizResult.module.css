@@ -407,8 +407,44 @@
 .sectionHeader {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 1rem;
     margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+/* Download PDF Button */
+.downloadButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.downloadButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.downloadButton:active {
+    transform: translateY(0);
+}
+
+.downloadButton svg {
+    transition: transform 0.3s ease;
+}
+
+.downloadButton:hover svg {
+    transform: translateY(2px);
 }
 
 .sectionIcon {
@@ -467,6 +503,215 @@
     color: #667eea;
     font-weight: 700;
 }
+
+/* Learning Plan Table */
+.tableContainer {
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
+.learningTable {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.learningTable thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.learningTable thead th {
+    padding: 1.25rem 1.5rem;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.learningTable tbody tr {
+    border-bottom: 1px solid #e2e8f0;
+    transition: background-color 0.2s ease;
+}
+
+.learningTable tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.learningTable tbody tr:last-child {
+    border-bottom: none;
+}
+
+.learningTable tbody td {
+    padding: 1.25rem 1.5rem;
+    color: #475569;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    vertical-align: top;
+}
+
+.learningTable tbody td:first-child {
+    font-weight: 700;
+    color: #667eea;
+    text-align: center;
+    width: 80px;
+}
+
+.learningTable tbody td:nth-child(2) {
+    font-weight: 600;
+    color: #1e293b;
+    white-space: nowrap;
+    width: 100px;
+}
+
+.learningTable tbody td:nth-child(3) {
+    font-weight: 600;
+    color: #1e293b;
+    min-width: 180px;
+}
+
+/* Alternating row colors for better readability */
+.learningTable tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+.learningTable tbody tr:nth-child(odd) {
+    background-color: white;
+}
+
+.learningTable tbody tr:hover {
+    background-color: #eef2ff !important;
+}
+
+/* Responsive table */
+@media (max-width: 1024px) {
+    .learningTable {
+        font-size: 0.9rem;
+    }
+
+    .learningTable thead th,
+    .learningTable tbody td {
+        padding: 1rem 1.25rem;
+    }
+
+    .learningTable tbody td:nth-child(3) {
+        min-width: 150px;
+    }
+}
+
+@media (max-width: 768px) {
+    .learningSection {
+        padding: 1.5rem;
+    }
+
+    .sectionHeader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .downloadButton {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .learningTable {
+        font-size: 0.85rem;
+        border-radius: 0;
+    }
+
+    .learningTable thead th,
+    .learningTable tbody td {
+        padding: 0.75rem 1rem;
+    }
+
+    .learningTable tbody td:first-child {
+        width: 50px;
+    }
+
+    .learningTable tbody td:nth-child(2) {
+        width: 80px;
+    }
+
+    .learningTable tbody td:nth-child(3) {
+        min-width: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tableContainer {
+        margin: 0 -1.5rem;
+        border-radius: 0;
+    }
+
+    .learningTable {
+        font-size: 0.8rem;
+    }
+
+    .learningTable thead th,
+    .learningTable tbody td {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+.learningTable tbody td:nth-child(4),
+.learningTable tbody td:nth-child(5) {
+    min-width: 250px;
+}
+
+/* Responsive table */
+@media (max-width: 1024px) {
+    .learningTable {
+        font-size: 0.9rem;
+    }
+
+    .learningTable thead th,
+    .learningTable tbody td {
+        padding: 1rem;
+    }
+
+    .learningTable tbody td:nth-child(4),
+    .learningTable tbody td:nth-child(5) {
+        min-width: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .tableContainer {
+        margin: 0 -1rem;
+    }
+
+    .learningTable {
+        font-size: 0.85rem;
+        border-radius: 0;
+    }
+
+    .learningTable thead th,
+    .learningTable tbody td {
+        padding: 0.875rem 0.75rem;
+    }
+
+    .learningTable tbody td:first-child {
+        width: 50px;
+    }
+
+    .learningTable tbody td:nth-child(2) {
+        width: 80px;
+    }
+
+    .learningTable tbody td:nth-child(3) {
+        min-width: 120px;
+    }
+
+    .learningTable tbody td:nth-child(4),
+    .learningTable tbody td:nth-child(5) {
+        min-width: 180px;
+    }
+}
+
 
 /* Modal Styles */
 .modal {
