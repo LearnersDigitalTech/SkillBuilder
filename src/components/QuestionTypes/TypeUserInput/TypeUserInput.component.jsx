@@ -11,9 +11,9 @@ const TypeUserInput = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, q
     const isLastQuestion = questionPaper && activeQuestionIndex === questionPaper.length - 1;
     const isMarkedForReview = questionPaper && questionPaper[activeQuestionIndex]?.markedForReview || false;
 
-    // Logic to hide operators for Grade 1
-    const isGrade1 = grade && grade.toString().includes("Grade 1");
-    const showOperators = isGrade1;
+    // Logic to hide operators for Grades 1-6
+    const gradesWithoutOperators = ["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6"];
+    const showOperators = !(grade && gradesWithoutOperators.includes(grade.toString()));
 
     const handleChange = (character) => {
         const next = `${inputValue}${character}`;
@@ -50,6 +50,36 @@ const TypeUserInput = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, q
         }
     }
 
+
+    const handleInputChange = (e) => {
+        const val = e.target.value;
+        // Validation logic
+        // Always allow empty, numbers, decimal, and minus (for negative numbers or subtraction)
+        // Only allow +, *, / if showOperators is true
+
+        let allowedPattern;
+        if (showOperators) {
+            // Allow digits, dot, and all four operators
+            allowedPattern = /^[0-9+\-*/.]*$/;
+        } else {
+            // Allow digits, dot, and minus only
+            allowedPattern = /^[0-9\-.]*$/;
+        }
+
+        if (allowedPattern.test(val)) {
+            setInputValue(val);
+            if (onAnswerChange) {
+                onAnswerChange(val);
+            }
+        }
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            onClick(inputValue, timeTakeRef.current);
+        }
+    };
+
     return (
         <div className={Styles.quizContainer}>
             {/* Column 1: Question */}
@@ -80,9 +110,11 @@ const TypeUserInput = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, q
                     <Input
                         disableUnderline
                         value={inputValue}
-                        readOnly
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
                         placeholder="Enter answer"
                         className={Styles.answerInput}
+                        autoFocus
                     />
 
                     {/* Compact Dial Pad with Math Operators */}
@@ -108,7 +140,11 @@ const TypeUserInput = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, q
                         {/* Row 4: Decimal, 0, Backspace, Division */}
                         <Button onClick={_ => handleChange('.')} className={Styles.dialButton}>.</Button>
                         <Button onClick={_ => handleChange('0')} className={Styles.dialButton}>0</Button>
-                        <Button onClick={handleBackspace} className={Styles.backspaceButton}>⌫</Button>
+                        {showOperators ? (
+                            <Button onClick={handleBackspace} className={Styles.backspaceButton}>⌫</Button>
+                        ) : (
+                            <Button onClick={_ => handleChange('-')} className={Styles.operatorButton}>−</Button>
+                        )}
                         {showOperators && <Button onClick={_ => handleChange('/')} className={Styles.operatorButton}>÷</Button>}
 
                         {/* Row 5: Reset button */}

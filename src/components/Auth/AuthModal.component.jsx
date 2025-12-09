@@ -486,7 +486,7 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                     </IconButton>
                 </DialogTitle>
 
-                <DialogContent className={Styles.modalContent}>
+                <DialogContent className={`${Styles.modalContent} ${step === "SELECT_PROFILE" ? Styles.fixedModalContent : ""}`}>
                     <div id="recaptcha-container"></div>
 
                     {/* ==================== CHOOSE METHOD ==================== */}
@@ -662,11 +662,12 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                                     <User className={Styles.inputIcon} size={20} />
                                     <TextField
                                         fullWidth
-                                        placeholder="Enter your full name"
+                                        placeholder="Enter student name"
                                         variant="outlined"
                                         value={registrationData.name}
                                         onChange={(e) => setRegistrationData({ ...registrationData, name: e.target.value })}
                                         className={Styles.textField}
+                                        autoFocus
                                     />
                                 </div> */}
 

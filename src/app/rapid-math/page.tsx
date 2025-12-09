@@ -105,10 +105,10 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col font-sans overflow-hidden">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col font-sans overflow-x-hidden">
       <Navigation />
 
-      <div className="flex-1 flex flex-col items-center justify-center p-4 animate-in fade-in duration-500 max-h-[calc(100vh-64px)]">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 py-8 md:p-4 animate-in fade-in duration-500 min-h-[calc(100vh-64px)] md:max-h-[calc(100vh-64px)] md:overflow-y-auto">
         <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
 
           {/* Hero / Intro Section */}

@@ -55,8 +55,8 @@ const DashboardClient = () => {
     // Check if Google/Email user needs to provide phone number
     useEffect(() => {
         if (!loading && user && userData) {
-            // If user signed in with Google/Email (no phoneNumber) and hasn't provided one yet
-            if (!user.phoneNumber && !userData.phoneNumber) {
+            // Check both standard phoneNumber and parentPhone (from normalization)
+            if (!user.phoneNumber && !userData.phoneNumber && !userData.parentPhone) {
                 setShowPhoneDialog(true);
             }
         }
