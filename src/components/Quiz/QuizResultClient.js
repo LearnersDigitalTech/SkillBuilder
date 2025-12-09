@@ -40,10 +40,12 @@ const HeroChart = ({ summary, notAttempted }) => {
 
 import Navigation from "@/components/Navigation/Navigation.component";
 import MathRenderer from "@/components/MathRenderer/MathRenderer.component";
-import { CheckCircle, XCircle, HelpCircle, Clock, Target, BookOpen, TrendingUp, BarChart3, FileText, X, AlertCircle } from "lucide-react";
+import { CheckCircle, XCircle, HelpCircle, Clock, Target, BookOpen, TrendingUp, BarChart3, FileText, X, AlertCircle, Download } from "lucide-react";
 import { QuizSessionContext } from "../../app/context/QuizSessionContext";
 import analyzeResponses from "@/app/workload/GenerateReport";
 import Footer from "@/components/Footer/Footer.component";
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { ref, set, get, push } from "firebase/database";
 import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -140,18 +142,32 @@ const QuizResultClient = () => {
                     }
 
                     if (targetReport) {
-                        let parsed = {};
-                        try {
-                            parsed = targetReport.generalFeedbackStringified ? JSON.parse(targetReport.generalFeedbackStringified) : {};
-                        } catch (e) {
-                            parsed = {};
+                        // Handle both old format (generalFeedbackStringified) and new format (direct fields)
+                        let topicFeedback = targetReport.topicFeedback;
+                        let perQuestionReport = targetReport.perQuestionReport;
+                        let learningPlanSummary = targetReport.learningPlanSummary;
+                        let learningPlan = targetReport.learningPlan;
+
+                        // Backward compatibility: parse old format if needed
+                        if (!topicFeedback && targetReport.generalFeedbackStringified) {
+                            try {
+                                const parsed = JSON.parse(targetReport.generalFeedbackStringified);
+                                topicFeedback = parsed.topicFeedback || {};
+                                perQuestionReport = parsed.perQuestionReport || [];
+                                learningPlanSummary = parsed.learningPlanSummary || "";
+                            } catch (e) {
+                                topicFeedback = {};
+                                perQuestionReport = [];
+                                learningPlanSummary = "";
+                            }
                         }
 
                         setReportState({
                             summary: targetReport.summary,
-                            topicFeedback: parsed.topicFeedback || {},
-                            perQuestionReport: parsed.perQuestionReport || [],
-                            learningPlanSummary: parsed.learningPlanSummary || "",
+                            topicFeedback: topicFeedback || {},
+                            perQuestionReport: perQuestionReport || [],
+                            learningPlanSummary: learningPlanSummary || "",
+                            learningPlan: learningPlan || [], // NEW: Include learning plan array
                         });
                         return;
                     }
@@ -166,6 +182,7 @@ const QuizResultClient = () => {
                         topicFeedback: computed.topicFeedback,
                         perQuestionReport: computed.perQuestionReport,
                         learningPlanSummary: computed.learningPlanSummary,
+                        learningPlan: computed.learningPlan, // NEW: Include learning plan array
                     });
                     return;
                 }
@@ -336,13 +353,20 @@ const QuizResultClient = () => {
         const reportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         const newReportRef = ref(firebaseDatabase, `NMD_2025/Reports/${finalParentKey}/${childId}/${reportId}`);
 
+        // Sanitize topicFeedback keys to remove Firebase-forbidden characters
+        const sanitizedTopicFeedback = {};
+        Object.entries(computed.topicFeedback).forEach(([topic, feedback]) => {
+            // Replace forbidden characters with underscores
+            const sanitizedKey = topic.replace(/[.#$\/\[\]]/g, '_');
+            sanitizedTopicFeedback[sanitizedKey] = feedback;
+        });
+
         set(newReportRef, {
             summary: computed.summary,
-            generalFeedbackStringified: JSON.stringify({
-                topicFeedback: computed.topicFeedback,
-                perQuestionReport: computed.perQuestionReport,
-                learningPlanSummary: computed.learningPlanSummary,
-            }),
+            topicFeedback: sanitizedTopicFeedback, // Use sanitized version
+            perQuestionReport: computed.perQuestionReport,
+            learningPlanSummary: computed.learningPlanSummary,
+            learningPlan: computed.learningPlan, // NEW: Save the structured learning plan array
             timestamp: new Date().toISOString(),
         }).then(() => {
             console.log("Report saved successfully with ID:", reportId);
@@ -570,6 +594,68 @@ const QuizResultClient = () => {
         }
     };
 
+    // PDF Download Function
+    const handleDownloadPDF = () => {
+        if (!reportState?.learningPlan || reportState.learningPlan.length === 0) {
+            alert("No learning plan available to download");
+            return;
+        }
+
+        const doc = new jsPDF();
+
+        // Add header
+        doc.setFontSize(20);
+        doc.setTextColor(102, 126, 234); // Purple color
+        doc.text("Personalized Learning Plan", 105, 20, { align: 'center' });
+
+        // Add student info
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Student: ${displayName}`, 20, 35);
+        doc.text(`Grade: ${displayGrade}`, 20, 42);
+        doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 49);
+        doc.text(`Powered by Learners Digital Tech`, 20, 56);
+
+        // Add table
+        const tableData = reportState.learningPlan.map((item, index) => [
+            index + 1,
+            `Day ${item.day}`,
+            item.skillCategory,
+            item.learnWithTutor,
+            item.selfLearn
+        ]);
+
+        doc.autoTable({
+            startY: 65,
+            head: [['Sl.No', 'Day', 'Skill Category', 'Learn with Tutor', 'Self Learn']],
+            body: tableData,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [102, 126, 234],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                halign: 'center'
+            },
+            styles: {
+                fontSize: 9,
+                cellPadding: 5,
+                overflow: 'linebreak',
+                halign: 'left'
+            },
+            columnStyles: {
+                0: { cellWidth: 15, halign: 'center' },
+                1: { cellWidth: 20, halign: 'center' },
+                2: { cellWidth: 35 },
+                3: { cellWidth: 60 },
+                4: { cellWidth: 60 }
+            }
+        });
+
+        // Save PDF
+        const fileName = `Learning_Plan_${displayName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(fileName);
+    };
+
     if (loadingReport && !reportState) {
         return (
             <div className={Styles.quizResultContainer}>
@@ -686,32 +772,50 @@ const QuizResultClient = () => {
                     <div className={Styles.sectionHeader}>
                         <BookOpen className={Styles.sectionIcon} />
                         <h2 className={Styles.sectionTitle}>Your Personalized Learning Plan</h2>
-                    </div>
-                    <div className={Styles.learningCard}>
-                        <p className={Styles.learningIntro}>{learningPlan.intro}</p>
-
-                        {learningPlan.steps.length > 0 && (
-                            <div className={Styles.learningBlock}>
-                                <h3 className={Styles.learningSubtitle}>Next Steps</h3>
-                                <ul className={Styles.learningList}>
-                                    {learningPlan.steps.map((step, index) => (
-                                        <li key={index}>{step}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-
-                        {learningPlan.timeTips.length > 0 && (
-                            <div className={Styles.learningBlock}>
-                                <h3 className={Styles.learningSubtitle}>Time Tips</h3>
-                                <ul className={Styles.learningList}>
-                                    {learningPlan.timeTips.map((tip, index) => (
-                                        <li key={index}>{tip}</li>
-                                    ))}
-                                </ul>
-                            </div>
+                        {reportState?.learningPlan && reportState.learningPlan.length > 0 && (
+                            <button
+                                className={Styles.downloadButton}
+                                onClick={handleDownloadPDF}
+                                title="Download as PDF"
+                            >
+                                <Download size={18} />
+                                <span>Download PDF</span>
+                            </button>
                         )}
                     </div>
+
+                    {reportState?.learningPlan && reportState.learningPlan.length > 0 ? (
+                        <div className={Styles.tableContainer}>
+                            <table className={Styles.learningTable}>
+                                <thead>
+                                    <tr>
+                                        <th>Sl.No</th>
+                                        <th>Day</th>
+                                        <th>Skill Category</th>
+                                        <th>Learn with Tutor</th>
+                                        <th>Self Learn</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {reportState.learningPlan.map((item, index) => (
+                                        <tr key={index}>
+                                            <td>{index + 1}</td>
+                                            <td>Day {item.day}</td>
+                                            <td>{item.skillCategory}</td>
+                                            <td>{item.learnWithTutor}</td>
+                                            <td>{item.selfLearn}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <div className={Styles.learningCard}>
+                            <p className={Styles.learningIntro}>
+                                🎉 Excellent work! You didn't make any mistakes. Keep practicing to maintain your skills!
+                            </p>
+                        </div>
+                    )}
 
                     <div className={Styles.tutorStatusInline}>
                         <span className={Styles.tutorHelper}>Already requested a tutor?</span>

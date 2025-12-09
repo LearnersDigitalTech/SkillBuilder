@@ -10,7 +10,8 @@ function analyzeResponses(responses, grade) {
         topicFeedback: {}, // topic -> { correctCount, wrongCount, positiveFeedback, improvementFeedback }
         perQuestionReport: [], // detailed per-question info
         timeReport: [], // { questionId, question, timeTaken }
-        learningPlanSummary: "" // final human-readable plan
+        learningPlanSummary: "", // final human-readable plan (legacy)
+        learningPlan: [] // structured learning plan: [{ day, skillCategory, learnWithTutor, selfLearn }]
     };
 
     if (!Array.isArray(responses) || responses.length === 0) {
@@ -136,16 +137,16 @@ function analyzeResponses(responses, grade) {
             result.topicFeedback[topic].wrongCount += (1 - score);
         }
 
-        // Per-question report
+        // Per-question report (Firebase doesn't allow undefined, use null instead)
         result.perQuestionReport.push({
-            questionId,
-            question,
-            topic,
-            correctAnswer,
+            questionId: questionId ?? null,
+            question: question ?? null,
+            topic: topic ?? null,
+            correctAnswer: correctAnswer ?? null,
             userAnswer: givenAnswer || null,
-            attempted,
-            isCorrect, // Keep strict boolean for UI badges
-            score, // Add score for detailed view if needed
+            attempted: attempted ?? false,
+            isCorrect: isCorrect ?? false,
+            score: score ?? 0,
             timeTaken: typeof timeTaken === "number" ? timeTaken : null
         });
 
@@ -253,6 +254,82 @@ function analyzeResponses(responses, grade) {
     plan += "- If a question feels confusing, it’s okay to take a bit longer and think calmly rather than guessing.";
 
     result.learningPlanSummary = plan;
+
+    // Generate structured learning plan based on ALL topics
+    // Include all topics because skipped questions don't show up in wrongCount
+    // Only exclude topics where student got 100% correct (all questions attempted and correct)
+    const topicsNeedingWork = Object.entries(result.topicFeedback)
+        .filter(([topic, feedback]) => {
+            const totalAttempted = feedback.correctCount + feedback.wrongCount;
+            // Exclude only if: attempted questions exist AND all were correct AND no wrong answers
+            const isPerfect = totalAttempted > 0 && feedback.wrongCount === 0 && feedback.correctCount === totalAttempted;
+            return !isPerfect; // Include everything except perfect scores
+        })
+        .sort((a, b) => b[1].wrongCount - a[1].wrongCount); // Sort by most errors first
+
+    result.learningPlan = topicsNeedingWork.map(([topic, feedback], index) => {
+        const day = index + 1;
+
+        // Generate specific learning activities based on topic
+        let learnWithTutor = "";
+        let selfLearn = "";
+
+        // Customize based on topic name
+        if (topic.toLowerCase().includes("counting")) {
+            learnWithTutor = "Practice counting forwards and backwards with teacher using number line";
+            selfLearn = "Complete counting worksheet (1-100) and practice skip counting by 2s, 5s, 10s";
+        } else if (topic.toLowerCase().includes("before") || topic.toLowerCase().includes("after")) {
+            learnWithTutor = "Use number line to find numbers before and after with guidance";
+            selfLearn = "Practice 15 before/after questions daily using flashcards";
+        } else if (topic.toLowerCase().includes("between")) {
+            learnWithTutor = "Identify numbers between two given numbers with teacher support";
+            selfLearn = "Solve 10 'between' problems using number chart";
+        } else if (topic.toLowerCase().includes("pattern") || topic.toLowerCase().includes("sequence")) {
+            learnWithTutor = "Identify and extend patterns with teacher explaining the rule";
+            selfLearn = "Create your own number patterns and solve pattern worksheets";
+        } else if (topic.toLowerCase().includes("addition") || topic.toLowerCase().includes("add")) {
+            learnWithTutor = "Practice addition strategies with manipulatives and teacher guidance";
+            selfLearn = "Complete 20 addition problems daily, check answers yourself";
+        } else if (topic.toLowerCase().includes("subtraction") || topic.toLowerCase().includes("subtract")) {
+            learnWithTutor = "Learn subtraction techniques using number line with teacher";
+            selfLearn = "Practice 20 subtraction problems, use counters to verify";
+        } else if (topic.toLowerCase().includes("multiplication") || topic.toLowerCase().includes("multiply")) {
+            learnWithTutor = "Understand multiplication as repeated addition with teacher";
+            selfLearn = "Memorize times tables and practice 15 multiplication facts daily";
+        } else if (topic.toLowerCase().includes("division") || topic.toLowerCase().includes("divide")) {
+            learnWithTutor = "Learn division concepts using grouping method with teacher";
+            selfLearn = "Practice division facts and solve 15 division problems";
+        } else if (topic.toLowerCase().includes("fraction")) {
+            learnWithTutor = "Understand fractions using visual models with teacher support";
+            selfLearn = "Draw fraction diagrams and practice comparing fractions";
+        } else if (topic.toLowerCase().includes("decimal")) {
+            learnWithTutor = "Learn place value of decimals with teacher using base-10 blocks";
+            selfLearn = "Practice decimal operations and rounding exercises";
+        } else if (topic.toLowerCase().includes("geometry") || topic.toLowerCase().includes("shape")) {
+            learnWithTutor = "Identify and classify shapes with teacher using real objects";
+            selfLearn = "Draw different shapes and find shapes in your environment";
+        } else if (topic.toLowerCase().includes("measurement") || topic.toLowerCase().includes("measure")) {
+            learnWithTutor = "Practice measuring length, weight, volume with teacher";
+            selfLearn = "Measure 10 objects at home and record measurements";
+        } else if (topic.toLowerCase().includes("time") || topic.toLowerCase().includes("clock")) {
+            learnWithTutor = "Read analog and digital clocks with teacher guidance";
+            selfLearn = "Practice telling time every hour and solve time word problems";
+        } else if (topic.toLowerCase().includes("money")) {
+            learnWithTutor = "Count coins and notes with teacher using real/play money";
+            selfLearn = "Practice making change and solve money word problems";
+        } else {
+            // Generic fallback
+            learnWithTutor = `Discuss ${topic} concepts with teacher and work through examples together`;
+            selfLearn = `Practice ${topic} problems independently and review mistakes`;
+        }
+
+        return {
+            day,
+            skillCategory: topic,
+            learnWithTutor,
+            selfLearn
+        };
+    });
 
     return result;
 }
