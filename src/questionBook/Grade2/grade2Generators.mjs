@@ -37,35 +37,67 @@ export const generateCounting = () => {
   };
 };
 
+// export const generatePlaceValue = () => {
+//   let hundreds = getRandomInt(1, 9);
+//   let tens = getRandomInt(0, 9);
+//   let ones = getRandomInt(0, 9);
+
+//   // Ensure digits are distinct to avoid duplicate options
+//   while (tens === hundreds) tens = getRandomInt(0, 9);
+//   while (ones === hundreds || ones === tens) ones = getRandomInt(0, 9);
+
+//   const number = hundreds * 100 + tens * 10 + ones;
+
+//   const answer = `${hundreds}H ${tens}T ${ones}O`;
+
+//   const options = shuffleArray([
+//     { value: answer, label: answer },
+//     { value: `${tens}H ${hundreds}T ${ones}O`, label: `${tens}H ${hundreds}T ${ones}O` },
+//     { value: `${hundreds}H ${ones}T ${tens}O`, label: `${hundreds}H ${ones}T ${tens}O` },
+//     { value: `${ones}H ${tens}T ${hundreds}O`, label: `${ones}H ${tens}T ${hundreds}O` }
+//   ]);
+
+//   return {
+//     type: "mcq",
+//     question: `what is the place value ${number}?`,
+//     topic: "Number Sense / Place Value",
+//     options: options,
+//     answer: answer
+//   };
+// };
+
 export const generatePlaceValue = () => {
-  let hundreds = getRandomInt(1, 9);
-  let tens = getRandomInt(0, 9);
-  let ones = getRandomInt(0, 9);
+  const tens = getRandomInt(1, 9);
+  const ones = getRandomInt(0, 9);
+  const number = tens * 10 + ones;
 
-  // Ensure digits are distinct to avoid duplicate options
-  while (tens === hundreds) tens = getRandomInt(0, 9);
-  while (ones === hundreds || ones === tens) ones = getRandomInt(0, 9);
+  const answer = `${tens} tens and ${ones} ones`;
 
-  const number = hundreds * 100 + tens * 10 + ones;
+  const options = [
+    { value: answer, label: answer }
+  ];
 
-  const answer = `${hundreds}H ${tens}T ${ones}O`;
+  while (options.length < 4) {
+    const t = getRandomInt(1, 9);
+    const o = getRandomInt(0, 9);
+    const val = `${t} tens and ${o} ones`;
 
-  const options = shuffleArray([
-    { value: answer, label: answer },
-    { value: `${tens}H ${hundreds}T ${ones}O`, label: `${tens}H ${hundreds}T ${ones}O` },
-    { value: `${hundreds}H ${ones}T ${tens}O`, label: `${hundreds}H ${ones}T ${tens}O` },
-    { value: `${ones}H ${tens}T ${hundreds}O`, label: `${ones}H ${tens}T ${hundreds}O` }
-  ]);
+    // Check if this value is already in options
+    if (!options.some(opt => opt.value === val)) {
+      options.push({ value: val, label: val });
+    }
+  }
+
+  shuffleArray(options);
 
   return {
     type: "mcq",
-    question: `what is the place value ${number}?`,
+    question: `Break down the number ${number} into tens and ones.`,
     topic: "Number Sense / Place Value",
     options: options,
     answer: answer
   };
 };
-
 export const generateValue = () => {
   let hundreds = getRandomInt(1, 9);
   let tens = getRandomInt(0, 9);

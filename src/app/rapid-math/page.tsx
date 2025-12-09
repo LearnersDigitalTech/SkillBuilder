@@ -260,7 +260,7 @@ export default function Home() {
               )}
             </Button>
           </div>
-          <DialogFooter className="sm:justify-between flex-row items-center gap-4">
+          {/* <DialogFooter className="sm:justify-between flex-row items-center gap-4">
             <Button
               variant="ghost"
               className="text-slate-400 hover:text-slate-600"
@@ -271,7 +271,7 @@ export default function Home() {
             >
               Skip & Start Quiz <ChevronRight size={16} />
             </Button>
-          </DialogFooter>
+          </DialogFooter> */}
         </DialogContent>
       </Dialog>
 
