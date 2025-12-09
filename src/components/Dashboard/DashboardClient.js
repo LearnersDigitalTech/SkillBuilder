@@ -6,7 +6,7 @@ import Navigation from "@/components/Navigation/Navigation.component";
 import Footer from "@/components/Footer/Footer.component";
 import PhoneNumberDialog from "@/components/Auth/PhoneNumberDialog";
 import { CircularProgress, Button, FormControl, InputLabel, Select, MenuItem, TextField, Dialog, DialogTitle, DialogContent, Card, CardContent } from "@mui/material";
-import { User, LogOut, BookOpen, Clock, Award, ChevronRight, Edit2, GraduationCap } from "lucide-react";
+import { User, LogOut, BookOpen, Clock, Award, ChevronRight, Edit2, GraduationCap, Zap } from "lucide-react";
 import { ref, get, set } from "firebase/database";
 import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler";
 import Styles from "../../app/dashboard/Dashboard.module.css";
@@ -175,7 +175,26 @@ const DashboardClient = () => {
 
     const effectiveUserData = userData || (typeof window !== "undefined" ? JSON.parse(window.localStorage.getItem("quizSession") || "{}")?.userDetails : null);
     const children = effectiveUserData?.children || null;
-    const activeChild = children && activeChildId ? children[activeChildId] : null;
+
+    // Robust active child resolution
+    let activeChild = null;
+    if (children) {
+        if (activeChildId && children[activeChildId]) {
+            activeChild = children[activeChildId];
+        } else if (children['default']) {
+            // Fallback to 'default' child if it exists (legacy users)
+            activeChild = children['default'];
+            // Update activeChildId to reflect this if it was null
+            if (!activeChildId) setActiveChildId('default');
+        } else {
+            // Last resort: take the first child found
+            const firstKey = Object.keys(children)[0];
+            if (firstKey) {
+                activeChild = children[firstKey];
+                if (!activeChildId) setActiveChildId(firstKey);
+            }
+        }
+    }
 
     if (loading) {
         return (
@@ -332,7 +351,7 @@ const DashboardClient = () => {
                             </div>
                             <div className={Styles.profileInfo}>
                                 <h1>{activeChild?.name || "Student"}</h1>
-                                <p>{activeChild?.grade} • {activeChild?.schoolName}</p>
+                                <p>{activeChild?.grade || "Grade N/A"} • {activeChild?.schoolName || "Learner"}</p>
                             </div>
                         </div>
 
@@ -410,70 +429,138 @@ const DashboardClient = () => {
                             <div className={Styles.loaderText}>Loading report...</div>
                         </div>
                     ) : reports ? (
-                        <div className={Styles.reportsList}>
-                            {/* Handle hybrid structure: Root (Legacy) + Children (New) */}
+                        <div className="flex flex-col gap-8">
                             {(() => {
-                                let reportList = [];
+                                let rapidMathReports = [];
+                                let assessmentReports = [];
 
-                                // 1. Check for Legacy Report at Root
+                                // 1. Collect all reports and split by type
+                                let allReports = [];
+
                                 if (reports.summary) {
-                                    reportList.push({
-                                        id: 'root',
-                                        ...reports
-                                    });
+                                    allReports.push({ id: 'root', ...reports });
                                 }
 
-                                // 2. Check for New Reports (Children)
                                 Object.entries(reports).forEach(([key, val]) => {
-                                    // Identify report objects by presence of 'summary' field, excluding the root keys we already processed
                                     if (key !== 'summary' && val && typeof val === 'object' && val.summary) {
-                                        reportList.push({ id: key, ...val });
+                                        allReports.push({ id: key, ...val });
                                     }
                                 });
 
-                                // 3. Sort by timestamp (newest first)
-                                reportList.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+                                // 2. Sort all reports first
+                                allReports.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
 
-                                // 4. Filter out duplicates (same timestamp) - Fix for strict mode double-save issue
-                                const uniqueReports = [];
+                                // 3. Deduplicate
                                 const seenTimestamps = new Set();
-                                reportList.forEach(report => {
+                                const uniqueReports = [];
+                                allReports.forEach(report => {
                                     const time = new Date(report.timestamp).getTime();
-                                    // Allow some tolerance or exact match? Exact match is likely for double-invoke
                                     if (!seenTimestamps.has(time)) {
                                         seenTimestamps.add(time);
                                         uniqueReports.push(report);
                                     }
                                 });
 
-                                return uniqueReports.map((report, index) => (
-                                    <Card key={report.id || index} className={Styles.reportCard}>
-                                        <CardContent className={Styles.reportContent}>
-                                            <div className={Styles.reportInfo}>
-                                                <div className={Styles.reportIcon}>
-                                                    <Award size={24} />
-                                                </div>
-                                                <div>
-                                                    <h3>Math Skill Proficiency Test {uniqueReports.length > 1 ? `#${uniqueReports.length - index}` : ""}</h3>
-                                                    <p className={Styles.reportDate}>
-                                                        {new Date(report.timestamp).toLocaleDateString()} • {new Date(report.timestamp).toLocaleTimeString()}
-                                                    </p>
+                                // 4. Separate
+                                uniqueReports.forEach(report => {
+                                    if (report.type === 'RAPID_MATH') {
+                                        rapidMathReports.push(report);
+                                    } else {
+                                        assessmentReports.push(report);
+                                    }
+                                });
+
+                                return (
+                                    <>
+                                        {/* Standard Assessments Section */}
+                                        {assessmentReports.length > 0 && (
+                                            <div className={Styles.reportsList}>
+                                                {assessmentReports.map((report, index) => (
+                                                    <Card key={report.id || index} className={Styles.reportCard}>
+                                                        <CardContent className={Styles.reportContent}>
+                                                            <div className={Styles.reportInfo}>
+                                                                <div className={Styles.reportIcon}>
+                                                                    <Award size={24} />
+                                                                </div>
+                                                                <div>
+                                                                    <h3>Math Skill Proficiency Test {assessmentReports.length > 1 ? `#${assessmentReports.length - index}` : ""}</h3>
+                                                                    <p className={Styles.reportDate}>
+                                                                        {new Date(report.timestamp).toLocaleDateString()} • {new Date(report.timestamp).toLocaleTimeString()}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <div className={Styles.reportScore}>
+                                                                <div className={Styles.scoreBadge}>
+                                                                    {report.summary.accuracyPercent}% Score
+                                                                </div>
+                                                                <Button
+                                                                    endIcon={<ChevronRight />}
+                                                                    onClick={() => router.push(`/quiz/quiz-result?reportId=${report.id}`)}
+                                                                >
+                                                                    View Full Report
+                                                                </Button>
+                                                            </div>
+                                                        </CardContent>
+                                                    </Card>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* Rapid Math Section */}
+                                        {rapidMathReports.length > 0 && (
+                                            <div className="mt-8">
+                                                <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-amber-600">
+                                                    <Zap size={24} fill="currentColor" /> Rapid Math Challenges
+                                                </h3>
+                                                <div className={Styles.reportsList}>
+                                                    {rapidMathReports.map((report, index) => (
+                                                        <Card key={report.id || index} className={Styles.reportCard}>
+                                                            <CardContent className={Styles.reportContent}>
+                                                                <div className={Styles.reportInfo}>
+                                                                    <div className={Styles.reportIcon}>
+                                                                        <Zap size={24} className="text-amber-500" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <h3>Rapid Math Challenge</h3>
+                                                                        <p className={Styles.reportDate}>
+                                                                            {new Date(report.timestamp).toLocaleDateString()} • {new Date(report.timestamp).toLocaleTimeString()}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                                <div className={Styles.reportScore}>
+                                                                    <div className={`${Styles.scoreBadge} bg-amber-100 text-amber-800`}>
+                                                                        {report.summary.accuracyPercent}% Score
+                                                                    </div>
+                                                                    <Button
+                                                                        endIcon={<ChevronRight />}
+                                                                        onClick={() => router.push(`/rapid-math/test/summary?reportId=${report.id}`)}
+                                                                    >
+                                                                        View Report
+                                                                    </Button>
+                                                                </div>
+                                                            </CardContent>
+                                                        </Card>
+                                                    ))}
                                                 </div>
                                             </div>
-                                            <div className={Styles.reportScore}>
-                                                <div className={Styles.scoreBadge}>
-                                                    {report.summary.accuracyPercent}% Score
-                                                </div>
+                                        )}
+
+                                        {/* Empty State if EVERYTHING is empty */}
+                                        {assessmentReports.length === 0 && rapidMathReports.length === 0 && (
+                                            <div className={Styles.emptyState}>
+                                                <img src="/empty-state.svg" alt="No assessments" className={Styles.emptyImage} />
+                                                <p>You haven't taken any assessments yet.</p>
                                                 <Button
-                                                    endIcon={<ChevronRight />}
-                                                    onClick={() => router.push(`/quiz/quiz-result?reportId=${report.id}`)}
+                                                    variant="contained"
+                                                    className={Styles.startBtn}
+                                                    onClick={() => router.push("/quiz")}
                                                 >
-                                                    View Full Report
+                                                    Start Assessment
                                                 </Button>
                                             </div>
-                                        </CardContent>
-                                    </Card>
-                                ));
+                                        )}
+                                    </>
+                                );
                             })()}
                         </div>
                     ) : (

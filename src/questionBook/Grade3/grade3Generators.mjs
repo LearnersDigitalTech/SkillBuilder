@@ -9,14 +9,13 @@ const shuffleArray = (array) => {
 };
 
 // --- Number Sense & Operations ---
-
-export const generateAddition = () => {
-    // 3-digit addition with carry
-    const num1 = getRandomInt(100, 500);
-    const num2 = getRandomInt(100, 499);
+export const generateAddition2digit = () => {
+    // 2-digit addition with carry
+    const num1 = getRandomInt(10, 99);
+    const num2 = getRandomInt(10, 99);
     const answer = num1 + num2;
 
-    const question = `Add: ${num1} + ${num2} = ?`;
+    const question = `Add: $$ ${num1} + ${num2} = ? $$`;
 
     return {
         type: "userInput",
@@ -26,13 +25,29 @@ export const generateAddition = () => {
     };
 };
 
-export const generateSubtraction = () => {
-    // 3-digit subtraction with borrow
-    const num1 = getRandomInt(500, 999);
+export const generateAddition3digit = () => {
+    // 3-digit addition with carry
+    const num1 = getRandomInt(100, 500);
     const num2 = getRandomInt(100, 499);
+    const answer = num1 + num2;
+
+    const question = `Add: $$ ${num1} + ${num2} = ? $$`;
+
+    return {
+        type: "userInput",
+        question: question,
+        topic: "Number Sense / Addition",
+        answer: String(answer)
+    };
+};
+
+export const generateSubtraction2digit = () => {
+    // 2-digit subtraction with borrow
+    const num1 = getRandomInt(10, 99);
+    const num2 = getRandomInt(10, num1);
     const answer = num1 - num2;
 
-    const question = `Subtract: ${num1} - ${num2} = ?`;
+    const question = `Subtract: $$ ${num1} - ${num2} = ? $$`;
 
     return {
         type: "userInput",
@@ -42,14 +57,30 @@ export const generateSubtraction = () => {
     };
 };
 
-export const generateMultiplication = () => {
-    // 1-digit x 1-digit or 2-digit x 1-digit
-    const isTwoDigit = Math.random() > 0.5;
-    const num1 = isTwoDigit ? getRandomInt(10, 20) : getRandomInt(2, 9);
-    const num2 = getRandomInt(2, 9);
+export const generateSubtraction3digit = () => {
+    // 3-digit subtraction with borrow
+    const num1 = getRandomInt(500, 999);
+    const num2 = getRandomInt(100, 499);
+    const answer = num1 - num2;
+
+    const question = `Subtract: $$ ${num1} - ${num2} = ? $$`;
+
+    return {
+        type: "userInput",
+        question: question,
+        topic: "Number Sense / Subtraction",
+        answer: String(answer)
+    };
+};
+
+export const generateMultiplication7and8and9and12 = () => {
+    // Only 9 and 12 times tables
+    const tables = [7, 8, 9, 12];
+    const num1 = tables[getRandomInt(0, tables.length - 1)];
+    const num2 = getRandomInt(1, 10);
     const answer = num1 * num2;
 
-    const question = `Multiply: ${num1} × ${num2} = ?`;
+    const question = `Multiply: $$ ${num1} × ${num2} = ? $$`;
 
     return {
         type: "userInput",
@@ -59,13 +90,46 @@ export const generateMultiplication = () => {
     };
 };
 
-export const generateDivision = () => {
+export const generateMultiplication13to19 = () => {
+    // Only 9 and 12 times tables
+    const tables = [13, 14, 15, 16, 17, 18, 19];
+    const num1 = tables[getRandomInt(0, tables.length - 1)];
+    const num2 = getRandomInt(1, 10);
+    const answer = num1 * num2;
+
+    const question = `Multiply: $$ ${num1} × ${num2} = ? $$`;
+
+    return {
+        type: "userInput",
+        question: question,
+        topic: "Number Sense / Multiplication",
+        answer: String(answer)
+    };
+};
+
+export const generateDivision1stlevel = () => {
     // Simple division without remainder
     const divisor = getRandomInt(2, 9);
     const quotient = getRandomInt(2, 12);
     const dividend = divisor * quotient;
 
-    const question = `Divide: ${dividend} ÷ ${divisor} = ?`;
+    const question = `Divide: $$ ${dividend} \\div ${divisor} = ? $$`;
+
+    return {
+        type: "userInput",
+        question: question,
+        topic: "Number Sense / Division",
+        answer: String(quotient)
+    };
+};
+
+export const generateDivision2ndlevel = () => {
+    // Simple division without remainder
+    const divisor = getRandomInt(10, 15);
+    const quotient = getRandomInt(2, 10);
+    const dividend = divisor * quotient;
+
+    const question = `Divide: $$ ${dividend} \\div ${divisor} = ? $$`;
 
     return {
         type: "userInput",
@@ -84,7 +148,7 @@ export const generateMissingNumber = () => {
         const missing = getRandomInt(5, 20);
         const total = num1 + missing;
 
-        const question = `Find the missing number: ${num1} + ? = ${total}`;
+        const question = `Find the missing number: $$ ${num1} +  ?  = ${total} $$`;
 
         return {
             type: "userInput",
@@ -115,7 +179,7 @@ export const generateMixedOperations = () => {
     const num3 = getRandomInt(1, 5);
 
     const answer = num1 + num2 - num3;
-    const question = `Solve: ${num1} + ${num2} - ${num3} = ?`;
+    const question = `Solve: $$ ${num1} + ${num2} - ${num3} = ? $$`;
 
     return {
         type: "userInput",
@@ -132,13 +196,13 @@ export const generateFractions = () => {
     const numerator = getRandomInt(1, denominator - 1);
 
     const question = `What fraction represents ${numerator} part${numerator > 1 ? 's' : ''} out of ${denominator} equal parts?`;
-    const answer = `${numerator}/${denominator}`;
+    const answer = `$\\frac{${numerator}}{${denominator}}$`;
 
     const options = shuffleArray([
         { value: answer, label: answer },
-        { value: `${denominator}/${numerator}`, label: `${denominator}/${numerator}` },
-        { value: `${numerator}/${denominator + 1}`, label: `${numerator}/${denominator + 1}` },
-        { value: `${numerator + 1}/${denominator}`, label: `${numerator + 1}/${denominator}` }
+        { value: `$\\frac{${denominator}}{${numerator}}$`, label: `$\\frac{${denominator}}{${numerator}}$` },
+        { value: `$\\frac{${numerator}}{${denominator + 1}}$`, label: `$\\frac{${numerator}}{${denominator + 1}}$` },
+        { value: `$\\frac{${numerator + 1}}{${denominator}}$`, label: `$\\frac{${numerator + 1}}{${denominator}}$` }
     ]);
 
     return {
@@ -158,12 +222,12 @@ export const generateCompareFractions = () => {
     while (den1 === den2) den2 = getRandomInt(2, 5);
 
     const answer = den1 < den2 ? ">" : "<"; // Smaller denominator means larger fraction
-    const question = `Compare: ${num}/${den1} _ ${num}/${den2}`;
+    const question = `Compare: $\\frac{${num}}{${den1}}$   ?    $\\frac{${num}}{${den2}}$`;
 
     const options = shuffleArray([
-        { value: ">", label: ">" },
-        { value: "<", label: "<" },
-        { value: "=", label: "=" }
+        { value: ">", label: "> More than" },
+        { value: "<", label: "< Less than" },
+        { value: "=", label: "= Equal to" }
     ]);
 
     return {
@@ -180,7 +244,7 @@ export const generateCompareFractions = () => {
 export const generateShapes = () => {
     const shapes = [
         { name: "Cube", properties: "6 faces, 12 edges, 8 vertices" },
-        { name: "Cuboid", properties: "6 rectangular faces, 12 edges, 8 vertices" },
+        // { name: "Cuboid", properties: "6 rectangular faces, 12 edges, 8 vertices" },
         { name: "Cone", properties: "1 circular face, 1 vertex" },
         { name: "Cylinder", properties: "2 circular faces, 0 vertices" },
         { name: "Sphere", properties: "0 faces, 0 edges, 0 vertices" }
@@ -208,13 +272,19 @@ export const generateShapes = () => {
 export const generateSymmetry = () => {
     // Concept check
     const objects = [
-        { name: "Butterfly", symmetric: "Yes" },
-        { name: "Human Face", symmetric: "Yes" },
-        { name: "Circle", symmetric: "Yes" },
-        { name: "Scalene Triangle", symmetric: "No" },
-        { name: "Letter F", symmetric: "No" },
-        { name: "Letter G", symmetric: "No" }
+        { name: "Butterfly", symmetric: "Yes", image: "/assets/grade3/butterfly.png" },
+        // { name: "Human Face", symmetric: "Yes" }, // No image available
+        { name: "Circle", symmetric: "Yes", image: "/assets/grade3/circle.png" },
+        // { name: "Scalene Triangle", symmetric: "No" },
+        { name: "Letter F", symmetric: "No", image: "/assets/grade3/F.png" },
+        { name: "Letter G", symmetric: "No", image: "/assets/grade3/G.png" }
     ];
+
+    // Filter out objects without images if we want to enforce images, 
+    // or just pick from all. Given the user request implies using these images, 
+    // I will prioritize ones with images or just leave the list as is with images added.
+    // I'll stick to the ones with images enabled for a better experience, 
+    // so I commented out Human Face which had no image in the list.
 
     const obj = objects[getRandomInt(0, objects.length - 1)];
     const question = `Is a ${obj.name} symmetrical?`;
@@ -223,6 +293,7 @@ export const generateSymmetry = () => {
         type: "mcq",
         question: question,
         topic: "Geometry / Symmetry",
+        image: obj.image,
         options: [
             { value: "Yes", label: "Yes" },
             { value: "No", label: "No" }
@@ -237,7 +308,7 @@ export const generateLengthConversion = () => {
     // m to cm
     const m = getRandomInt(1, 9);
     const cm = m * 100;
-    const question = `Convert ${m} meters to centimeters.`;
+    const question = `Convert ${m} meter to centimeters.`;
 
     return {
         type: "userInput",
@@ -302,17 +373,35 @@ export const generateTimeReading = () => {
 // --- Money ---
 
 export const generateIdentifyMoney = () => {
-    // Identify notes/coins or simple addition
     const notes = [10, 20, 50, 100, 200, 500];
     const note = notes[getRandomInt(0, notes.length - 1)];
 
-    const question = `Identify the value of a ₹${note} note.`;
+    const question = `Identify the note </br>₹${note}`;
+
+    // Create options with other note values
+    const uniqueOptions = new Set();
+    uniqueOptions.add(note);
+
+    // Add 3 random different notes as distractors
+    while (uniqueOptions.size < 4) {
+        const randomNote = notes[getRandomInt(0, notes.length - 1)];
+        uniqueOptions.add(randomNote);
+    }
+
+    // Convert to array and create MCQ options with images
+    const optionsArray = Array.from(uniqueOptions).map(value => ({
+        value: `/assets/grade2/rupee_${value}.jpg`,
+        // label: `₹${value}`,
+        image: `/assets/grade2/rupee_${value}.jpg`
+    }));
 
     return {
-        type: "userInput",
+        type: "mcq",
         question: question,
-        topic: "Money / Identification",
-        answer: String(note)
+        topic: "Money / Basics",
+        answer: `/assets/grade2/rupee_${note}.jpg`,
+        // image: `/assets/grade2/rupee_${note}.jpg`,
+        options: shuffleArray(optionsArray)
     };
 };
 
@@ -355,7 +444,7 @@ export const generateTally = () => {
         tally += "|";
     }
 
-    const question = `Count the tally marks: ${tally}`;
+    const question = `Count the tally marks:</br> ${tally}`;
 
     return {
         type: "userInput",
@@ -374,7 +463,7 @@ export const generateNumberPattern = () => {
     const seq = [start, start + step, start + step * 2, start + step * 3];
     const next = start + step * 4;
 
-    const question = `Complete the pattern: ${seq.join(", ")}, ?`;
+    const question = `Complete the pattern:</br> ${seq.join(", ")}, ?`;
 
     return {
         type: "userInput",

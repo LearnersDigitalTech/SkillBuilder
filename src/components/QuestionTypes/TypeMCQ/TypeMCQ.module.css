@@ -214,6 +214,37 @@
     align-self: flex-start;
 }
 
+.optionWithImage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.optionImage {
+    max-width: 100%;
+    max-height: 80px;
+    object-fit: contain;
+    border-radius: 0.5rem;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.optionContainer :global(.MuiFormControlLabel-root:hover) .optionImage {
+    border-color: #2563eb;
+}
+
+.optionContainer :global(.MuiFormControlLabel-root .Mui-checked)~.optionImage {
+    border-color: #2563eb;
+}
+
+.optionLabel {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 1.1rem;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
     .quizContainer {
@@ -248,6 +279,14 @@
     .questionImage {
         align-self: center;
         max-height: 150px;
+    }
+
+    .optionImage {
+        max-height: 70px;
+    }
+
+    .optionLabel {
+        font-size: 1rem;
     }
 }
 

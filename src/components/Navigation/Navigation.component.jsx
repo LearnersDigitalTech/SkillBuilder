@@ -1,7 +1,7 @@
 "use client";
 import { useContext, useState, useEffect } from "react";
 import Styles from "./Navigation.module.css";
-import { Play, Phone, User } from 'lucide-react'
+import { Play, Phone, User, Zap } from 'lucide-react'
 import { Tooltip } from "@mui/material";
 import { useRouter } from "next/navigation";
 import AuthModal from "../Auth/AuthModal.component";
@@ -154,6 +154,13 @@ const Navigation = () => {
                         >
                             <Play size={16} />
                             <span className={Styles.buttonText}>Take Test</span>
+                        </button>
+                    </Tooltip>
+
+                    <Tooltip title="Rapid Math" arrow>
+                        <button onClick={() => router.push("/rapid-math")} className={`${Styles.navButton} ${Styles.outlined}`}>
+                            <Zap size={16} />
+                            <span className={Styles.buttonText}>Rapid Math</span>
                         </button>
                     </Tooltip>
 

@@ -338,6 +338,16 @@
     box-shadow: 0 2px 4px -1px rgba(22, 163, 74, 0.4), 0 0 0 #14532d !important;
 }
 
+.questionImage {
+    max-width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    margin-bottom: 1.5rem;
+    border-radius: 0.5rem;
+    align-self: flex-start;
+    z-index: 1;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
     .quizContainer {
@@ -378,6 +388,12 @@
         overflow-y: auto;
         padding-bottom: 70px;
         /* Space for fixed navigation */
+    }
+
+    .questionImage {
+        align-self: center;
+        max-height: 150px;
+        margin-bottom: 1rem;
     }
 
     .questionColumn {

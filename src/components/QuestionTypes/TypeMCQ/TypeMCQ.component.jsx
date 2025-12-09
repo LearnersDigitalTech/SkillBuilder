@@ -60,7 +60,22 @@ const TypeMCQ = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, questio
                         <FormControlLabel
                             key={option.value}
                             value={option.value}
-                            label={<MathRenderer content={option.label} />}
+                            label={
+                                option.image ? (
+                                    <div className={Styles.optionWithImage}>
+                                        <img
+                                            src={option.image}
+                                            alt={option.label}
+                                            className={Styles.optionImage}
+                                        />
+                                        <span className={Styles.optionLabel}>
+                                            <MathRenderer content={option.label} />
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <MathRenderer content={option.label} />
+                                )
+                            }
                             control={<Radio />}
                         />
                     ))}

@@ -23,7 +23,7 @@ import {
     generateWeight,
     generateCapacity,
     generateTime,
-    generateShapes,
+    generateIdentifyShapes,
     generatePatterns,
     generateTally,
     generatePictograph,
@@ -55,19 +55,20 @@ const Grade2Questions = {
     q16: generate(generateSubWordProblems),
     q17: generate(generateRepeatedAddition),
     q18: generate(generateTables),
-    q19: generate(generateIdentifyMoney),
-    q20: generate(generateAddMoney),
-    q21: generate(generateSubMoney),
-    q22: generate(generateLength),
+    q19: generate(generateTables),
+    q20: generate(generateIdentifyMoney),
+    q21: generate(generateAddMoney),
+    q22: generate(generateSubMoney),
+    // q22: generate(generateLength),
     q23: generate(generateWeight),
     q24: generate(generateCapacity),
     q25: generate(generateTime),
-    q26: generate(generateShapes),
+    q26: generate(generateIdentifyShapes),
     q27: generate(generatePatterns),
     q28: generate(generateTally),
-    q29: generate(generatePictograph),
-    q30: generate(generateSequences),
-    q31: generate(generateMissingNumbers)
+    // q28: generate(generatePictograph),
+    q29: generate(generateSequences),
+    q30: generate(generateMissingNumbers)
 };
 
 export default Grade2Questions;

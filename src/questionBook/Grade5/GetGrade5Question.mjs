@@ -19,6 +19,7 @@ import {
     generateAreaPerimeterShapes,
     generatePieChart,
     generateFactors,
+    generateLCM,
     generateHCF
 } from './grade5Generators.mjs';
 
@@ -47,17 +48,18 @@ const Grade5Questions = {
     q18: generate(generateAreaPerimeterShapes),
     q19: generate(generatePieChart),
     q20: generate(generateFactors),
-    q21: generate(generateHCF),
+    q21: generate(generateLCM),
+    q22: generate(generateHCF),
     // Fill remaining slots to reach q30 if needed, reusing generators
-    q22: generate(generatePlaceValueLarge),
-    q23: generate(generateAdditionLarge),
-    q24: generate(generateMultiplicationLarge),
-    q25: generate(generateEquivalentFractions),
-    q26: generate(generateDecimalOps),
-    q27: generate(generateUnitConversion),
-    q28: generate(generateAreaPerimeterShapes),
-    q29: generate(generateFactors),
-    q30: generate(generateHCF)
+    // q22: generate(generatePlaceValueLarge),
+    // q23: generate(generateAdditionLarge),
+    // q24: generate(generateMultiplicationLarge),
+    // q25: generate(generateEquivalentFractions),
+    // q26: generate(generateDecimalOps),
+    // q27: generate(generateUnitConversion),
+    // q28: generate(generateAreaPerimeterShapes),
+    // q29: generate(generateFactors),
+    // q30: generate(generateHCF)
 };
 
 export default Grade5Questions;

@@ -34,32 +34,110 @@ export const generatePlaceValue5Digit = () => {
     };
 };
 
+// export const generateAddition4Digit = () => {
+//     const num1 = getRandomInt(1000, 5000);
+//     const num2 = getRandomInt(1000, 4999);
+//     const answer = num1 + num2;
+
+//     const question = `Add: ${num1} + ${num2} = ?`;
+
+//     return {
+//         type: "userInput",
+//         question: question,
+//         topic: "Number Sense / Addition",
+//         answer: String(answer)
+//     };
+// };
+
+export const generateExpandedForm = () => {
+    const num = getRandomInt(1000, 9999);
+    const numStr = String(num);
+    const parts = [];
+
+    for (let i = 0; i < numStr.length; i++) {
+        const digit = numStr[i];
+        if (digit !== '0') {
+            parts.push(`${digit}${'0'.repeat(numStr.length - 1 - i)}`);
+        }
+    }
+
+    const answer = parts.join(" + ");
+    const question = `Write the expanded form of ${num}.`;
+
+    // Distractors
+    const dist1 = parts.join(" + ").replace(/00/g, "0"); // Fewer zeros
+    const dist2 = parts.join(" - "); // Wrong operator
+
+    // Create a subtle wrong expanded form
+    const partsWrong = [...parts];
+    if (partsWrong.length > 1) {
+        partsWrong[partsWrong.length - 1] = partsWrong[partsWrong.length - 1] + "0";
+    }
+    const dist3 = partsWrong.join(" + ");
+
+    const options = shuffleArray([
+        { value: answer, label: answer },
+        { value: dist1, label: dist1 },
+        { value: dist3, label: dist3 },
+        { value: String(num), label: String(num) } // Just the number
+    ]);
+
+    return {
+        type: "mcq",
+        question: question,
+        topic: "Number Sense / Expanded Form",
+        options: options,
+        answer: answer
+    };
+};
+
 export const generateAddition4Digit = () => {
     const num1 = getRandomInt(1000, 5000);
     const num2 = getRandomInt(1000, 4999);
-    const answer = num1 + num2;
+    // Ensure carry
+    const u1 = num1 % 10;
+    const u2 = num2 % 10;
+    if (u1 + u2 < 10) return generateAddition4Digit(); // Retry if no carry
 
-    const question = `Add: ${num1} + ${num2} = ?`;
+    const answer = num1 + num2;
 
     return {
         type: "userInput",
-        question: question,
-        topic: "Number Sense / Addition",
+        question: `Add: ${num1} + ${num2} = ?`,
+        topic: "Addition / With Carry",
         answer: String(answer)
     };
 };
 
+// export const generateSubtraction4Digit = () => {
+//     const num1 = getRandomInt(5000, 9999);
+//     const num2 = getRandomInt(1000, 4999);
+//     const answer = num1 - num2;
+
+//     const question = `Subtract: ${num1} - ${num2} = ?`;
+
+//     return {
+//         type: "userInput",
+//         question: question,
+//         topic: "Number Sense / Subtraction",
+//         answer: String(answer)
+//     };
+// };
+
 export const generateSubtraction4Digit = () => {
     const num1 = getRandomInt(5000, 9999);
     const num2 = getRandomInt(1000, 4999);
-    const answer = num1 - num2;
+    // Ensure borrow
+    const u1 = num1 % 10;
+    const u2 = num2 % 10;
+    if (u1 >= u2) return generateSubtraction4Digit(); // Retry if no borrow needed
 
-    const question = `Subtract: ${num1} - ${num2} = ?`;
+    const answer = num1 - num2;
 
     return {
         type: "userInput",
-        question: question,
-        topic: "Number Sense / Subtraction",
+        question: `Subtract: ${num1} - ${num2} = ?`,
+        topic: "Subtraction / With Borrow",
         answer: String(answer)
     };
 };
@@ -125,27 +203,88 @@ export const generateEstimation = () => {
 
 // --- Fractions ---
 
+// export const generateFractionTypes = () => {
+//     // Identify Proper, Improper, Mixed
+//     const types = ["Proper Fraction", "Improper Fraction", "Mixed Fraction"];
+//     const type = types[getRandomInt(0, 2)];
+//     let question, answer;
+
+//     if (type === "Proper Fraction") {
+//         const den = getRandomInt(3, 9);
+//         const num = getRandomInt(1, den - 1);
+//         question = `Identify the type of fraction: $$ ${num}/${den} $$`;
+//         answer = "Proper Fraction";
+//     } else if (type === "Improper Fraction") {
+//         const num = getRandomInt(5, 12);
+//         const den = getRandomInt(2, num - 1);
+//         question = `Identify the type of fraction: $$ ${num}/${den} $$`;
+//         answer = "Improper Fraction";
+//     } else {
+//         const whole = getRandomInt(1, 5);
+//         const den = getRandomInt(3, 9);
+//         const num = getRandomInt(1, den - 1);
+//         question = `Identify the type of fraction: $$ ${whole} ${num}/${den} $$`;
+//         answer = "Mixed Fraction";
+//     }
+
+//     const options = shuffleArray([
+//         { value: "Proper Fraction", label: "Proper Fraction" },
+//         { value: "Improper Fraction", label: "Improper Fraction" },
+//         { value: "Mixed Fraction", label: "Mixed Fraction" },
+//         { value: "Unit Fraction", label: "Unit Fraction" }
+//     ]);
+
+//     return {
+//         type: "mcq",
+//         question: question,
+//         topic: "Fractions / Types",
+//         options: options,
+//         answer: answer
+//     };
+// };
+
+
+
+// Helper: compute gcd
+const gcd = (a, b) => {
+    if (b === 0) return a;
+    return gcd(b, a % b);
+};
+
 export const generateFractionTypes = () => {
-    // Identify Proper, Improper, Mixed
     const types = ["Proper Fraction", "Improper Fraction", "Mixed Fraction"];
     const type = types[getRandomInt(0, 2)];
     let question, answer;
 
     if (type === "Proper Fraction") {
-        const den = getRandomInt(3, 9);
-        const num = getRandomInt(1, den - 1);
-        question = `Identify the type of fraction: ${num}/${den}`;
+        let num, den;
+        do {
+            den = getRandomInt(3, 9);
+            num = getRandomInt(1, den - 1);
+        } while (gcd(num, den) !== 1); // retry if not simplified
+
+        question = `Identify the type of fraction: $$ ${num}/${den} $$`;
         answer = "Proper Fraction";
+
     } else if (type === "Improper Fraction") {
-        const num = getRandomInt(5, 12);
-        const den = getRandomInt(2, num - 1);
-        question = `Identify the type of fraction: ${num}/${den}`;
+        let num, den;
+        do {
+            num = getRandomInt(5, 12);
+            den = getRandomInt(2, num - 1);
+        } while (gcd(num, den) !== 1); // retry if not simplified
+
+        question = `Identify the type of fraction: $$ ${num}/${den} $$`;
         answer = "Improper Fraction";
-    } else {
-        const whole = getRandomInt(1, 5);
-        const den = getRandomInt(3, 9);
-        const num = getRandomInt(1, den - 1);
-        question = `Identify the type of fraction: ${whole} ${num}/${den}`;
+
+    } else { // Mixed Fraction
+        let whole, num, den;
+        do {
+            whole = getRandomInt(1, 5);
+            den = getRandomInt(3, 9);
+            num = getRandomInt(1, den - 1);
+        } while (gcd(num, den) !== 1); // retry if not simplified
+
+        question = `Identify the type of fraction: $$ ${whole} ${num}/${den} $$`;
         answer = "Mixed Fraction";
     }
 
@@ -165,6 +304,7 @@ export const generateFractionTypes = () => {
     };
 };
 
+
 export const generateFractionOperations = () => {
     // Add/Sub like fractions
     const den = getRandomInt(3, 12);
@@ -176,22 +316,22 @@ export const generateFractionOperations = () => {
 
     if (isAddition) {
         answerNum = num1 + num2;
-        question = `Solve: ${num1}/${den} + ${num2}/${den} = ?`;
+        question = `Solve: $$ ${num1}/${den} + ${num2}/${den} = ? $$`;
     } else {
         // Ensure num1 > num2 for subtraction
         const n1 = Math.max(num1, num2);
         const n2 = Math.min(num1, num2);
         answerNum = n1 - n2;
-        question = `Solve: ${n1}/${den} - ${n2}/${den} = ?`;
+        question = `Solve: $$ ${n1}/${den} - ${n2}/${den} = ? $$`;
     }
 
-    const answer = `${answerNum}/${den}`;
+    const answer = `$$ ${answerNum}/${den} $$`;
 
     const options = shuffleArray([
         { value: answer, label: answer },
-        { value: `${answerNum + 1}/${den}`, label: `${answerNum + 1}/${den}` },
-        { value: `${answerNum}/${den + 1}`, label: `${answerNum}/${den + 1}` },
-        { value: `${den}/${answerNum}`, label: `${den}/${answerNum}` }
+        { value: `${answerNum + 1}/${den}`, label: `$$ ${answerNum + 1}/${den} $$` },
+        { value: `${answerNum}/${den + 1}`, label: `$$ ${answerNum}/${den + 1} $$` },
+        { value: `${den}/${answerNum}`, label: `$$ ${den}/${answerNum} $$` }
     ]);
 
     return {
@@ -267,35 +407,77 @@ export const generateTriangles = () => {
 
 // --- Measurement ---
 
-export const generateAreaPerimeter = () => {
-    const isArea = Math.random() > 0.5;
+// export const generateAreaPerimeter = () => {
+//     const isArea = Math.random() > 0.5;
+//     const l = getRandomInt(2, 10);
+//     const b = getRandomInt(2, 10);
+
+//     if (isArea) {
+//         const area = l * b;
+//         const question = `Find the area of a rectangle with length ${l}cm and breadth ${b}cm.`;
+//         return {
+//             type: "userInput",
+//             question: question,
+//             topic: "Measurement / Area",
+//             answer: String(area)
+//         };
+//     } else {
+//         const perimeter = 2 * (l + b);
+//         const question = `Find the perimeter of a rectangle with length ${l}cm and breadth ${b}cm.`;
+//         return {
+//             type: "userInput",
+//             question: question,
+//             topic: "Measurement / Perimeter",
+//             answer: String(perimeter)
+//         };
+//     }
+// };
+export const generateAreaRectangle = () => {
     const l = getRandomInt(2, 10);
     const b = getRandomInt(2, 10);
 
-    if (isArea) {
-        const area = l * b;
-        const question = `Find the area of a rectangle with length ${l}cm and breadth ${b}cm.`;
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Measurement / Area",
-            answer: String(area)
-        };
-    } else {
-        const perimeter = 2 * (l + b);
-        const question = `Find the perimeter of a rectangle with length ${l}cm and breadth ${b}cm.`;
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Measurement / Perimeter",
-            answer: String(perimeter)
-        };
-    }
+    const area = l * b;
+
+    return {
+        type: "userInput",
+        question: `Find the area of a rectangle with length ${l}cm and breadth ${b}cm.`,
+        topic: "Measurement / Area",
+        answer: String(area)
+    };
 };
 
-export const generateTimeConversion = () => {
+
+export const generatePerimeterRectangle = () => {
+    const l = getRandomInt(2, 10);
+    const b = getRandomInt(2, 10);
+
+    const perimeter = 2 * (l + b);
+    return {
+        type: "userInput",
+        question: `Find the perimeter of a rectangle with length ${l}cm and breadth ${b}cm.`,
+        topic: "Measurement / Perimeter",
+        answer: String(perimeter)
+    };
+};
+
+
+export const generateTimeConversion2to10 = () => {
     // Hours to Minutes
     const hours = getRandomInt(2, 10);
+    const minutes = hours * 60;
+    const question = `Convert ${hours} hours to minutes.`;
+
+    return {
+        type: "userInput",
+        question: question,
+        topic: "Measurement / Time",
+        answer: String(minutes)
+    };
+};
+
+export const generateTimeConversion5to10 = () => {
+    // Hours to Minutes
+    const hours = getRandomInt(5, 10);
     const minutes = hours * 60;
     const question = `Convert ${hours} hours to minutes.`;
 
@@ -349,17 +531,76 @@ export const generateBarGraph = () => {
 
 export const generatePattern = () => {
     // Number pattern
-    const start = getRandomInt(2, 10);
-    const mult = getRandomInt(2, 4);
-    const seq = [start, start * mult, start * mult * mult];
-    const next = start * mult * mult * mult;
+    const start = getRandomInt(2, 5);
+    const mult = getRandomInt(1, 3);
+    const seq = [start, start * mult];
+    const next = start * mult * mult;
 
-    const question = `Complete the pattern: ${seq.join(", ")}, ?`;
+    const question = `Complete the pattern: </br> ${seq.join(", ")}, ?`;
 
     return {
         type: "userInput",
         question: question,
         topic: "Logical Thinking / Patterns",
+        answer: String(next)
+    };
+};
+
+
+
+export const generateSimpleGrade4Pattern = () => {
+    const patternType = getRandomInt(1, 3); // 1=addition, 2=subtraction, 3=multiplication
+
+    let start, step, seq, next;
+
+    switch (patternType) {
+        case 1:
+            // ➕ Addition pattern
+            start = getRandomInt(2, 20);
+            step = getRandomInt(2, 10);
+
+            seq = [
+                start,
+                start + step,
+                start + step * 2
+            ];
+
+            next = start + step * 3;
+            break;
+
+        case 2:
+            // ➖ Subtraction pattern (safe: no negative results)
+            start = getRandomInt(30, 60);
+            step = getRandomInt(2, 10);
+
+            seq = [
+                start,
+                start - step,
+                start - step * 2
+            ];
+
+            next = start - step * 3;
+            break;
+
+        case 3:
+            // ✖ Multiplication pattern (×2 or ×3, small numbers)
+            start = getRandomInt(1, 5);
+            step = getRandomInt(2, 3); // ×2 or ×3
+
+            seq = [
+                start,
+                start * step,
+                start * step * step
+            ];
+
+            next = start * step * step * step;
+            break;
+    }
+
+    return {
+        type: "userInput",
+        question: `Complete the pattern: </br> ${seq.join(", ")}, ?`,
+        topic: "Number Patterns (Grade 4)",
         answer: String(next)
     };
 };

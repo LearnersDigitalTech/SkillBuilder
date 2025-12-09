@@ -30,7 +30,7 @@ export const generateIntegerUnderstanding = () => {
         question = "What integer represents sea level?";
         answer = "0";
     } else {
-        question = `What integer represents a ${ctx.text} ${val}?`;
+        question = 'What integer represents a temperature of ${val} degrees below ${ctx.text}?';
         answer = `${ctx.sign}${val}`;
     }
 

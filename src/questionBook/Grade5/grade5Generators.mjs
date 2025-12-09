@@ -10,32 +10,77 @@ const shuffleArray = (array) => {
 
 // --- Number Sense ---
 
+// export const generatePlaceValueLarge = () => {
+//     // Up to 10 Lakhs (7 digits)
+//     const num = getRandomInt(100000, 9999999);
+//     const numStr = String(num);
+
+//     // Ensure we pick a non-zero digit to avoid duplicate 0 options
+//     let pos = getRandomInt(0, numStr.length - 1);
+//     while (numStr[pos] === '0') {
+//         pos = getRandomInt(0, numStr.length - 1);
+//     }
+
+//     const digit = numStr[pos];
+//     const power = numStr.length - 1 - pos;
+//     const placeValue = Number(digit) * Math.pow(10, power);
+
+//     // Determine place name (Indian System)
+//     let placeName = "";
+//     if (power === 0) placeName = "Ones";
+//     else if (power === 1) placeName = "Tens";
+//     else if (power === 2) placeName = "Hundreds";
+//     else if (power === 3) placeName = "Thousands";
+//     else if (power === 4) placeName = "Ten Thousands";
+//     else if (power === 5) placeName = "Lakhs";
+//     else if (power === 6) placeName = "Ten Lakhs";
+
+//     const question = `What is the place value of the digit ${digit} in ${num}?`; // Simplified question
+
+//     return {
+//         type: "userInput",
+//         question: question,
+//         topic: "Number Sense / Place Value",
+//         answer: String(placeValue)
+//     };
+// };
+
 export const generatePlaceValueLarge = () => {
     // Up to 10 Lakhs (7 digits)
     const num = getRandomInt(100000, 9999999);
     const numStr = String(num);
 
-    // Ensure we pick a non-zero digit to avoid duplicate 0 options
-    let pos = getRandomInt(0, numStr.length - 1);
-    while (numStr[pos] === '0') {
-        pos = getRandomInt(0, numStr.length - 1);
+    // Collect positions of digits that are unique and non-zero
+    const uniquePositions = [];
+    for (let i = 0; i < numStr.length; i++) {
+        const digit = numStr[i];
+        if (digit !== '0' && numStr.indexOf(digit) === numStr.lastIndexOf(digit)) {
+            uniquePositions.push(i);
+        }
     }
 
+    // If no unique non-zero digit, retry
+    if (uniquePositions.length === 0) return generatePlaceValueLarge();
+
+    // Pick a random position from unique digits
+    const pos = uniquePositions[getRandomInt(0, uniquePositions.length - 1)];
     const digit = numStr[pos];
     const power = numStr.length - 1 - pos;
     const placeValue = Number(digit) * Math.pow(10, power);
 
     // Determine place name (Indian System)
     let placeName = "";
-    if (power === 0) placeName = "Ones";
-    else if (power === 1) placeName = "Tens";
-    else if (power === 2) placeName = "Hundreds";
-    else if (power === 3) placeName = "Thousands";
-    else if (power === 4) placeName = "Ten Thousands";
-    else if (power === 5) placeName = "Lakhs";
-    else if (power === 6) placeName = "Ten Lakhs";
+    switch (power) {
+        case 0: placeName = "Ones"; break;
+        case 1: placeName = "Tens"; break;
+        case 2: placeName = "Hundreds"; break;
+        case 3: placeName = "Thousands"; break;
+        case 4: placeName = "Ten Thousands"; break;
+        case 5: placeName = "Lakhs"; break;
+        case 6: placeName = "Ten Lakhs"; break;
+    }
 
-    const question = `What is the place value of the digit ${digit} in ${num}?`; // Simplified question
+    const question = `What is the place value of the digit ${digit} in ${num}?`;
 
     return {
         type: "userInput",
@@ -44,6 +89,7 @@ export const generatePlaceValueLarge = () => {
         answer: String(placeValue)
     };
 };
+
 
 export const generateExpandedForm = () => {
     const num = getRandomInt(10000, 999999);
@@ -92,15 +138,15 @@ export const generateCompareLarge = () => {
     let num2 = getRandomInt(100000, 999999);
     while (num1 === num2) num2 = getRandomInt(100000, 999999);
 
-    const question = `Compare: ${num1} ? ${num2}`;
+    const question = `Compare: $$ ${num1}  \\quad ? \\quad ${num2} $$`;
     let answer;
     if (num1 > num2) answer = ">";
     else answer = "<";
 
-    const options = shuffleArray([
-        { value: ">", label: ">" },
-        { value: "<", label: "<" },
-        { value: "=", label: "=" },
+    const options = ([
+        { value: ">", label: "> Greater than" },
+        { value: "<", label: "< Less than" },
+        { value: "=", label: "= Equal to" },
         { value: "None", label: "None" }
     ]);
 
@@ -120,7 +166,7 @@ export const generateAdditionLarge = () => {
     const num2 = getRandomInt(10000, 99999);
     const answer = num1 + num2;
 
-    const question = `Add: ${num1} + ${num2} = ?`;
+    const question = `Add: $$ ${num1} + ${num2} = ? $$`;
 
     return {
         type: "userInput",
@@ -135,7 +181,7 @@ export const generateSubtractionLarge = () => {
     const num2 = getRandomInt(10000, 49999);
     const answer = num1 - num2;
 
-    const question = `Subtract: ${num1} - ${num2} = ?`;
+    const question = `Subtract: $$ ${num1} - ${num2} = ? $$`;
 
     return {
         type: "userInput",
@@ -152,7 +198,7 @@ export const generateMultiplicationLarge = () => {
     const num2 = is3x3 ? getRandomInt(100, 999) : getRandomInt(10, 99);
 
     const answer = num1 * num2;
-    const question = `Multiply: ${num1} × ${num2} = ?`;
+    const question = `Multiply:  $$ ${num1} × ${num2} = ? $$`;
 
     return {
         type: "userInput",
@@ -170,13 +216,13 @@ export const generateDivisionLarge = () => {
     const remainder = getRandomInt(0, divisor - 1);
     const dividend = (divisor * quotient) + remainder;
 
-    const question = `Divide: ${dividend} ÷ ${divisor}`;
-    const answer = `Q: ${quotient}, R: ${remainder}`;
+    const question = `Divide: $$ ${dividend} ÷ ${divisor} $$`;
+    const answer = `$$ Q: ${quotient}, R: ${remainder} $$`;
 
     // Distractors
-    const dist1 = `Q: ${quotient + 1}, R: ${remainder}`;
-    const dist2 = `Q: ${quotient}, R: ${remainder + 1}`;
-    const dist3 = `Q: ${quotient - 1}, R: ${remainder}`;
+    const dist1 = `$$ Q: ${quotient + 1}, R: ${remainder} $$`;
+    const dist2 = `$$ Q: ${quotient}, R: ${remainder + 1} $$`;
+    const dist3 = `$$ Q: ${quotient - 1}, R: ${remainder} $$`;
 
     const options = shuffleArray([
         { value: answer, label: answer },
@@ -235,14 +281,14 @@ export const generateEquivalentFractions = () => {
     const eqNum = num * mult;
     const eqDen = den * mult;
 
-    const question = `Which fraction is equivalent to ${num}/${den}?`;
-    const answer = `${eqNum}/${eqDen}`;
+    const question = `Which fraction is equivalent to $$ ${num}/${den}? $$`;
+    const answer = `$$ ${eqNum}/${eqDen} $$`;
 
     const options = shuffleArray([
         { value: answer, label: answer },
-        { value: `${eqNum + 1}/${eqDen}`, label: `${eqNum + 1}/${eqDen}` },
-        { value: `${eqNum}/${eqDen + 1}`, label: `${eqNum}/${eqDen + 1}` },
-        { value: `${den}/${num}`, label: `${den}/${num}` }
+        { value: `${eqNum + 1}/${eqDen}`, label: `$$ ${eqNum + 1}/${eqDen} $$` },
+        { value: `${eqNum}/${eqDen + 1}`, label: `$$ ${eqNum}/${eqDen + 1} $$` },
+        { value: `${den}/${num}`, label: `$$ ${den}/${num} $$` }
     ]);
 
     return {
@@ -270,14 +316,14 @@ export const generateSimplifyFractions = () => {
     const bigNum = num * mult;
     const bigDen = den * mult;
 
-    const question = `Reduce ${bigNum}/${bigDen} to its lowest terms.`;
-    const answer = `${num}/${den}`;
+    const question = `Reduce $$ ${bigNum}/${bigDen} $$ to its lowest terms.`;
+    const answer = `$$ ${num}/${den} $$`;
 
     const options = shuffleArray([
         { value: answer, label: answer },
-        { value: `${num + 1}/${den}`, label: `${num + 1}/${den}` },
-        { value: `${num}/${den - 1}`, label: `${num}/${den - 1}` },
-        { value: `${bigNum}/${bigDen}`, label: `${bigNum}/${bigDen}` }
+        { value: `${num + 1}/${den}`, label: `$$ ${num + 1}/${den} $$` },
+        { value: `${num}/${den - 1}`, label: `$$ ${num}/${den - 1} $$` },
+        { value: `${bigNum}/${bigDen}`, label: `$$ ${bigNum}/${bigDen} $$` }
     ]);
 
     return {
@@ -301,14 +347,14 @@ export const generateAddUnlikeFractions = () => {
     const commonDen = d1 * d2;
     const numSum = (n1 * d2) + (n2 * d1);
 
-    const question = `Add: ${n1}/${d1} + ${n2}/${d2} = ?`;
-    const answer = `${numSum}/${commonDen}`;
+    const question = `Add: $$ ${n1}/${d1} + ${n2}/${d2} = ? $$`;
+    const answer = `$$ ${numSum}/${commonDen} $$`;
 
     const options = shuffleArray([
         { value: answer, label: answer },
-        { value: `${n1 + n2}/${d1 + d2}`, label: `${n1 + n2}/${d1 + d2}` }, // Common mistake
-        { value: `${numSum + 1}/${commonDen}`, label: `${numSum + 1}/${commonDen}` },
-        { value: `${numSum}/${commonDen + 1}`, label: `${numSum}/${commonDen + 1}` }
+        { value: `${n1 + n2}/${d1 + d2}`, label: `$$ ${n1 + n2}/${d1 + d2} $$` }, // Common mistake
+        { value: `${numSum + 1}/${commonDen}`, label: `$$ ${numSum + 1}/${commonDen} $$` },
+        { value: `${numSum}/${commonDen + 1}`, label: `$$ ${numSum}/${commonDen + 1} $$` }
     ]);
 
     return {
@@ -329,13 +375,13 @@ export const generateMixedImproper = () => {
     const impNum = (whole * den) + num;
 
     if (isMixedToImp) {
-        const question = `Convert ${whole} ${num}/${den} to an improper fraction.`;
-        const answer = `${impNum}/${den}`;
+        const question = `Convert $$ ${whole} ${num}/${den} $$ to an improper fraction.`;
+        const answer = `$$ ${impNum}/${den} $$`;
         const options = shuffleArray([
             { value: answer, label: answer },
-            { value: `${impNum + 1}/${den}`, label: `${impNum + 1}/${den}` },
-            { value: `${whole * num}/${den}`, label: `${whole * num}/${den}` },
-            { value: `${impNum}/${den + 1}`, label: `${impNum}/${den + 1}` }
+            { value: `${impNum + 1}/${den}`, label: `$$ ${impNum + 1}/${den} $$` },
+            { value: `${whole * num}/${den}`, label: `$$ ${whole * num}/${den} $$` },
+            { value: `${impNum}/${den + 1}`, label: `$$ ${impNum}/${den + 1} $$` }
         ]);
         return {
             type: "mcq",
@@ -345,13 +391,13 @@ export const generateMixedImproper = () => {
             answer: answer
         };
     } else {
-        const question = `Convert ${impNum}/${den} to a mixed fraction.`;
-        const answer = `${whole} ${num}/${den}`;
+        const question = `Convert $$ ${impNum}/${den} $$ to a mixed fraction.`;
+        const answer = `$$ ${whole} ${num}/${den} $$`;
         const options = shuffleArray([
             { value: answer, label: answer },
-            { value: `${whole + 1} ${num}/${den}`, label: `${whole + 1} ${num}/${den}` },
-            { value: `${whole} ${num + 1}/${den}`, label: `${whole} ${num + 1}/${den}` },
-            { value: `${whole} ${num}/${den + 1}`, label: `${whole} ${num}/${den + 1}` }
+            { value: `${whole + 1} ${num}/${den}`, label: `$$ ${whole + 1} ${num}/${den} $$` },
+            { value: `${whole} ${num + 1}/${den}`, label: `$$ ${whole} ${num + 1}/${den} $$` },
+            { value: `${whole} ${num}/${den + 1}`, label: `$$ ${whole} ${num}/${den + 1} $$` }
         ]);
         return {
             type: "mcq",
@@ -367,32 +413,39 @@ export const generateMixedImproper = () => {
 
 export const generateDecimalPlaceValue = () => {
     const whole = getRandomInt(0, 9);
-    const tenth = getRandomInt(1, 9);
-    const hundredth = getRandomInt(1, 9);
+    const tenth = getRandomInt(0, 9);
+    const hundredth = getRandomInt(0, 9);
+
     const num = `${whole}.${tenth}${hundredth}`;
+    const digits = [
+        { digit: whole, place: "ones", val: String(whole) },
+        { digit: tenth, place: "tenths", val: `0.${tenth}` },
+        { digit: hundredth, place: "hundredths", val: `0.0${hundredth}` }
+    ];
 
-    const isTenth = Math.random() > 0.5;
-    let digit, place, val;
-
-    if (isTenth) {
-        digit = tenth;
-        place = "tenths";
-        val = `0.${tenth}`;
-    } else {
-        digit = hundredth;
-        place = "hundredths";
-        val = `0.0${hundredth}`;
+    // Filter digits that are unique
+    const counts = {};
+    for (const d of digits) {
+        counts[d.digit] = (counts[d.digit] || 0) + 1;
     }
+    const uniqueDigits = digits.filter(d => counts[d.digit] === 1);
 
-    const question = `What is the place value of ${digit} in ${num}?`;
+    // If no unique digit, retry
+    if (uniqueDigits.length === 0) return generateDecimalPlaceValue();
+
+    // Pick a random unique digit
+    const choice = uniqueDigits[getRandomInt(0, uniqueDigits.length - 1)];
+
+    const question = `What is the place value of ${choice.digit} in ${num}?`;
 
     return {
         type: "userInput",
         question: question,
         topic: "Decimals / Place Value",
-        answer: val
+        answer: choice.val
     };
 };
+
 
 export const generateDecimalOps = () => {
     const isAdd = Math.random() > 0.5;
@@ -402,12 +455,12 @@ export const generateDecimalOps = () => {
     let ans, question;
     if (isAdd) {
         ans = (n1 + n2).toFixed(1);
-        question = `Add: ${n1} + ${n2} = ?`;
+        question = `Add: $$ ${n1} + ${n2} = ? $$`;
     } else {
         const big = Math.max(n1, n2);
         const small = Math.min(n1, n2);
         ans = (big - small).toFixed(1);
-        question = `Subtract: ${big} - ${small} = ?`;
+        question = `Subtract: $$ ${big} - ${small} = ? $$`;
     }
 
     return {
@@ -432,7 +485,7 @@ export const generateUnitConversion = () => {
         answer = `${m * 100} cm`;
     } else if (type === "Weight") {
         const kg = getRandomInt(2, 10);
-        question = `Convert ${kg} kg to g.`;
+        question = `Convert ${kg} kg to grams.`;
         answer = `${kg * 1000} g`;
     } else {
         const l = getRandomInt(2, 10);
@@ -550,15 +603,21 @@ export const generatePieChart = () => {
 // --- Number Theory ---
 
 export const generateFactors = () => {
-    const num = getRandomInt(6, 20);
+    const num = getRandomInt(6, 50);
+
     // Find factors
     const factors = [];
     for (let i = 1; i <= num; i++) {
         if (num % i === 0) factors.push(i);
     }
 
-    const question = `Which of these is a factor of ${num}?`;
-    const correct = factors[getRandomInt(0, factors.length - 1)];
+    // ❗ If the number is prime, regenerate
+    if (factors.length === 2) {
+        return generateFactors();
+    }
+
+    const question = `What are the factors of  $ ${num} $ `;
+    const correct = factors[getRandomInt(1, factors.length - 1)]; // avoid 1 to make it meaningful
 
     // Generate distractors (non-factors)
     const distractors = [];
@@ -574,6 +633,31 @@ export const generateFactors = () => {
         question: question,
         topic: "Number Theory / Factors",
         answer: String(correct)
+    };
+};
+
+export const generateLCM = () => {
+    // Simple LCM pairs
+    const pairs = [
+        [4, 6, 12],
+        [5, 10, 10],
+        [8, 12, 24],
+        [3, 7, 21],
+        [9, 6, 18]
+    ];
+
+    const pair = pairs[getRandomInt(0, pairs.length - 1)];
+    const n1 = pair[0];
+    const n2 = pair[1];
+    const lcm = pair[2];
+
+    const question = `Find the LCM of ${n1} and ${n2}.`;
+
+    return {
+        type: "userInput",
+        question: question,
+        topic: "Number Theory / LCM",
+        answer: String(lcm)
     };
 };
 

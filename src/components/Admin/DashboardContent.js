@@ -67,7 +67,7 @@ const DashboardContent = ({ logoutAction }) => {
                                 // Student List Data Preparation
                                 let latestMarks = null;
                                 let latestDate = null;
-                                let latest = {};
+                                let latest = {}; // Default empty object
 
                                 // Find reports for this child using normalized key
                                 const reportKey = normalizedReports[normalizedPhoneKey];
@@ -112,66 +112,119 @@ const DashboardContent = ({ logoutAction }) => {
                                     allReports.sort((a, b) => b.timestamp - a.timestamp);
 
                                     if (allReports.length > 0) {
-                                        latest = allReports[0];
+                                        // Separate logic for Standard vs Rapid Math
+                                        const standardReports = allReports.filter(r => r.type !== 'RAPID_MATH');
+                                        const rapidMathReports = allReports.filter(r => r.type === 'RAPID_MATH');
 
-                                        // Handle stringified feedback for latest report
-                                        if (typeof latest.generalFeedbackStringified === 'string') {
-                                            try {
-                                                const parsed = JSON.parse(latest.generalFeedbackStringified);
-                                                latest = { ...latest, ...parsed };
-                                            } catch (e) {
-                                                console.error("Error parsing feedback:", e);
-                                            }
-                                        }
+                                        // --- PROCESS STANDARD REPORTS ---
+                                        if (standardReports.length > 0) {
+                                            latest = standardReports[0];
 
-                                        // Calculate marks for latest report
-                                        let accuracy = 0;
-                                        if (latest.summary && latest.summary.accuracyPercent !== undefined) {
-                                            accuracy = latest.summary.accuracyPercent;
-                                        } else if (latest.perQuestionReport && Array.isArray(latest.perQuestionReport)) {
-                                            const total = latest.perQuestionReport.length;
-                                            const correct = latest.perQuestionReport.filter(q => q.isCorrect).length;
-                                            accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
-                                        }
-
-                                        latestMarks = accuracy;
-                                        latestDate = latest.timestamp;
-
-                                        // Aggregate Stats
-                                        reportCount += allReports.length;
-                                        allReports.forEach(rep => {
-                                            let repAccuracy = 0;
-                                            if (rep.summary && rep.summary.accuracyPercent !== undefined) {
-                                                repAccuracy = rep.summary.accuracyPercent;
-                                            } else if (rep.perQuestionReport && Array.isArray(rep.perQuestionReport)) {
-                                                const total = rep.perQuestionReport.length;
-                                                const correct = rep.perQuestionReport.filter(q => q.isCorrect).length;
-                                                repAccuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+                                            // Handle stringified feedback for latest report
+                                            if (typeof latest.generalFeedbackStringified === 'string') {
+                                                try {
+                                                    const parsed = JSON.parse(latest.generalFeedbackStringified);
+                                                    latest = { ...latest, ...parsed };
+                                                } catch (e) {
+                                                    console.error("Error parsing feedback:", e);
+                                                }
                                             }
 
-                                            if (repAccuracy >= 40) passedCount++;
-                                            if (repAccuracy === 100) perfectScoreCount++;
+                                            // Calculate marks for latest report
+                                            let accuracy = 0;
+                                            // Handle both new 'summary' format and old 'perQuestionReport' format
+                                            if (latest.summary && latest.summary.accuracyPercent !== undefined) {
+                                                accuracy = latest.summary.accuracyPercent;
+                                            } else if (latest.perQuestionReport && Array.isArray(latest.perQuestionReport)) {
+                                                const total = latest.perQuestionReport.length;
+                                                const correct = latest.perQuestionReport.filter(q => q.isCorrect).length;
+                                                accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+                                            }
 
-                                            // Aggregate for Marks Chart
-                                            const grade = child.grade || "Unknown";
-                                            if (!gradeMarks[grade]) gradeMarks[grade] = { total: 0, count: 0 };
-                                            gradeMarks[grade].total += repAccuracy;
-                                            gradeMarks[grade].count++;
+                                            latestMarks = accuracy;
+                                            latestDate = latest.timestamp;
+
+                                            // Aggregate Stats (Only for Standard Reports as per current logic)
+                                            reportCount += standardReports.length;
+                                            standardReports.forEach(rep => {
+                                                let repAccuracy = 0;
+                                                if (rep.summary && rep.summary.accuracyPercent !== undefined) {
+                                                    repAccuracy = rep.summary.accuracyPercent;
+                                                } else if (rep.perQuestionReport && Array.isArray(rep.perQuestionReport)) {
+                                                    const total = rep.perQuestionReport.length;
+                                                    const correct = rep.perQuestionReport.filter(q => q.isCorrect).length;
+                                                    repAccuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+                                                }
+
+                                                if (repAccuracy >= 40) passedCount++;
+                                                if (repAccuracy === 100) perfectScoreCount++;
+
+                                                // Aggregate for Marks Chart
+                                                const grade = child.grade || "Unknown";
+                                                if (!gradeMarks[grade]) gradeMarks[grade] = { total: 0, count: 0 };
+                                                gradeMarks[grade].total += repAccuracy;
+                                                gradeMarks[grade].count++;
+                                            });
+                                        }
+
+                                        // --- PROCESS RAPID MATH REPORTS ---
+                                        let latestRapid = null;
+                                        if (rapidMathReports.length > 0) {
+                                            latestRapid = rapidMathReports[0];
+                                        }
+
+                                        students.push({
+                                            name: child.name,
+                                            grade: child.grade,
+                                            phoneNumber: user.parentPhone || phoneKey, // Fallback to key if parentPhone missing
+                                            email: child.email,
+                                            marks: latestMarks,
+                                            date: latestDate,
+                                            id: phoneKey, // Add ID for deletion
+                                            feedback: latest.generalFeedback || "No feedback available",
+                                            topicFeedback: latest.topicFeedback || null,
+                                            rapidMath: latestRapid ? {
+                                                marks: latestRapid.summary?.accuracyPercent || 0,
+                                                date: latestRapid.timestamp,
+                                                timeTaken: latestRapid.summary?.timeTaken || 0,
+                                                totalQuestions: latestRapid.summary?.totalQuestions || 0,
+                                                report: latestRapid
+                                            } : null
+                                        });
+
+                                    } else {
+                                        // Reports exist for other types but filter results in empty? Or raw array implies existing but logic says 0.
+                                        // Basically if reports existed but none were pushed (e.g. invalid?), we might fall here.
+                                        // But if (allReports.length > 0) is true, we push.
+                                        // So we only need the else for when (allReports.length === 0).
+                                        students.push({
+                                            name: child.name,
+                                            grade: child.grade,
+                                            phoneNumber: user.parentPhone || phoneKey,
+                                            email: child.email,
+                                            marks: null,
+                                            date: null,
+                                            id: phoneKey,
+                                            feedback: "No feedback available",
+                                            topicFeedback: null,
+                                            rapidMath: null
                                         });
                                     }
+                                } else {
+                                    // No reports key found
+                                    students.push({
+                                        name: child.name,
+                                        grade: child.grade,
+                                        phoneNumber: user.parentPhone || phoneKey,
+                                        email: child.email,
+                                        marks: null,
+                                        date: null,
+                                        id: phoneKey,
+                                        feedback: "No feedback available",
+                                        topicFeedback: null,
+                                        rapidMath: null
+                                    });
                                 }
-
-                                students.push({
-                                    name: child.name,
-                                    grade: child.grade,
-                                    phoneNumber: user.parentPhone || phoneKey, // Fallback to key if parentPhone missing
-                                    email: child.email,
-                                    marks: latestMarks,
-                                    date: latestDate,
-                                    id: phoneKey, // Add ID for deletion
-                                    feedback: latest.generalFeedback || "No feedback available",
-                                    topicFeedback: latest.topicFeedback || null
-                                });
 
                                 // Aggregate for Growth Chart (using createdAt)
                                 if (child.createdAt) {
@@ -312,6 +365,14 @@ const DashboardContent = ({ logoutAction }) => {
                 >
                     Students
                 </Button>
+                <Button
+                    variant={view === 'rapid_math' ? 'contained' : 'outlined'}
+                    startIcon={<Trophy size={20} />}
+                    onClick={() => setView('rapid_math')}
+                    sx={{ borderRadius: 2, textTransform: 'none', px: 3 }}
+                >
+                    Rapid Math
+                </Button>
             </Stack>
 
             {view === 'overview' ? (
@@ -367,7 +428,11 @@ const DashboardContent = ({ logoutAction }) => {
                     </Grid>
                 </>
             ) : (
-                <StudentList students={studentList} onDelete={handleDeleteStudent} />
+                <StudentList
+                    students={studentList}
+                    onDelete={handleDeleteStudent}
+                    assessmentType={view === 'rapid_math' ? 'rapid' : 'standard'}
+                />
             )}
         </Container>
     );

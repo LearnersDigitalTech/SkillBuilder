@@ -62,6 +62,13 @@ const TypeUserInput = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, q
                         <span>{topic}</span>
                     </div>
                 </div>
+                {questionPaper[activeQuestionIndex]?.image && (
+                    <img
+                        src={questionPaper[activeQuestionIndex].image}
+                        alt="Question Image"
+                        className={Styles.questionImage}
+                    />
+                )}
                 <h3 className={Styles.question}>
                     <MathRenderer content={question} />
                 </h3>
