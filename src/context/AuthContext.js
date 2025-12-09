@@ -30,7 +30,15 @@ export const AuthProvider = ({ children }) => {
                         // New shape: { parentPhone/parentEmail, authProvider, children: { childId: { ...profile } } }
                         let normalizedData;
                         if (rawData && rawData.children) {
-                            normalizedData = rawData;
+                            // Even if children exist, ensure we expose parentPhone/phoneNumber at top level
+                            // Fallback: If phoneNumber is missing at root, check if it was saved as parentPhone
+                            const phone = rawData.phoneNumber || rawData.parentPhone || "";
+
+                            normalizedData = {
+                                ...rawData,
+                                phoneNumber: phone,
+                                parentPhone: phone
+                            };
                         } else if (rawData) {
                             // Legacy phone auth user - normalize
                             const phoneNumber = currentUser.phoneNumber ? currentUser.phoneNumber.slice(-10) : "";

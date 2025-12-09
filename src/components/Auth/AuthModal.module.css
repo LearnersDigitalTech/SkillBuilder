@@ -37,11 +37,24 @@
     padding-bottom: 12px !important;
 }
 
+.fixedModalContent {
+    overflow: hidden !important;
+}
+
 .stepContainer {
     display: flex;
     flex-direction: column;
     gap: 18px;
     animation: fadeInUp 0.4s ease-out forwards;
+}
+
+.stepDescription {
+    text-align: center;
+    color: #6b7280;
+    margin: 0;
+    font-size: 0.95rem;
+    padding-top: 8px;
+    /* Push it down slightly as requested */
 }
 
 @keyframes fadeInUp {
@@ -396,13 +409,15 @@
     margin: 8px 0 !important;
     border-color: #e5e7eb !important;
 }
+
 /* ============ COMPACT PROFILE LIST (Chrome-style) ============ */
 .profileList {
     display: flex;
     flex-direction: column;
     gap: 8px;
     margin-top: 12px;
-    max-height: 400px;
+    margin-top: 12px;
+    max-height: 55vh;
     overflow-y: auto;
     padding: 4px;
 }

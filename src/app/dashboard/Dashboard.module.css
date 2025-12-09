@@ -261,6 +261,8 @@
 .emptyState img {
     width: 150px;
     opacity: 0.8;
+    margin: 0 auto;
+    display: block;
 }
 
 .emptyState p {

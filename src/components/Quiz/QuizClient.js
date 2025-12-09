@@ -298,22 +298,22 @@ const QuizClient = () => {
 
     // Helper function to get the current child's name
     const getChildName = () => {
-        // Check from quiz context first
-        const nameFromContext = quizContext?.userDetails?.activeChild?.name || quizContext?.userDetails?.name;
-        if (nameFromContext && nameFromContext.trim()) {
-            return nameFromContext.trim();
+        // 1. Strict check for active child in context
+        if (quizContext?.userDetails?.activeChild) {
+            // Return name (even if empty) to avoid falling back to parent/sibling
+            return quizContext.userDetails.activeChild.name || "";
         }
 
-        // Check from userData/AuthContext
+        // 2. Legacy/Single user check
+        if (quizContext?.userDetails?.name) {
+            return quizContext.userDetails.name;
+        }
+
+        // 3. Fallback to AuthContext matching active child
         if (userData?.children) {
             const childId = quizContext?.userDetails?.childId || quizContext?.userDetails?.activeChildId;
-            if (childId && userData.children[childId]?.name) {
-                return userData.children[childId].name.trim();
-            }
-            // Try default child
-            const childKeys = Object.keys(userData.children);
-            if (childKeys.length > 0 && userData.children[childKeys[0]]?.name) {
-                return userData.children[childKeys[0]].name.trim();
+            if (childId && userData.children[childId]) {
+                return userData.children[childId].name || "";
             }
         }
 
@@ -447,21 +447,21 @@ const QuizClient = () => {
 
         if ((activeQuestionIndex + 1) >= questionPaper.length) {
             // This is the submit action - check if name exists
+            // This is the submit action - always confirm name
             const childName = getChildName();
-            if (!childName) {
-                // No name set, show dialog to prompt for name
-                setPendingSubmit({ answer, time });
-                setNameDialogOpen(true);
-                return;
-            }
-            router.replace("quiz/quiz-result");
+
+            // Pre-fill the input with existing name
+            setChildNameInput(childName || "");
+
+            setPendingSubmit({ answer, time });
+            setNameDialogOpen(true);
             return;
         }
 
         const nextIndex = activeQuestionIndex + 1;
 
-        // Show motivation toast if this question is being viewed for the first time
-        if (!viewedQuestionsRef.current.has(nextIndex)) {
+        // Show motivation toast if this question is being viewed for the first time AND user has answered
+        if (answer && !viewedQuestionsRef.current.has(nextIndex)) {
             viewedQuestionsRef.current.add(nextIndex);
             const phrases = motivationData.quiz;
             const randomPhrase = phrases[getRandomInt(0, phrases.length - 1)];
@@ -475,6 +475,7 @@ const QuizClient = () => {
                 draggable: false,
             });
         }
+
 
         setActiveQuestionIndex(nextIndex);
 
@@ -612,7 +613,7 @@ const QuizClient = () => {
             {/* Main Question Section */}
             <div className={Styles.questionSection}>
                 {
-                    questionPaper[activeQuestionIndex]?.type === "mcq" ?
+                    questionPaper && questionPaper[activeQuestionIndex] && questionPaper[activeQuestionIndex].type === "mcq" ?
                         <TypeMCQ
                             onClick={handleNext}
                             onPrevious={handlePrevious}
@@ -629,7 +630,7 @@ const QuizClient = () => {
                         /> : null
                 }
                 {
-                    questionPaper[activeQuestionIndex]?.type === "userInput" ?
+                    questionPaper && questionPaper[activeQuestionIndex] && questionPaper[activeQuestionIndex].type === "userInput" ?
                         <TypeUserInput
                             onClick={handleNext}
                             onPrevious={handlePrevious}
@@ -644,7 +645,7 @@ const QuizClient = () => {
                         /> : null
                 }
                 {
-                    questionPaper[activeQuestionIndex]?.type === "tableInput" ?
+                    questionPaper && questionPaper[activeQuestionIndex] && questionPaper[activeQuestionIndex].type === "tableInput" ?
                         <TypeTableInput
                             onClick={handleNext}
                             onPrevious={handlePrevious}
@@ -657,7 +658,7 @@ const QuizClient = () => {
                         /> : null
                 }
                 {
-                    questionPaper[activeQuestionIndex]?.type === "trueAndFalse" ?
+                    questionPaper && questionPaper[activeQuestionIndex] && questionPaper[activeQuestionIndex].type === "trueAndFalse" ?
                         <TypeTrueAndFalse
                             onClick={handleNext}
                             onPrevious={handlePrevious}

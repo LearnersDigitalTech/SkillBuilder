@@ -106,8 +106,60 @@ const QuizResultClient = () => {
         const loadReport = async () => {
             try {
                 const userGrade = quizSession?.userDetails?.activeChild?.grade || quizSession?.userDetails?.grade;
-                // Case 1: We have an in-memory quizSession with questionPaper (coming directly from quiz)
-                if (quizSession?.questionPaper && userGrade) {
+
+                // Case 1: If reportId is provided in URL, fetch that specific report from Firebase
+                // This takes priority over in-memory quizSession to show the correct historical report
+                if (reportId && user && userData?.children) {
+                    // Fetch specific report from Firebase
+                    const userKey = getUserDatabaseKey(user);
+                    const children = userData.children;
+                    const childKeys = Object.keys(children);
+                    if (childKeys.length === 0) return;
+
+                    let activeChildId = childKeys[0];
+                    if (childKeys.length > 1 && typeof window !== "undefined") {
+                        const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
+                        if (storedChildId && childKeys.includes(storedChildId)) {
+                            activeChildId = storedChildId;
+                        }
+                    }
+
+                    const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${userKey}/${activeChildId}`);
+                    const snapshot = await get(reportRef);
+                    if (!snapshot.exists()) {
+                        return;
+                    }
+
+                    const data = snapshot.val();
+                    let targetReport = null;
+
+                    if (reportId === 'root') {
+                        targetReport = data;
+                    } else if (data[reportId]) {
+                        targetReport = data[reportId];
+                    }
+
+                    if (targetReport) {
+                        let parsed = {};
+                        try {
+                            parsed = targetReport.generalFeedbackStringified ? JSON.parse(targetReport.generalFeedbackStringified) : {};
+                        } catch (e) {
+                            parsed = {};
+                        }
+
+                        setReportState({
+                            summary: targetReport.summary,
+                            topicFeedback: parsed.topicFeedback || {},
+                            perQuestionReport: parsed.perQuestionReport || [],
+                            learningPlanSummary: parsed.learningPlanSummary || "",
+                        });
+                        return;
+                    }
+                }
+
+                // Case 2: We have an in-memory quizSession with questionPaper (coming directly from quiz)
+                // Only use this if no reportId is specified
+                if (quizSession?.questionPaper && userGrade && !reportId) {
                     const computed = analyzeResponses(quizSession.questionPaper, userGrade);
                     setReportState({
                         summary: computed.summary,
@@ -196,7 +248,8 @@ const QuizResultClient = () => {
         };
 
         loadReport();
-    }, [quizSession, user, userData]);
+    }, [quizSession, user, userData, reportId]); // Added reportId to trigger refresh when viewing different reports
+
 
     const rawSummary = reportState?.summary || {
         totalQuestions: 0,
@@ -234,9 +287,32 @@ const QuizResultClient = () => {
     });
 
     useEffect(() => {
-        if (!quizSession?.questionPaper) {
+        if (!quizSession?.questionPaper || !Array.isArray(quizSession.questionPaper) || quizSession.questionPaper.length === 0) {
             return;
         }
+
+        // Don't save if we're viewing an existing report (reportId exists in URL)
+        // Only save when completing a new quiz (no reportId)
+        const currentReportId = searchParams?.get("reportId");
+        if (currentReportId) {
+            console.log("Skipping save: viewing existing report with ID", currentReportId);
+            return;
+        }
+
+
+        // Get user grade to compute the report
+        const userGrade = quizSession?.userDetails?.activeChild?.grade || quizSession?.userDetails?.grade;
+        if (!userGrade) return;
+
+        // Compute the report to validate it has actual data
+        const computed = analyzeResponses(quizSession.questionPaper, userGrade);
+
+        // Don't save if there's no actual quiz data
+        if (!computed.summary || computed.summary.totalQuestions === 0) {
+            console.log("Skipping save: no valid quiz data");
+            return;
+        }
+
         // Get user key from quizSession (already set correctly in Start Assessment)
         // For multi-profile, we need the parent key and the child key
         const userKey = quizSession?.userDetails?.userKey || quizSession?.userDetails?.parentPhone || quizSession?.userDetails?.parentEmail || quizSession?.userDetails?.phoneNumber;
@@ -256,24 +332,27 @@ const QuizResultClient = () => {
         hasSavedRef.current = true;
 
         const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${finalParentKey}/${childId}`);
-        // Use push to create a new entry instead of overwriting
-        const newReportRef = push(reportRef);
+        // Use unique ID with random suffix to ensure each attempt is separate
+        const reportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const newReportRef = ref(firebaseDatabase, `NMD_2025/Reports/${finalParentKey}/${childId}/${reportId}`);
 
         set(newReportRef, {
-            summary,
+            summary: computed.summary,
             generalFeedbackStringified: JSON.stringify({
-                topicFeedback,
-                perQuestionReport,
-                learningPlanSummary,
+                topicFeedback: computed.topicFeedback,
+                perQuestionReport: computed.perQuestionReport,
+                learningPlanSummary: computed.learningPlanSummary,
             }),
             timestamp: new Date().toISOString(),
         }).then(() => {
-            console.log("Report saved successfully");
+            console.log("Report saved successfully with ID:", reportId);
         }).catch((error) => {
             console.error("Error saving report:", error);
-            // If error, maybe allow retry? But usually network retry is handled by FB.
+            // Reset flag on error to allow retry
+            hasSavedRef.current = false;
         });
-    }, [quizSession?.questionPaper, summary, topicFeedback, perQuestionReport, learningPlanSummary]);
+    }, [quizSession?.questionPaper, searchParams]); // Check searchParams for reportId
+
 
     const parseLearningPlan = (text) => {
         const parts = text.split("Time Tip:");

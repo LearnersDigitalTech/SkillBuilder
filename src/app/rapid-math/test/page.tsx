@@ -55,8 +55,8 @@ export default function TestPage() {
 
   const generateQuestion = useCallback((): Question => {
     const range = getRange(difficulty)
-    const num1 = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min
-    const num2 = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min
+    let num1 = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min
+    let num2 = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min
     const ops = ["+", "-", "*", "/"]
     const operation = ops[Math.floor(Math.random() * ops.length)]
 
@@ -78,6 +78,12 @@ export default function TestPage() {
     if (operation === "+") {
       correctAnswer = num1 + num2
     } else if (operation === "-") {
+      // Ensure result is always positive
+      if (num1 < num2) {
+        const temp = num1;
+        num1 = num2;
+        num2 = temp;
+      }
       correctAnswer = num1 - num2
     } else if (operation === "*") {
       correctAnswer = num1 * num2
