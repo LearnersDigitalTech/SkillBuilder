@@ -15,9 +15,9 @@ jobs:
 
     env:
       PROJECT_ID: skill-builder-480609
-      REGION: asia-south1
+      REGION: us-central1
       SERVICE: skill-builder
-      AR_LOCATION: asia-south1
+      AR_LOCATION: us-central1
 
     steps:
       - name: Checkout
