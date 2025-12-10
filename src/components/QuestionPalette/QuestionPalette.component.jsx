@@ -15,7 +15,7 @@ const QuestionPalette = ({
     const gridRef = useRef(null);
 
     const toggleDrawer = (open) => (event) => {
-        if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+        if (event && event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
             return;
         }
         setIsOpen(open);

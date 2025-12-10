@@ -12,6 +12,7 @@ const HeroChart = ({ summary, notAttempted }) => {
             correct: summary.correct,
             wrong: summary.wrong,
             skipped: notAttempted,
+            totalTime: summary.totalTime || 0,
         },
     ];
 
@@ -103,6 +104,8 @@ const QuizResultClient = () => {
 
     const [reportState, setReportState] = useState(null);
     const [loadingReport, setLoadingReport] = useState(true);
+    const [showCelebration, setShowCelebration] = useState(false);
+    const [floatingEmojis, setFloatingEmojis] = useState([]);
 
     useEffect(() => {
         const loadReport = async () => {
@@ -267,6 +270,36 @@ const QuizResultClient = () => {
         loadReport();
     }, [quizSession, user, userData, reportId]); // Added reportId to trigger refresh when viewing different reports
 
+    // Check for celebration (100% Score)
+    useEffect(() => {
+        if (reportState?.summary?.accuracyPercent === 100) {
+            // Only show celebration if not viewing an old report (optional, but requested behavior implies immediate feedback)
+            // But user might want to see it again? Let's show it.
+            // Actually, best to show only on *first* load or just trigger it.
+            // Let's trigger it with a small delay to ensure UI is ready
+            const timer = setTimeout(() => {
+                setShowCelebration(true);
+                // Trigger confetti/clap sound here if we had one
+                triggerFloatingEmojis();
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [reportState]);
+
+    const triggerFloatingEmojis = () => {
+        const emojis = ['🎉', '👏', '🏆', '⭐', '🎊', '✨'];
+        const newEmojis = [];
+        for (let i = 0; i < 20; i++) {
+            newEmojis.push({
+                id: i,
+                char: emojis[Math.floor(Math.random() * emojis.length)],
+                left: Math.random() * 100 + '%',
+                delay: Math.random() * 2 + 's'
+            });
+        }
+        setFloatingEmojis(newEmojis);
+    };
+
 
     const rawSummary = reportState?.summary || {
         totalQuestions: 0,
@@ -274,6 +307,7 @@ const QuizResultClient = () => {
         correct: 0,
         wrong: 0,
         accuracyPercent: 0,
+        totalTime: 0,
     };
 
     // Ensure accuracy is based on totalQuestions (e.g., 30/30 -> 100%)
@@ -697,6 +731,17 @@ const QuizResultClient = () => {
                             <span className={Styles.heroStatLabel}>Wrong</span>
                         </div>
                         <div className={Styles.heroStatItem}>
+                            <span className={Styles.heroStatValue} style={{ color: '#000' }}>
+                                {(() => {
+                                    const seconds = summary.totalTime || 0;
+                                    const m = Math.floor(seconds / 60);
+                                    const s = seconds % 60;
+                                    return `${m}:${s.toString().padStart(2, '0')}`;
+                                })()}
+                            </span>
+                            <span className={Styles.heroStatLabel}>Total Time</span>
+                        </div>
+                        <div className={Styles.heroStatItem}>
                             <span className={`${Styles.heroStatValue} ${Styles.statColorSkipped}`}>{notAttempted}</span>
                             <span className={Styles.heroStatLabel}>Skipped</span>
                         </div>
@@ -735,6 +780,49 @@ const QuizResultClient = () => {
 
                 {/* Action Buttons */}
                 <section className={Styles.actionSection}>
+                    <Dialog
+                        open={showCelebration}
+                        onClose={() => setShowCelebration(false)}
+                        maxWidth="sm"
+                        fullWidth
+                        PaperProps={{
+                            className: Styles.modal
+                        }}
+                    >
+                        <div className={Styles.celebrationModal}>
+                            {floatingEmojis.map(emoji => (
+                                <div
+                                    key={emoji.id}
+                                    className={Styles.celebrationEmoji}
+                                    style={{ left: emoji.left, animationDelay: emoji.delay }}
+                                >
+                                    {emoji.char}
+                                </div>
+                            ))}
+                            <div className={Styles.celebrationIcon}>🏆</div>
+                            <h2 className={Styles.celebrationTitle}>100% Club!</h2>
+                            <p className={Styles.celebrationText}>
+                                Congratulations on getting a perfect score!<br />
+                                You've mastered this topic perfectly.<br /><br />
+                                <strong>High Performers like you get special attention!</strong><br />
+                                Our academic tutor will contact you soon for advanced coaching.
+                            </p>
+                            <Button
+                                variant="contained"
+                                onClick={() => setShowCelebration(false)}
+                                style={{
+                                    background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+                                    color: 'white',
+                                    fontWeight: 'bold',
+                                    padding: '10px 30px',
+                                    borderRadius: '50px',
+                                    boxShadow: '0 4px 15px rgba(255, 165, 0, 0.4)'
+                                }}
+                            >
+                                Awesome! 🎉
+                            </Button>
+                        </div>
+                    </Dialog>
                     <Button
                         className={Styles.actionButton}
                         onClick={() => setTopicModalOpen(true)}

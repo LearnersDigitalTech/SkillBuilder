@@ -1578,3 +1578,69 @@
         opacity: 0;
     }
 }
+
+/* Celebration Modal */
+.celebrationModal {
+    text-align: center;
+    padding: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.celebrationIcon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: bounce 1s infinite;
+}
+
+.celebrationTitle {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.celebrationText {
+    font-size: 1.1rem;
+    color: #475569;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.celebrationEmoji {
+    position: absolute;
+    font-size: 2rem;
+    animation: floatUp 3s ease-in infinite;
+    opacity: 0;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(100px) rotate(0deg);
+        opacity: 0;
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-300px) rotate(360deg);
+        opacity: 0;
+    }
+}
