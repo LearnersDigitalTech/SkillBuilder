@@ -138,7 +138,7 @@ export const generateWholeNumberProperties = () => {
     ];
 
     const target = props[getRandomInt(0, 3)];
-    const question = `Which property is shown by: ${target.eq}?`;
+    const question = `Which property is shown by:  $ ${target.eq} $?`;
     const answer = target.name;
 
     const options = shuffleArray(props.map(p => ({ value: p.name, label: p.name })));
@@ -174,7 +174,7 @@ export const generateWholeNumberPattern = () => {
         rule = "Square numbers";
     }
 
-    const question = `Find the next number in the pattern: ${seq.join(", ")}, ...`;
+    const question = `Find the next number in the pattern: $$ ${seq.join(", ")}, ... $$`;
     const answer = String(nextVal);
 
     const options = shuffleArray([
@@ -284,7 +284,7 @@ export const generateDecimalConversion = () => {
         const num = getRandomInt(1, den - 1);
         const val = num / den;
 
-        const question = `Convert ${num}/${den} to a decimal.`;
+        const question = `Convert  $ ${num}/${den} $ to a decimal.`;
         const answer = String(val);
 
         const options = shuffleArray([
@@ -450,16 +450,16 @@ export const generateAlgebraExpression = () => {
 
     let question, answer;
     if (op.sign === "+") {
-        question = `Write the expression for: ${num} added to ${variable}`;
+        question = `Write the expression for: </br> ${num} added to ${variable}`;
         answer = `${variable} + ${num}`;
     } else if (op.text === "subtracted from") {
-        question = `Write the expression for: ${num} subtracted from ${variable}`;
+        question = `Write the expression for: </br> ${num} subtracted from ${variable}`;
         answer = `${variable} - ${num}`;
     } else if (op.sign === "") {
-        question = `Write the expression for: ${variable} multiplied by ${num}`;
+        question = `Write the expression for: </br> ${variable} multiplied by ${num}`;
         answer = `${num}${variable}`;
     } else {
-        question = `Write the expression for: ${variable} divided by ${num}`;
+        question = `Write the expression for: </br> ${variable} divided by ${num}`;
         answer = `${variable}/${num}`;
     }
 
@@ -507,11 +507,11 @@ export const generateSimpleEquation = () => {
     let question, answer;
     if (isAdd) {
         const b = x + a;
-        question = `Solve for x: x + ${a} = ${b}`;
+        question = `Solve for x: $$ x + ${a} = ${b} $$`;
         answer = String(x);
     } else {
         const b = a * x;
-        question = `Solve for x: ${a}x = ${b}`;
+        question = `Solve for x: $$ ${a}x = ${b} $$`;
         answer = String(x);
     }
 
@@ -702,7 +702,7 @@ export const generateDataInterpretation = () => {
         // Shuffle data to hide the construction
         shuffleArray(data);
 
-        question = `Find the Mean of: ${data.join(", ")}`;
+        question = `Find the Mean of: $$ ${data.join(", ")} $$`;
         answer = String(targetMean);
     } else if (type === "Median") {
         const count = 5; // Odd for simplicity
@@ -710,7 +710,7 @@ export const generateDataInterpretation = () => {
         const sorted = [...data].sort((a, b) => a - b);
         const median = sorted[Math.floor(count / 2)];
 
-        question = `Find the Median of: ${data.join(", ")}`;
+        question = `Find the Median of: $$ ${data.join(", ")} $$`;
         answer = String(median);
     } else {
         // Mode
@@ -718,7 +718,7 @@ export const generateDataInterpretation = () => {
         data = [modeVal, modeVal, modeVal, getRandomInt(1, 10), getRandomInt(1, 10)];
         shuffleArray(data);
 
-        question = `Find the Mode of: ${data.join(", ")}`;
+        question = `Find the Mode of: $$ ${data.join(", ")} $$`;
         answer = String(modeVal);
     }
 

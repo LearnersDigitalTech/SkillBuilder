@@ -70,7 +70,7 @@ export default function Home() {
       bg: "bg-green-500/10",
       border: "border-green-200",
       activeBorder: "border-green-500",
-      range: "1-2 digits"
+      range: "1 digit"
     },
     normal: {
       label: "Normal",
@@ -80,7 +80,7 @@ export default function Home() {
       bg: "bg-blue-500/10",
       border: "border-blue-200",
       activeBorder: "border-blue-500",
-      range: "2 digits"
+      range: "1-2 digits"
     },
     medium: {
       label: "Medium",
@@ -90,7 +90,7 @@ export default function Home() {
       bg: "bg-orange-500/10",
       border: "border-orange-200",
       activeBorder: "border-orange-500",
-      range: "2-3 digits"
+      range: "2 digits"
     },
     hard: {
       label: "Hard",
@@ -100,7 +100,7 @@ export default function Home() {
       bg: "bg-red-500/10",
       border: "border-red-200",
       activeBorder: "border-red-500",
-      range: "3-4 digits"
+      range: "2-3 digits"
     },
   }
 
