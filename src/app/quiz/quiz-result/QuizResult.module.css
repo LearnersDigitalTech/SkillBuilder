@@ -1634,6 +1634,7 @@
         opacity: 0;
     }
 }
+
 /* Responsive Learning Plan - Mobile/Tablet Button and Modal */
 
 /* Hide mobile button on desktop, show table */
@@ -1919,5 +1920,4 @@
         width: 100%;
         max-width: 300px;
     }
-}
 }
