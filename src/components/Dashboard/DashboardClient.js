@@ -13,7 +13,7 @@ import Styles from "../../app/dashboard/Dashboard.module.css";
 import { QuizSessionContext } from "../../app/context/QuizSessionContext";
 
 const DashboardClient = () => {
-    const { user, userData, setUserData, logout, loading } = useAuth();
+    const { user, userData, setUserData, logout, loading, refreshUserData } = useAuth();
     const router = useRouter();
     const [quizContext, setQuizContext] = useContext(QuizSessionContext);
     const [activeChildId, setActiveChildId] = useState(null);
@@ -60,9 +60,49 @@ const DashboardClient = () => {
 
     // Check if Google/Email user needs to provide phone number
     useEffect(() => {
-        if (!loading && user && userData) {
-            // Check both standard phoneNumber and parentPhone (from normalization)
-            if (!user.phoneNumber && !userData.phoneNumber && !userData.parentPhone) {
+        if (!loading && user) {
+            // For phone auth users, never show dialog (they already have phone)
+            if (user.phoneNumber) {
+                setShowPhoneDialog(false);
+                return;
+            }
+
+            // IMPORTANT: Wait for userData to load before making any decision
+            if (!userData) {
+                console.log("⏳ Waiting for userData to load...");
+                setShowPhoneDialog(false);
+                return;
+            }
+
+            // Check localStorage flag - if user EVER provided phone, never ask again
+            const userKey = getUserDatabaseKey(user);
+            const phoneProvided = typeof window !== "undefined"
+                ? window.localStorage.getItem(`phoneProvided_${userKey}`)
+                : null;
+
+            if (phoneProvided === "true") {
+                console.log("✅ Phone already provided (localStorage flag)");
+                setShowPhoneDialog(false);
+                return;
+            }
+
+            // Check if phone exists in database
+            const hasPhoneInDB = userData.phoneNumber || userData.parentPhone;
+
+            console.log("🔍 Checking phone in database:", {
+                hasPhoneInDB,
+                phoneNumber: userData.phoneNumber,
+                parentPhone: userData.parentPhone,
+                userDataKeys: Object.keys(userData)
+            });
+
+            if (hasPhoneInDB) {
+                // Phone exists in database - don't show dialog
+                console.log("✅ Phone found in database:", hasPhoneInDB);
+                setShowPhoneDialog(false);
+            } else {
+                // Brand new user with no phone - show dialog
+                console.log("📱 Brand new user - showing phone dialog");
                 setShowPhoneDialog(true);
             }
         }
@@ -72,23 +112,24 @@ const DashboardClient = () => {
     const handlePhoneComplete = async (phoneNumber) => {
         setShowPhoneDialog(false);
 
-        // Refresh userData from database to get the updated phone number
-        if (user && userData) {
-            try {
-                const userKey = getUserDatabaseKey(user);
-                const userRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}`);
-                const snapshot = await get(userRef);
+        // SIMPLE FIX: Mark phone as provided in localStorage
+        if (user && typeof window !== "undefined") {
+            const userKey = getUserDatabaseKey(user);
+            window.localStorage.setItem(`phoneProvided_${userKey}`, "true");
+            console.log("✅ Phone number saved, localStorage flag set");
+        }
 
-                if (snapshot.exists()) {
-                    const updatedData = snapshot.val();
-                    setUserData(updatedData);
-                }
+        // Use the refreshUserData function from AuthContext to reload data
+        if (refreshUserData) {
+            try {
+                await refreshUserData();
             } catch (error) {
                 console.error("Error refreshing user data:", error);
-                // Fallback: update local state
+                // Fallback: update local state manually
                 setUserData({
                     ...userData,
-                    phoneNumber: phoneNumber
+                    phoneNumber: phoneNumber,
+                    parentPhone: phoneNumber
                 });
             }
         }
@@ -263,16 +304,22 @@ const DashboardClient = () => {
             const childRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}/children/${childId}`);
             await set(childRef, childProfile);
 
-            setUserData((prev) => {
-                const prevChildren = prev?.children || {};
-                return {
-                    ...(prev || {}),
-                    children: {
-                        ...prevChildren,
-                        [childId]: childProfile
-                    }
-                };
-            });
+            // Refresh user data from Firebase to get latest data including phone number
+            if (refreshUserData) {
+                await refreshUserData();
+            } else {
+                // Fallback: manual update if refreshUserData not available
+                setUserData((prev) => {
+                    const prevChildren = prev?.children || {};
+                    return {
+                        ...(prev || {}),
+                        children: {
+                            ...prevChildren,
+                            [childId]: childProfile
+                        }
+                    };
+                });
+            }
 
             setActiveChildId(childId);
             // Use userKey for localStorage as well
@@ -316,13 +363,19 @@ const DashboardClient = () => {
             const childRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}/children/${editingChildId}`);
             await set(childRef, updatedProfile);
 
-            setUserData((prev) => ({
-                ...(prev || {}),
-                children: {
-                    ...prev.children,
-                    [editingChildId]: updatedProfile
-                }
-            }));
+            // Refresh user data from Firebase to get latest data
+            if (refreshUserData) {
+                await refreshUserData();
+            } else {
+                // Fallback: manual update if refreshUserData not available
+                setUserData((prev) => ({
+                    ...(prev || {}),
+                    children: {
+                        ...prev.children,
+                        [editingChildId]: updatedProfile
+                    }
+                }));
+            }
 
             setEditChildOpen(false);
             setEditingChildId(null);

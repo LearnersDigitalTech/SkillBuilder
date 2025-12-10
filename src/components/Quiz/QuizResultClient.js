@@ -94,7 +94,7 @@ const formatAnswer = (answer) => {
 const QuizResultClient = () => {
 
     const [quizSession, setQuizSession] = useContext(QuizSessionContext);
-    const { user, userData } = useAuth();
+    const { user, userData, loading } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
     const reportId = searchParams.get("reportId");
@@ -327,6 +327,7 @@ const QuizResultClient = () => {
     // Modal states
     const [topicModalOpen, setTopicModalOpen] = useState(false);
     const [questionModalOpen, setQuestionModalOpen] = useState(false);
+    const [learningPlanModalOpen, setLearningPlanModalOpen] = useState(false);
 
     // Tutor booking dialog state
     const [tutorDialogOpen, setTutorDialogOpen] = useState(false);
@@ -446,15 +447,24 @@ const QuizResultClient = () => {
             if (activeChild) {
                 displayName = activeChild.name || displayName;
                 displayGrade = activeChild.grade || displayGrade;
-                // For phone display, use actual phone number (not UID)
-                if (user.phoneNumber) {
-                    displayPhone = user.phoneNumber.slice(-10);
-                } else if (userData?.phoneNumber) {
-                    displayPhone = userData.phoneNumber;
-                } else {
-                    displayPhone = ""; // No phone available
-                }
             }
+        }
+    }
+
+    // IMPORTANT: Validate phone number - if it's a UID (long hash) or empty, get from userData
+    // A valid phone number should be 10-15 digits, a UID is much longer with letters
+    const isValidPhone = displayPhone && /^\d{10,15}$/.test(displayPhone);
+
+    if (!isValidPhone) {
+        // displayPhone is empty, a UID, or invalid - get real phone from userData
+        if (userData?.phoneNumber) {
+            displayPhone = userData.phoneNumber;
+        } else if (userData?.parentPhone) {
+            displayPhone = userData.parentPhone;
+        } else if (user?.phoneNumber) {
+            displayPhone = user.phoneNumber.slice(-10);
+        } else {
+            displayPhone = "";
         }
     }
 
@@ -462,8 +472,32 @@ const QuizResultClient = () => {
         setTutorSuccess("");
         setTutorError("");
 
+        // IMPORTANT: Recalculate phone number from userData at dialog open time
+        // This ensures we have the latest userData loaded
+        let phoneNumber = "";
+
+        // First check if quizSession has a valid phone number
+        const sessionPhone = quizSession?.userDetails?.phoneNumber || quizSession?.userDetails?.parentPhone || "";
+        const isValidSessionPhone = sessionPhone && /^\d{10,15}$/.test(sessionPhone);
+
+        if (isValidSessionPhone) {
+            phoneNumber = sessionPhone;
+            console.log("📱 Using phone from quizSession:", phoneNumber);
+        } else if (userData?.phoneNumber) {
+            phoneNumber = userData.phoneNumber;
+            console.log("📱 Using phone from userData.phoneNumber:", phoneNumber);
+        } else if (userData?.parentPhone) {
+            phoneNumber = userData.parentPhone;
+            console.log("📱 Using phone from userData.parentPhone:", phoneNumber);
+        } else if (user?.phoneNumber) {
+            phoneNumber = user.phoneNumber.slice(-10);
+            console.log("📱 Using phone from user.phoneNumber:", phoneNumber);
+        } else {
+            console.log("⚠️ No phone number found. userData:", userData, "user:", user, "loading:", loading);
+        }
+
         setTutorForm({
-            phone: displayPhone || (user?.phoneNumber ? user.phoneNumber.slice(-10) : ""),
+            phone: phoneNumber,
         });
 
         setTutorDialogOpen(true);
@@ -473,6 +507,116 @@ const QuizResultClient = () => {
         const value = event.target.value;
         setTutorForm((prev) => ({ ...prev, [field]: value }));
     };
+
+    const handleDownloadLearningPlan = () => {
+        if (!reportState?.learningPlan || reportState.learningPlan.length === 0) {
+            return;
+        }
+
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+
+        // Add white header background
+        doc.setFillColor(255, 255, 255);
+        doc.rect(0, 0, pageWidth, 45, 'F');
+
+        // Add purple accent border at bottom of header
+        doc.setFillColor(102, 126, 234);
+        doc.rect(0, 43, pageWidth, 2, 'F');
+
+        // Add logo
+        const logoImg = new Image();
+        logoImg.src = '/LearnersLogoTransparent.png';
+
+        try {
+            // Add logo on left side
+            doc.addImage(logoImg, 'PNG', 14, 8, 30, 30);
+        } catch (error) {
+            console.log('Logo not loaded, continuing without it');
+        }
+
+        // Add title text (shifted right to accommodate logo)
+        doc.setTextColor(102, 126, 234);
+        doc.setFontSize(20);
+        doc.setFont(undefined, 'bold');
+        doc.text('Your Personalized Learning Plan', pageWidth / 2, 18, { align: 'center' });
+
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text('Math Skill Conquest', pageWidth / 2, 28, { align: 'center' });
+
+        // Student details
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(11);
+        let yPos = 55;
+
+        doc.setFont(undefined, 'bold');
+        doc.text('Student Details:', 14, yPos);
+        yPos += 7;
+
+        doc.setFont(undefined, 'normal');
+        doc.text(`Name: ${displayName || 'Student'}`, 14, yPos);
+        yPos += 6;
+        doc.text(`Grade: ${displayGrade || 'N/A'}`, 14, yPos);
+        yPos += 6;
+        doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, yPos);
+        yPos += 12;
+
+        // Learning plan table
+        const tableData = reportState.learningPlan.map((item) => [
+            `Day ${item.day}`,
+            item.skillCategory,
+            item.learnWithTutor,
+            item.selfLearn
+        ]);
+
+        autoTable(doc, {
+            startY: yPos,
+            head: [['Day', 'Skill Category', 'Learn with Tutor', 'Self Learn']],
+            body: tableData,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [102, 126, 234],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                fontSize: 10
+            },
+            bodyStyles: {
+                fontSize: 9,
+                cellPadding: 4
+            },
+            columnStyles: {
+                0: { cellWidth: 25 },
+                1: { cellWidth: 40 },
+                2: { cellWidth: 60 },
+                3: { cellWidth: 60 }
+            },
+            alternateRowStyles: {
+                fillColor: [248, 250, 252]
+            },
+            margin: { left: 14, right: 14 }
+        });
+
+        // Footer
+        const finalY = doc.lastAutoTable.finalY || yPos + 50;
+        doc.setFontSize(9);
+        doc.setTextColor(100, 116, 139);
+        doc.text('Keep practicing daily to master these skills! 🎯', pageWidth / 2, finalY + 15, { align: 'center' });
+
+        // Add website URL
+        doc.setFontSize(10);
+        doc.setTextColor(102, 126, 234);
+        doc.textWithLink('Visit: https://math100.learnersdigital.com/', pageWidth / 2, finalY + 23, {
+            align: 'center',
+            url: 'https://math100.learnersdigital.com/'
+        });
+
+        // Save PDF
+        const fileName = `Learning_Plan_${displayName || 'Student'}_${displayGrade || 'Grade'}.pdf`;
+        doc.save(fileName);
+    };
+
 
     const [statusDialogOpen, setStatusDialogOpen] = useState(false);
     const [statusLoading, setStatusLoading] = useState(false);
@@ -857,46 +1001,68 @@ const QuizResultClient = () => {
 
                 {/* Learning Plan */}
                 <section className={Styles.learningSection}>
-                    <div className={Styles.sectionHeader}>
-                        <BookOpen className={Styles.sectionIcon} />
-                        <h2 className={Styles.sectionTitle}>Your Personalized Learning Plan</h2>
-                        {/* {reportState?.learningPlan && reportState.learningPlan.length > 0 && (
-                            <button
-                                className={Styles.downloadButton}
-                                onClick={handleDownloadPDF}
-                                title="Download as PDF"
-                            >
-                                <Download size={18} />
-                                <span>Download PDF</span>
-                            </button>
-                        )} */}
+                    <div className={Styles.sectionHeaderWrapper}>
+                        <div className={Styles.sectionTitleRow}>
+                            <BookOpen className={Styles.sectionIcon} />
+                            <h2 className={Styles.sectionTitle}>Your Personalized Learning Plan</h2>
+                        </div>
+                        {reportState?.learningPlan && reportState.learningPlan.length > 0 && (
+                            <div className={Styles.sectionActions}>
+                                <button
+                                    className={Styles.downloadButton}
+                                    onClick={handleDownloadLearningPlan}
+                                    title="Download as PDF"
+                                >
+                                    <Download size={18} />
+                                    <span>Download PDF</span>
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {reportState?.learningPlan && reportState.learningPlan.length > 0 ? (
-                        <div className={Styles.tableContainer}>
-                            <table className={Styles.learningTable}>
-                                <thead>
-                                    <tr>
-                                        <th>Sl.No</th>
-                                        <th>Day</th>
-                                        <th>Skill Category</th>
-                                        <th>Learn with Tutor</th>
-                                        <th>Self Learn</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {reportState.learningPlan.map((item, index) => (
-                                        <tr key={index}>
-                                            <td>{index + 1}</td>
-                                            <td>Day {item.day}</td>
-                                            <td>{item.skillCategory}</td>
-                                            <td>{item.learnWithTutor}</td>
-                                            <td>{item.selfLearn}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                        <>
+                            {/* Mobile/Tablet: Show button to open modal */}
+                            <div className={Styles.mobileViewPlanButton}>
+                                <Button
+                                    variant="contained"
+                                    onClick={() => setLearningPlanModalOpen(true)}
+                                    startIcon={<BookOpen />}
+                                    fullWidth
+                                    className={Styles.viewPlanButton}
+                                >
+                                    View Learning Plan
+                                </Button>
+                            </div>
+
+                            {/* Desktop: Show table directly */}
+                            <div className={Styles.desktopTableContainer}>
+                                <div className={Styles.tableContainer}>
+                                    <table className={Styles.learningTable}>
+                                        <thead>
+                                            <tr>
+                                                <th>Sl.No</th>
+                                                <th>Day</th>
+                                                <th>Skill Category</th>
+                                                <th>Learn with Tutor</th>
+                                                <th>Self Learn</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {reportState.learningPlan.map((item, index) => (
+                                                <tr key={index}>
+                                                    <td>{index + 1}</td>
+                                                    <td>Day {item.day}</td>
+                                                    <td>{item.skillCategory}</td>
+                                                    <td>{item.learnWithTutor}</td>
+                                                    <td>{item.selfLearn}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </>
                     ) : (
                         <div className={Styles.learningCard}>
                             <p className={Styles.learningIntro}>
@@ -918,6 +1084,57 @@ const QuizResultClient = () => {
                     </div>
                 </section>
             </div>
+
+            {/* Learning Plan Modal (Mobile/Tablet) */}
+            <Dialog
+                open={learningPlanModalOpen}
+                onClose={() => setLearningPlanModalOpen(false)}
+                maxWidth="md"
+                fullWidth
+                PaperProps={{
+                    className: Styles.modal
+                }}
+            >
+                <DialogTitle className={Styles.modalHeader}>
+                    <div className={Styles.modalTitleWrapper}>
+                        <BookOpen className={Styles.modalIcon} />
+                        <span>Your Personalized Learning Plan</span>
+                    </div>
+                    <IconButton onClick={() => setLearningPlanModalOpen(false)} className={Styles.closeButton}>
+                        <X size={20} />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent className={Styles.modalContent}>
+                    <div className={Styles.learningPlanCards}>
+                        {reportState?.learningPlan?.map((item, index) => (
+                            <div key={index} className={Styles.learningPlanCard}>
+                                <div className={Styles.cardHeader}>
+                                    <span className={Styles.cardNumber}>{index + 1}</span>
+                                    <span className={Styles.cardDay}>Day {item.day}</span>
+                                </div>
+                                <div className={Styles.cardSkill}>
+                                    <strong>Skill Category:</strong>
+                                    <p>{item.skillCategory}</p>
+                                </div>
+                                <div className={Styles.cardSection}>
+                                    <div className={Styles.sectionLabel}>
+                                        <BookOpen size={16} />
+                                        <strong>Learn with Tutor</strong>
+                                    </div>
+                                    <p>{item.learnWithTutor}</p>
+                                </div>
+                                <div className={Styles.cardSection}>
+                                    <div className={Styles.sectionLabel}>
+                                        <Target size={16} />
+                                        <strong>Self Learn</strong>
+                                    </div>
+                                    <p>{item.selfLearn}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             {/* Topic Feedback Modal */}
             <Dialog

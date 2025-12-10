@@ -608,16 +608,6 @@
         padding: 1.5rem;
     }
 
-    .sectionHeader {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .downloadButton {
-        width: 100%;
-        justify-content: center;
-    }
-
     .learningTable {
         font-size: 0.85rem;
         border-radius: 0;
