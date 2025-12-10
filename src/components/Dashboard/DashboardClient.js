@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Navigation from "@/components/Navigation/Navigation.component";
 import Footer from "@/components/Footer/Footer.component";
 import PhoneNumberDialog from "@/components/Auth/PhoneNumberDialog";
-import { CircularProgress, Button, FormControl, InputLabel, Select, MenuItem, TextField, Dialog, DialogTitle, DialogContent, Card, CardContent } from "@mui/material";
+import { CircularProgress, Button, FormControl, InputLabel, Select, MenuItem, TextField, Dialog, DialogTitle, DialogContent, Card, CardContent, Tabs, Tab } from "@mui/material";
 import { User, LogOut, BookOpen, Clock, Award, ChevronRight, Edit2, GraduationCap, Zap } from "lucide-react";
 import { ref, get, set } from "firebase/database";
 import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler";
@@ -31,6 +31,12 @@ const DashboardClient = () => {
         name: "",
         grade: ""
     });
+
+    const [activeTab, setActiveTab] = useState(0);
+
+    const handleTabChange = (event, newValue) => {
+        setActiveTab(newValue);
+    };
 
     // Check for local quiz session before redirecting
     useEffect(() => {
@@ -378,6 +384,47 @@ const DashboardClient = () => {
         }
     };
 
+    const handleStartAssessment = (type = 'ASSESSMENT', reportsCount = 0) => {
+        // Check if we have user data (either from auth or local storage)
+        if (!effectiveUserData || !activeChild) {
+            router.push("/");
+            return;
+        }
+
+        // Get user key - works for both authenticated and phone-only users
+        let userKey = null;
+        if (user) {
+            userKey = getUserDatabaseKey(user);
+        }
+        if (!userKey && effectiveUserData) {
+            userKey = effectiveUserData.userKey || effectiveUserData.phoneNumber || effectiveUserData.parentPhone || effectiveUserData.parentEmail;
+        }
+
+        if (!userKey) {
+            router.push("/");
+            return;
+        }
+
+        try {
+            if (typeof window !== "undefined") {
+                window.localStorage.removeItem("quizSession");
+            }
+        } catch (e) {
+            // ignore storage errors
+        }
+
+        const userDetails = {
+            ...activeChild,
+            phoneNumber: userKey, // Use userKey for backward compatibility
+            childId: activeChildId,
+            activeChildId: activeChildId,
+            attemptCount: reportsCount + 1, // Pass attempt number
+            testType: type
+        };
+        setQuizContext({ userDetails, questionPaper: null });
+        router.push(type === 'RAPID_MATH' ? "/rapid-math" : "/quiz");
+    };
+
     return (
         <div className={Styles.pageWrapper}>
             <Navigation />
@@ -391,79 +438,95 @@ const DashboardClient = () => {
 
             <div className={Styles.dashboardContainer}>
                 {/* Profile Section */}
+                {/* Profile Section */}
                 <section className={Styles.profileSection}>
-                    <div className={Styles.profileHeader}>
-                        <div className={Styles.avatarSection}>
+                    <div className={Styles.profileCardHeader}>
+                        <div className={Styles.profileCover}></div>
+                        <div className={Styles.avatarWrapper}>
                             <div className={Styles.avatar}>
-                                <User size={40} color="white" />
+                                <User size={48} color="white" />
                             </div>
-                            <div className={Styles.profileInfo}>
-                                <h1>{activeChild?.name || "Student"}</h1>
-                                <p>{activeChild?.grade || "Grade N/A"} • {activeChild?.schoolName || "Learner"}</p>
+                        </div>
+                        <div className={Styles.profileInfo}>
+                            <h1>{activeChild?.name || "Student"}</h1>
+                            <div className={Styles.gradeTag}>
+                                <GraduationCap size={14} />
+                                <span>{activeChild?.grade || "Grade N/A"}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className={Styles.profileBody}>
+                        {children && (
+                            <div className={Styles.controlPanel}>
+                                <FormControl size="small" fullWidth className={Styles.childSelector}>
+                                    <InputLabel>Switch Profile</InputLabel>
+                                    <Select
+                                        value={activeChildId || ""}
+                                        label="Switch Profile"
+                                        onChange={handleChildChange}
+                                    >
+                                        {Object.entries(children).map(([id, child]) => (
+                                            <MenuItem key={id} value={id}>
+                                                {child.name} ({child.grade})
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+
+                                <div className={Styles.actionButtonsRow}>
+                                    <Button
+                                        variant="outlined"
+                                        onClick={handleEditChild}
+                                        disabled={!activeChildId}
+                                        startIcon={<Edit2 size={16} />}
+                                        fullWidth
+                                        className={Styles.secondaryActionBtn}
+                                    >
+                                        Edit
+                                    </Button>
+                                    <Button
+                                        variant="contained"
+                                        onClick={handleOpenAddChild}
+                                        fullWidth
+                                        className={Styles.primaryActionBtn}
+                                    >
+                                        Add Child
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className={Styles.statsGrid}>
+                            <div className={Styles.statCard}>
+                                <div className={`${Styles.statIconBox} ${Styles.blueIcon}`}>
+                                    <BookOpen size={20} />
+                                </div>
+                                <div className={Styles.statInfo}>
+                                    <p className={Styles.statLabel}>Status</p>
+                                    <h3 className={Styles.statValue}>{reports ? "Active" : "New"}</h3>
+                                </div>
+                            </div>
+                            <div className={Styles.statCard}>
+                                <div className={`${Styles.statIconBox} ${Styles.orangeIcon}`}>
+                                    <Clock size={20} />
+                                </div>
+                                <div className={Styles.statInfo}>
+                                    <p className={Styles.statLabel}>Last Active</p>
+                                    <h3 className={Styles.statValue}>{new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</h3>
+                                </div>
                             </div>
                         </div>
 
                         <Button
-                            variant="outlined"
+                            variant="text"
                             color="error"
-                            startIcon={<LogOut size={18} />}
+                            startIcon={<LogOut size={16} />}
                             onClick={handleLogout}
-                            className={Styles.logoutButton}
+                            className={Styles.logoutButtonText}
                         >
                             Sign Out
                         </Button>
-                    </div>
-
-                    {children && (
-                        <div className={Styles.childSelectorRow}>
-                            <FormControl size="small" className={Styles.childSelector}>
-                                <InputLabel>Child Profile</InputLabel>
-                                <Select
-                                    value={activeChildId || ""}
-                                    label="Child Profile"
-                                    onChange={handleChildChange}
-                                >
-                                    {Object.entries(children).map(([id, child]) => (
-                                        <MenuItem key={id} value={id}>
-                                            {child.name} ({child.grade})
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                            <Button
-                                variant="outlined"
-                                onClick={handleEditChild}
-                                disabled={!activeChildId}
-                                startIcon={<Edit2 size={18} />}
-                                className={Styles.editChildButton}
-                            >
-                                Edit
-                            </Button>
-                            <Button
-                                variant="outlined"
-                                onClick={handleOpenAddChild}
-                                className={Styles.addChildButton}
-                            >
-                                Add Child
-                            </Button>
-                        </div>
-                    )}
-
-                    <div className={Styles.statsGrid}>
-                        <div className={Styles.statCard}>
-                            <BookOpen className={Styles.statIcon} />
-                            <div>
-                                <h3>Assessment Status</h3>
-                                <p>{reports ? "Completed" : "Not Started"}</p>
-                            </div>
-                        </div>
-                        <div className={Styles.statCard}>
-                            <Clock className={Styles.statIcon} />
-                            <div>
-                                <h3>Last Active</h3>
-                                <p>{new Date().toLocaleDateString()}</p>
-                            </div>
-                        </div>
                     </div>
                 </section>
 
@@ -525,95 +588,122 @@ const DashboardClient = () => {
 
                                 return (
                                     <>
-                                        {/* Standard Assessments Section */}
-                                        {assessmentReports.length > 0 && (
-                                            <div className={Styles.reportsList}>
-                                                {assessmentReports.map((report, index) => (
-                                                    <Card key={report.id || index} className={Styles.reportCard}>
-                                                        <CardContent className={Styles.reportContent}>
-                                                            <div className={Styles.reportInfo}>
-                                                                <div className={Styles.reportIcon}>
-                                                                    <Award size={24} />
-                                                                </div>
-                                                                <div>
-                                                                    <h3>Math Skill Proficiency Test {assessmentReports.length > 1 ? `#${assessmentReports.length - index}` : ""}</h3>
-                                                                    <p className={Styles.reportDate}>
-                                                                        {new Date(report.timestamp).toLocaleDateString()} • {new Date(report.timestamp).toLocaleTimeString()}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                            <div className={Styles.reportScore}>
-                                                                <div className={Styles.scoreBadge}>
-                                                                    {report.summary.totalQuestions > 0
-                                                                        ? Math.round(report.summary.accuracyPercent)
-                                                                        : 0}%
-                                                                </div>
-                                                                <Button
-                                                                    endIcon={<ChevronRight />}
-                                                                    onClick={() => router.push(`/quiz/quiz-result?reportId=${report.id}`)}
-                                                                >
-                                                                    View Full Report
-                                                                </Button>
-                                                            </div>
-                                                        </CardContent>
-                                                    </Card>
-                                                ))}
-                                            </div>
-                                        )}
+                                        <div className={Styles.tabsContainer}>
+                                            <Tabs
+                                                value={activeTab}
+                                                onChange={handleTabChange}
+                                                aria-label="report tabs"
+                                                className={Styles.customTabs}
+                                                TabIndicatorProps={{ style: { backgroundColor: '#2563eb', height: 3, borderRadius: '3px 3px 0 0' } }}
+                                            >
+                                                <Tab label="Skill Assessments" className={Styles.customTab} />
+                                                <Tab label="Rapid Math" className={Styles.customTab} />
+                                            </Tabs>
+                                        </div>
 
-                                        {/* Rapid Math Section */}
-                                        {rapidMathReports.length > 0 && (
-                                            <div className="mt-8">
-                                                <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-amber-600">
-                                                    <Zap size={24} fill="currentColor" /> Rapid Math Challenges
-                                                </h3>
-                                                <div className={Styles.reportsList}>
-                                                    {rapidMathReports.map((report, index) => (
-                                                        <Card key={report.id || index} className={Styles.reportCard}>
-                                                            <CardContent className={Styles.reportContent}>
-                                                                <div className={Styles.reportInfo}>
-                                                                    <div className={Styles.reportIcon}>
-                                                                        <Zap size={24} className="text-amber-500" />
-                                                                    </div>
-                                                                    <div>
-                                                                        <h3>Rapid Math Challenge</h3>
-                                                                        <p className={Styles.reportDate}>
-                                                                            {new Date(report.timestamp).toLocaleDateString()} • {new Date(report.timestamp).toLocaleTimeString()}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                                <div className={Styles.reportScore}>
-                                                                    <div className={`${Styles.scoreBadge} bg-amber-100 text-amber-800`}>
-                                                                        {report.summary.accuracyPercent}% Score
-                                                                    </div>
-                                                                    <Button
-                                                                        endIcon={<ChevronRight />}
-                                                                        onClick={() => router.push(`/rapid-math/test/summary?reportId=${report.id}`)}
-                                                                    >
-                                                                        View Report
-                                                                    </Button>
-                                                                </div>
-                                                            </CardContent>
-                                                        </Card>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
+                                        <div role="tabpanel" hidden={activeTab !== 0}>
+                                            {activeTab === 0 && (
+                                                <>
+                                                    {assessmentReports.length > 0 ? (
+                                                        <div className={Styles.reportsList}>
+                                                            {assessmentReports.map((report, index) => (
+                                                                <Card key={report.id || index} className={Styles.reportCard}>
+                                                                    <CardContent className={Styles.reportContent}>
+                                                                        <div className={Styles.reportInfo}>
+                                                                            <div className={Styles.reportIcon}>
+                                                                                <Award size={24} />
+                                                                            </div>
+                                                                            <div>
+                                                                                <h3>Math Skill Proficiency Test {assessmentReports.length - index}</h3>
+                                                                                <p className={Styles.reportDate}>
+                                                                                    {new Date(report.timestamp).toLocaleDateString()} • {new Date(report.timestamp).toLocaleTimeString()}
+                                                                                </p>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className={Styles.reportScore}>
+                                                                            <div className={Styles.scoreBadge}>
+                                                                                {report.summary.totalQuestions > 0
+                                                                                    ? Math.round(report.summary.accuracyPercent)
+                                                                                    : 0}%
+                                                                            </div>
+                                                                            <Button
+                                                                                endIcon={<ChevronRight />}
+                                                                                onClick={() => router.push(`/quiz/quiz-result?reportId=${report.id}`)}
+                                                                            >
+                                                                                View Report
+                                                                            </Button>
+                                                                        </div>
+                                                                    </CardContent>
+                                                                </Card>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <div className={Styles.emptyState}>
+                                                            <img src="/empty-state.svg" alt="No assessments" className={Styles.emptyImage} />
+                                                            <p>You haven't taken any assessments yet.</p>
+                                                            <Button
+                                                                variant="contained"
+                                                                className={Styles.startBtn}
+                                                                onClick={() => router.push("/quiz")}
+                                                            >
+                                                                Start Assessment
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
 
-                                        {/* Empty State if EVERYTHING is empty */}
-                                        {assessmentReports.length === 0 && rapidMathReports.length === 0 && (
-                                            <div className={Styles.emptyState}>
-                                                <img src="/empty-state.svg" alt="No assessments" className={Styles.emptyImage} />
-                                                <p>You haven't taken any assessments yet.</p>
-                                                <Button
-                                                    variant="contained"
-                                                    className={Styles.startBtn}
-                                                    onClick={() => router.push("/quiz")}
-                                                >
-                                                    Start Assessment
-                                                </Button>
-                                            </div>
-                                        )}
+                                        <div role="tabpanel" hidden={activeTab !== 1}>
+                                            {activeTab === 1 && (
+                                                <>
+                                                    {rapidMathReports.length > 0 ? (
+                                                        <div className={Styles.reportsList}>
+                                                            {rapidMathReports.map((report, index) => (
+                                                                <Card key={report.id || index} className={Styles.reportCard}>
+                                                                    <CardContent className={Styles.reportContent}>
+                                                                        <div className={Styles.reportInfo}>
+                                                                            <div className={`${Styles.reportIcon} ${Styles.rapidIcon}`}>
+                                                                                <Zap size={24} />
+                                                                            </div>
+                                                                            <div>
+                                                                                <h3>Rapid Math Challenge</h3>
+                                                                                <p className={Styles.reportDate}>
+                                                                                    {new Date(report.timestamp).toLocaleDateString()} • {new Date(report.timestamp).toLocaleTimeString()}
+                                                                                </p>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className={Styles.reportScore}>
+                                                                            <div className={`${Styles.scoreBadge} ${Styles.rapidBadge}`}>
+                                                                                {report.summary.accuracyPercent}% Score
+                                                                            </div>
+                                                                            <Button
+                                                                                endIcon={<ChevronRight />}
+                                                                                onClick={() => router.push(`/rapid-math/test/summary?reportId=${report.id}`)}
+                                                                            >
+                                                                                View Report
+                                                                            </Button>
+                                                                        </div>
+                                                                    </CardContent>
+                                                                </Card>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <div className={Styles.emptyState}>
+                                                            <img src="/empty-state.svg" alt="No rapid math" className={Styles.emptyImage} />
+                                                            <p>No Rapid Math challenges yet.</p>
+                                                            <Button
+                                                                variant="contained"
+                                                                className={Styles.startBtn}
+                                                                onClick={() => router.push("/rapid-math")}
+                                                            >
+                                                                Start Challenge
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
                                     </>
                                 );
                             })()}
@@ -626,44 +716,7 @@ const DashboardClient = () => {
                             <Button
                                 variant="contained"
                                 className={Styles.startBtn}
-                                onClick={() => {
-                                    // Check if we have user data (either from auth or local storage)
-                                    if (!effectiveUserData || !activeChild) {
-                                        router.push("/");
-                                        return;
-                                    }
-
-                                    // Get user key - works for both authenticated and phone-only users
-                                    let userKey = null;
-                                    if (user) {
-                                        userKey = getUserDatabaseKey(user);
-                                    }
-                                    if (!userKey && effectiveUserData) {
-                                        userKey = effectiveUserData.userKey || effectiveUserData.phoneNumber || effectiveUserData.parentPhone || effectiveUserData.parentEmail;
-                                    }
-
-                                    if (!userKey) {
-                                        router.push("/");
-                                        return;
-                                    }
-
-                                    try {
-                                        if (typeof window !== "undefined") {
-                                            window.localStorage.removeItem("quizSession");
-                                        }
-                                    } catch (e) {
-                                        // ignore storage errors
-                                    }
-
-                                    const userDetails = {
-                                        ...activeChild,
-                                        phoneNumber: userKey, // Use userKey for backward compatibility
-                                        childId: activeChildId,
-                                        activeChildId: activeChildId,
-                                    };
-                                    setQuizContext({ userDetails, questionPaper: null });
-                                    router.push("/quiz");
-                                }}
+                                onClick={() => handleStartAssessment('ASSESSMENT', 0)}
                             >
                                 Start Assessment
                             </Button>

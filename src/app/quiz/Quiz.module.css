@@ -110,3 +110,284 @@
         padding: 0;
     }
 }
+
+/* Intro Screen Styles */
+.introOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.introCard {
+    background: white;
+    border-radius: 20px;
+    padding: 0;
+    text-align: center;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    overflow: hidden;
+}
+
+.introHeader {
+    background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.introIconWrapper {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1), 0 2px 4px -1px rgba(37, 99, 235, 0.06);
+    border: 1px solid #bfdbfe;
+}
+
+.introCard h1 {
+    font-size: 24px;
+    color: #1e293b;
+    margin-bottom: 4px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.introCard p {
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.instructionBox {
+    padding: 20px 24px;
+    background: #ffffff;
+    text-align: left;
+}
+
+.instructionBox h3 {
+    font-size: 13px;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-bottom: 12px;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.instructionBox h3::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e2e8f0;
+}
+
+.instructionList {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.instructionList li {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #334155;
+    padding-left: 20px;
+    position: relative;
+}
+
+/* Custom bullet points */
+.instructionList li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 7px;
+    width: 6px;
+    height: 6px;
+    background: #3b82f6;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px #dbeafe;
+}
+
+.introActions {
+    padding: 16px 24px 20px;
+    background: #ffffff;
+    display: flex;
+    gap: 12px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.exitQuizBtn {
+    flex: 1;
+    border: 1px solid #cbd5e1 !important;
+    color: #475569 !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    padding: 14px !important;
+    border-radius: 12px !important;
+    font-size: 1rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.exitQuizBtn:hover {
+    background-color: #f8fafc !important;
+    border-color: #94a3b8 !important;
+    color: #1e293b !important;
+}
+
+.startQuizBtn {
+    flex: 2;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    font-weight: 700 !important;
+    text-transform: none !important;
+    padding: 14px !important;
+    border-radius: 12px !important;
+    font-size: 1.1rem !important;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4), 0 2px 4px -1px rgba(37, 99, 235, 0.2) !important;
+    transition: all 0.2s ease !important;
+}
+
+.startQuizBtn:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.5), 0 4px 6px -2px rgba(37, 99, 235, 0.3) !important;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Tablet Responsiveness */
+@media (max-width: 1024px) {
+    .introCard {
+        max-width: 500px;
+        padding: 0;
+    }
+
+    .introHeader {
+        padding: 24px;
+    }
+
+    .instructionBox {
+        padding: 24px;
+    }
+
+    .introActions {
+        padding: 20px 24px 24px;
+    }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+    .introOverlay {
+        padding: 16px;
+        align-items: flex-end;
+        /* Bottom sheet feel on mobile or center? Center is safer for modal */
+        align-items: center;
+    }
+
+    .introCard {
+        max-width: 100%;
+        border-radius: 20px;
+        margin: 0;
+    }
+
+    .introHeader {
+        padding: 20px;
+    }
+
+    .introIconWrapper {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 12px;
+    }
+
+    .introIconWrapper svg {
+        width: 32px;
+        height: 32px;
+    }
+
+    .introCard h1 {
+        font-size: 22px;
+        margin-bottom: 6px;
+    }
+
+    .introCard p {
+        font-size: 14px;
+    }
+
+    .instructionBox {
+        padding: 20px;
+        max-height: 40vh;
+        /* Scrollable if too tall on small phones */
+        overflow-y: auto;
+    }
+
+    .instructionBox h3 {
+        margin-bottom: 12px;
+        font-size: 13px;
+    }
+
+    .instructionList {
+        gap: 12px;
+    }
+
+    .instructionList li {
+        font-size: 13px;
+        padding-left: 20px;
+    }
+
+    .instructionList li::before {
+        top: 7px;
+        width: 5px;
+        height: 5px;
+    }
+
+    .introActions {
+        padding: 16px 20px 20px;
+        flex-direction: column-reverse;
+        /* Stack buttons on very small screens? Or keep row? Row is usually better for actions unless names are long. Let's keep row but gap adjustment */
+        gap: 12px;
+        flex-direction: row;
+    }
+
+    .startQuizBtn,
+    .exitQuizBtn {
+        padding: 12px !important;
+        font-size: 1rem !important;
+    }
+}

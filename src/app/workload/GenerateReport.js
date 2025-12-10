@@ -5,7 +5,8 @@ function analyzeResponses(responses, grade) {
             attempted: 0,
             correct: 0,
             wrong: 0,
-            accuracyPercent: 0
+            accuracyPercent: 0,
+            totalTime: 0
         },
         topicFeedback: {}, // topic -> { correctCount, wrongCount, positiveFeedback, improvementFeedback }
         perQuestionReport: [], // detailed per-question info
@@ -120,6 +121,10 @@ function analyzeResponses(responses, grade) {
             result.summary.attempted += 1;
             result.summary.correct += score;
             result.summary.wrong += (1 - score);
+            // Accumulate timeTaken (ensure it's a number)
+            if (typeof timeTaken === 'number') {
+                result.summary.totalTime += timeTaken;
+            }
         }
 
         // Track topic stats
