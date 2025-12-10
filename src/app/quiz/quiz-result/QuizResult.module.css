@@ -1578,3 +1578,355 @@
         opacity: 0;
     }
 }
+
+/* Celebration Modal */
+.celebrationModal {
+    text-align: center;
+    padding: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.celebrationIcon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: bounce 1s infinite;
+}
+
+.celebrationTitle {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.celebrationText {
+    font-size: 1.1rem;
+    color: #475569;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.celebrationEmoji {
+    position: absolute;
+    font-size: 2rem;
+    animation: floatUp 3s ease-in infinite;
+    opacity: 0;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(100px) rotate(0deg);
+        opacity: 0;
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-300px) rotate(360deg);
+        opacity: 0;
+    }
+}
+/* Responsive Learning Plan - Mobile/Tablet Button and Modal */
+
+/* Hide mobile button on desktop, show table */
+.mobileViewPlanButton {
+    display: none;
+}
+
+.desktopTableContainer {
+    display: block;
+}
+
+/* Mobile/Tablet: Hide table, show button */
+@media (max-width: 1024px) {
+    .mobileViewPlanButton {
+        display: block;
+        margin-top: 1rem;
+    }
+
+    .desktopTableContainer {
+        display: none;
+    }
+
+    .viewPlanButton {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        padding: 1rem 1.5rem !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        text-transform: none !important;
+        border-radius: 0.75rem !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .viewPlanButton:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+    }
+}
+
+/* Learning Plan Cards in Modal */
+.learningPlanCards {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.learningPlanCard {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.learningPlanCard:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.cardNumber {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    font-size: 1.125rem;
+}
+
+.cardDay {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.cardSkill {
+    margin-bottom: 1.25rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+    border-radius: 0.75rem;
+}
+
+.cardSkill strong {
+    display: block;
+    font-size: 0.875rem;
+    color: #667eea;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+
+.cardSkill p {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    line-height: 1.5;
+}
+
+.cardSection {
+    margin-bottom: 1rem;
+}
+
+.cardSection:last-child {
+    margin-bottom: 0;
+}
+
+.sectionLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    color: #667eea;
+}
+
+.sectionLabel strong {
+    font-size: 0.95rem;
+    color: #1e293b;
+}
+
+.cardSection p {
+    margin: 0;
+    padding-left: 1.75rem;
+    font-size: 0.95rem;
+    color: #475569;
+    line-height: 1.6;
+}
+
+/* Responsive adjustments for modal */
+@media (max-width: 768px) {
+    .modalContent {
+        padding: 1.5rem !important;
+    }
+
+    .learningPlanCard {
+        padding: 1.25rem;
+    }
+
+    .cardHeader {
+        flex-wrap: wrap;
+    }
+
+    .cardNumber {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    .cardDay {
+        font-size: 1rem;
+    }
+
+    .cardSkill {
+        padding: 0.875rem;
+    }
+
+    .cardSkill strong {
+        font-size: 0.8rem;
+    }
+
+    .cardSkill p {
+        font-size: 0.95rem;
+    }
+
+    .sectionLabel strong {
+        font-size: 0.875rem;
+    }
+
+    .cardSection p {
+        font-size: 0.875rem;
+        padding-left: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .modalHeader {
+        padding: 1.25rem 1.5rem !important;
+    }
+
+    .modalTitleWrapper {
+        font-size: 1.25rem;
+    }
+
+    .modalContent {
+        padding: 1.25rem !important;
+    }
+
+    .learningPlanCards {
+        gap: 1.25rem;
+    }
+
+    .learningPlanCard {
+        padding: 1rem;
+    }
+
+    .cardHeader {
+        margin-bottom: 1rem;
+        padding-bottom: 0.875rem;
+    }
+
+    .cardSkill {
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+    }
+}
+
+/* Additional mobile responsiveness for section header */
+@media (max-width: 480px) {
+    .sectionHeader {
+        gap: 0.5rem;
+    }
+
+    .sectionIcon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .sectionTitle {
+        font-size: 1.125rem;
+    }
+}
+
+/* Professional Section Header Layout */
+.sectionHeaderWrapper {
+    margin-bottom: 2rem;
+}
+
+.sectionTitleRow {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.sectionActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+/* Desktop: Keep actions on same row as title */
+@media (min-width: 769px) {
+    .sectionHeaderWrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .sectionTitleRow {
+        margin-bottom: 0;
+    }
+
+    .sectionActions {
+        flex-shrink: 0;
+    }
+}
+
+/* Mobile: Stack title and button */
+@media (max-width: 768px) {
+    .sectionTitleRow {
+        justify-content: flex-start;
+    }
+
+    .sectionActions {
+        justify-content: center;
+    }
+
+    .sectionActions .downloadButton {
+        width: 100%;
+        max-width: 300px;
+    }
+}

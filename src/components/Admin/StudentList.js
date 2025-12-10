@@ -27,7 +27,8 @@ import {
     Divider,
     useTheme,
     ToggleButton,
-    ToggleButtonGroup
+    ToggleButtonGroup,
+    InputAdornment
 } from '@mui/material';
 import {
     Eye,
@@ -44,7 +45,8 @@ import {
     Trash2,
     FileSpreadsheet,
     Zap,
-    BookOpen
+    BookOpen,
+    Search
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -56,6 +58,7 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
     const chartRef = useRef(null);
     const [selectedGrade, setSelectedGrade] = useState('All');
     const [minScore, setMinScore] = useState(0);
+    const [searchTerm, setSearchTerm] = useState('');
     const [open, setOpen] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -87,9 +90,17 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
             }
 
             const scoreMatch = score >= minScore;
-            return gradeMatch && scoreMatch;
+
+            // Search Filter
+            const term = searchTerm.toLowerCase();
+            const nameMatch = student.name?.toLowerCase().includes(term);
+            const phoneMatch = student.phoneNumber?.toLowerCase().includes(term);
+            const emailMatch = student.email?.toLowerCase().includes(term);
+            const searchMatch = !searchTerm || nameMatch || phoneMatch || emailMatch;
+
+            return gradeMatch && scoreMatch && searchMatch;
         });
-    }, [students, selectedGrade, minScore, viewMode]);
+    }, [students, selectedGrade, minScore, viewMode, searchTerm]);
 
     const handleView = (student) => {
         setSelectedStudent(student);
@@ -336,15 +347,54 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
             </Box>
 
             {/* Filters */}
-            <Paper sx={{ p: 2, mb: 3, borderRadius: 2 }}>
+            <Paper sx={{
+                p: 3,
+                mb: 4,
+                borderRadius: 4,
+                boxShadow: '0 4px 20px 0 rgba(0,0,0,0.05)',
+                border: '1px solid #f1f5f9',
+                background: 'ffffff'
+            }}>
                 <Grid container spacing={3} alignItems="center">
+                    {/* Search Field */}
+                    <Grid item xs={12} md={5}>
+                        <TextField
+                            fullWidth
+                            size="small"
+                            placeholder="Search Student Name, Phone..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <Search size={20} color="#64748b" />
+                                    </InputAdornment>
+                                ),
+                                sx: {
+                                    borderRadius: '12px',
+                                    fieldset: { borderColor: '#e2e8f0' },
+                                    '&:hover fieldset': { borderColor: '#cbd5e1' },
+                                    '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
+                                    bgcolor: '#f8fafc',
+                                    fontSize: '0.95rem'
+                                }
+                            }}
+                        />
+                    </Grid>
+
+                    {/* Grade Filter */}
                     <Grid item xs={12} md={3}>
                         <FormControl fullWidth size="small">
-                            <InputLabel>Filter by Grade</InputLabel>
+                            <InputLabel sx={{ fontWeight: 500, color: '#64748b' }}>Filter by Grade</InputLabel>
                             <Select
                                 value={selectedGrade}
                                 label="Filter by Grade"
                                 onChange={(e) => setSelectedGrade(e.target.value)}
+                                sx={{
+                                    borderRadius: '12px',
+                                    bgcolor: '#f8fafc',
+                                    '.MuiOutlinedInput-notchedOutline': { borderColor: '#e2e8f0' }
+                                }}
                             >
                                 <MenuItem value="All">All Grades</MenuItem>
                                 {uniqueGrades.map((grade) => (
@@ -353,38 +403,50 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
                             </Select>
                         </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={3}>
-                        <Typography gutterBottom variant="body2" color="text.secondary">
-                            Minimum Score: {minScore}%
-                        </Typography>
-                        <Slider
-                            value={minScore}
-                            onChange={(e, newValue) => setMinScore(newValue)}
-                            valueLabelDisplay="auto"
-                            min={0}
-                            max={100}
-                        />
+
+                    {/* Min Score Filter */}
+                    <Grid item xs={12} md={2}>
+                        <Box sx={{ px: 1 }}>
+                            <Typography gutterBottom variant="caption" color="text.secondary" fontWeight="600">
+                                Min Score: {minScore}%
+                            </Typography>
+                            <Slider
+                                value={minScore}
+                                onChange={(e, newValue) => setMinScore(newValue)}
+                                valueLabelDisplay="auto"
+                                min={0}
+                                max={100}
+                                size="small"
+                                sx={{
+                                    color: '#3b82f6',
+                                    '& .MuiSlider-thumb': { boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }
+                                }}
+                            />
+                        </Box>
                     </Grid>
-                    <Grid item xs={12} md={3}>
-                        <Typography variant="body2" color="text.secondary" align="center">
-                            Showing {filteredStudents.length} of {students.length} students
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={12} md={3} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+
+                    <Grid item xs={12} md={2} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                         <Button
                             variant="contained"
                             color="success"
-                            startIcon={<FileSpreadsheet size={20} />}
+                            startIcon={<FileSpreadsheet size={18} />}
                             onClick={handleExportExcel}
+                            size="medium"
                             sx={{
-                                background: 'linear-gradient(45deg, #2e7d32 30%, #4caf50 90%)',
-                                boxShadow: '0 3px 5px 2px rgba(46, 125, 50, .3)',
+                                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.4)',
                                 color: 'white',
-                                width: '100%'
+                                width: '100%',
+                                borderRadius: '10px',
+                                textTransform: 'none',
+                                fontWeight: 600
                             }}
                         >
                             Export Excel
                         </Button>
+                        <Typography variant="caption" color="text.fourth" align="center" fontWeight="500" sx={{ color: '#94a3b8' }}>
+                            {filteredStudents.length} Students Found
+                        </Typography>
                     </Grid>
                 </Grid>
             </Paper>

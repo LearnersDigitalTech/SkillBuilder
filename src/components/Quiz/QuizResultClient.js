@@ -12,6 +12,7 @@ const HeroChart = ({ summary, notAttempted }) => {
             correct: summary.correct,
             wrong: summary.wrong,
             skipped: notAttempted,
+            totalTime: summary.totalTime || 0,
         },
     ];
 
@@ -93,7 +94,7 @@ const formatAnswer = (answer) => {
 const QuizResultClient = () => {
 
     const [quizSession, setQuizSession] = useContext(QuizSessionContext);
-    const { user, userData } = useAuth();
+    const { user, userData, loading } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
     const reportId = searchParams.get("reportId");
@@ -103,6 +104,8 @@ const QuizResultClient = () => {
 
     const [reportState, setReportState] = useState(null);
     const [loadingReport, setLoadingReport] = useState(true);
+    const [showCelebration, setShowCelebration] = useState(false);
+    const [floatingEmojis, setFloatingEmojis] = useState([]);
 
     useEffect(() => {
         const loadReport = async () => {
@@ -267,6 +270,36 @@ const QuizResultClient = () => {
         loadReport();
     }, [quizSession, user, userData, reportId]); // Added reportId to trigger refresh when viewing different reports
 
+    // Check for celebration (100% Score)
+    useEffect(() => {
+        if (reportState?.summary?.accuracyPercent === 100) {
+            // Only show celebration if not viewing an old report (optional, but requested behavior implies immediate feedback)
+            // But user might want to see it again? Let's show it.
+            // Actually, best to show only on *first* load or just trigger it.
+            // Let's trigger it with a small delay to ensure UI is ready
+            const timer = setTimeout(() => {
+                setShowCelebration(true);
+                // Trigger confetti/clap sound here if we had one
+                triggerFloatingEmojis();
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [reportState]);
+
+    const triggerFloatingEmojis = () => {
+        const emojis = ['🎉', '👏', '🏆', '⭐', '🎊', '✨'];
+        const newEmojis = [];
+        for (let i = 0; i < 20; i++) {
+            newEmojis.push({
+                id: i,
+                char: emojis[Math.floor(Math.random() * emojis.length)],
+                left: Math.random() * 100 + '%',
+                delay: Math.random() * 2 + 's'
+            });
+        }
+        setFloatingEmojis(newEmojis);
+    };
+
 
     const rawSummary = reportState?.summary || {
         totalQuestions: 0,
@@ -274,6 +307,7 @@ const QuizResultClient = () => {
         correct: 0,
         wrong: 0,
         accuracyPercent: 0,
+        totalTime: 0,
     };
 
     // Ensure accuracy is based on totalQuestions (e.g., 30/30 -> 100%)
@@ -293,6 +327,7 @@ const QuizResultClient = () => {
     // Modal states
     const [topicModalOpen, setTopicModalOpen] = useState(false);
     const [questionModalOpen, setQuestionModalOpen] = useState(false);
+    const [learningPlanModalOpen, setLearningPlanModalOpen] = useState(false);
 
     // Tutor booking dialog state
     const [tutorDialogOpen, setTutorDialogOpen] = useState(false);
@@ -412,15 +447,24 @@ const QuizResultClient = () => {
             if (activeChild) {
                 displayName = activeChild.name || displayName;
                 displayGrade = activeChild.grade || displayGrade;
-                // For phone display, use actual phone number (not UID)
-                if (user.phoneNumber) {
-                    displayPhone = user.phoneNumber.slice(-10);
-                } else if (userData?.phoneNumber) {
-                    displayPhone = userData.phoneNumber;
-                } else {
-                    displayPhone = ""; // No phone available
-                }
             }
+        }
+    }
+
+    // IMPORTANT: Validate phone number - if it's a UID (long hash) or empty, get from userData
+    // A valid phone number should be 10-15 digits, a UID is much longer with letters
+    const isValidPhone = displayPhone && /^\d{10,15}$/.test(displayPhone);
+
+    if (!isValidPhone) {
+        // displayPhone is empty, a UID, or invalid - get real phone from userData
+        if (userData?.phoneNumber) {
+            displayPhone = userData.phoneNumber;
+        } else if (userData?.parentPhone) {
+            displayPhone = userData.parentPhone;
+        } else if (user?.phoneNumber) {
+            displayPhone = user.phoneNumber.slice(-10);
+        } else {
+            displayPhone = "";
         }
     }
 
@@ -428,8 +472,32 @@ const QuizResultClient = () => {
         setTutorSuccess("");
         setTutorError("");
 
+        // IMPORTANT: Recalculate phone number from userData at dialog open time
+        // This ensures we have the latest userData loaded
+        let phoneNumber = "";
+
+        // First check if quizSession has a valid phone number
+        const sessionPhone = quizSession?.userDetails?.phoneNumber || quizSession?.userDetails?.parentPhone || "";
+        const isValidSessionPhone = sessionPhone && /^\d{10,15}$/.test(sessionPhone);
+
+        if (isValidSessionPhone) {
+            phoneNumber = sessionPhone;
+            console.log("📱 Using phone from quizSession:", phoneNumber);
+        } else if (userData?.phoneNumber) {
+            phoneNumber = userData.phoneNumber;
+            console.log("📱 Using phone from userData.phoneNumber:", phoneNumber);
+        } else if (userData?.parentPhone) {
+            phoneNumber = userData.parentPhone;
+            console.log("📱 Using phone from userData.parentPhone:", phoneNumber);
+        } else if (user?.phoneNumber) {
+            phoneNumber = user.phoneNumber.slice(-10);
+            console.log("📱 Using phone from user.phoneNumber:", phoneNumber);
+        } else {
+            console.log("⚠️ No phone number found. userData:", userData, "user:", user, "loading:", loading);
+        }
+
         setTutorForm({
-            phone: displayPhone || (user?.phoneNumber ? user.phoneNumber.slice(-10) : ""),
+            phone: phoneNumber,
         });
 
         setTutorDialogOpen(true);
@@ -439,6 +507,116 @@ const QuizResultClient = () => {
         const value = event.target.value;
         setTutorForm((prev) => ({ ...prev, [field]: value }));
     };
+
+    const handleDownloadLearningPlan = () => {
+        if (!reportState?.learningPlan || reportState.learningPlan.length === 0) {
+            return;
+        }
+
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+
+        // Add white header background
+        doc.setFillColor(255, 255, 255);
+        doc.rect(0, 0, pageWidth, 45, 'F');
+
+        // Add purple accent border at bottom of header
+        doc.setFillColor(102, 126, 234);
+        doc.rect(0, 43, pageWidth, 2, 'F');
+
+        // Add logo
+        const logoImg = new Image();
+        logoImg.src = '/LearnersLogoTransparent.png';
+
+        try {
+            // Add logo on left side
+            doc.addImage(logoImg, 'PNG', 14, 8, 30, 30);
+        } catch (error) {
+            console.log('Logo not loaded, continuing without it');
+        }
+
+        // Add title text (shifted right to accommodate logo)
+        doc.setTextColor(102, 126, 234);
+        doc.setFontSize(20);
+        doc.setFont(undefined, 'bold');
+        doc.text('Your Personalized Learning Plan', pageWidth / 2, 18, { align: 'center' });
+
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text('Math Skill Conquest', pageWidth / 2, 28, { align: 'center' });
+
+        // Student details
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(11);
+        let yPos = 55;
+
+        doc.setFont(undefined, 'bold');
+        doc.text('Student Details:', 14, yPos);
+        yPos += 7;
+
+        doc.setFont(undefined, 'normal');
+        doc.text(`Name: ${displayName || 'Student'}`, 14, yPos);
+        yPos += 6;
+        doc.text(`Grade: ${displayGrade || 'N/A'}`, 14, yPos);
+        yPos += 6;
+        doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, yPos);
+        yPos += 12;
+
+        // Learning plan table
+        const tableData = reportState.learningPlan.map((item) => [
+            `Day ${item.day}`,
+            item.skillCategory,
+            item.learnWithTutor,
+            item.selfLearn
+        ]);
+
+        autoTable(doc, {
+            startY: yPos,
+            head: [['Day', 'Skill Category', 'Learn with Tutor', 'Self Learn']],
+            body: tableData,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [102, 126, 234],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                fontSize: 10
+            },
+            bodyStyles: {
+                fontSize: 9,
+                cellPadding: 4
+            },
+            columnStyles: {
+                0: { cellWidth: 25 },
+                1: { cellWidth: 40 },
+                2: { cellWidth: 60 },
+                3: { cellWidth: 60 }
+            },
+            alternateRowStyles: {
+                fillColor: [248, 250, 252]
+            },
+            margin: { left: 14, right: 14 }
+        });
+
+        // Footer
+        const finalY = doc.lastAutoTable.finalY || yPos + 50;
+        doc.setFontSize(9);
+        doc.setTextColor(100, 116, 139);
+        doc.text('Keep practicing daily to master these skills! 🎯', pageWidth / 2, finalY + 15, { align: 'center' });
+
+        // Add website URL
+        doc.setFontSize(10);
+        doc.setTextColor(102, 126, 234);
+        doc.textWithLink('Visit: https://math100.learnersdigital.com/', pageWidth / 2, finalY + 23, {
+            align: 'center',
+            url: 'https://math100.learnersdigital.com/'
+        });
+
+        // Save PDF
+        const fileName = `Learning_Plan_${displayName || 'Student'}_${displayGrade || 'Grade'}.pdf`;
+        doc.save(fileName);
+    };
+
 
     const [statusDialogOpen, setStatusDialogOpen] = useState(false);
     const [statusLoading, setStatusLoading] = useState(false);
@@ -697,6 +875,17 @@ const QuizResultClient = () => {
                             <span className={Styles.heroStatLabel}>Wrong</span>
                         </div>
                         <div className={Styles.heroStatItem}>
+                            <span className={Styles.heroStatValue} style={{ color: '#000' }}>
+                                {(() => {
+                                    const seconds = summary.totalTime || 0;
+                                    const m = Math.floor(seconds / 60);
+                                    const s = seconds % 60;
+                                    return `${m}:${s.toString().padStart(2, '0')}`;
+                                })()}
+                            </span>
+                            <span className={Styles.heroStatLabel}>Total Time</span>
+                        </div>
+                        <div className={Styles.heroStatItem}>
                             <span className={`${Styles.heroStatValue} ${Styles.statColorSkipped}`}>{notAttempted}</span>
                             <span className={Styles.heroStatLabel}>Skipped</span>
                         </div>
@@ -735,6 +924,49 @@ const QuizResultClient = () => {
 
                 {/* Action Buttons */}
                 <section className={Styles.actionSection}>
+                    <Dialog
+                        open={showCelebration}
+                        onClose={() => setShowCelebration(false)}
+                        maxWidth="sm"
+                        fullWidth
+                        PaperProps={{
+                            className: Styles.modal
+                        }}
+                    >
+                        <div className={Styles.celebrationModal}>
+                            {floatingEmojis.map(emoji => (
+                                <div
+                                    key={emoji.id}
+                                    className={Styles.celebrationEmoji}
+                                    style={{ left: emoji.left, animationDelay: emoji.delay }}
+                                >
+                                    {emoji.char}
+                                </div>
+                            ))}
+                            <div className={Styles.celebrationIcon}>🏆</div>
+                            <h2 className={Styles.celebrationTitle}>100% Club!</h2>
+                            <p className={Styles.celebrationText}>
+                                Congratulations on getting a perfect score!<br />
+                                You've mastered this topic perfectly.<br /><br />
+                                <strong>High Performers like you get special attention!</strong><br />
+                                Our academic tutor will contact you soon for advanced coaching.
+                            </p>
+                            <Button
+                                variant="contained"
+                                onClick={() => setShowCelebration(false)}
+                                style={{
+                                    background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+                                    color: 'white',
+                                    fontWeight: 'bold',
+                                    padding: '10px 30px',
+                                    borderRadius: '50px',
+                                    boxShadow: '0 4px 15px rgba(255, 165, 0, 0.4)'
+                                }}
+                            >
+                                Awesome! 🎉
+                            </Button>
+                        </div>
+                    </Dialog>
                     <Button
                         className={Styles.actionButton}
                         onClick={() => setTopicModalOpen(true)}
@@ -830,6 +1062,57 @@ const QuizResultClient = () => {
                     </div>
                 </section>
             </div>
+
+            {/* Learning Plan Modal (Mobile/Tablet) */}
+            <Dialog
+                open={learningPlanModalOpen}
+                onClose={() => setLearningPlanModalOpen(false)}
+                maxWidth="md"
+                fullWidth
+                PaperProps={{
+                    className: Styles.modal
+                }}
+            >
+                <DialogTitle className={Styles.modalHeader}>
+                    <div className={Styles.modalTitleWrapper}>
+                        <BookOpen className={Styles.modalIcon} />
+                        <span>Your Personalized Learning Plan</span>
+                    </div>
+                    <IconButton onClick={() => setLearningPlanModalOpen(false)} className={Styles.closeButton}>
+                        <X size={20} />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent className={Styles.modalContent}>
+                    <div className={Styles.learningPlanCards}>
+                        {reportState?.learningPlan?.map((item, index) => (
+                            <div key={index} className={Styles.learningPlanCard}>
+                                <div className={Styles.cardHeader}>
+                                    <span className={Styles.cardNumber}>{index + 1}</span>
+                                    <span className={Styles.cardDay}>Day {item.day}</span>
+                                </div>
+                                <div className={Styles.cardSkill}>
+                                    <strong>Skill Category:</strong>
+                                    <p>{item.skillCategory}</p>
+                                </div>
+                                <div className={Styles.cardSection}>
+                                    <div className={Styles.sectionLabel}>
+                                        <BookOpen size={16} />
+                                        <strong>Learn with Tutor</strong>
+                                    </div>
+                                    <p>{item.learnWithTutor}</p>
+                                </div>
+                                <div className={Styles.cardSection}>
+                                    <div className={Styles.sectionLabel}>
+                                        <Target size={16} />
+                                        <strong>Self Learn</strong>
+                                    </div>
+                                    <p>{item.selfLearn}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             {/* Topic Feedback Modal */}
             <Dialog

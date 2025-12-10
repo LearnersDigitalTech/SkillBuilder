@@ -8,6 +8,7 @@ import { useContext, useEffect, useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { QuizSessionContext } from "../../app/context/QuizSessionContext";
 import { toast } from "react-toastify";
+import { Trophy, Star } from "lucide-react";
 import getRandomInt from "../../app/workload/GetRandomInt";
 import GetGrade1Question from "@/questionBook/Grade1/GetGrade1Question";
 import GetGrade2Question from "@/questionBook/Grade2/GetGrade2Question";
@@ -36,6 +37,8 @@ const QuizClient = () => {
     const [hydrationDone, setHydrationDone] = useState(false);
     const [hasStoredSession, setHasStoredSession] = useState(false);
     const [isInitializing, setIsInitializing] = useState(true); // Ensures loading screen shows on first load
+    const [showIntro, setShowIntro] = useState(false);
+    const [attemptCount, setAttemptCount] = useState(0);
 
     // Name prompt dialog state
     const [nameDialogOpen, setNameDialogOpen] = useState(false);
@@ -93,6 +96,68 @@ const QuizClient = () => {
         }, 1500);
         return () => clearTimeout(timer);
     }, []);
+
+    // Fetch attempt count if not provided in context
+    useEffect(() => {
+        const fetchAttemptCount = async () => {
+            if (activeQuestionIndex === 0 && user) {
+                // If attempt count is already passed, use it directly (or default to 1)
+                if (quizContext.userDetails?.attemptCount) {
+                    setAttemptCount(quizContext.userDetails.attemptCount);
+                    setShowIntro(true); // Always show intro
+                    return;
+                }
+
+                try {
+                    const userKey = getUserDatabaseKey(user);
+                    const childId = quizContext.userDetails.activeChildId || quizContext.userDetails.childId || "default";
+                    const finalUserKey = userKey.replace('.', '_');
+                    const reportsRef = ref(firebaseDatabase, `NMD_2025/Reports/${finalUserKey}/${childId}`);
+
+                    const { get } = await import("firebase/database");
+                    const snapshot = await get(reportsRef);
+                    let count = 0;
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        Object.values(data).forEach(r => {
+                            if (r.summary && (!r.type || r.type === 'ASSESSMENT')) count++;
+                        });
+                    }
+                    // Always show intro, default attempt is count + 1
+                    setAttemptCount(count + 1);
+                    setShowIntro(true);
+                } catch (e) {
+                    console.error("Error fetching attempts:", e);
+                    // Fallback to attempt 1 if error
+                    setAttemptCount(1);
+                    setShowIntro(true);
+                }
+            }
+        };
+
+        // Only fetch if we are starting fresh (index 0) and haven't viewed questions yet
+        if (activeQuestionIndex === 0 && !viewedQuestionsRef.current.has('intro_seen')) {
+            fetchAttemptCount();
+        }
+    }, [activeQuestionIndex, quizContext.userDetails, user]);
+
+    const handleStartQuiz = () => {
+        setShowIntro(false);
+        viewedQuestionsRef.current.add('intro_seen');
+    };
+
+    const handleExitQuiz = () => {
+        if (typeof window !== 'undefined') {
+            window.localStorage.removeItem("quizSession");
+        }
+        router.back();
+    };
+
+    const getOrdinal = (n) => {
+        const s = ["th", "st", "nd", "rd"];
+        const v = n % 100;
+        return n + (s[(v - 20) % 10] || s[v] || s[0]);
+    };
 
     useEffect(() => {
         let gradeQuestionPaper = null;
@@ -605,6 +670,62 @@ const QuizClient = () => {
                 title="Loading Your Assessment"
                 subtitle="Preparing your personalized math questions..."
             />
+        );
+    }
+
+    if (showIntro) {
+        return (
+            <div className={Styles.introOverlay}>
+                <div className={Styles.introCard}>
+                    <div className={Styles.introHeader}>
+                        <div className={Styles.introIconWrapper}>
+                            <Trophy size={40} color="#2563eb" fill="#2563eb" />
+                        </div>
+                        <h1>Assessment Attempt #{attemptCount}</h1>
+                        <p>You are about to start your {getOrdinal(attemptCount)} attempt for this assessment.</p>
+                    </div>
+
+                    <div className={Styles.instructionBox}>
+                        <h3>Assessment Instructions</h3>
+                        <ul className={Styles.instructionList}>
+                            <li>
+                                <strong>Time Duration:</strong> You have <strong>30 minutes</strong> to complete this assessment. The timer will start as soon as you click "Start Test".
+                            </li>
+                            <li>
+                                <strong>Question Format:</strong> This test consists of various question types. Read each question carefully before answering.
+                            </li>
+                            <li>
+                                <strong>Navigation:</strong> Use the "Next" and "Previous" buttons to navigate. You can also use the Question Palette to jump to specific questions.
+                            </li>
+                            <li>
+                                <strong>Submission:</strong> Ensure all questions are answered before submitting. You cannot change answers after submission.
+                            </li>
+                            <li>
+                                <strong>Important:</strong> Do not refresh the page or switch tabs, as this may interrupt your session.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div className={Styles.introActions}>
+                        <Button
+                            variant="outlined"
+                            size="large"
+                            className={Styles.exitQuizBtn}
+                            onClick={handleExitQuiz}
+                        >
+                            Exit
+                        </Button>
+                        <Button
+                            variant="contained"
+                            size="large"
+                            className={Styles.startQuizBtn}
+                            onClick={handleStartQuiz}
+                        >
+                            Start Test
+                        </Button>
+                    </div>
+                </div>
+            </div>
         );
     }
 
