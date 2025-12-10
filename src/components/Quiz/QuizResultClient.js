@@ -1001,46 +1001,68 @@ const QuizResultClient = () => {
 
                 {/* Learning Plan */}
                 <section className={Styles.learningSection}>
-                    <div className={Styles.sectionHeader}>
-                        <BookOpen className={Styles.sectionIcon} />
-                        <h2 className={Styles.sectionTitle}>Your Personalized Learning Plan</h2>
-                        {/* {reportState?.learningPlan && reportState.learningPlan.length > 0 && (
-                            <button
-                                className={Styles.downloadButton}
-                                onClick={handleDownloadPDF}
-                                title="Download as PDF"
-                            >
-                                <Download size={18} />
-                                <span>Download PDF</span>
-                            </button>
-                        )} */}
+                    <div className={Styles.sectionHeaderWrapper}>
+                        <div className={Styles.sectionTitleRow}>
+                            <BookOpen className={Styles.sectionIcon} />
+                            <h2 className={Styles.sectionTitle}>Your Personalized Learning Plan</h2>
+                        </div>
+                        {reportState?.learningPlan && reportState.learningPlan.length > 0 && (
+                            <div className={Styles.sectionActions}>
+                                <button
+                                    className={Styles.downloadButton}
+                                    onClick={handleDownloadLearningPlan}
+                                    title="Download as PDF"
+                                >
+                                    <Download size={18} />
+                                    <span>Download PDF</span>
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {reportState?.learningPlan && reportState.learningPlan.length > 0 ? (
-                        <div className={Styles.tableContainer}>
-                            <table className={Styles.learningTable}>
-                                <thead>
-                                    <tr>
-                                        <th>Sl.No</th>
-                                        <th>Day</th>
-                                        <th>Skill Category</th>
-                                        <th>Learn with Tutor</th>
-                                        <th>Self Learn</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {reportState.learningPlan.map((item, index) => (
-                                        <tr key={index}>
-                                            <td>{index + 1}</td>
-                                            <td>Day {item.day}</td>
-                                            <td>{item.skillCategory}</td>
-                                            <td>{item.learnWithTutor}</td>
-                                            <td>{item.selfLearn}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                        <>
+                            {/* Mobile/Tablet: Show button to open modal */}
+                            <div className={Styles.mobileViewPlanButton}>
+                                <Button
+                                    variant="contained"
+                                    onClick={() => setLearningPlanModalOpen(true)}
+                                    startIcon={<BookOpen />}
+                                    fullWidth
+                                    className={Styles.viewPlanButton}
+                                >
+                                    View Learning Plan
+                                </Button>
+                            </div>
+
+                            {/* Desktop: Show table directly */}
+                            <div className={Styles.desktopTableContainer}>
+                                <div className={Styles.tableContainer}>
+                                    <table className={Styles.learningTable}>
+                                        <thead>
+                                            <tr>
+                                                <th>Sl.No</th>
+                                                <th>Day</th>
+                                                <th>Skill Category</th>
+                                                <th>Learn with Tutor</th>
+                                                <th>Self Learn</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {reportState.learningPlan.map((item, index) => (
+                                                <tr key={index}>
+                                                    <td>{index + 1}</td>
+                                                    <td>Day {item.day}</td>
+                                                    <td>{item.skillCategory}</td>
+                                                    <td>{item.learnWithTutor}</td>
+                                                    <td>{item.selfLearn}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </>
                     ) : (
                         <div className={Styles.learningCard}>
                             <p className={Styles.learningIntro}>
