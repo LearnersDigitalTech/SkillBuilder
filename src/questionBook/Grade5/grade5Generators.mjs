@@ -335,32 +335,71 @@ export const generateSimplifyFractions = () => {
     };
 };
 
-export const generateAddUnlikeFractions = () => {
-    // Simple unlike fractions e.g. 1/2 + 1/3
-    const d1 = getRandomInt(2, 5);
-    let d2 = getRandomInt(2, 5);
-    while (d1 === d2) d2 = getRandomInt(2, 5);
+export const generateAddUnlikeFractions = () => { // Renamed logically but keeping export name for compatibility
+    // Grade 5: Mixed Fractions Addition (Like Denominators or Simple)
+    // Example: 2 1/2 + 3 1/2
+    const d = getRandomInt(2, 9);
 
-    const n1 = 1;
-    const n2 = 1;
+    // Generate two mixed numbers
+    const w1 = getRandomInt(1, 4);
+    const n1 = getRandomInt(1, d - 1);
 
-    const commonDen = d1 * d2;
-    const numSum = (n1 * d2) + (n2 * d1);
+    const w2 = getRandomInt(1, 4);
+    const n2 = getRandomInt(1, d - 1);
 
-    const question = `Add: $$ ${n1}/${d1} + ${n2}/${d2} = ? $$`;
-    const answer = `$$ ${numSum}/${commonDen} $$`;
+    // Question string
+    const question = `Add: $$ ${w1} \\frac{${n1}}{${d}} + ${w2} \\frac{${n2}}{${d}} = ? $$`;
+
+    // Calculate sum
+    let totalWhole = w1 + w2;
+    let totalNum = n1 + n2;
+    let totalDen = d;
+
+    // Simplify improper fraction part if needed
+    if (totalNum >= totalDen) {
+        totalWhole += Math.floor(totalNum / totalDen);
+        totalNum = totalNum % totalDen;
+    }
+
+    // Simplify fraction part
+    const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+    const divisor = gcd(totalNum, totalDen);
+    totalNum /= divisor;
+    totalDen /= divisor;
+
+    let answer;
+    if (totalNum === 0) {
+        answer = `$$ ${totalWhole} $$`;
+    } else {
+        answer = `$$ ${totalWhole} \\frac{${totalNum}}{${totalDen}} $$`;
+    }
+
+    // Generate Distractors
+    // 1. Forgot to carry over
+    const badWhole = w1 + w2;
+    const badNum = n1 + n2;
+    const dist1 = `$$ ${badWhole} \\frac{${badNum}}{${d}} $$`;
+
+    // 2. Add straight across without simplifying/carrying correctly
+    const dist2 = `$$ ${totalWhole + 1} \\frac{${totalNum}}{${totalDen}} $$`;
+
+    // 3. Random error
+    const dist3 = `$$ ${totalWhole} \\frac{${totalNum + 1}}{${totalDen}} $$`;
 
     const options = shuffleArray([
         { value: answer, label: answer },
-        { value: `${n1 + n2}/${d1 + d2}`, label: `$$ ${n1 + n2}/${d1 + d2} $$` }, // Common mistake
-        { value: `${numSum + 1}/${commonDen}`, label: `$$ ${numSum + 1}/${commonDen} $$` },
-        { value: `${numSum}/${commonDen + 1}`, label: `$$ ${numSum}/${commonDen + 1} $$` }
+        { value: dist1, label: dist1 },
+        { value: dist2, label: dist2 },
+        { value: dist3, label: dist3 }
     ]);
+
+    // Ensure options are unique 
+    const params = [w1, n1, w2, n2, d].join('-');
 
     return {
         type: "mcq",
         question: question,
-        topic: "Fractions / Addition",
+        topic: "Fractions / Mixed Addition",
         options: options,
         answer: answer
     };
@@ -588,15 +627,49 @@ export const generateAreaPerimeterShapes = () => {
 // --- Data Handling ---
 
 export const generatePieChart = () => {
-    // Simple interpretation
-    const question = "In a pie chart representing 100 students, if 50% like Cricket, how many students like Cricket?";
-    const answer = "50";
+    // Data: Total students = 100 or 200 or similar
+    const total = 100 * getRandomInt(1, 4); // 100, 200, 300, 400
+
+    // Percentages: Cricket 50%, Football 25%, Tennis 25%
+    const percentCricket = 50;
+    const percentFootball = 25;
+    const percentTennis = 25;
+
+    // Question: "Total students: ${total}. How many students like Cricket?"
+    const question = `Total students: ${total}. How many students like Cricket?`;
+    const answer = String((total * percentCricket) / 100);
+
+    // Generate SVG Pie Chart
+    // 50% = 180 deg, 25% = 90 deg
+    // Colors: Cricket (Blue), Football (Green), Tennis (Orange)
+    const cricketPath = `M 100 100 L 100 20 A 80 80 0 0 1 100 180 Z`;
+    const footballPath = `M 100 100 L 100 180 A 80 80 0 0 1 20 100 Z`;
+    const tennisPath = `M 100 100 L 20 100 A 80 80 0 0 1 100 20 Z`;
+
+    // Labels
+    const textCricket = `<text x="140" y="100" fill="white" font-size="12">Cricket 50%</text>`;
+    const textFootball = `<text x="60" y="150" fill="white" font-size="12">Football 25%</text>`;
+    const textTennis = `<text x="60" y="60" fill="white" font-size="12">Tennis 25%</text>`;
+
+    const svgContent = `
+        <circle cx="100" cy="100" r="80" fill="#eee" />
+        <path d="${cricketPath}" fill="#3b82f6" />
+        <path d="${footballPath}" fill="#10b981" />
+        <path d="${tennisPath}" fill="#f59e0b" />
+        ${textCricket}
+        ${textFootball}
+        ${textTennis}
+    `;
+
+    const imageUri = `data:image/svg+xml;base64,${Buffer.from(`<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'>${svgContent}</svg>`).toString('base64')}`;
 
     return {
         type: "userInput",
         question: question,
+        image: imageUri,
         topic: "Data Handling / Pie Chart",
-        answer: answer
+        answer: answer,
+        instructions: "Calculate the number of students."
     };
 };
 
@@ -679,3 +752,339 @@ export const generateHCF = () => {
     };
 };
 
+export const generateFactorTree = () => {
+    // Pick a composite number suitable for grade 5 (12 to 100)
+    // Avoid primes
+    let num = 0;
+    const composites = [12, 16, 18, 20, 24, 27, 28, 30, 32, 36, 40, 42, 45, 48, 50, 54, 56, 60, 63, 64, 72, 81, 100];
+    const getRandomIntLocal = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    num = composites[getRandomIntLocal(0, composites.length - 1)];
+
+    let nodeIdCounter = 0;
+
+    const buildTree = (n) => {
+        const node = {
+            id: `node_${nodeIdCounter++}`,
+            val: n,
+            children: [],
+            isInput: false
+        };
+
+        // If composite, split
+        // Find split pair
+        const factors = [];
+        for (let i = 2; i < n; i++) {
+            if (n % i === 0) {
+                factors.push(i);
+            }
+        }
+
+        if (factors.length > 0) {
+            // Pick a random factor
+            const factor1 = factors[getRandomIntLocal(0, factors.length - 1)];
+            const factor2 = n / factor1;
+
+            // Recurse
+            node.children.push(buildTree(factor1));
+            node.children.push(buildTree(factor2));
+        }
+
+        return node;
+    };
+
+    const tree = buildTree(num);
+
+    // Flatten tree to list of nodes (excluding root usually, but here we can include root if we want root hidden? No, usually leaf or intermediate)
+    const nodes = [];
+    const traverse = (n) => {
+        if (n.children && n.children.length > 0) {
+            // Intermediate or root
+            // We can hide intermediate nodes
+            n.children.forEach(c => {
+                nodes.push(c);
+                traverse(c);
+            });
+        }
+    };
+    traverse(tree);
+
+    // Also include leaves?
+    // Actually, usually we hide some leaves (prime factors) or some intermediate factors.
+    // Let's re-collect ALL nodes except root.
+    const allNodesButRoot = [];
+    const collect = (n) => {
+        if (n.children) {
+            n.children.forEach(c => {
+                allNodesButRoot.push(c);
+                collect(c);
+            });
+        }
+    };
+    collect(tree);
+
+    // Shuffle and pick some to hide
+    // For visual simplicity, let's just pick 2 or 3 random nodes to hide from allNodesButRoot
+    // Helper shuffle
+    const shuffle = (array) => {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    };
+
+    const shuffled = shuffle([...allNodesButRoot]);
+    const nodesToHideCount = getRandomIntLocal(2, Math.min(4, shuffled.length));
+
+    // Map required answers
+    const expectedAnswers = {};
+
+    for (let i = 0; i < nodesToHideCount; i++) {
+        shuffled[i].isInput = true;
+    }
+
+    const correctAnswers = {};
+    const extractAnswers = (n) => {
+        if (n.isInput) {
+            correctAnswers[n.id] = String(n.val);
+        }
+        if (n.children) n.children.forEach(extractAnswers);
+    };
+    extractAnswers(tree);
+
+    const question = `Complete the Factor Tree for ${num}:`;
+
+    return {
+        type: "factorTree",
+        question: question,
+        topic: "Number Theory / Factor Tree",
+        tree: tree,
+        answer: JSON.stringify(correctAnswers)
+    };
+};
+
+export const generateSymmetry = () => {
+    const items = [
+        { name: "Square", count: 4 },
+        { name: "Rectangle", count: 2 },
+        { name: "Equilateral Triangle", count: 3 },
+        { name: "Isosceles Triangle", count: 1 },
+        { name: "Regular Pentagon", count: 5 },
+        { name: "Regular Hexagon", count: 6 },
+        { name: "Rhombus", count: 2 },
+        { name: "Kite", count: 1 },
+        { name: "Parallelogram", count: 0 },
+        { name: "Isosceles Trapezoid", count: 1 },
+        { name: "Scalene Triangle", count: 0 },
+        { name: "Star", count: 5 },
+        { name: "Arrow", count: 1 },
+        { name: "Cross", count: 4 },
+    ];
+
+    const getShapeSvg = (name) => {
+        let svgContent = "";
+        const size = 200;
+        const center = size / 2;
+        const style = "fill='none' stroke='black' stroke-width='4'";
+
+        switch (name) {
+            case "Square":
+                svgContent = `<rect x='50' y='50' width='100' height='100' ${style} />`;
+                break;
+            case "Rectangle":
+                svgContent = `<rect x='25' y='60' width='150' height='80' ${style} />`;
+                break;
+            case "Equilateral Triangle":
+                // Height = sqrt(3)/2 * side. Side ~ 120
+                svgContent = `<polygon points='100,40 40,160 160,160' ${style} />`;
+                break;
+            case "Isosceles Triangle":
+                svgContent = `<polygon points='100,20 60,160 140,160' ${style} />`;
+                break;
+            case "Regular Pentagon":
+                // Approximate points
+                svgContent = `<polygon points='100,20 176,75 147,163 53,163 24,75' ${style} />`;
+                break;
+            case "Regular Hexagon":
+                svgContent = `<polygon points='100,20 170,60 170,140 100,180 30,140 30,60' ${style} />`;
+                break;
+            case "Rhombus":
+                svgContent = `<polygon points='100,20 160,100 100,180 40,100' ${style} />`;
+                break;
+            case "Kite":
+                svgContent = `<polygon points='100,20 160,80 100,180 40,80' ${style} />`;
+                break;
+            case "Parallelogram":
+                svgContent = `<polygon points='60,140 160,140 140,60 40,60' ${style} />`;
+                break;
+            case "Isosceles Trapezoid":
+                svgContent = `<polygon points='50,140 150,140 120,60 80,60' ${style} />`;
+                break;
+            case "Scalene Triangle":
+                svgContent = `<polygon points='40,160 180,160 60,40' ${style} />`;
+                break;
+            case "Star":
+                svgContent = `<polygon points='100,20 123,85 195,85 136,125 158,190 100,150 42,190 64,125 5,85 77,85' ${style} />`;
+                break;
+            case "Arrow":
+                svgContent = `<polygon points='100,20 160,80 130,80 130,180 70,180 70,80 40,80' ${style} />`;
+                break;
+            case "Cross":
+                svgContent = `<polygon points='80,20 120,20 120,80 180,80 180,120 120,120 120,180 80,180 80,120 20,120 20,80 80,80' ${style} />`;
+                break;
+            default:
+                svgContent = "";
+        }
+
+        if (!svgContent) return null;
+
+        return `data:image/svg+xml;base64,${Buffer.from(`<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}' viewBox='0 0 ${size} ${size}'>${svgContent}</svg>`).toString('base64')}`;
+    };
+
+    const item = items[Math.floor(Math.random() * items.length)];
+    const imageUri = getShapeSvg(item.name);
+
+    return {
+        type: "userInput",
+        question: `How many lines of symmetry does the shape below have?`,
+        image: imageUri,
+        answer: String(item.count),
+        topic: "Geometry / Symmetry",
+        instructions: "Enter the number.",
+        format: "integer"
+    };
+};
+
+export const generateNumberPattern = () => {
+    // Select pattern type: 0 = Squares of 1s (Repunits), 1 = Descending 8s, 2 = Ascending 9s
+    const type = Math.floor(Math.random() * 2);
+    // Difficulty adjustment: Limit n to 4 or 5 lines to keep it simple for Grade 5
+    const n = Math.floor(Math.random() * 2) + 4; // 4, 5
+
+    let latex = "\\begin{aligned} ";
+    let questionText = "";
+    let answer = "";
+    let instructions = "";
+
+    if (type === 0) {
+        // Repunit Squares: 12321 = 111 x 111
+        for (let i = 1; i < n; i++) {
+            const ones = "1".repeat(i);
+            const square = (BigInt(ones) * BigInt(ones)).toString();
+            latex += `${square} &= ${ones} \\times ${ones} \\\\ `;
+        }
+        const onesTarget = "1".repeat(n);
+        const squareTarget = (BigInt(onesTarget) * BigInt(onesTarget)).toString();
+
+        latex += `${squareTarget} &= ? `;
+        instructions = "Type the multiplication expression (e.g. 111 x 111)";
+        answer = `${onesTarget} x ${onesTarget}`;
+    } else {
+        // Times 8 Pattern: 12 x 8 + 2 = 98
+        // 1 x 8 + 1 = 9
+        // 123 x 8 + 3 = 987
+        for (let i = 1; i < n; i++) {
+            let leftNum = "";
+            for (let j = 1; j <= i; j++) leftNum += j;
+
+            // Calculate right side (987...)
+            let rightNum = "";
+            for (let j = 0; j < i; j++) rightNum += (9 - j);
+
+            latex += `${leftNum} \\times 8 + ${i} &= ${rightNum} \\\\ `;
+        }
+
+        let leftNumTarget = "";
+        for (let j = 1; j <= n; j++) leftNumTarget += j;
+
+        // Target answer
+        let rightNumTarget = "";
+        for (let j = 0; j < n; j++) rightNumTarget += (9 - j);
+
+        latex += `${leftNumTarget} \\times 8 + ${n} &= ? `;
+        instructions = "Type the result number.";
+        answer = rightNumTarget;
+    }
+
+    latex += "\\end{aligned}";
+    questionText = `Look at this pattern and take it forward: $$${latex}$$`;
+
+    return {
+        type: "userInput",
+        question: questionText,
+        answer: answer,
+        topic: "Pattern Recognition",
+        instructions: instructions, // Dynamic instructions
+        format: "text"
+    };
+};
+
+export const generatePicturePattern = () => {
+    // Rotating Arrow Pattern
+    // Random start angle: 0, 90, 180, 270
+    const angles = [0, 90, 180, 270];
+    const startIndex = Math.floor(Math.random() * 4);
+
+    // Sequence of 3 items
+    const seqAngles = [
+        angles[startIndex % 4],
+        angles[(startIndex + 1) % 4],
+        angles[(startIndex + 2) % 4]
+    ];
+    const nextAngle = angles[(startIndex + 3) % 4];
+
+    // Helper to generate SVG for a single Arrow at specific rotation
+    // ViewBox 0 0 100 100
+    const getArrowSvg = (angle, xOffset = 0) => {
+        // Arrow path centered at 50,50 (inside 100x100 box)
+        return `<g transform="translate(${xOffset}, 0) rotate(${angle} 50 50)">
+            <path d="M 50 80 L 50 20 L 30 40 M 50 20 L 70 40" stroke="black" stroke-width="4" fill="none" />
+        </g>`;
+    };
+
+    // Helper to produce full SVG data URI
+    const encodeSvg = (content, width, height) => {
+        return `data:image/svg+xml;base64,${Buffer.from(`<svg xmlns='http://www.w3.org/2000/svg' width='${width}' height='${height}' viewBox='0 0 ${width} ${height}'>${content}</svg>`).toString('base64')}`;
+    };
+
+    // 1. Generate Question Image (Sequence of 3)
+    let questionSvgContent = "";
+    questionSvgContent += getArrowSvg(seqAngles[0], 0);
+    questionSvgContent += getArrowSvg(seqAngles[1], 100);
+    questionSvgContent += getArrowSvg(seqAngles[2], 200);
+
+    const questionImage = encodeSvg(questionSvgContent, 300, 100);
+
+    // 2. Generate Options
+    const optionsData = angles.map(angle => {
+        const svg = encodeSvg(getArrowSvg(angle, 0), 100, 100);
+        return {
+            label: "",
+            value: String(angle),
+            image: svg
+        };
+    });
+
+    // Shuffle options
+    for (let i = optionsData.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [optionsData[i], optionsData[j]] = [optionsData[j], optionsData[i]];
+    }
+
+    // Assign labels
+    optionsData.forEach((opt, idx) => {
+        opt.label = `Option ${idx + 1}`;
+    });
+
+    const correctOption = optionsData.find(opt => opt.value === String(nextAngle));
+
+    return {
+        type: "mcq",
+        question: "Observe the pattern below. Which image comes next?",
+        image: questionImage,
+        topic: "Pattern Recognition / Visual",
+        options: optionsData,
+        answer: correctOption.value,
+        instructions: "Select the correct image."
+    };
+};
