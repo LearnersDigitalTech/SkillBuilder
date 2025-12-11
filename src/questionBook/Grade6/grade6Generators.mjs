@@ -833,3 +833,359 @@ export const generateLCM = () => {
 };
 
 
+export const generateFactorTree = () => {
+    // Pick a composite number suitable for grade 6 
+    let num = 0;
+    const composites = [12, 16, 18, 20, 24, 27, 28, 30, 32, 36, 40, 42, 45, 48, 50, 54, 56, 60, 63, 64, 72, 81, 100, 108, 120];
+    const getRandomIntLocal = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    num = composites[getRandomIntLocal(0, composites.length - 1)];
+
+    let nodeIdCounter = 0;
+
+    const buildTree = (n) => {
+        const node = {
+            id: `node_${nodeIdCounter++}`,
+            val: n,
+            children: [],
+            isInput: false
+        };
+
+        // If composite, split
+        const factors = [];
+        for (let i = 2; i < n; i++) {
+            if (n % i === 0) {
+                factors.push(i);
+            }
+        }
+
+        if (factors.length > 0) {
+            // Pick a random factor
+            const factor1 = factors[getRandomIntLocal(0, factors.length - 1)];
+            const factor2 = n / factor1;
+
+            // Recurse
+            node.children.push(buildTree(factor1));
+            node.children.push(buildTree(factor2));
+        }
+
+        return node;
+    };
+
+    const tree = buildTree(num);
+
+    const allNodesButRoot = [];
+    const collect = (n) => {
+        if (n.children) {
+            n.children.forEach(c => {
+                allNodesButRoot.push(c);
+                collect(c);
+            });
+        }
+    };
+    collect(tree);
+
+    // Shuffle and pick some to hide
+    const shuffle = (array) => {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    };
+
+    const shuffled = shuffle([...allNodesButRoot]);
+    const nodesToHideCount = getRandomIntLocal(2, Math.min(4, shuffled.length));
+
+    const correctAnswers = {};
+
+    for (let i = 0; i < nodesToHideCount; i++) {
+        shuffled[i].isInput = true;
+    }
+
+    const extractAnswers = (n) => {
+        if (n.isInput) {
+            correctAnswers[n.id] = String(n.val);
+        }
+        if (n.children) n.children.forEach(extractAnswers);
+    };
+    extractAnswers(tree);
+
+    const question = `Complete the Factor Tree for ${num}:`;
+
+    return {
+        type: "factorTree",
+        question: question,
+        topic: "Number Theory / Factor Tree",
+        tree: tree,
+        answer: JSON.stringify(correctAnswers)
+    };
+};
+
+
+export const generateAlphabetSymmetry = () => {
+    // Letters and their line symmetry counts (standard sans-serif uppercase)
+    const items = [
+        { char: "A", count: 1 },
+        { char: "B", count: 1 },
+        { char: "C", count: 1 },
+        { char: "D", count: 1 },
+        { char: "E", count: 1 },
+        { char: "F", count: 0 },
+        { char: "G", count: 0 },
+        { char: "H", count: 2 },
+        { char: "I", count: 2 },
+        { char: "J", count: 0 },
+        // K is ambiguous, skip
+        { char: "L", count: 0 },
+        { char: "M", count: 1 },
+        { char: "N", count: 0 },
+        { char: "O", count: 2 },
+        { char: "P", count: 0 },
+        { char: "Q", count: 0 },
+        { char: "R", count: 0 },
+        { char: "S", count: 0 },
+        { char: "T", count: 1 },
+        { char: "U", count: 1 },
+        { char: "V", count: 1 },
+        { char: "W", count: 1 },
+        { char: "X", count: 2 },
+        { char: "Y", count: 1 },
+        { char: "Z", count: 0 }
+    ];
+
+    const item = items[Math.floor(Math.random() * items.length)];
+
+    // Generate SVG for letter
+    const size = 200;
+    const svgContent = `<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="120" fill="black">${item.char}</text>`;
+    const imageUri = `data:image/svg+xml;base64,${Buffer.from(`<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}' viewBox='0 0 ${size} ${size}'>${svgContent}</svg>`).toString('base64')}`;
+
+    const question = `How many lines of symmetry does the letter below have?`;
+
+    return {
+        type: "userInput",
+        question: question,
+        topic: "Geometry / Symmetry",
+        image: imageUri,
+        answer: String(item.count)
+    };
+};
+
+
+export const generateNumberPlay = () => {
+    // Concepts: Number Cells (Patterns), Palindrome, Clock
+    const types = ["palindrome", "clock", "pattern"];
+    const type = types[Math.floor(Math.random() * types.length)];
+
+    if (type === "palindrome") {
+        const isPalindrome = (n) => String(n) === String(n).split('').reverse().join('');
+        const generatePalindrome = () => {
+            const seed = Math.floor(Math.random() * 9) + 1; // 1-9
+            return parseInt(`${seed}${Math.floor(Math.random() * 10)}${seed}`); // e.g. 121, 353
+        };
+        const generateNonPalindrome = () => {
+            let n;
+            do {
+                n = Math.floor(Math.random() * 900) + 100;
+            } while (isPalindrome(n));
+            return n;
+        };
+
+        const answer = generatePalindrome();
+        const dists = [generateNonPalindrome(), generateNonPalindrome(), generateNonPalindrome()];
+
+        const shuffle = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+
+        const options = shuffle([
+            { value: String(answer), label: String(answer) },
+            { value: String(dists[0]), label: String(dists[0]) },
+            { value: String(dists[1]), label: String(dists[1]) },
+            { value: String(dists[2]), label: String(dists[2]) }
+        ]);
+
+        return {
+            type: "mcq",
+            question: "Which of these numbers is a Palindrome?",
+            topic: "Number Play / Palindrome",
+            options: options,
+            answer: String(answer)
+        };
+    } else if (type === "clock") {
+        // Angle between hands at full hours (1:00 to 11:00, avoiding 12 and 6 edge cases for simplicity if needed, but 6 is 180, 12 is 0)
+        // Using hours 1-6 for simple smaller angles
+        const hour = Math.floor(Math.random() * 5) + 1; // 1 to 6
+        const ans = hour * 30;
+
+        return {
+            type: "userInput",
+            question: `What is the angle (in degrees) between the hour and minute hands at ${hour}:00?`,
+            topic: "Number Play / Clock",
+            answer: String(ans)
+        };
+    } else {
+        // Pattern / Number Cell
+        const patterns = [
+            { seq: [2, 4, 6, 8], next: 10, rule: "+2" },
+            { seq: [3, 6, 9, 12], next: 15, rule: "+3" },
+            { seq: [5, 10, 15, 20], next: 25, rule: "+5" },
+            { seq: [1, 4, 9, 16], next: 25, rule: "Squares" },
+            { seq: [2, 5, 10, 17], next: 26, rule: "Square + 1" },
+            { seq: [10, 20, 30, 40], next: 50, rule: "+10" },
+            { seq: [100, 90, 80, 70], next: 60, rule: "-10" }
+        ];
+        const pat = patterns[Math.floor(Math.random() * patterns.length)];
+        const question = `Find the next number in the pattern: ${pat.seq.join(', ')}, ?`;
+
+        return {
+            type: "userInput",
+            question: question,
+            topic: "Number Play / Patterns",
+            answer: String(pat.next)
+        };
+    }
+};
+
+
+export const generateNumberPattern = () => {
+    // Select pattern type: 0 = Squares of 1s (Repunits), 1 = Descending 8s
+    const type = Math.floor(Math.random() * 2);
+    // Grade 6 difficulty: n = 4, 5, 6 (slightly harder than 5's 4-5)
+    const n = Math.floor(Math.random() * 3) + 4; // 4, 5, 6
+
+    let latex = "\\begin{aligned} ";
+    let questionText = "";
+    let answer = "";
+    let instructions = "";
+
+    if (type === 0) {
+        // Repunit Squares: 12321 = 111 x 111
+        for (let i = 1; i < n; i++) {
+            const ones = "1".repeat(i);
+            const square = (BigInt(ones) * BigInt(ones)).toString();
+            latex += `${square} &= ${ones} \\times ${ones} \\\\ `;
+        }
+        const onesTarget = "1".repeat(n);
+        const squareTarget = (BigInt(onesTarget) * BigInt(onesTarget)).toString();
+
+        latex += `${squareTarget} &= ? `;
+        instructions = "Type the multiplication expression (e.g. 111 x 111)";
+        answer = `${onesTarget} x ${onesTarget}`;
+    } else {
+        // Times 8 Pattern: 12 x 8 + 2 = 98
+        for (let i = 1; i < n; i++) {
+            let leftNum = "";
+            for (let j = 1; j <= i; j++) leftNum += j;
+
+            // Calculate right side (987...)
+            let rightNum = "";
+            for (let j = 0; j < i; j++) rightNum += (9 - j);
+
+            latex += `${leftNum} \\times 8 + ${i} &= ${rightNum} \\\\ `;
+        }
+
+        let leftNumTarget = "";
+        for (let j = 1; j <= n; j++) leftNumTarget += j;
+
+        // Target answer
+        let rightNumTarget = "";
+        for (let j = 0; j < n; j++) rightNumTarget += (9 - j);
+
+        latex += `${leftNumTarget} \\times 8 + ${n} &= ? `;
+        instructions = "Type the result number.";
+        answer = rightNumTarget;
+    }
+
+    latex += "\\end{aligned}";
+    questionText = `Look at this pattern and take it forward: $$${latex}$$`;
+
+    return {
+        type: "userInput",
+        question: questionText,
+        answer: answer,
+        topic: "Pattern Recognition",
+        instructions: instructions,
+        format: "text",
+        keypadMode: "multiplication"
+    };
+};
+
+export const generateAddSubMultipleSelect = () => {
+    // Generate simple addition/subtraction expressions that sum to a target
+    // Target: 20 to 100
+    const target = Math.floor(Math.random() * 81) + 20;
+
+    // Generate correct options
+    const correctOptions = [];
+    // 1. Addition
+    let a1 = Math.floor(Math.random() * (target - 5)) + 1;
+    correctOptions.push(`${a1} + ${target - a1}`);
+
+    // 2. Subtraction
+    let s1 = target + Math.floor(Math.random() * 20) + 5;
+    correctOptions.push(`${s1} - ${s1 - target}`);
+
+    // 3. Maybe another addition or subtraction
+    if (Math.random() > 0.5) {
+        let a2 = Math.floor(Math.random() * (target - 5)) + 1;
+        correctOptions.push(`${a2} + ${target - a2}`);
+    } else {
+        let s2 = target + Math.floor(Math.random() * 30) + 10;
+        correctOptions.push(`${s2} - ${s2 - target}`);
+    }
+
+    // Generate wrong options (close to target)
+    const wrongOptions = [];
+    while (wrongOptions.length < 2) {
+        let offset = Math.floor(Math.random() * 10) - 5;
+        if (offset === 0) offset = 5;
+        const fakeTarget = target + offset;
+
+        // Generate expression for fake target
+        if (Math.random() > 0.5) {
+            let fa = Math.floor(Math.random() * (fakeTarget - 5)) + 1;
+            wrongOptions.push(`${fa} + ${fakeTarget - fa}`);
+        } else {
+            let fs = fakeTarget + Math.floor(Math.random() * 20) + 5;
+            wrongOptions.push(`${fs} - ${fs - fakeTarget}`);
+        }
+    }
+
+    // Combine and shuffle
+    const allOptions = [...correctOptions, ...wrongOptions];
+    // Simple shuffle
+    for (let i = allOptions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allOptions[i], allOptions[j]] = [allOptions[j], allOptions[i]];
+    }
+
+    // Prepare options format
+    const options = allOptions.map((opt, idx) => ({
+        label: `${opt}`,
+        value: opt
+    }));
+
+    // Identify correct *values* (which are the expressions themselves)
+    const correctAnswerList = correctOptions.sort(); // Sort for consistent comparison
+    // Note: TypeMCQ logic above stringifies the selected array.
+    // Our answer checking (GenerateReport) needs to handle this.
+    // If I return answer as JSON string of array, calculateScore (tableTree logic) might handle it or fall back to strict equality.
+    // Since I updated TypeMCQ to sort selected options, strict equality of JSON strings should work!
+
+    const answer = JSON.stringify(correctAnswerList);
+
+    return {
+        type: "mcq",
+        allowMultiple: true,
+        question: `Select multiple expressions that equal ${target}.`,
+        answer: answer,
+        topic: "Operations",
+        options: options,
+        instructions: "Select all correct options."
+    };
+};

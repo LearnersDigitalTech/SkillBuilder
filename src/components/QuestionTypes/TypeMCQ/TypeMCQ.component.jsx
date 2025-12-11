@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect } from "react";
 import Styles from "./TypeMCQ.module.css";
-import { Button, FormControlLabel, Radio, RadioGroup } from "@mui/material";
+import { Button, FormControlLabel, Radio, RadioGroup, Checkbox, FormGroup } from "@mui/material";
 import { ArrowLeft, ArrowRight, Check, Flag } from "lucide-react";
 import MathRenderer from "@/components/MathRenderer/MathRenderer.component";
 
@@ -13,7 +13,19 @@ const TypeMCQ = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, questio
 
     useEffect(() => {
         if (questionPaper && questionPaper[activeQuestionIndex]) {
-            setSelectedOption(questionPaper[activeQuestionIndex]?.userAnswer || null)
+            let userAns = questionPaper[activeQuestionIndex]?.userAnswer || null;
+            if (questionPaper[activeQuestionIndex]?.allowMultiple) {
+                if (typeof userAns === 'string') {
+                    try {
+                        userAns = JSON.parse(userAns);
+                    } catch (e) {
+                        // If not json, maybe empty string or single value
+                        userAns = userAns ? [userAns] : [];
+                    }
+                }
+                if (!Array.isArray(userAns)) userAns = [];
+            }
+            setSelectedOption(userAns);
         }
     }, [question, activeQuestionIndex, questionPaper])
 
@@ -49,37 +61,80 @@ const TypeMCQ = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, questio
 
             {/* Column 2: Options */}
             <div className={Styles.optionsColumn}>
-                <RadioGroup className={Styles.optionContainer} onChange={(e) => {
-                    const value = e.target.value;
-                    setSelectedOption(value);
-                    if (onAnswerChange) {
-                        onAnswerChange(value);
-                    }
-                }} value={selectedOption}>
-                    {options.map((option, index) => (
-                        <FormControlLabel
-                            key={`${option.value}-${index}`}
-                            value={option.value}
-                            label={
-                                option.image ? (
-                                    <div className={Styles.optionWithImage}>
-                                        <img
-                                            src={option.image}
-                                            alt={option.label}
-                                            className={Styles.optionImage}
+                {questionPaper[activeQuestionIndex]?.allowMultiple ? (
+                    <FormGroup className={Styles.optionContainer}>
+                        {options.map((option, index) => {
+                            const isSelected = Array.isArray(selectedOption) && selectedOption.includes(option.value);
+                            return (
+                                <FormControlLabel
+                                    key={`${option.value}-${index}`}
+                                    control={
+                                        <Checkbox
+                                            checked={isSelected || false}
+                                            onChange={(e) => {
+                                                const checked = e.target.checked;
+                                                const val = option.value;
+                                                const current = Array.isArray(selectedOption) ? selectedOption : [];
+                                                let next;
+                                                if (checked) {
+                                                    next = [...current, val];
+                                                } else {
+                                                    next = current.filter(v => v !== val);
+                                                }
+                                                // Sort to ensure consistent answer comparison
+                                                next.sort();
+                                                setSelectedOption(next);
+                                                if (onAnswerChange) onAnswerChange(JSON.stringify(next));
+                                            }}
                                         />
-                                        <span className={Styles.optionLabel}>
+                                    }
+                                    label={
+                                        option.image ? (
+                                            <div className={Styles.optionWithImage}>
+                                                <img src={option.image} alt={option.label} className={Styles.optionImage} />
+                                                <span className={Styles.optionLabel}><MathRenderer content={option.label} /></span>
+                                            </div>
+                                        ) : (
                                             <MathRenderer content={option.label} />
-                                        </span>
-                                    </div>
-                                ) : (
-                                    <MathRenderer content={option.label} />
-                                )
-                            }
-                            control={<Radio />}
-                        />
-                    ))}
-                </RadioGroup>
+                                        )
+                                    }
+                                />
+                            );
+                        })}
+                    </FormGroup>
+                ) : (
+                    <RadioGroup className={Styles.optionContainer} onChange={(e) => {
+                        const value = e.target.value;
+                        setSelectedOption(value);
+                        if (onAnswerChange) {
+                            onAnswerChange(value);
+                        }
+                    }} value={selectedOption || ""}>
+                        {options.map((option, index) => (
+                            <FormControlLabel
+                                key={`${option.value}-${index}`}
+                                value={option.value}
+                                label={
+                                    option.image ? (
+                                        <div className={Styles.optionWithImage}>
+                                            <img
+                                                src={option.image}
+                                                alt={option.label}
+                                                className={Styles.optionImage}
+                                            />
+                                            <span className={Styles.optionLabel}>
+                                                <MathRenderer content={option.label} />
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <MathRenderer content={option.label} />
+                                    )
+                                }
+                                control={<Radio />}
+                            />
+                        ))}
+                    </RadioGroup>
+                )}
 
 
                 <div className={Styles.navigationContainer}>
