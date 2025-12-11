@@ -57,6 +57,22 @@ import { useAuth } from "@/context/AuthContext";
 
 const formatAnswer = (answer) => {
     if (!answer) return "";
+
+    // Check if answer is an image path (contains /assets/)
+    if (typeof answer === 'string' && answer.includes('/assets/')) {
+        // Extract meaningful information from image path
+        // Example: /assets/grade2/rupee_500.jpg -> ₹500
+        if (answer.includes('rupee_')) {
+            const match = answer.match(/rupee_(\d+)/);
+            if (match) {
+                return `₹${match[1]}`;
+            }
+        }
+        // For other image types, return a generic label
+        const filename = answer.split('/').pop().replace(/\.(jpg|png|jpeg|gif)$/i, '');
+        return filename.replace(/_/g, ' ');
+    }
+
     try {
         // Only try to parse if it looks like a JSON object
         if (typeof answer === 'string' && answer.trim().startsWith('{')) {
@@ -92,6 +108,31 @@ const formatAnswer = (answer) => {
     return answer;
 };
 
+// Helper function to render answer (as image or text)
+const renderAnswer = (answer) => {
+    if (!answer) return null;
+
+    // Check if answer is an image path
+    if (typeof answer === 'string' && answer.includes('/assets/')) {
+        return (
+            <img
+                src={answer}
+                alt={formatAnswer(answer)}
+                style={{
+                    maxWidth: '120px',
+                    maxHeight: '60px',
+                    objectFit: 'contain',
+                    borderRadius: '4px',
+                    border: '1px solid #e2e8f0'
+                }}
+            />
+        );
+    }
+
+    // Otherwise render as text with MathRenderer
+    return <MathRenderer content={formatAnswer(answer)} />;
+};
+
 const QuizResultClient = () => {
 
     const [quizSession, setQuizSession] = useContext(QuizSessionContext);
@@ -107,11 +148,108 @@ const QuizResultClient = () => {
     const [loadingReport, setLoadingReport] = useState(true);
     const [showCelebration, setShowCelebration] = useState(false);
     const [floatingEmojis, setFloatingEmojis] = useState([]);
+    const [isAdminView, setIsAdminView] = useState(false);
 
     useEffect(() => {
         const loadReport = async () => {
             try {
                 const userGrade = quizSession?.userDetails?.activeChild?.grade || quizSession?.userDetails?.grade;
+                const phoneParam = searchParams.get("phone");
+                const adminView = searchParams.get("adminView");
+
+                // Admin View: Load report by phone number
+                if (phoneParam && adminView === 'true') {
+                    console.log('🔍 Admin View Detected - Loading report for phone:', phoneParam);
+                    try {
+                        // Normalize phone number (last 10 digits)
+                        const normalizedPhone = phoneParam.replace(/\D/g, '').slice(-10);
+                        console.log('📱 Normalized phone:', normalizedPhone);
+
+                        // Fetch reports for this phone number
+                        const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${normalizedPhone}`);
+                        console.log('🔥 Firebase path:', `NMD_2025/Reports/${normalizedPhone}`);
+                        const snapshot = await get(reportRef);
+
+                        if (!snapshot.exists()) {
+                            console.log('❌ No reports found for phone:', normalizedPhone);
+                            setLoadingReport(false);
+                            return;
+                        }
+
+                        const reportsData = snapshot.val();
+                        console.log('📊 Reports data:', reportsData);
+
+                        // Get all child reports
+                        let allReports = [];
+                        Object.entries(reportsData).forEach(([childId, childReports]) => {
+                            console.log(`👶 Processing child ${childId}:`, childReports);
+                            if (typeof childReports === 'object' && childReports !== null) {
+                                // Check if it's a single report or multiple reports
+                                if (childReports.summary) {
+                                    console.log('✅ Found single report with summary');
+                                    allReports.push(childReports);
+                                } else {
+                                    // Multiple reports - get all
+                                    console.log('📚 Found multiple reports, extracting...');
+                                    Object.values(childReports).forEach(report => {
+                                        if (report && typeof report === 'object' && report.summary) {
+                                            allReports.push(report);
+                                        }
+                                    });
+                                }
+                            }
+                        });
+
+                        console.log(`📋 Total reports found: ${allReports.length}`);
+
+                        // Sort by timestamp and get latest
+                        allReports.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+                        if (allReports.length > 0) {
+                            const latestReport = allReports[0];
+                            console.log('🎯 Latest report:', latestReport);
+
+                            // Handle both old and new format
+                            let topicFeedback = latestReport.topicFeedback;
+                            let perQuestionReport = latestReport.perQuestionReport;
+                            let learningPlanSummary = latestReport.learningPlanSummary;
+                            let learningPlan = latestReport.learningPlan;
+
+                            if (!topicFeedback && latestReport.generalFeedbackStringified) {
+                                try {
+                                    const parsed = JSON.parse(latestReport.generalFeedbackStringified);
+                                    topicFeedback = parsed.topicFeedback || {};
+                                    perQuestionReport = parsed.perQuestionReport || [];
+                                    learningPlanSummary = parsed.learningPlanSummary || "";
+                                } catch (e) {
+                                    topicFeedback = {};
+                                    perQuestionReport = [];
+                                    learningPlanSummary = "";
+                                }
+                            }
+
+                            const reportStateData = {
+                                summary: latestReport.summary,
+                                topicFeedback: topicFeedback || {},
+                                perQuestionReport: perQuestionReport || [],
+                                learningPlanSummary: learningPlanSummary || "",
+                                learningPlan: learningPlan || [],
+                            };
+
+                            console.log('✅ Setting report state:', reportStateData);
+                            setReportState(reportStateData);
+                            setLoadingReport(false);
+                            return;
+                        } else {
+                            console.log('⚠️ No valid reports found after processing');
+                            setLoadingReport(false);
+                        }
+                    } catch (error) {
+                        console.error('❌ Error loading admin report:', error);
+                        setLoadingReport(false);
+                    }
+                    return; // Exit early for admin view
+                }
 
                 // Case 1: If reportId is provided in URL, fetch that specific report from Firebase
                 // This takes priority over in-memory quizSession to show the correct historical report
@@ -286,6 +424,12 @@ const QuizResultClient = () => {
             return () => clearTimeout(timer);
         }
     }, [reportState]);
+
+    // Detect if viewing from admin dashboard
+    useEffect(() => {
+        const adminView = searchParams.get('adminView');
+        setIsAdminView(adminView === 'true');
+    }, [searchParams]);
 
     const triggerFloatingEmojis = () => {
         const emojis = ['🎉', '👏', '🏆', '⭐', '🎊', '✨'];
@@ -854,6 +998,31 @@ const QuizResultClient = () => {
 
             <div className={Styles.quizResultContent}>
 
+                {/* Admin Back Button */}
+                {isAdminView && (
+                    <div style={{
+                        maxWidth: '1200px',
+                        margin: '0 auto',
+                        padding: '1rem 1.5rem 0',
+                        marginBottom: '-1rem'
+                    }}>
+                        <Button
+                            variant="outlined"
+                            startIcon={<ArrowLeft size={18} />}
+                            onClick={() => window.location.href = '/admin-dashboard'}
+                            sx={{
+                                borderRadius: 2,
+                                borderWidth: 2,
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                '&:hover': { borderWidth: 2 }
+                            }}
+                        >
+                            Back to Admin Dashboard
+                        </Button>
+                    </div>
+                )}
+
                 {/* Hero Section */}
                 <header className={Styles.heroSection}>
                     <div className={Styles.heroContent}>
@@ -1384,13 +1553,13 @@ const QuizResultClient = () => {
                                         <div className={Styles.answerRow}>
                                             <span className={Styles.answerLabel}>Correct Answer:</span>
                                             <div className={Styles.correctAnswer}>
-                                                <MathRenderer content={formatAnswer(q.correctAnswer)} />
+                                                {renderAnswer(q.correctAnswer)}
                                             </div>
                                         </div>
                                         <div className={Styles.answerRow}>
                                             <span className={Styles.answerLabel}>Your Answer:</span>
                                             <div className={`${Styles.userAnswer} ${q.isCorrect ? Styles.correct : (q.attempted ? Styles.wrong : Styles.skipped)}`}>
-                                                {q.userAnswer ? <MathRenderer content={formatAnswer(q.userAnswer)} /> : "Not Attempted"}
+                                                {q.userAnswer ? renderAnswer(q.userAnswer) : "Not Attempted"}
                                             </div>
                                         </div>
                                     </div>
