@@ -105,11 +105,12 @@ function analyzeResponses(responses, grade) {
                 }
                 return allCorrect ? 1 : 0;
             } catch (e) {
-                return givenAnswer === correctAnswer ? 1 : 0;
+                return givenAnswer.replace(/\s+/g, "") === correctAnswer.replace(/\s+/g, "") ? 1 : 0;
             }
         }
 
-        return givenAnswer === correctAnswer ? 1 : 0;
+        // Default: Ignore all whitespace for comparison to handle spacing variations (e.g. "1 x 1" vs "1x1")
+        return givenAnswer.replace(/\s+/g, "") === correctAnswer.replace(/\s+/g, "") ? 1 : 0;
     };
 
     // Step 1: Iterate and compute per-question stats

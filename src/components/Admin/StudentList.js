@@ -28,7 +28,10 @@ import {
     useTheme,
     ToggleButton,
     ToggleButtonGroup,
-    InputAdornment
+    InputAdornment,
+    Accordion,
+    AccordionSummary,
+    AccordionDetails
 } from '@mui/material';
 import {
     Eye,
@@ -46,8 +49,11 @@ import {
     FileSpreadsheet,
     Zap,
     BookOpen,
-    Search
+    Search,
+    ChevronDown,
+    Clock
 } from 'lucide-react';
+import MathRenderer from '@/components/MathRenderer/MathRenderer.component';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
@@ -596,175 +602,260 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
 
                 <DialogContent sx={{ p: 4, bgcolor: '#f8f9fa' }}>
                     {selectedStudent && (
-                        <Grid container spacing={4}>
-                            {/* Left Column: Personal Info */}
-                            <Grid item xs={12} md={6}>
-                                <Paper elevation={0} sx={{ p: 3, borderRadius: 2, height: '100%', border: '1px solid #e0e0e0' }}>
-                                    <Typography variant="h6" gutterBottom fontWeight="bold" color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <User size={20} /> Personal Details
-                                    </Typography>
-                                    <Divider sx={{ mb: 2 }} />
-
-                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-                                        <Box display="flex" alignItems="center" gap={2}>
-                                            <Phone size={20} color="#666" />
-                                            <Box>
-                                                <Typography variant="caption" color="text.secondary">Phone Number</Typography>
-                                                <Typography variant="body1" fontWeight="500">{selectedStudent.phoneNumber}</Typography>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            {/* Row 1: Profile & Pie Chart */}
+                            <Grid container spacing={4}>
+                                <Grid item xs={12} md={6}>
+                                    <Paper elevation={0} sx={{ p: 3, borderRadius: 2, height: '100%', border: '1px solid #e0e0e0' }}>
+                                        <Typography variant="h6" gutterBottom fontWeight="bold" color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <User size={20} /> Personal Details
+                                        </Typography>
+                                        <Divider sx={{ mb: 2 }} />
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                                            <Box display="flex" alignItems="center" gap={2}>
+                                                <Phone size={20} color="#666" />
+                                                <Box>
+                                                    <Typography variant="caption" color="text.secondary">Phone Number</Typography>
+                                                    <Typography variant="body1" fontWeight="500">{selectedStudent.phoneNumber}</Typography>
+                                                </Box>
+                                            </Box>
+                                            <Box display="flex" alignItems="center" gap={2}>
+                                                <Mail size={20} color="#666" />
+                                                <Box>
+                                                    <Typography variant="caption" color="text.secondary">Email Address</Typography>
+                                                    <Typography variant="body1" fontWeight="500">{selectedStudent.email || 'N/A'}</Typography>
+                                                </Box>
+                                            </Box>
+                                            <Box display="flex" alignItems="center" gap={2}>
+                                                <Calendar size={20} color="#666" />
+                                                <Box>
+                                                    <Typography variant="caption" color="text.secondary">Date Joined</Typography>
+                                                    <Typography variant="body1" fontWeight="500">
+                                                        {selectedStudent.date ? new Date(selectedStudent.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}
+                                                    </Typography>
+                                                </Box>
                                             </Box>
                                         </Box>
-
-                                        <Box display="flex" alignItems="center" gap={2}>
-                                            <Mail size={20} color="#666" />
-                                            <Box>
-                                                <Typography variant="caption" color="text.secondary">Email Address</Typography>
-                                                <Typography variant="body1" fontWeight="500">{selectedStudent.email || 'N/A'}</Typography>
-                                            </Box>
-                                        </Box>
-
-                                        <Box display="flex" alignItems="center" gap={2}>
-                                            <Calendar size={20} color="#666" />
-                                            <Box>
-                                                <Typography variant="caption" color="text.secondary">Date Joined</Typography>
-                                                <Typography variant="body1" fontWeight="500">
-                                                    {/* We can use reg date, or last test date */}
-                                                    {selectedStudent.date // Fallback if no specific date for Rapid Math
-                                                        ? new Date(selectedStudent.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
-                                                        : 'N/A'}
-                                                </Typography>
-                                            </Box>
-                                        </Box>
-                                    </Box>
-                                </Paper>
-                            </Grid>
-
-                            {/* Right Column: Performance */}
-                            <Grid item xs={12} md={6}>
-                                <Paper elevation={0} sx={{ p: 3, borderRadius: 2, height: '100%', border: '1px solid #e0e0e0' }}>
-                                    <Typography variant="h6" gutterBottom fontWeight="bold" color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <Award size={20} /> Performance Overview
-                                    </Typography>
-                                    <Divider sx={{ mb: 2 }} />
-
-                                    {(() => {
-                                        const marks = viewMode === 'rapid' ? selectedStudent.rapidMath?.marks : selectedStudent.marks;
-
-                                        if (marks !== null && marks !== undefined) {
-                                            return (
-                                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                    <Box
-                                                        ref={chartRef}
-                                                        key={`chart-${selectedStudent.id}-${marks}`} // Force remount on data change
-                                                        sx={{ width: '100%', maxWidth: 300, height: 200, position: 'relative', bgcolor: 'white', mx: 'auto', '& *': { color: '#000000 !important' } }}
-                                                    >
-                                                        <ResponsiveContainer width="100%" height="100%">
-                                                            <PieChart>
-                                                                <Pie
-                                                                    data={getChartData(selectedStudent)}
-                                                                    cx="50%"
-                                                                    cy="50%"
-                                                                    innerRadius={60}
-                                                                    outerRadius={80}
-                                                                    fill="#8884d8"
-                                                                    paddingAngle={5}
-                                                                    dataKey="value"
-                                                                    isAnimationActive={false}
-                                                                    stroke="#ffffff"
-                                                                >
-                                                                    {getChartData(selectedStudent).map((entry, index) => (
-                                                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                                                    ))}
-                                                                </Pie>
-                                                                <RechartsTooltip
-                                                                    contentStyle={{ backgroundColor: '#fff', borderColor: '#ccc' }}
-                                                                    itemStyle={{ color: '#000' }}
-                                                                    cursor={false}
-                                                                />
-                                                                <Legend verticalAlign="bottom" height={36} wrapperStyle={{ color: '#000000' }} />
-                                                            </PieChart>
-                                                        </ResponsiveContainer>
-                                                        <Box sx={{
-                                                            position: 'absolute',
-                                                            top: '50%',
-                                                            left: '50%',
-                                                            transform: 'translate(-50%, -65%)',
-                                                            textAlign: 'center'
-                                                        }}>
-                                                            <Typography variant="h4" fontWeight="bold" color="text.primary">
-                                                                {marks}%
-                                                            </Typography>
-                                                            <Typography variant="caption" color="text.secondary">
-                                                                Score
+                                    </Paper>
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <Paper elevation={0} sx={{ p: 3, borderRadius: 2, height: '100%', border: '1px solid #e0e0e0' }}>
+                                        <Typography variant="h6" gutterBottom fontWeight="bold" color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Award size={20} /> Performance Overview
+                                        </Typography>
+                                        <Divider sx={{ mb: 2 }} />
+                                        {(() => {
+                                            const marks = viewMode === 'rapid' ? selectedStudent.rapidMath?.marks : selectedStudent.marks;
+                                            if (marks !== null && marks !== undefined) {
+                                                return (
+                                                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                        <Box ref={chartRef} key={`chart-${selectedStudent.id}-${marks}`} sx={{ width: '100%', maxWidth: 300, height: 200, position: 'relative' }}>
+                                                            <ResponsiveContainer width="100%" height="100%">
+                                                                <PieChart>
+                                                                    <Pie data={getChartData(selectedStudent)} cx="50%" cy="50%" innerRadius={60} outerRadius={80} fill="#8884d8" paddingAngle={5} dataKey="value" stroke="none">
+                                                                        {getChartData(selectedStudent).map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                                                                    </Pie>
+                                                                    <RechartsTooltip />
+                                                                    <Legend verticalAlign="bottom" height={36} />
+                                                                </PieChart>
+                                                            </ResponsiveContainer>
+                                                            <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -65%)', textAlign: 'center' }}>
+                                                                <Typography variant="h4" fontWeight="bold">{marks}%</Typography>
+                                                                <Typography variant="caption">Score</Typography>
+                                                            </Box>
+                                                        </Box>
+                                                        <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1, bgcolor: marks >= 40 ? '#e8f5e9' : '#ffebee', p: 1, px: 2, borderRadius: 10 }}>
+                                                            {marks >= 40 ? <CheckCircle size={18} color="green" /> : <XCircle size={18} color="red" />}
+                                                            <Typography variant="subtitle2" color={marks >= 40 ? "success.main" : "error.main"} fontWeight="bold">
+                                                                Result: {marks >= 40 ? "PASSED" : "FAILED"}
                                                             </Typography>
                                                         </Box>
-                                                    </Box>
 
-                                                    <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1, bgcolor: marks >= 40 ? '#e8f5e9' : '#ffebee', p: 1, px: 2, borderRadius: 10 }}>
-                                                        {marks >= 40 ? <CheckCircle size={18} color="green" /> : <XCircle size={18} color="red" />}
-                                                        <Typography variant="subtitle2" color={marks >= 40 ? "success.main" : "error.main"} fontWeight="bold">
-                                                            Result: {marks >= 40 ? "PASSED" : "FAILED"}
-                                                        </Typography>
-                                                    </Box>
+                                                        {/* Summary Stats Grid */}
+                                                        {(() => {
+                                                            const currentSummary = viewMode === 'rapid'
+                                                                ? selectedStudent.rapidMath?.report?.summary
+                                                                : selectedStudent.summary;
 
-                                                    {/* Feedback Section - Specific to report type */}
-                                                    <Box sx={{ mt: 3, width: '100%', p: 2, bgcolor: '#f8f9fa', borderRadius: 2, border: '1px solid #e0e0e0', textAlign: 'left' }}>
-                                                        <Typography variant="subtitle2" color="text.secondary" gutterBottom fontWeight="bold">
-                                                            Detailed Feedback
-                                                        </Typography>
-
-                                                        {viewMode === 'standard' ? (
-                                                            selectedStudent.topicFeedback ? (
-                                                                Object.entries(selectedStudent.topicFeedback).map(([topic, data]) => (
-                                                                    <Box key={topic} sx={{ mb: 2, p: 1.5, bgcolor: 'white', borderRadius: 1, border: '1px solid #eee' }}>
-                                                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom color="primary">
-                                                                            {topic}
-                                                                        </Typography>
-
-                                                                        <Box sx={{ mb: 1 }}>
-                                                                            <Typography variant="caption" color="success.main" fontWeight="bold" display="block">
-                                                                                What went well:
-                                                                            </Typography>
-                                                                            <Typography variant="body2" color="text.secondary">
-                                                                                {data.positiveFeedback}
-                                                                            </Typography>
+                                                            if (currentSummary) {
+                                                                return (
+                                                                    <Box sx={{ width: '100%', mt: 3, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                                                                        <Box sx={{ p: 1.5, bgcolor: '#f0fdf4', borderRadius: 2, border: '1px solid #bbf7d0', textAlign: 'center' }}>
+                                                                            <Typography variant="h6" color="success.main" fontWeight="bold">{currentSummary.correct || 0}</Typography>
+                                                                            <Typography variant="caption" color="text.secondary">Correct</Typography>
                                                                         </Box>
-
-                                                                        <Box>
-                                                                            <Typography variant="caption" color="error.main" fontWeight="bold" display="block">
-                                                                                Needs Improvement:
+                                                                        <Box sx={{ p: 1.5, bgcolor: '#fef2f2', borderRadius: 2, border: '1px solid #fecaca', textAlign: 'center' }}>
+                                                                            <Typography variant="h6" color="error.main" fontWeight="bold">{currentSummary.wrong || 0}</Typography>
+                                                                            <Typography variant="caption" color="text.secondary">Wrong</Typography>
+                                                                        </Box>
+                                                                        <Box sx={{ p: 1.5, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                                                                            <Typography variant="h6" color="text.secondary" fontWeight="bold">{(currentSummary.totalQuestions || 0) - (currentSummary.attempted || 0)}</Typography>
+                                                                            <Typography variant="caption" color="text.secondary">Skipped</Typography>
+                                                                        </Box>
+                                                                        <Box sx={{ p: 1.5, bgcolor: '#eff6ff', borderRadius: 2, border: '1px solid #bfdbfe', textAlign: 'center' }}>
+                                                                            <Typography variant="h6" color="primary.main" fontWeight="bold">
+                                                                                {currentSummary.totalTime ? `${Math.floor(currentSummary.totalTime / 60)}m ${currentSummary.totalTime % 60}s` : '0m 0s'}
                                                                             </Typography>
-                                                                            <Typography variant="body2" color="text.secondary">
-                                                                                {data.improvementFeedback}
-                                                                            </Typography>
+                                                                            <Typography variant="caption" color="text.secondary">Time Taken</Typography>
                                                                         </Box>
                                                                     </Box>
-                                                                ))
-                                                            ) : (
-                                                                <Typography variant="body2" color="text.primary" sx={{ fontStyle: 'italic' }}>
-                                                                    "{selectedStudent.feedback}"
-                                                                </Typography>
-                                                            )
-                                                        ) : (
-                                                            // Rapid Math Feedback (Usually simpler)
-                                                            <Typography variant="body2" color="text.primary">
-                                                                Rapid Math Challenge completed with {selectedStudent.rapidMath?.marks}% accuracy.
+                                                                );
+                                                            }
+                                                            return null;
+                                                        })()}
+
+                                                        {/* Feedback Section - Specific to report type */}
+                                                        <Box sx={{ mt: 3, width: '100%', p: 2, bgcolor: '#f8f9fa', borderRadius: 2, border: '1px solid #e0e0e0', textAlign: 'left' }}>
+                                                            <Typography variant="subtitle2" color="text.secondary" gutterBottom fontWeight="bold">
+                                                                Detailed Feedback
                                                             </Typography>
-                                                        )}
+
+                                                            {viewMode === 'standard' ? (
+                                                                selectedStudent.topicFeedback ? (
+                                                                    Object.entries(selectedStudent.topicFeedback).map(([topic, data]) => (
+                                                                        <Box key={topic} sx={{ mb: 2, p: 1.5, bgcolor: 'white', borderRadius: 1, border: '1px solid #eee' }}>
+                                                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom color="primary">
+                                                                                {topic}
+                                                                            </Typography>
+
+                                                                            <Box sx={{ mb: 1 }}>
+                                                                                <Typography variant="caption" color="success.main" fontWeight="bold" display="block">
+                                                                                    What went well:
+                                                                                </Typography>
+                                                                                <Typography variant="body2" color="text.secondary">
+                                                                                    {data.positiveFeedback}
+                                                                                </Typography>
+                                                                            </Box>
+
+                                                                            <Box>
+                                                                                <Typography variant="caption" color="error.main" fontWeight="bold" display="block">
+                                                                                    Needs Improvement:
+                                                                                </Typography>
+                                                                                <Typography variant="body2" color="text.secondary">
+                                                                                    {data.improvementFeedback}
+                                                                                </Typography>
+                                                                            </Box>
+                                                                        </Box>
+                                                                    ))
+                                                                ) : (
+                                                                    <Typography variant="body2" color="text.primary" sx={{ fontStyle: 'italic' }}>
+                                                                        "{selectedStudent.feedback}"
+                                                                    </Typography>
+                                                                )
+                                                            ) : (
+                                                                // Rapid Math Feedback (Usually simpler)
+                                                                <Typography variant="body2" color="text.primary">
+                                                                    Rapid Math Challenge completed with {selectedStudent.rapidMath?.marks}% accuracy.
+                                                                </Typography>
+                                                            )}
+                                                        </Box>
                                                     </Box>
-                                                </Box>
-                                            );
-                                        } else {
-                                            return (
-                                                <Box sx={{ height: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'text.secondary', gap: 2 }}>
-                                                    <AlertCircle size={48} opacity={0.5} />
-                                                    <Typography>No performance data available</Typography>
-                                                </Box>
-                                            );
-                                        }
-                                    })()}
-                                </Paper>
+                                                );
+                                            }
+                                            return <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>No Data</Box>
+                                        })()}
+                                    </Paper>
+                                </Grid>
                             </Grid>
-                        </Grid>
+
+                            {/* Row 2: Detailed Analysis */}
+                            {selectedStudent.perQuestionReport && selectedStudent.perQuestionReport.length > 0 && (
+                                <Box>
+                                    <Typography variant="h6" fontWeight="bold" gutterBottom color="primary">
+                                        <BookOpen size={20} style={{ marginRight: 8, verticalAlign: 'middle' }} />
+                                        Detailed Question Analysis
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                        {selectedStudent.perQuestionReport.map((q, idx) => (
+                                            <Accordion key={idx} variant="outlined" sx={{ borderRadius: 2, bgcolor: 'white', '&:before': { display: 'none' } }}>
+                                                <AccordionSummary expandIcon={<ChevronDown />}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                                                        <Chip label={`Q${idx + 1}`} size="small" color={q.isCorrect ? "success" : "error"} variant={q.isCorrect ? "filled" : "outlined"} />
+                                                        <Typography variant="subtitle2" sx={{ flexGrow: 1, fontWeight: 600 }}>
+                                                            <MathRenderer content={typeof q.question === 'string' ? q.question.substring(0, 50) + (q.question.length > 50 ? '...' : '') : 'Question Image'} />
+                                                        </Typography>
+                                                        {q.timeTaken && (
+                                                            <Chip icon={<Clock size={14} />} label={`${Math.round(q.timeTaken)}s`} size="small" variant="outlined" />
+                                                        )}
+                                                        {q.image && <Typography variant="caption" color="text.secondary">(Image)</Typography>}
+                                                    </Box>
+                                                </AccordionSummary>
+                                                <AccordionDetails>
+                                                    <Grid container spacing={2}>
+                                                        <Grid item xs={12}>
+                                                            <Typography variant="subtitle2" color="text.secondary">Question:</Typography>
+                                                            <Box sx={{ p: 1.5, bgcolor: '#f8fafc', borderRadius: 1, border: '1px solid #e2e8f0' }}>
+                                                                <MathRenderer content={q.question || ''} />
+                                                            </Box>
+                                                            {q.image && (
+                                                                <Box mt={1}>
+                                                                    <img src={q.image} alt="Question" style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 8 }} />
+                                                                </Box>
+                                                            )}
+                                                        </Grid>
+                                                        <Grid item xs={12} md={6}>
+                                                            <Typography variant="subtitle2" color="text.secondary">Your Answer:</Typography>
+                                                            <Box sx={{ p: 1.5, bgcolor: q.isCorrect ? '#f0fdf4' : '#fef2f2', borderRadius: 1, border: '1px solid', borderColor: q.isCorrect ? '#bbf7d0' : '#fecaca', minHeight: 40 }}>
+                                                                <Typography color={q.isCorrect ? "success.main" : "error.main"} fontWeight="500">
+                                                                    {q.type === 'factorTree' ? 'Factor Tree Interaction' : (q.userAnswer || 'Not Attempted')}
+                                                                </Typography>
+                                                            </Box>
+                                                        </Grid>
+                                                        <Grid item xs={12} md={6}>
+                                                            <Typography variant="subtitle2" color="text.secondary">Correct Answer:</Typography>
+                                                            <Box sx={{ p: 1.5, bgcolor: '#f0f9ff', borderRadius: 1, border: '1px solid #bae6fd', minHeight: 40 }}>
+                                                                <Typography color="primary.main" fontWeight="500">
+                                                                    {q.type === 'factorTree' ? 'Check details' : (q.correctAnswer || 'N/A')}
+                                                                </Typography>
+                                                            </Box>
+                                                        </Grid>
+                                                    </Grid>
+                                                </AccordionDetails>
+                                            </Accordion>
+                                        ))}
+                                    </Box>
+                                </Box>
+                            )}
+
+                            {/* Row 3: Topic Feedback & Learning Plan */}
+                            <Grid container spacing={4}>
+                                <Grid item xs={12} md={6}>
+                                    <Paper elevation={0} sx={{ p: 3, borderRadius: 2, height: '100%', border: '1px solid #e0e0e0' }}>
+                                        <Typography variant="h6" gutterBottom fontWeight="bold" color="primary">Topic Feedback</Typography>
+                                        <Divider sx={{ mb: 2 }} />
+                                        {selectedStudent.topicFeedback ? (
+                                            Object.entries(selectedStudent.topicFeedback).map(([topic, data]) => (
+                                                <Box key={topic} sx={{ mb: 2, p: 1.5, bgcolor: '#f8fafc', borderRadius: 2 }}>
+                                                    <Typography variant="subtitle2" fontWeight="bold" color="primary">{topic}</Typography>
+                                                    <Typography variant="caption" color="success.main" display="block">Good: {data.positiveFeedback}</Typography>
+                                                    <Typography variant="caption" color="error.main" display="block">Improve: {data.improvementFeedback}</Typography>
+                                                </Box>
+                                            ))
+                                        ) : (
+                                            <Typography variant="body2">{selectedStudent.feedback}</Typography>
+                                        )}
+                                    </Paper>
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <Paper elevation={0} sx={{ p: 3, borderRadius: 2, height: '100%', border: '1px solid #e0e0e0' }}>
+                                        <Typography variant="h6" gutterBottom fontWeight="bold" color="primary">Learning Plan</Typography>
+                                        <Divider sx={{ mb: 2 }} />
+                                        {selectedStudent.learningPlan && selectedStudent.learningPlan.length > 0 ? (
+                                            <Box>
+                                                {selectedStudent.learningPlan.map((day, idx) => (
+                                                    <Box key={idx} sx={{ mb: 1.5, p: 1.5, bgcolor: '#fffbeb', borderRadius: 2, border: '1px solid #fcd34d' }}>
+                                                        <Typography variant="subtitle2" fontWeight="bold" color="orange">Day {day.day}: {day.skillCategory}</Typography>
+                                                        <Typography variant="body2" sx={{ mt: 0.5 }}>{day.selfLearn}</Typography>
+                                                    </Box>
+                                                ))}
+                                            </Box>
+                                        ) : (
+                                            <Typography variant="body2" color="text.secondary">No learning plan generated yet.</Typography>
+                                        )}
+                                    </Paper>
+                                </Grid>
+                            </Grid>
+                        </Box>
                     )}
                 </DialogContent>
                 <DialogActions sx={{ p: 3, bgcolor: '#f8f9fa', borderTop: '1px solid #e0e0e0' }}>

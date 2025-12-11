@@ -115,6 +115,8 @@ const DashboardContent = ({ logoutAction }) => {
                                         // Separate logic for Standard vs Rapid Math
                                         const standardReports = allReports.filter(r => r.type !== 'RAPID_MATH');
                                         const rapidMathReports = allReports.filter(r => r.type === 'RAPID_MATH');
+                                        let fullSummary = null;
+
 
                                         // --- PROCESS STANDARD REPORTS ---
                                         if (standardReports.length > 0) {
@@ -133,12 +135,27 @@ const DashboardContent = ({ logoutAction }) => {
                                             // Calculate marks for latest report
                                             let accuracy = 0;
                                             // Handle both new 'summary' format and old 'perQuestionReport' format
+                                            fullSummary = latest.summary || null;
+
                                             if (latest.summary && latest.summary.accuracyPercent !== undefined) {
                                                 accuracy = latest.summary.accuracyPercent;
                                             } else if (latest.perQuestionReport && Array.isArray(latest.perQuestionReport)) {
                                                 const total = latest.perQuestionReport.length;
                                                 const correct = latest.perQuestionReport.filter(q => q.isCorrect).length;
+                                                // Estimate attempted/wrong/time if summary missing
+                                                const attempted = latest.perQuestionReport.filter(q => q.userAnswer !== null && q.userAnswer !== undefined && q.userAnswer !== "").length;
+                                                const wrong = latest.perQuestionReport.filter(q => !q.isCorrect && (q.userAnswer !== null && q.userAnswer !== undefined && q.userAnswer !== "")).length;
+                                                const totalTime = latest.perQuestionReport.reduce((acc, q) => acc + (q.timeTaken || 0), 0);
+
                                                 accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+                                                fullSummary = {
+                                                    totalQuestions: total,
+                                                    correct,
+                                                    wrong,
+                                                    attempted,
+                                                    totalTime,
+                                                    accuracyPercent: accuracy
+                                                };
                                             }
 
                                             latestMarks = accuracy;
@@ -183,6 +200,10 @@ const DashboardContent = ({ logoutAction }) => {
                                             id: phoneKey, // Add ID for deletion
                                             feedback: latest.generalFeedback || "No feedback available",
                                             topicFeedback: latest.topicFeedback || null,
+                                            summary: fullSummary || {},
+                                            perQuestionReport: latest.perQuestionReport || [],
+                                            learningPlan: latest.learningPlan || [],
+                                            learningPlanSummary: latest.learningPlanSummary || "",
                                             rapidMath: latestRapid ? {
                                                 marks: latestRapid.summary?.accuracyPercent || 0,
                                                 date: latestRapid.timestamp,
