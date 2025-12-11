@@ -131,7 +131,7 @@
 .navigationContainer {
     margin-top: auto;
     padding-top: 2rem;
-    display: flex;
+    display: none;
     gap: 1rem;
     justify-content: space-between;
     align-items: center;
@@ -140,7 +140,7 @@
 /* Hide navigation on desktop - buttons are in the sidebar palette */
 @media (min-width: 1025px) {
     .navigationContainer {
-        display: none;
+        display: none !important;
     }
 }
 
@@ -210,6 +210,10 @@
     .quizContainer {
         grid-template-columns: 1fr;
         grid-template-rows: auto 1fr;
+    }
+
+    .navigationContainer {
+        display: flex;
     }
 
     .questionColumn {

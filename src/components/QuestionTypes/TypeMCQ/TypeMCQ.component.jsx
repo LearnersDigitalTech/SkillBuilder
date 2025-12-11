@@ -81,6 +81,7 @@ const TypeMCQ = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, questio
                     ))}
                 </RadioGroup>
 
+
                 <div className={Styles.navigationContainer}>
                     <div className={Styles.leftButtons}>
                         {activeQuestionIndex > 0 && (
@@ -93,16 +94,6 @@ const TypeMCQ = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, questio
                                 Previous
                             </Button>
                         )}
-                        {/* {onMarkForReview && (
-                            <Button
-                                onClick={handleMarkForReview}
-                                size="large"
-                                startIcon={<Flag />}
-                                className={isMarkedForReview ? Styles.reviewButtonActive : Styles.reviewButton}
-                            >
-                                {isMarkedForReview ? 'Marked' : 'Mark for Review'}
-                            </Button>
-                        )} */}
                     </div>
                     <Button
                         onClick={() => onClick(selectedOption, timeTakeRef.current)}
