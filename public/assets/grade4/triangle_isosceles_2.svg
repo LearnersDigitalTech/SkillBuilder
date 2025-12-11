@@ -1,0 +1,8 @@
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Isosceles Triangle -->
+  <polygon points="100,20 40,170 160,170" fill="none" stroke="black" stroke-width="3"/>
+  <!-- Labels -->
+  <text x="50" y="90" font-family="Arial" font-size="16" fill="black">7cm</text>
+  <text x="130" y="90" font-family="Arial" font-size="16" fill="black">7cm</text>
+  <text x="90" y="190" font-family="Arial" font-size="16" fill="black">4cm</text>
+</svg>
