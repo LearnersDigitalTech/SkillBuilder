@@ -353,83 +353,77 @@ export const generateCompareFractions = () => {
 
 
 // --- Geometry ---
-export const generateNumberReading = () => {
+
+// Helper function to convert number to words (shared by both functions)
+const numberToWords = (num) => {
+    const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+    const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+    if (num < 20) {
+        return ones[num];
+    } else {
+        const tensPlace = Math.floor(num / 10);
+        const onesPlace = num % 10;
+        return `${tens[tensPlace]} ${ones[onesPlace]}`.trim();
+    }
+};
+
+export const generateNumberToWords = () => {
     // Generate a random number between 1 and 100
     const number = getRandomInt(1, 100);
-
-    // Function to convert a number to its word form
-    const numberToWords = (num) => {
-        const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
-        const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
-
-        if (num < 20) {
-            return ones[num];
-        } else {
-            const tensPlace = Math.floor(num / 10);
-            const onesPlace = num % 10;
-            return `${tens[tensPlace]} ${ones[onesPlace]}`.trim();
-        }
-    };
-
     const numberInWords = numberToWords(number);
 
-    // Randomly choose the type of question: either a numeral or a number name
-    const isNumeralQuestion = Math.random() < 0.5; // 50% chance
+    // The question asks for the number name, given the numeral
+    const question = `What is the number name for: $ ${number} $`;
 
-    let question;
-    let options;
-
-    if (isNumeralQuestion) {
-        // The question asks for the number name, given the numeral
-        question = `What is the number name for: $ ${number} $`;
-
-        // Create options as number names (words)
-        options = shuffleArray([
-            { value: numberInWords, label: numberInWords }, // correct number name
-            { value: numberToWords(getRandomInt(1, 100)), label: numberToWords(getRandomInt(1, 100)) }, // random number name
-            { value: numberToWords(getRandomInt(1, 100)), label: numberToWords(getRandomInt(1, 100)) }, // random number name
-            { value: numberToWords(getRandomInt(1, 100)), label: numberToWords(getRandomInt(1, 100)) } // random number name
-        ]);
-    } else {
-        // The question asks for the numeral, given the number name
-        question = `What is the number for: $ ${numberInWords} $`;
-
-        // Create options as numerals (numbers)
-        options = shuffleArray([
-            { value: number.toString(), label: number.toString() }, // correct numeral
-            { value: getRandomInt(1, 100).toString(), label: getRandomInt(1, 100).toString() }, // random numeral
-            { value: getRandomInt(1, 100).toString(), label: getRandomInt(1, 100).toString() }, // random numeral
-            { value: getRandomInt(1, 100).toString(), label: getRandomInt(1, 100).toString() } // random numeral
-        ]);
-    }
+    // Create options as number names (words)
+    const options = shuffleArray([
+        { value: numberInWords, label: numberInWords }, // correct number name
+        { value: numberToWords(getRandomInt(1, 100)), label: numberToWords(getRandomInt(1, 100)) }, // random number name
+        { value: numberToWords(getRandomInt(1, 100)), label: numberToWords(getRandomInt(1, 100)) }, // random number name
+        { value: numberToWords(getRandomInt(1, 100)), label: numberToWords(getRandomInt(1, 100)) } // random number name
+    ]);
 
     return {
         type: "mcq",
         question: question,
-        topic: "Measurement / Numbers",
+        topic: "Number Sense / Number Names",
         options: options,
-        answer: isNumeralQuestion ? numberInWords : number.toString()
+        answer: numberInWords
     };
 };
 
-export const generateDoublingHalvingQuestion = () => {
-    // Generate a random number between 1 and 50 for simplicity
-    const number = getRandomInt(1, 50);
+export const generateWordsToNumber = () => {
+    // Generate a random number between 1 and 100
+    const number = getRandomInt(1, 100);
+    const numberInWords = numberToWords(number);
 
-    // Randomly decide whether the question is about doubling or halving
-    const isDoubling = Math.random() < 0.5; // 50% chance of doubling or halving
+    // The question asks for the numeral, given the number name
+    const question = `What is the number for: $ ${numberInWords} $`;
 
-    let question;
-    let correctAnswer;
+    // Create options as numerals (numbers)
+    const options = shuffleArray([
+        { value: number.toString(), label: number.toString() }, // correct numeral
+        { value: getRandomInt(1, 100).toString(), label: getRandomInt(1, 100).toString() }, // random numeral
+        { value: getRandomInt(1, 100).toString(), label: getRandomInt(1, 100).toString() }, // random numeral
+        { value: getRandomInt(1, 100).toString(), label: getRandomInt(1, 100).toString() } // random numeral
+    ]);
 
-    // Doubling or halving logic
-    if (isDoubling) {
-        question = `What is double of $ ${number} $`;
-        correctAnswer = number * 2;
-    } else {
-        question = `What is half of $ ${number} $`;
-        correctAnswer = number / 2;
-    }
+    return {
+        type: "mcq",
+        question: question,
+        topic: "Number Sense / Number Reading",
+        options: options,
+        answer: number.toString()
+    };
+};
+
+export const generateDoublingQuestion = () => {
+    // Generate a random number between 1 and 50 for doubling
+    const number = getRandomInt(1, 20);
+    const correctAnswer = number * 2;
+
+    const question = `What is double of $ ${number} $`;
 
     // Generate random incorrect answers within a range of 1-100 (but avoid the correct answer)
     const generateRandomIncorrectAnswer = () => {
@@ -451,7 +445,40 @@ export const generateDoublingHalvingQuestion = () => {
     return {
         type: "mcq",
         question: question,
-        topic: "Doubling and Halving",
+        topic: "Number Sense / Doubling",
+        options: options,
+        answer: correctAnswer.toString()
+    };
+};
+
+export const generateHalvingQuestion = () => {
+    // Generate an even random number between 2 and 100 for halving
+    const number = getRandomInt(1, 50) * 2; // Ensures even number
+    const correctAnswer = number / 2;
+
+    const question = `What is half of $ ${number} $`;
+
+    // Generate random incorrect answers within a range of 1-100 (but avoid the correct answer)
+    const generateRandomIncorrectAnswer = () => {
+        let randomAnswer;
+        do {
+            randomAnswer = getRandomInt(1, 100);
+        } while (randomAnswer === correctAnswer);
+        return randomAnswer;
+    };
+
+    // Create the options with the correct answer and 3 random incorrect answers
+    const options = shuffleArray([
+        { value: correctAnswer, label: correctAnswer.toString() },
+        { value: generateRandomIncorrectAnswer(), label: generateRandomIncorrectAnswer().toString() },
+        { value: generateRandomIncorrectAnswer(), label: generateRandomIncorrectAnswer().toString() },
+        { value: generateRandomIncorrectAnswer(), label: generateRandomIncorrectAnswer().toString() }
+    ]);
+
+    return {
+        type: "mcq",
+        question: question,
+        topic: "Number Sense / Halving",
         options: options,
         answer: correctAnswer.toString()
     };
