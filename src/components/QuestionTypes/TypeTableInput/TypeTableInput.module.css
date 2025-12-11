@@ -249,16 +249,12 @@
 .navigationContainer {
     margin-top: auto;
     padding-top: 2rem;
-    display: flex;
+    display: none;
     justify-content: space-between;
 }
 
 /* Hide navigation on desktop - buttons are in the sidebar palette */
-@media (min-width: 1025px) {
-    .navigationContainer {
-        display: none;
-    }
-}
+
 
 .submitButton {
     background: linear-gradient(135deg, #16a34a, #15803d);
@@ -465,8 +461,14 @@
 .navigationContainer {
     margin-top: auto;
     padding-top: 2rem;
-    display: flex;
+    display: none;
     justify-content: space-between;
+}
+
+@media (min-width: 1025px) {
+    .navigationContainer {
+        display: none !important;
+    }
 }
 
 .submitButton {
@@ -488,6 +490,12 @@
 }
 
 /* Mobile Responsiveness */
+@media (max-width: 1024px) {
+    .navigationContainer {
+        display: flex;
+    }
+}
+
 @media (max-width: 640px) {
     .quizContainer {
         padding: 1rem;

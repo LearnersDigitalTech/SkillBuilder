@@ -525,14 +525,26 @@ const QuizClient = () => {
 
         const nextIndex = activeQuestionIndex + 1;
 
-        // Show motivation toast if this question is being viewed for the first time AND user has answered
-        if (answer && !viewedQuestionsRef.current.has(nextIndex)) {
+        // Show motivation toast if this question is being viewed for the first time AND user has answered AND it's mobile view
+        const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+
+        const hasUserAnswered = (ans) => {
+            if (!ans) return false;
+            // Check for empty JSON object/array from TableInput
+            if (typeof ans === 'string') {
+                const trimmed = ans.trim();
+                if (trimmed === '{}' || trimmed === '[]') return false;
+            }
+            return true;
+        };
+
+        if (hasUserAnswered(answer) && !viewedQuestionsRef.current.has(nextIndex)) {
             viewedQuestionsRef.current.add(nextIndex);
             const phrases = motivationData.quiz;
             const randomPhrase = phrases[getRandomInt(0, phrases.length - 1)];
             toast.success(randomPhrase.motivation, {
                 toastId: "motivation-toast",
-                position: "bottom-left",
+                position: isMobile ? "top-center" : "bottom-left",
                 autoClose: 3000,
                 hideProgressBar: true,
                 closeOnClick: true,
