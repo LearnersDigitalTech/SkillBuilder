@@ -45,10 +45,10 @@ export default function TestPage() {
 
   const getRange = (diff: string) => {
     const ranges: any = {
-      normal: { min: 1, max: 20 },
-      easy: { min: 1, max: 50 },
-      medium: { min: 10, max: 100 },
-      hard: { min: 100, max: 500 },
+      normal: { min: 1, max: 99 },
+      easy: { min: 1, max: 9 },
+      medium: { min: 10, max: 99 },
+      hard: { min: 10, max: 999 },
     }
     return ranges[diff] || ranges.easy
   }
