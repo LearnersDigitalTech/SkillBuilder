@@ -35,6 +35,9 @@ const TypeMCQ = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, questio
                         <span>{topic}</span>
                     </div>
                 </div>
+                <h3 className={Styles.question}>
+                    <MathRenderer content={question} />
+                </h3>
                 {questionPaper[activeQuestionIndex]?.image && (
                     <img
                         src={questionPaper[activeQuestionIndex].image}
@@ -42,9 +45,6 @@ const TypeMCQ = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, questio
                         className={Styles.questionImage}
                     />
                 )}
-                <h3 className={Styles.question}>
-                    <MathRenderer content={question} />
-                </h3>
             </div>
 
             {/* Column 2: Options */}
@@ -56,9 +56,9 @@ const TypeMCQ = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, questio
                         onAnswerChange(value);
                     }
                 }} value={selectedOption}>
-                    {options.map((option) => (
+                    {options.map((option, index) => (
                         <FormControlLabel
-                            key={option.value}
+                            key={`${option.value}-${index}`}
                             value={option.value}
                             label={
                                 option.image ? (

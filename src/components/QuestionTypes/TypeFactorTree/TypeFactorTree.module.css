@@ -1,0 +1,204 @@
+.quizContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.questionNumber {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2563eb;
+    background: #eff6ff;
+    padding: 8px 16px;
+    border-radius: 12px;
+}
+
+.topicTitle {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.questionText {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+/* --- New SVG / Absolute Layout --- */
+
+.treeScrollContainer {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    overflow-x: auto;
+    width: 100%;
+    /* Ensure minimal height so it doesn't collapse */
+    min-height: 400px;
+}
+
+.treeCanvas {
+    position: relative;
+    /* width/height injected inline */
+    margin: 0 auto;
+}
+
+.svgLayer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    /* Below nodes */
+    pointer-events: none;
+}
+
+.connectorLine {
+    stroke: #dc2626;
+    /* Red-600 */
+    stroke-width: 2px;
+}
+
+/* Node Styles */
+.nodeAbsolute {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    z-index: 2;
+    /* Above SVG */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: translate(-50%, -50%);
+    /* Center coordinate on x,y */
+    /* Note: In JSX calc, I used left=x, top=y. 
+       If I want x,y to be the CENTER of the node, I should transform. 
+       In my JSX calculation:
+         x1 = x + NODE_WIDTH/2
+       This implies x,y is Top-Left. 
+       So no translate needed unless algorithm changed.
+       Let's stick to Top-Left logic for simplicity as coded in JSX.
+    */
+    transform: none;
+}
+
+/* Yellow Box (Composite/Parent) */
+.compositeNode {
+    background: #fef08a;
+    /* Yellow-200/300 */
+    color: #000;
+    border: 2px solid #eab308;
+    /* Yellow-500 */
+    border-radius: 8px;
+}
+
+/* Green Circle (Prime/Leaf) */
+.primeNode {
+    background: #86efac;
+    /* Green-300 */
+    color: #000;
+    border: 2px solid #22c55e;
+    /* Green-500 */
+    border-radius: 50%;
+}
+
+/* Input Styling */
+.inputField {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    text-align: center;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    border-radius: inherit;
+    /* Follow parent shape */
+}
+
+.inputField:focus {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.staticText {
+    pointer-events: none;
+}
+
+
+/* Navigation */
+.navigationContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 2px solid #f1f5f9;
+}
+
+.submitButton {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: white;
+    padding: 12px 32px;
+    border-radius: 16px;
+    text-transform: none;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    transition: all 0.3s ease;
+}
+
+.submitButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
+}
+
+.nextButton {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    padding: 12px 32px;
+    border-radius: 16px;
+    text-transform: none;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    transition: all 0.3s ease;
+    margin-left: auto;
+}
+
+.previousButton {
+    color: #64748b;
+    padding: 12px 24px;
+    border-radius: 16px;
+    text-transform: none;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    border: 2px solid #e2e8f0;
+    margin-right: auto;
+}

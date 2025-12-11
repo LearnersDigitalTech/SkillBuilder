@@ -4,6 +4,7 @@ import Styles from "../../app/quiz/Quiz.module.css";
 import TypeUserInput from "@/components/QuestionTypes/TypeUserInput/TypeUserInput.component";
 import TypeTableInput from "@/components/QuestionTypes/TypeTableInput/TypeTableInput.component";
 import TypeTrueAndFalse from "@/components/QuestionTypes/TypeTrueAndFalse/TypeTrueAndFalse.component";
+import TypeFactorTree from "@/components/QuestionTypes/TypeFactorTree/TypeFactorTree.component";
 import { useContext, useEffect, useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { QuizSessionContext } from "../../app/context/QuizSessionContext";
@@ -800,6 +801,19 @@ const QuizClient = () => {
                             questionPaper={questionPaper}
                             activeQuestionIndex={activeQuestionIndex}
                             question={questionPaper[activeQuestionIndex].question}
+                            topic={questionPaper[activeQuestionIndex].topic}
+                            grade={quizContext.userDetails.activeChild?.grade || quizContext.userDetails.grade}
+                            timeTakeRef={timeTakeRef}
+                        /> : null
+                }
+                {
+                    questionPaper && questionPaper[activeQuestionIndex] && questionPaper[activeQuestionIndex].type === "factorTree" ?
+                        <TypeFactorTree
+                            onClick={handleNext}
+                            onPrevious={handlePrevious}
+                            onAnswerChange={handleAnswerChange}
+                            questionPaper={questionPaper}
+                            activeQuestionIndex={activeQuestionIndex}
                             topic={questionPaper[activeQuestionIndex].topic}
                             grade={quizContext.userDetails.activeChild?.grade || quizContext.userDetails.grade}
                             timeTakeRef={timeTakeRef}

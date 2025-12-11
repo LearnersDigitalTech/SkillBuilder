@@ -92,6 +92,9 @@ const TypeUserInput = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, q
                         <span>{topic}</span>
                     </div>
                 </div>
+                <h3 className={Styles.question}>
+                    <MathRenderer content={question} />
+                </h3>
                 {questionPaper[activeQuestionIndex]?.image && (
                     <img
                         src={questionPaper[activeQuestionIndex].image}
@@ -99,9 +102,6 @@ const TypeUserInput = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, q
                         className={Styles.questionImage}
                     />
                 )}
-                <h3 className={Styles.question}>
-                    <MathRenderer content={question} />
-                </h3>
             </div>
 
             {/* Column 2: Input & Compact Dial Pad */}

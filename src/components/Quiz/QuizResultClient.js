@@ -41,6 +41,7 @@ const HeroChart = ({ summary, notAttempted }) => {
 
 import Navigation from "@/components/Navigation/Navigation.component";
 import MathRenderer from "@/components/MathRenderer/MathRenderer.component";
+import TypeFactorTree from "@/components/QuestionTypes/TypeFactorTree/TypeFactorTree.component";
 import { CheckCircle, XCircle, HelpCircle, Clock, Target, BookOpen, TrendingUp, BarChart3, FileText, X, AlertCircle, Download } from "lucide-react";
 import { QuizSessionContext } from "../../app/context/QuizSessionContext";
 import analyzeResponses from "@/app/workload/GenerateReport";
@@ -1371,6 +1372,13 @@ const QuizResultClient = () => {
                                     <div className={Styles.questionText}>
                                         <MathRenderer content={q.question} />
                                     </div>
+                                    {q.image && (
+                                        <img
+                                            src={q.image}
+                                            alt="Question Visual"
+                                            style={{ maxWidth: '100%', maxHeight: '200px', display: 'block', marginTop: '10px', marginBottom: '10px' }}
+                                        />
+                                    )}
                                     <span className={Styles.topicBadge}>{q.topic}</span>
                                     <div className={Styles.answerSection}>
                                         <div className={Styles.answerRow}>
@@ -1386,6 +1394,25 @@ const QuizResultClient = () => {
                                             </div>
                                         </div>
                                     </div>
+                                    {q.type === 'factorTree' && q.tree && (
+                                        <div style={{ marginTop: '16px', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '12px', overflowX: 'auto' }}>
+                                            <div style={{ minWidth: '300px' }}>
+                                                <TypeFactorTree
+                                                    treeDataProp={q.tree}
+                                                    userAnswersProp={q.userAnswer ? JSON.parse(q.userAnswer) : {}}
+                                                    readOnly={true}
+                                                    onClick={null}
+                                                    onPrevious={null}
+                                                    onAnswerChange={null}
+                                                    questionPaper={null}
+                                                    activeQuestionIndex={0}
+                                                    topic={q.topic}
+                                                    grade={null}
+                                                    timeTakeRef={null}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className={Styles.questionStatus}>
                                     {(() => {
