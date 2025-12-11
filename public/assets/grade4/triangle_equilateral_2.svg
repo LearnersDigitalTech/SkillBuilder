@@ -1,0 +1,8 @@
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Equilateral Triangle -->
+  <polygon points="100,20 20,170 180,170" fill="none" stroke="black" stroke-width="3"/>
+  <!-- Labels -->
+  <text x="40" y="90" font-family="Arial" font-size="16" fill="black">8cm</text>
+  <text x="130" y="90" font-family="Arial" font-size="16" fill="black">8cm</text>
+  <text x="90" y="190" font-family="Arial" font-size="16" fill="black">8cm</text>
+</svg>

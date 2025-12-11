@@ -282,21 +282,21 @@ const HomeContent = () => {
                     <img className={Styles.placeImage} src="/places/LearnersGlobalSchoolAndPUCollege.png" alt="Learners Global School and PU College" />
                     <h2 className={Styles.placeTitle}>Learners Global School and PU College</h2>
                     <p className={Styles.placeDescription}>Fostering young minds with a holistic CBSE school curriculum from Pre-KG to 12th, focused on foundational excellence and character development</p>
-                    <p className={Styles.placeVisitNow}>Vist Now!</p>
+                    <p className={Styles.placeVisitNow}>Visit Now!</p>
                 </a>
 
                 <a href="https://learnerspuc.com/" className={Styles.placeContainer} >
                     <img className={Styles.placeImage} src="/places/LearnersPUC.png" alt="Learners Global School and PU College" />
                     <h2 className={Styles.placeTitle}>Learners PU College</h2>
                     <p className={Styles.placeDescription}>Preparing students for higher education through rigorous academic programs and career-focused guidance, strengthened by integrated NEET, JEE, CET, and IIT coaching</p>
-                    <p className={Styles.placeVisitNow}>Vist Now!</p>
+                    <p className={Styles.placeVisitNow}>Visit Now!</p>
                 </a>
 
                 <a href="https://learnersdigital.com/" className={Styles.placeContainer} >
                     <img className={Styles.placeImage} src="/places/nesaratechpark.jpg" alt="Learners Global School and PU College" />
                     <h2 className={Styles.placeTitle}>Learners Digital</h2>
                     <p className={Styles.placeDescription}>Connecting talent with global opportunities and fostering corporate partnerships for mutual growth.</p>
-                    <p className={Styles.placeVisitNow}>Vist Now!</p>
+                    <p className={Styles.placeVisitNow}>Visit Now!</p>
                 </a>
             </div>
 

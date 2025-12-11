@@ -34,6 +34,77 @@ export const generatePlaceValue5Digit = () => {
     };
 };
 
+
+export const generatePlaceValue5DigitVisual = () => {
+    // Generate 5-digit number
+    const num = getRandomInt(10000, 99999);
+    const numStr = String(num);
+
+    // Pick a random non-zero digit
+    let pos = getRandomInt(0, 4);
+    while (numStr[pos] === '0') {
+        pos = getRandomInt(0, 4);
+    }
+    const digit = numStr[pos];
+
+    const places = ["Ten Thousands", "Thousands", "Hundreds", "Tens", "Ones"];
+    const values = [10000, 1000, 100, 10, 1];
+
+    // Calculate place value
+    const placeValue = Number(digit) * values[pos];
+
+    // SVG dimensions
+    const width = 550;
+    const height = 120;
+    const cellWidth = 100;
+    const cellHeight = 50;
+    const padding = 10;
+
+    // Create SVG table for the number
+    let svgParts = [
+        `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">`,
+        `<rect width="100%" height="100%" fill="white" />`
+    ];
+
+    // Draw cells and digits
+    for (let i = 0; i < 5; i++) {
+        const x = padding + i * cellWidth;
+        const y = 20;
+        // Highlight the chosen digit
+        const fillColor = i === pos ? "#f4a261" : "#a8dadc";
+
+        // Cell rectangle
+        svgParts.push(`<rect x="${x}" y="${y}" width="${cellWidth}" height="${cellHeight}" fill="${fillColor}" stroke="#1d3557" stroke-width="2"/>`);
+
+        // Digit text
+        svgParts.push(`<text x="${x + cellWidth / 2}" y="${y + cellHeight / 2 + 6}" font-family="Arial" font-size="20" font-weight="bold" text-anchor="middle">${numStr[i]}</text>`);
+
+        // Place label
+        svgParts.push(`<text x="${x + cellWidth / 2}" y="${y + cellHeight + 20}" font-family="Arial" font-size="14" text-anchor="middle">${places[i]}</text>`);
+    }
+
+    svgParts.push(`</svg>`);
+
+    const svgString = svgParts.join('');
+    const base64Svg = typeof Buffer !== 'undefined'
+        ? Buffer.from(svgString).toString('base64')
+        : btoa(svgString);
+    const imagePath = `data:image/svg+xml;base64,${base64Svg}`;
+
+    const question = `Look at the table below and find the place value of the highlighted digit.`;
+
+    return {
+        type: "userInput",
+        topic: "Number Sense / Place Value",
+        question: question,
+        answer: String(placeValue),
+        image: imagePath
+    };
+};
+
+
+
+
 // export const generateAddition4Digit = () => {
 //     const num1 = getRandomInt(1000, 5000);
 //     const num2 = getRandomInt(1000, 4999);
@@ -103,7 +174,7 @@ export const generateAddition4Digit = () => {
 
     return {
         type: "userInput",
-        question: `Add: ${num1} + ${num2} = ?`,
+        question: `Add: $$ ${num1} + ${num2} = ? $$`,
         topic: "Addition / With Carry",
         answer: String(answer)
     };
@@ -170,7 +241,7 @@ export const generateSubtraction4Digit = () => {
 
     return {
         type: "userInput",
-        question: `Subtract: ${num1} - ${num2} = ?`,
+        question: `Subtract: $$ ${num1} - ${num2} = ? $$`,
         topic: "Subtraction / With Borrow",
         answer: String(answer)
     };
@@ -183,7 +254,7 @@ export const generateSubtraction4DigitAppliactionLevel = () => {
     // Ensure borrow
     const u1 = num1 % 10;
     const u2 = num2 % 10;
-    if (u1 >= u2) return generateSubtraction4Digit(); // Retry if no borrow needed
+    if (u1 >= u2) return generateSubtraction4DigitAppliactionLevel(); // Retry if no borrow needed
 
     const scenarios = [
         `You had ${num1} stickers. You gave ${num2} stickers to your friend. How many stickers are left?`,
@@ -224,7 +295,7 @@ export const generateMultiplication = () => {
     }
 
     const answer = num1 * num2;
-    const question = `Multiply: ${num1} × ${num2} = ?`;
+    const question = `Multiply: $$ ${num1} × ${num2} = ? $$`;
 
     return {
         type: "userInput",
@@ -269,7 +340,7 @@ export const generateDivision = () => {
     const quotient = getRandomInt(100, 500);
     const dividend = divisor * quotient; // Ensure no remainder for simplicity first
 
-    const question = `Divide: ${dividend} ÷ ${divisor} = ?`;
+    const question = `Divide: $$ \\frac{${dividend}}{${divisor}} = ? $$`;
 
     return {
         type: "userInput",
@@ -328,50 +399,27 @@ export const generateEstimation = () => {
     };
 };
 
+export const generateLCM = () => {
+    const num1 = getRandomInt(2, 10);
+    const num2 = getRandomInt(2, 10);
+
+    // helper to calculate LCM
+    const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+    const lcm = (num1 * num2) / gcd(num1, num2);
+
+    const question = `Find the LCM of ${num1} and ${num2}.`;
+    const answer = String(lcm);
+
+    return {
+        type: "userInput",
+        topic: "Number Sense / LCM",
+        question,
+        answer
+    };
+};
+
+
 // --- Fractions ---
-
-// export const generateFractionTypes = () => {
-//     // Identify Proper, Improper, Mixed
-//     const types = ["Proper Fraction", "Improper Fraction", "Mixed Fraction"];
-//     const type = types[getRandomInt(0, 2)];
-//     let question, answer;
-
-//     if (type === "Proper Fraction") {
-//         const den = getRandomInt(3, 9);
-//         const num = getRandomInt(1, den - 1);
-//         question = `Identify the type of fraction: $$ ${num}/${den} $$`;
-//         answer = "Proper Fraction";
-//     } else if (type === "Improper Fraction") {
-//         const num = getRandomInt(5, 12);
-//         const den = getRandomInt(2, num - 1);
-//         question = `Identify the type of fraction: $$ ${num}/${den} $$`;
-//         answer = "Improper Fraction";
-//     } else {
-//         const whole = getRandomInt(1, 5);
-//         const den = getRandomInt(3, 9);
-//         const num = getRandomInt(1, den - 1);
-//         question = `Identify the type of fraction: $$ ${whole} ${num}/${den} $$`;
-//         answer = "Mixed Fraction";
-//     }
-
-//     const options = shuffleArray([
-//         { value: "Proper Fraction", label: "Proper Fraction" },
-//         { value: "Improper Fraction", label: "Improper Fraction" },
-//         { value: "Mixed Fraction", label: "Mixed Fraction" },
-//         { value: "Unit Fraction", label: "Unit Fraction" }
-//     ]);
-
-//     return {
-//         type: "mcq",
-//         question: question,
-//         topic: "Fractions / Types",
-//         options: options,
-//         answer: answer
-//     };
-// };
-
-
-
 // Helper: compute gcd
 const gcd = (a, b) => {
     if (b === 0) return a;
@@ -548,15 +596,20 @@ export const generateAngles = () => {
 export const generateTriangles = () => {
     const types = ["Equilateral", "Isosceles", "Scalene"];
     const type = types[getRandomInt(0, 2)];
-    let question;
+    let imagePath;
+
+    // Select random image variant (1 or 2)
+    const imageNum = getRandomInt(1, 2);
 
     if (type === "Equilateral") {
-        question = "A triangle with all 3 sides equal is called?";
+        imagePath = `/assets/grade4/triangle_equilateral_${imageNum}.svg`;
     } else if (type === "Isosceles") {
-        question = "A triangle with exactly 2 sides equal is called?";
+        imagePath = `/assets/grade4/triangle_isosceles_${imageNum}.svg`;
     } else {
-        question = "A triangle with all 3 sides different is called?";
+        imagePath = `/assets/grade4/triangle_scalene_${imageNum}.svg`;
     }
+
+    const question = "Identify the type of triangle based on the side lengths shown in the image:";
 
     const options = shuffleArray([
         { value: "Equilateral", label: "Equilateral" },
@@ -570,77 +623,323 @@ export const generateTriangles = () => {
         question: question,
         topic: "Geometry / Triangles",
         options: options,
-        answer: type
+        answer: type,
+        image: imagePath
     };
 };
 
 // --- Measurement ---
 
-// export const generateAreaPerimeter = () => {
-//     const isArea = Math.random() > 0.5;
-//     const l = getRandomInt(2, 10);
-//     const b = getRandomInt(2, 10);
 
-//     if (isArea) {
-//         const area = l * b;
-//         const question = `Find the area of a rectangle with length ${l}cm and breadth ${b}cm.`;
-//         return {
-//             type: "userInput",
-//             question: question,
-//             topic: "Measurement / Area",
-//             answer: String(area)
-//         };
-//     } else {
-//         const perimeter = 2 * (l + b);
-//         const question = `Find the perimeter of a rectangle with length ${l}cm and breadth ${b}cm.`;
-//         return {
-//             type: "userInput",
-//             question: question,
-//             topic: "Measurement / Perimeter",
-//             answer: String(perimeter)
-//         };
-//     }
-// };
-export const generateAreaRectangle = () => {
-    const l = getRandomInt(2, 10);
-    const b = getRandomInt(2, 10);
+export const generateAreaShape = () => {
+    // randomly choose: 0 = rectangle, 1 = square
+    const shapeType = getRandomInt(0, 1);
 
-    const area = l * b;
+    if (shapeType === 0) {
+        // Rectangle
+        const l = getRandomInt(2, 10);
+        const b = getRandomInt(2, 10);
+        const area = l * b;
 
-    return {
-        type: "userInput",
-        question: `Find the area of a rectangle with length ${l}cm and breadth ${b}cm.`,
-        topic: "Measurement / Area",
-        answer: String(area)
-    };
+        // Generate SVG for rectangle
+        const width = 300;
+        const height = 250;
+        const padding = 50;
+
+        // Scale the rectangle proportionally
+        const maxDim = Math.max(l, b);
+        const scale = 150 / maxDim;
+        const rectWidth = l * scale;
+        const rectHeight = b * scale;
+
+        const rectX = (width - rectWidth) / 2;
+        const rectY = (height - rectHeight) / 2;
+
+        const svgParts = [
+            `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">`,
+            `<rect width="100%" height="100%" fill="white" />`,
+            // Rectangle
+            `<rect x="${rectX}" y="${rectY}" width="${rectWidth}" height="${rectHeight}" fill="#a8dadc" stroke="#1d3557" stroke-width="3"/>`,
+            // Length label (top)
+            `<text x="${rectX + rectWidth / 2}" y="${rectY - 10}" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle">${l}cm</text>`,
+            // Breadth label (right side)
+            `<text x="${rectX + rectWidth + 20}" y="${rectY + rectHeight / 2}" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle">${b}cm</text>`,
+            `</svg>`
+        ];
+
+        const svgString = svgParts.join('');
+        const base64Svg = typeof Buffer !== 'undefined'
+            ? Buffer.from(svgString).toString('base64')
+            : btoa(svgString);
+        const imagePath = `data:image/svg+xml;base64,${base64Svg}`;
+
+        return {
+            type: "userInput",
+            topic: "Measurement / Area",
+            question: `Find the area of the rectangle shown in the image:`,
+            answer: String(area),
+            image: imagePath
+        };
+    } else {
+        // Square
+        const side = getRandomInt(2, 10);
+        const area = side * side;
+
+        // Generate SVG for square
+        const width = 300;
+        const height = 250;
+
+        const squareSize = 150;
+        const squareX = (width - squareSize) / 2;
+        const squareY = (height - squareSize) / 2;
+
+        const svgParts = [
+            `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">`,
+            `<rect width="100%" height="100%" fill="white" />`,
+            // Square
+            `<rect x="${squareX}" y="${squareY}" width="${squareSize}" height="${squareSize}" fill="#f4a261" stroke="#1d3557" stroke-width="3"/>`,
+            // Side label (top)
+            `<text x="${squareX + squareSize / 2}" y="${squareY - 10}" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle">${side}cm</text>`,
+            // Side label (right)
+            `<text x="${squareX + squareSize + 20}" y="${squareY + squareSize / 2}" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle">${side}cm</text>`,
+            `</svg>`
+        ];
+
+        const svgString = svgParts.join('');
+        const base64Svg = typeof Buffer !== 'undefined'
+            ? Buffer.from(svgString).toString('base64')
+            : btoa(svgString);
+        const imagePath = `data:image/svg+xml;base64,${base64Svg}`;
+
+        return {
+            type: "userInput",
+            topic: "Measurement / Area",
+            question: `Find the area of the square shown in the image:`,
+            answer: String(area),
+            image: imagePath
+        };
+    }
 };
 
 
-export const generatePerimeterRectangle = () => {
-    const l = getRandomInt(2, 10);
-    const b = getRandomInt(2, 10);
 
-    const perimeter = 2 * (l + b);
-    return {
-        type: "userInput",
-        question: `Find the perimeter of a rectangle with length ${l}cm and breadth ${b}cm.`,
-        topic: "Measurement / Perimeter",
-        answer: String(perimeter)
-    };
+export const generatePerimeterShape = () => {
+    // 0 = rectangle, 1 = square (50% chance each)
+    const shapeType = getRandomInt(0, 1);
+
+    if (shapeType === 0) {
+        // Rectangle
+        const l = getRandomInt(2, 10);
+        const b = getRandomInt(2, 10);
+        const perimeter = 2 * (l + b);
+
+        // Generate SVG for rectangle
+        const width = 300;
+        const height = 250;
+
+        // Scale the rectangle proportionally
+        const maxDim = Math.max(l, b);
+        const scale = 150 / maxDim;
+        const rectWidth = l * scale;
+        const rectHeight = b * scale;
+
+        const rectX = (width - rectWidth) / 2;
+        const rectY = (height - rectHeight) / 2;
+
+        const svgParts = [
+            `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">`,
+            `<rect width="100%" height="100%" fill="white" />`,
+            // Rectangle
+            `<rect x="${rectX}" y="${rectY}" width="${rectWidth}" height="${rectHeight}" fill="#a8dadc" stroke="#1d3557" stroke-width="3"/>`,
+            // Length label (top)
+            `<text x="${rectX + rectWidth / 2}" y="${rectY - 10}" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle">${l}cm</text>`,
+            // Breadth label (right side)
+            `<text x="${rectX + rectWidth + 20}" y="${rectY + rectHeight / 2}" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle">${b}cm</text>`,
+            `</svg>`
+        ];
+
+        const svgString = svgParts.join('');
+        const base64Svg = typeof Buffer !== 'undefined'
+            ? Buffer.from(svgString).toString('base64')
+            : btoa(svgString);
+        const imagePath = `data:image/svg+xml;base64,${base64Svg}`;
+
+        return {
+            type: "userInput",
+            topic: "Measurement / Perimeter",
+            question: `Find the perimeter of the rectangle shown in the image:`,
+            answer: String(perimeter),
+            image: imagePath
+        };
+    } else {
+        // Square
+        const side = getRandomInt(2, 10);
+        const perimeter = 4 * side;
+
+        // Generate SVG for square
+        const width = 300;
+        const height = 250;
+
+        const squareSize = 150;
+        const squareX = (width - squareSize) / 2;
+        const squareY = (height - squareSize) / 2;
+
+        const svgParts = [
+            `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">`,
+            `<rect width="100%" height="100%" fill="white" />`,
+            // Square
+            `<rect x="${squareX}" y="${squareY}" width="${squareSize}" height="${squareSize}" fill="#f4a261" stroke="#1d3557" stroke-width="3"/>`,
+            // Side label (top)
+            `<text x="${squareX + squareSize / 2}" y="${squareY - 10}" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle">${side}cm</text>`,
+            // Side label (right)
+            `<text x="${squareX + squareSize + 20}" y="${squareY + squareSize / 2}" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle">${side}cm</text>`,
+            `</svg>`
+        ];
+
+        const svgString = svgParts.join('');
+        const base64Svg = typeof Buffer !== 'undefined'
+            ? Buffer.from(svgString).toString('base64')
+            : btoa(svgString);
+        const imagePath = `data:image/svg+xml;base64,${base64Svg}`;
+
+        return {
+            type: "userInput",
+            topic: "Measurement / Perimeter",
+            question: `Find the perimeter of the square shown in the image:`,
+            answer: String(perimeter),
+            image: imagePath
+        };
+    }
 };
 
 
-export const generateTimeConversion2to10 = () => {
-    // Hours to Minutes
-    const hours = getRandomInt(2, 10);
-    const minutes = hours * 60;
-    const question = `Convert ${hours} hours to minutes.`;
+
+export const generateMeasurementConversion = () => {
+    const types = ["Time", "Capacity", "Length", "Mass"];
+    const type = types[getRandomInt(0, 3)];
+    let question, answer, topic;
+
+    if (type === "Time") {
+        const hours = getRandomInt(2, 10);
+        const minutes = hours * 60;
+        question = `Convert ${hours} hours to minutes.`;
+        topic = "Measurement / Time";
+        answer = String(minutes);
+    } else if (type === "Capacity") {
+        // Litre to ml (1 L = 1000 ml)
+        const liters = getRandomInt(2, 9);
+        const ml = liters * 1000;
+        question = `Convert ${liters} liters to milliliters.`;
+        topic = "Measurement / Capacity";
+        answer = String(ml);
+    } else if (type === "Length") {
+        // cm to m (100 cm = 1 m)
+        // Check user request: "cm to m"
+        // Generate cm as multiples of 100
+        const meters = getRandomInt(2, 9);
+        const cm = meters * 100;
+        question = `Convert ${cm} centimeters to meters.`;
+        topic = "Measurement / Length";
+        answer = String(meters);
+    } else {
+        // kg to g (1 kg = 1000 g)
+        const kg = getRandomInt(2, 9);
+        const g = kg * 1000;
+        question = `Convert ${kg} kg to grams.`;
+        topic = "Measurement / Mass";
+        answer = String(g);
+    }
 
     return {
         type: "userInput",
         question: question,
-        topic: "Measurement / Time",
-        answer: String(minutes)
+        topic: topic,
+        answer: answer
+    };
+};
+
+
+
+export const generateMeasurementConversionApplicationLevel = () => {
+    const types = ["Time", "Capacity", "Length", "Mass"];
+    const type = types[getRandomInt(0, 3)];
+
+    let question, answer, topic;
+
+    if (type === "Time") {
+        // 1–5 hours → minutes
+        const hours = getRandomInt(1, 5);
+        const minutes = hours * 60;
+
+        const scenarios = [
+            `You studied for ${hours} hours. How many minutes did you study?`,
+            `A movie lasts ${hours} hours. How many minutes long is it?`,
+            `You played outside for ${hours} hours. How many minutes is that?`,
+            `Your class picnic lasted ${hours} hours. Convert it into minutes.`,
+            `You watched cartoons for ${hours} hours. How many minutes did you watch?`
+        ];
+
+        question = scenarios[Math.floor(Math.random() * scenarios.length)];
+        topic = "Measurement / Time";
+        answer = String(minutes);
+
+    } else if (type === "Capacity") {
+        // 1–5 L → ml
+        const liters = getRandomInt(1, 5);
+        const ml = liters * 1000;
+
+        const scenarios = [
+            `A bottle holds ${liters} liters of juice. How many milliliters is that?`,
+            `Your mother bought ${liters} liters of milk. Convert it to milliliters.`,
+            `A water jug contains ${liters} liters of water. How many milliliters does it hold?`,
+            `A lemonade jar has ${liters} liters of lemonade. Convert to milliliters.`,
+            `A tank stores ${liters} liters of water. How many milliliters is that?`
+        ];
+
+        question = scenarios[Math.floor(Math.random() * scenarios.length)];
+        topic = "Measurement / Capacity";
+        answer = String(ml);
+
+    } else if (type === "Length") {
+        // 100–500 cm → meters
+        const meters = getRandomInt(1, 5);
+        const cm = meters * 100;
+
+        const scenarios = [
+            `A rope is ${cm} centimeters long. How many meters is that?`,
+            `Your table is ${cm} centimeters long. Convert it into meters.`,
+            `A jump rope measures ${cm} centimeters. How many meters long is it?`,
+            `A ribbon is ${cm} centimeters long. Convert to meters.`,
+            `A bench is ${cm} centimeters long. How many meters is that?`
+        ];
+
+        question = scenarios[Math.floor(Math.random() * scenarios.length)];
+        topic = "Measurement / Length";
+        answer = String(meters);
+
+    } else {
+        // 1–5 kg → grams
+        const kg = getRandomInt(1, 5);
+        const g = kg * 1000;
+
+        const scenarios = [
+            `A bag of rice weighs ${kg} kilograms. How many grams is that?`,
+            `You bought a ${kg}-kilogram packet of sugar. Convert it to grams.`,
+            `A puppy weighs ${kg} kilograms. How many grams does it weigh?`,
+            `A watermelon weighs ${kg} kilograms. Convert its weight to grams.`,
+            `Your school bag weighs ${kg} kilograms. How many grams is that?`
+        ];
+
+        question = scenarios[Math.floor(Math.random() * scenarios.length)];
+        topic = "Measurement / Mass";
+        answer = String(g);
+    }
+
+    return {
+        type: "userInput",
+        topic,
+        question,
+        answer
     };
 };
 
@@ -666,19 +965,82 @@ export const generateBarGraph = () => {
     const oranges = getRandomInt(10, 50);
     const bananas = getRandomInt(10, 50);
 
-    const max = Math.max(apples, oranges, bananas);
-    let answer, question;
+    const maxVal = Math.max(apples, oranges, bananas);
+    const yAxisMax = Math.ceil(maxVal / 10) * 10 + 10; // Round up to nearest 10, add padding
 
-    if (max === apples) {
+    let answer;
+    if (maxVal === apples) {
         answer = "Apples";
-        question = `If Apples=${apples}, Oranges=${oranges}, Bananas=${bananas}, which fruit has the highest count?`;
-    } else if (max === oranges) {
+    } else if (maxVal === oranges) {
         answer = "Oranges";
-        question = `If Apples=${apples}, Oranges=${oranges}, Bananas=${bananas}, which fruit has the highest count?`;
     } else {
         answer = "Bananas";
-        question = `If Apples=${apples}, Oranges=${oranges}, Bananas=${bananas}, which fruit has the highest count?`;
     }
+
+    // Dynamic SVG Generation
+    const width = 400;
+    const height = 300;
+    const padding = 50;
+    const chartWidth = width - 2 * padding;
+    const chartHeight = height - 2 * padding;
+
+    // Calculate bar dimensions
+    const barWidth = 60;
+    const gap = (chartWidth - (3 * barWidth)) / 4;
+
+    // Helper to map value to y-coordinate
+    const getY = (val) => height - padding - (val / yAxisMax) * chartHeight;
+
+    const svgParts = [
+        `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">`,
+        // Background
+        `<rect width="100%" height="100%" fill="white" />`,
+        // Axes
+        `<line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="black" stroke-width="2"/>`, // X-axis
+        `<line x1="${padding}" y1="${height - padding}" x2="${padding}" y2="${padding}" stroke="black" stroke-width="2"/>` // Y-axis
+    ];
+
+    // Y-axis labels
+    for (let i = 0; i <= yAxisMax; i += 10) {
+        const y = getY(i);
+        svgParts.push(
+            `<line x1="${padding - 5}" y1="${y}" x2="${padding}" y2="${y}" stroke="black"/>`,
+            `<text x="${padding - 10}" y="${y + 5}" font-family="Arial" font-size="12" text-anchor="end">${i}</text>`
+        );
+    }
+
+    // Bars
+    const data = [
+        { label: "Apples", value: apples, color: "#ff6b6b" },
+        { label: "Oranges", value: oranges, color: "#ffa502" },
+        { label: "Bananas", value: bananas, color: "#ffeaa7" }
+    ];
+
+    data.forEach((item, index) => {
+        const x = padding + gap + (index * (barWidth + gap));
+        const y = getY(item.value);
+        const barHeight = (height - padding) - y;
+
+        svgParts.push(
+            // Bar
+            `<rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" fill="${item.color}" stroke="black"/>`,
+            // Value Label (top of bar)
+            `<text x="${x + barWidth / 2}" y="${y - 5}" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle">${item.value}</text>`,
+            // X-axis Label
+            `<text x="${x + barWidth / 2}" y="${height - padding + 20}" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle">${item.label}</text>`
+        );
+    });
+
+    svgParts.push(`</svg>`);
+
+    const svgString = svgParts.join('');
+    // Base64 encode for data URI
+    const base64Svg = typeof Buffer !== 'undefined'
+        ? Buffer.from(svgString).toString('base64')
+        : btoa(svgString);
+
+    const imagePath = `data:image/svg+xml;base64,${base64Svg}`;
+    const question = `Look at the bar graph. Which fruit has the highest count?`;
 
     const options = shuffleArray([
         { value: "Apples", label: "Apples" },
@@ -692,7 +1054,8 @@ export const generateBarGraph = () => {
         question: question,
         topic: "Data Handling / Bar Graph",
         options: options,
-        answer: answer
+        answer: answer,
+        image: imagePath
     };
 };
 
@@ -769,7 +1132,7 @@ export const generateSimpleGrade4Pattern = () => {
     return {
         type: "userInput",
         question: `Complete the pattern: </br> ${seq.join(", ")}, ?`,
-        topic: "Number Patterns (Grade 4)",
+        topic: "Number Patterns",
         answer: String(next)
     };
 };
