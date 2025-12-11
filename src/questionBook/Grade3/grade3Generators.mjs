@@ -75,7 +75,7 @@ export const generateSubtraction3digit = () => {
 
 export const generateMultiplication7and8and9and12 = () => {
     // Only 9 and 12 times tables
-    const tables = [7, 8, 9, 12];
+    const tables = [6, 7, 8, 9];
     const num1 = tables[getRandomInt(0, tables.length - 1)];
     const num2 = getRandomInt(1, 10);
     const answer = num1 * num2;
@@ -92,7 +92,7 @@ export const generateMultiplication7and8and9and12 = () => {
 
 export const generateMultiplication13to19 = () => {
     // Only 9 and 12 times tables
-    const tables = [13, 14, 15, 16, 17, 18, 19];
+    const tables = [12, 13, 14, 15, 16, 17, 18, 19];
     const num1 = tables[getRandomInt(0, tables.length - 1)];
     const num2 = getRandomInt(1, 10);
     const answer = num1 * num2;
@@ -139,41 +139,93 @@ export const generateDivision2ndlevel = () => {
     };
 };
 
-export const generateMissingNumber = () => {
-    // e.g., 15 + ? = 25 or ? - 5 = 10
-    const isAddition = Math.random() > 0.5;
+// export const generateMissingNumber = () => {
+//     // e.g., 15 + ? = 25 or ? - 5 = 10
+//     const isAddition = Math.random() > 0.5;
 
-    if (isAddition) {
-        const num1 = getRandomInt(10, 50);
-        const missing = getRandomInt(5, 20);
-        const total = num1 + missing;
+//     if (isAddition) {
+//         const num1 = getRandomInt(10, 50);
+//         const missing = getRandomInt(5, 20);
+//         const total = num1 + missing;
 
-        const question = `Find the missing number: $$ ${num1} +  ?  = ${total} $$`;
+//         const question = `Find the missing number: $$ ${num1} +  ?  = ${total} $$`;
 
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Number Sense / Missing Number",
-            answer: String(missing)
-        };
-    } else {
-        const num1 = getRandomInt(20, 60);
-        const missing = getRandomInt(5, 15);
-        const result = num1 - missing;
+//         return {
+//             type: "userInput",
+//             question: question,
+//             topic: "Number Sense / Missing Number",
+//             answer: String(missing)
+//         };
+//     } else {
+//         const num1 = getRandomInt(20, 60);
+//         const missing = getRandomInt(5, 15);
+//         const result = num1 - missing;
 
-        const question = `Find the missing number: ${num1} - ? = ${result}`;
+//         const question = `Find the missing number: $$ ${num1} - ? = ${result} $$`;
 
-        return {
-            type: "userInput",
-            question: question,
-            topic: "Number Sense / Missing Number",
-            answer: String(missing)
-        };
-    }
+//         return {
+//             type: "userInput",
+//             question: question,
+//             topic: "Number Sense / Missing Number",
+//             answer: String(missing)
+//         };
+//     }
+// };
+
+export const generateMissingNumberAddition = () => {
+    // Random numbers for addition
+    const num1 = getRandomInt(10, 50);
+    const missing = getRandomInt(5, 20);
+    const total = num1 + missing;
+
+    const question = `Find the missing number: $$ ${num1} +  ?  = ${total} $$`;
+
+    return {
+        type: "userInput",
+        question: question,
+        topic: "Number Sense / Missing Number",
+        answer: String(missing)
+    };
 };
 
-export const generateMixedOperations = () => {
-    // e.g., 5 + 3 - 2 = ?
+export const generateMissingNumberSubtraction = () => {
+    // Random numbers for subtraction
+    const num1 = getRandomInt(20, 60);
+    const missing = getRandomInt(5, 15);
+    const result = num1 - missing;
+
+    const question = `Find the missing number: $$ ${num1} - ? = ${result} $$`;
+
+    return {
+        type: "userInput",
+        question: question,
+        topic: "Number Sense / Missing Number",
+        answer: String(missing)
+    };
+};
+
+
+
+
+// export const generateMixedOperations = () => {
+//     // e.g., 5 + 3 - 2 = ?
+//     const num1 = getRandomInt(5, 15);
+//     const num2 = getRandomInt(2, 10);
+//     const num3 = getRandomInt(1, 5);
+
+//     const answer = num1 + num2 - num3;
+//     const question = `Solve: $$ ${num1} + ${num2} - ${num3} = ? $$`;
+
+//     return {
+//         type: "userInput",
+//         question: question,
+//         topic: "Number Sense / Mixed Operations",
+//         answer: String(answer)
+//     };
+// };
+
+export const generateAdditionThenSubtraction = () => {
+    // Random numbers for addition and subtraction
     const num1 = getRandomInt(5, 15);
     const num2 = getRandomInt(2, 10);
     const num3 = getRandomInt(1, 5);
@@ -188,6 +240,26 @@ export const generateMixedOperations = () => {
         answer: String(answer)
     };
 };
+
+
+
+export const generateSubtractionThenAddition = () => {
+    // Random numbers for subtraction and addition
+    const num1 = getRandomInt(5, 15);
+    const num2 = getRandomInt(2, 10);
+    const num3 = getRandomInt(1, 5);
+
+    const answer = num1 - num2 + num3;
+    const question = `Solve: $$ ${num1} - ${num2} + ${num3} = ? $$`;
+
+    return {
+        type: "userInput",
+        question: question,
+        topic: "Number Sense / Mixed Operations",
+        answer: String(answer)
+    };
+};
+
 
 export const generateFractions = () => {
     // Identify fraction from description (visuals are harder without images)
@@ -239,7 +311,152 @@ export const generateCompareFractions = () => {
     };
 };
 
+// export const generateNumberReading = () => {
+//     // Generate a random number between 1 and 100
+//     const number = getRandomInt(1, 100);
+
+//     // Function to convert a number to its word form
+//     const numberToWords = (num) => {
+//         const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+//         const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+//         if (num < 20) {
+//             return ones[num];
+//         } else {
+//             const tensPlace = Math.floor(num / 10);
+//             const onesPlace = num % 10;
+//             return `${tens[tensPlace]} ${ones[onesPlace]}`.trim();
+//         }
+//     };
+
+//     const numberInWords = numberToWords(number);
+
+//     // Create the question by giving a mix of number and word options
+//     const question = `What is the number for: $$ ${numberInWords} ? $$`;
+
+//     // Options will include the number in word form, numeral form, and other similar values
+//     const options = shuffleArray([
+//         { value: numberInWords, label: numberInWords }, // correct word form
+//         { value: number.toString(), label: number.toString() }, // correct number
+//         { value: getRandomInt(1, 100).toString(), label: getRandomInt(1, 100).toString() }, // random number
+//         { value: numberToWords(getRandomInt(1, 100)), label: numberToWords(getRandomInt(1, 100)) } // random word form
+//     ]);
+
+//     return {
+//         type: "mcq",
+//         question: question,
+//         topic: "Measurement / Numbers",
+//         options: options,
+//         answer: numberInWords
+//     };
+// };
+
+
 // --- Geometry ---
+export const generateNumberReading = () => {
+    // Generate a random number between 1 and 100
+    const number = getRandomInt(1, 100);
+
+    // Function to convert a number to its word form
+    const numberToWords = (num) => {
+        const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+        const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+        if (num < 20) {
+            return ones[num];
+        } else {
+            const tensPlace = Math.floor(num / 10);
+            const onesPlace = num % 10;
+            return `${tens[tensPlace]} ${ones[onesPlace]}`.trim();
+        }
+    };
+
+    const numberInWords = numberToWords(number);
+
+    // Randomly choose the type of question: either a numeral or a number name
+    const isNumeralQuestion = Math.random() < 0.5; // 50% chance
+
+    let question;
+    let options;
+
+    if (isNumeralQuestion) {
+        // The question asks for the number name, given the numeral
+        question = `What is the number name for: $ ${number} $`;
+
+        // Create options as number names (words)
+        options = shuffleArray([
+            { value: numberInWords, label: numberInWords }, // correct number name
+            { value: numberToWords(getRandomInt(1, 100)), label: numberToWords(getRandomInt(1, 100)) }, // random number name
+            { value: numberToWords(getRandomInt(1, 100)), label: numberToWords(getRandomInt(1, 100)) }, // random number name
+            { value: numberToWords(getRandomInt(1, 100)), label: numberToWords(getRandomInt(1, 100)) } // random number name
+        ]);
+    } else {
+        // The question asks for the numeral, given the number name
+        question = `What is the number for: $ ${numberInWords} $`;
+
+        // Create options as numerals (numbers)
+        options = shuffleArray([
+            { value: number.toString(), label: number.toString() }, // correct numeral
+            { value: getRandomInt(1, 100).toString(), label: getRandomInt(1, 100).toString() }, // random numeral
+            { value: getRandomInt(1, 100).toString(), label: getRandomInt(1, 100).toString() }, // random numeral
+            { value: getRandomInt(1, 100).toString(), label: getRandomInt(1, 100).toString() } // random numeral
+        ]);
+    }
+
+    return {
+        type: "mcq",
+        question: question,
+        topic: "Measurement / Numbers",
+        options: options,
+        answer: isNumeralQuestion ? numberInWords : number.toString()
+    };
+};
+
+export const generateDoublingHalvingQuestion = () => {
+    // Generate a random number between 1 and 50 for simplicity
+    const number = getRandomInt(1, 50);
+
+    // Randomly decide whether the question is about doubling or halving
+    const isDoubling = Math.random() < 0.5; // 50% chance of doubling or halving
+
+    let question;
+    let correctAnswer;
+
+    // Doubling or halving logic
+    if (isDoubling) {
+        question = `What is double of $ ${number} $`;
+        correctAnswer = number * 2;
+    } else {
+        question = `What is half of $ ${number} $`;
+        correctAnswer = number / 2;
+    }
+
+    // Generate random incorrect answers within a range of 1-100 (but avoid the correct answer)
+    const generateRandomIncorrectAnswer = () => {
+        let randomAnswer;
+        do {
+            randomAnswer = getRandomInt(1, 100);
+        } while (randomAnswer === correctAnswer);
+        return randomAnswer;
+    };
+
+    // Create the options with the correct answer and 3 random incorrect answers
+    const options = shuffleArray([
+        { value: correctAnswer, label: correctAnswer.toString() },
+        { value: generateRandomIncorrectAnswer(), label: generateRandomIncorrectAnswer().toString() },
+        { value: generateRandomIncorrectAnswer(), label: generateRandomIncorrectAnswer().toString() },
+        { value: generateRandomIncorrectAnswer(), label: generateRandomIncorrectAnswer().toString() }
+    ]);
+
+    return {
+        type: "mcq",
+        question: question,
+        topic: "Doubling and Halving",
+        options: options,
+        answer: correctAnswer.toString()
+    };
+};
+
 
 export const generateShapes = () => {
     const shapes = [
@@ -346,31 +563,71 @@ export const generateCapacityConversion = () => {
     };
 };
 
+// export const generateTimeReading = () => {
+//     // Available clock images showing different hours
+//     const availableClocks = [1, 2, 3, 5, 7, 8, 9, 10, 12];
+//     const hour = availableClocks[getRandomInt(0, availableClocks.length - 1)];
+
+//     // For simplicity, using :00 (on the hour) times
+//     const time = `${hour}:00`;
+
+//     const question = `What time is it?`;
+
+//     // Generate plausible wrong answers
+//     const wrongHour1 = hour === 12 ? 1 : hour + 1;
+//     const wrongHour2 = hour === 1 ? 12 : hour - 1;
+//     const wrongHour3 = hour <= 10 ? hour + 2 : hour - 2;
+
+//     const options = shuffleArray([
+//         { value: time, label: time },
+//         { value: `${wrongHour1}:00`, label: `${wrongHour1}:00` },
+//         { value: `${wrongHour2}:00`, label: `${wrongHour2}:00` },
+//         { value: `${wrongHour3}:00`, label: `${wrongHour3}:00` }
+//     ]);
+
+//     return {
+//         type: "userInput",
+//         question: question,
+//         topic: "Measurement / Time",
+//         image: `/assets/grade3/ClockAt${hour}.png`,
+//         options: options,
+//         answer: time
+//     };
+// };
+
+// --- Money ---
+
 export const generateTimeReading = () => {
-    const hour = getRandomInt(1, 12);
-    const minute = getRandomInt(0, 11) * 5;
-    const minuteStr = minute < 10 ? `0${minute}` : minute;
-    const time = `${hour}:${minuteStr}`;
+    // Available clock images showing different hours
+    const availableClocks = [1, 2, 3, 5, 7, 8, 9, 10, 12];
+    const hour = availableClocks[getRandomInt(0, availableClocks.length - 1)];
 
-    const question = `What time is it? (Hour hand at ${hour}, Minute hand at ${minute / 5 === 0 ? 12 : minute / 5})`;
+    // Question: What hour is shown on the clock?
+    const question = `What hour is shown on the clock?`;
 
+    // Generate plausible wrong answers (hours close to the correct hour)
+    const wrongHour1 = hour === 12 ? 1 : hour + 1;
+    const wrongHour2 = hour === 1 ? 12 : hour - 1;
+    const wrongHour3 = hour <= 10 ? hour + 2 : hour - 2;
+
+    // Options for the multiple-choice question
     const options = shuffleArray([
-        { value: time, label: time },
-        { value: `${hour + 1}:${minuteStr}`, label: `${hour + 1}:${minuteStr}` },
-        { value: `${hour}:${minute < 10 ? minute + 15 : '00'}`, label: `${hour}:${minute < 10 ? minute + 15 : '00'}` },
-        { value: `${hour - 1}:${minuteStr}`, label: `${hour - 1}:${minuteStr}` }
+        { value: hour, label: hour.toString() }, // Correct answer as a number
+        { value: wrongHour1, label: wrongHour1.toString() }, // Incorrect option 1
+        { value: wrongHour2, label: wrongHour2.toString() }, // Incorrect option 2
+        { value: wrongHour3, label: wrongHour3.toString() }  // Incorrect option 3
     ]);
 
     return {
-        type: "mcq",
+        type: "userInput",
         question: question,
         topic: "Measurement / Time",
-        options: options,
-        answer: time
+        image: `/assets/grade3/ClockAt${hour}.png`, // Path to the clock image showing the selected hour
+        options: options, // Multiple-choice options
+        answer: hour.toString() // The correct answer is the hour as a string (e.g., "1", "2", etc.)
     };
 };
 
-// --- Money ---
 
 export const generateIdentifyMoney = () => {
     const notes = [10, 20, 50, 100, 200, 500];

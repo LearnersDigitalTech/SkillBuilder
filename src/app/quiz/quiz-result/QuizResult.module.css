@@ -969,6 +969,176 @@
     font-size: 0.875rem;
 }
 
+/* Responsive styles for Question Items in Modal */
+@media (max-width: 1024px) {
+    .questionItem {
+        grid-template-columns: auto 1fr;
+        gap: 1rem;
+    }
+
+    .questionStatus {
+        grid-column: 2;
+        align-items: flex-start;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-top: 0.75rem;
+    }
+
+    .answerRow {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .modalContent {
+        padding: 1rem !important;
+    }
+
+    .questionList {
+        gap: 0.75rem;
+    }
+
+    .questionItem {
+        padding: 1rem;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .questionNumber {
+        width: 36px;
+        height: 36px;
+        font-size: 0.8rem;
+    }
+
+    .questionText {
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .topicBadge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.6rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .answerSection {
+        gap: 0.75rem;
+    }
+
+    .answerRow {
+        flex-direction: column;
+        gap: 0.25rem;
+        font-size: 0.85rem;
+    }
+
+    .answerLabel {
+        font-weight: 600;
+        color: #475569;
+    }
+
+    .correctAnswer,
+    .userAnswer {
+        padding-left: 0;
+        font-size: 0.9rem;
+    }
+
+    /* Image sizing for mobile */
+    .correctAnswer img,
+    .userAnswer img {
+        max-width: 100px !important;
+        max-height: 50px !important;
+    }
+
+    .questionStatus {
+        grid-column: 1;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .statusBadge {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .timeInfo {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .modalHeader {
+        padding: 0.875rem 1rem !important;
+    }
+
+    .modalTitleWrapper {
+        font-size: 1.1rem;
+    }
+
+    .modalContent {
+        padding: 0.75rem !important;
+    }
+
+    .questionItem {
+        padding: 0.875rem;
+        border-radius: 0.75rem;
+    }
+
+    .questionNumber {
+        width: 32px;
+        height: 32px;
+        font-size: 0.75rem;
+    }
+
+    .questionText {
+        font-size: 0.9rem;
+    }
+
+    .topicBadge {
+        font-size: 0.65rem;
+    }
+
+    .answerRow {
+        font-size: 0.8rem;
+    }
+
+    .correctAnswer,
+    .userAnswer {
+        font-size: 0.85rem;
+    }
+
+    /* Smaller images for small mobile */
+    .correctAnswer img,
+    .userAnswer img {
+        max-width: 80px !important;
+        max-height: 40px !important;
+    }
+
+    .statusBadge {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.75rem;
+        gap: 0.25rem;
+    }
+
+    .statusBadge svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .timeInfo {
+        font-size: 0.75rem;
+    }
+
+    .timeInfo svg {
+        width: 14px;
+        height: 14px;
+    }
+}
+
 /* Responsive Design - Tablet (1024px and below) */
 @media (max-width: 1024px) {
     .quizResultContent {

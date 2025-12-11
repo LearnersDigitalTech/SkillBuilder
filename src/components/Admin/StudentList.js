@@ -130,6 +130,18 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
         setStudentToDelete(null);
     };
 
+    const handleViewFullReport = () => {
+        if (!selectedStudent?.marks && !selectedStudent?.rapidMath) {
+            alert('No quiz report available for this student');
+            return;
+        }
+
+        // Navigate to quiz result page with admin view flag
+        // The quiz result page will load the report based on the user's phone number
+        const phoneNumber = selectedStudent.phoneNumber || selectedStudent.id;
+        window.location.href = `/quiz/quiz-result?phone=${phoneNumber}&adminView=true`;
+    };
+
     const handleExportExcel = () => {
         const dataToExport = filteredStudents.map(student => {
             if (viewMode === 'standard') {
@@ -757,6 +769,21 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
                 </DialogContent>
                 <DialogActions sx={{ p: 3, bgcolor: '#f8f9fa', borderTop: '1px solid #e0e0e0' }}>
                     <Button onClick={handleClose} color="inherit" sx={{ mr: 1 }}>Close</Button>
+                    <Button
+                        onClick={handleViewFullReport}
+                        variant="outlined"
+                        color="primary"
+                        startIcon={<BookOpen size={18} />}
+                        disabled={!selectedStudent?.marks && !selectedStudent?.rapidMath}
+                        sx={{
+                            mr: 'auto',
+                            borderRadius: 2,
+                            borderWidth: 2,
+                            '&:hover': { borderWidth: 2 }
+                        }}
+                    >
+                        View Full Report
+                    </Button>
                     <Button
                         onClick={handleDownload}
                         variant="contained"
