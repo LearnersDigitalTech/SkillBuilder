@@ -63,7 +63,12 @@ const TypeUserInput = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, q
             allowedPattern = /^[0-9+\-*/.]*$/;
         } else {
             // Allow digits, dot, and minus only
-            allowedPattern = /^[0-9\-.]*$/;
+            // If keypadMode is multiplication, allow 'x' or '*'
+            if (questionPaper && questionPaper[activeQuestionIndex]?.keypadMode === 'multiplication') {
+                allowedPattern = /^[0-9xX*.]*$/;
+            } else {
+                allowedPattern = /^[0-9\-.]*$/;
+            }
         }
 
         if (allowedPattern.test(val)) {
@@ -143,7 +148,11 @@ const TypeUserInput = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, q
                         {showOperators ? (
                             <Button onClick={handleBackspace} className={Styles.backspaceButton}>⌫</Button>
                         ) : (
-                            <Button onClick={_ => handleChange('-')} className={Styles.operatorButton}>−</Button>
+                            questionPaper && questionPaper[activeQuestionIndex]?.keypadMode === 'multiplication' ? (
+                                <Button onClick={_ => handleChange('x')} className={Styles.operatorButton}>×</Button>
+                            ) : (
+                                <Button onClick={_ => handleChange('-')} className={Styles.operatorButton}>−</Button>
+                            )
                         )}
                         {showOperators && <Button onClick={_ => handleChange('/')} className={Styles.operatorButton}>÷</Button>}
 
