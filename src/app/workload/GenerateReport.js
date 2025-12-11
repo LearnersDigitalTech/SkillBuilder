@@ -83,6 +83,32 @@ function analyzeResponses(responses, grade) {
             }
         }
 
+        // Special check for Factor Tree (JSON object comparison)
+        if (item.type === 'factorTree') {
+            try {
+                const correctObj = JSON.parse(correctAnswer);
+                const userObj = JSON.parse(givenAnswer);
+
+                const correctKeys = Object.keys(correctObj);
+                const userKeys = Object.keys(userObj);
+
+                // If number of keys differ (e.g. missing inputs), it's wrong (or partial?)
+                // Strict: must provide all answers.
+                if (correctKeys.length !== userKeys.length) return 0;
+
+                let allCorrect = true;
+                for (let key of correctKeys) {
+                    if (normalizeFunc(userObj[key]) !== normalizeFunc(correctObj[key])) {
+                        allCorrect = false;
+                        break;
+                    }
+                }
+                return allCorrect ? 1 : 0;
+            } catch (e) {
+                return givenAnswer === correctAnswer ? 1 : 0;
+            }
+        }
+
         return givenAnswer === correctAnswer ? 1 : 0;
     };
 
@@ -146,7 +172,10 @@ function analyzeResponses(responses, grade) {
         result.perQuestionReport.push({
             questionId: questionId ?? null,
             question: question ?? null,
+            image: item.image ?? null,
             topic: topic ?? null,
+            type: item.type ?? null,
+            tree: item.tree ?? null,
             correctAnswer: correctAnswer ?? null,
             userAnswer: givenAnswer || null,
             attempted: attempted ?? false,
