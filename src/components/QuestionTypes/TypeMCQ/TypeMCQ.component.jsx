@@ -137,6 +137,7 @@ const TypeMCQ = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, questio
                 )}
 
 
+
                 <div className={Styles.navigationContainer}>
                     <div className={Styles.leftButtons}>
                         {activeQuestionIndex > 0 && (
