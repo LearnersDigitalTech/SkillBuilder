@@ -109,6 +109,40 @@ export const generateAddition4Digit = () => {
     };
 };
 
+export const generateAddition4DigitAppliactionLevel = () => {
+    const num1 = getRandomInt(1000, 5000);
+    const num2 = getRandomInt(1000, 4999);
+
+    // Ensure carry
+    const u1 = num1 % 10;
+    const u2 = num2 % 10;
+    if (u1 + u2 < 10) return generateAddition4DigitAppliactionLevel(); // Retry if no carry
+
+    const scenarios = [
+        `You bought a toy for $${num1}$ and a storybook for $${num2}$ How much did you spend?`,
+        `You bought pencils for $${num1}$ and crayons for $${num2}$ What is the total cost?`,
+        `You bought a backpack for $${num1}$ and a water bottle for $${num2}$ How much did you pay altogether?`,
+        `You bought chocolates for $${num1}$ and ice cream for $${num2}$ How much did you spend in total?`,
+        `You bought shoes for $${num1}$ and socks for $${num2}$ How much is the total?`,
+        `You bought a football for $${num1}$ and a jersey for $${num2}$ What is the total amount?`,
+        `You bought notebooks for $${num1}$ and a lunch box for $${num2}$ How much did you spend?`,
+        `You bought a puzzle for $${num1}$ and a coloring book for $${num2}$ What is the total?`,
+        `You bought stickers for $${num1}$ and markers for $${num2}$ How much did you spend altogether?`,
+        `You bought a teddy bear for $${num1}$ and a toy car for $${num2}$ What is the total cost?`
+    ];
+
+    const question = scenarios[Math.floor(Math.random() * scenarios.length)];
+    const answer = num1 + num2;
+
+    return {
+        type: "userInput",
+        topic: "Addition / With Carry",
+        question,
+        answer: String(answer)
+    };
+};
+
+
 // export const generateSubtraction4Digit = () => {
 //     const num1 = getRandomInt(5000, 9999);
 //     const num2 = getRandomInt(1000, 4999);
@@ -142,6 +176,40 @@ export const generateSubtraction4Digit = () => {
     };
 };
 
+export const generateSubtraction4DigitAppliactionLevel = () => {
+    const num1 = getRandomInt(5000, 9999);
+    const num2 = getRandomInt(1000, 4999);
+
+    // Ensure borrow
+    const u1 = num1 % 10;
+    const u2 = num2 % 10;
+    if (u1 >= u2) return generateSubtraction4Digit(); // Retry if no borrow needed
+
+    const scenarios = [
+        `You had ${num1} stickers. You gave ${num2} stickers to your friend. How many stickers are left?`,
+        `A shop had ${num1} pencils. It sold ${num2} pencils. How many pencils remain?`,
+        `A library had ${num1} books. After students borrowed ${num2} books, how many books are still there?`,
+        `You collected ${num1} coins. You spent ${num2} coins. How many coins do you have now?`,
+        `There were ${num1} visitors at a park. ${num2} visitors left. How many visitors are still in the park?`,
+        `A farmer had ${num1} apples. He sold ${num2} apples. How many apples are left?`,
+        `Your school printed ${num1} worksheets. Teachers used ${num2} worksheets. How many are left?`,
+        `A toy store had ${num1} balloons. ${num2} balloons flew away. How many balloons remain?`,
+        `You walked ${num1} steps today. You rested after ${num2} steps. How many more steps are needed?`,
+        `A museum had ${num1} tickets available. ${num2} tickets were sold. How many tickets remain?`
+    ];
+
+    const question = scenarios[Math.floor(Math.random() * scenarios.length)];
+    const answer = num1 - num2;
+
+    return {
+        type: "userInput",
+        topic: "Subtraction / With Borrow",
+        question,
+        answer: String(answer)
+    };
+};
+
+
 export const generateMultiplication = () => {
     // 3-digit x 1-digit or 2-digit x 2-digit
     const type = Math.random() > 0.5 ? "3x1" : "2x2";
@@ -166,6 +234,35 @@ export const generateMultiplication = () => {
     };
 };
 
+export const generateMultiplicationApplicationLevel = () => {
+    const num1 = getRandomInt(10, 99);
+    const num2 = getRandomInt(10, 99);
+
+    const scenarios = [
+        `Each box has ${num1} chocolates. If you buy ${num2} boxes, how many chocolates do you have in total?`,
+        `A teacher printed ${num1} worksheets for each class. There are ${num2} classes. How many worksheets did she print?`,
+        `You collected ${num1} stickers each day for ${num2} days. How many stickers did you collect in total?`,
+        `A garden has ${num1} rows of plants and ${num2} plants in each row. How many plants are there altogether?`,
+        `A toy shop packs ${num1} toys in one carton. If it has ${num2} cartons, how many toys are there?`,
+        `A school bought ${num1} pencils for each student. There are ${num2} students. How many pencils were bought in total?`,
+        `A farmer planted ${num1} seeds in each row. He made ${num2} rows. How many seeds did he plant?`,
+        `Each notebook has ${num1} pages. If you buy ${num2} notebooks, how many pages do you have?`,
+        `You read ${num1} pages each day for ${num2} days. How many pages did you read?`,
+        `A box has ${num1} marbles. You bought ${num2} boxes. How many marbles do you have altogether?`
+    ];
+
+    const question = scenarios[Math.floor(Math.random() * scenarios.length)];
+    const answer = num1 * num2;
+
+    return {
+        type: "userInput",
+        topic: "Multiplication / 2-digit × 2-digit",
+        question,
+        answer: String(answer)
+    };
+};
+
+
 export const generateDivision = () => {
     // 3-digit or 4-digit divided by 1-digit
     const divisor = getRandomInt(2, 9);
@@ -181,6 +278,36 @@ export const generateDivision = () => {
         answer: String(quotient)
     };
 };
+
+export const generateDivisionApplicationLevel = () => {
+    // 3-digit dividend, 1-digit divisor
+    const divisor = getRandomInt(2, 9);
+    const quotient = getRandomInt(10, 99); // so dividend becomes 3-digit
+    const dividend = divisor * quotient; // ensures no remainder
+
+    const scenarios = [
+        `You have ${dividend} candies. You want to share them equally among ${divisor} friends. How many candies does each friend get?`,
+        `A teacher has ${dividend} stickers. She divides them equally among ${divisor} students. How many stickers does each student get?`,
+        `A farmer collected ${dividend} apples. He packed them equally into ${divisor} baskets. How many apples go in each basket?`,
+        `There are ${dividend} pages to read in a book. You want to read the same number of pages for ${divisor} days. How many pages will you read each day?`,
+        `A shopkeeper has ${dividend} balloons. He ties them into groups of ${divisor}. How many groups can he make?`,
+        `A library has ${dividend} books to arrange. The bookshelves hold equal numbers and there are ${divisor} shelves. How many books go on each shelf?`,
+        `You collected ${dividend} coins and want to put them equally into ${divisor} jars. How many coins go in each jar?`,
+        `A box has ${dividend} crayons. You want to pack them into sets of ${divisor}. How many crayons are in each set?`,
+        `A class folded ${dividend} paper airplanes. They divide them equally among ${divisor} teams. How many airplanes does each team get?`,
+        `A baker made ${dividend} cookies and packed them equally into ${divisor} boxes. How many cookies go in each box?`
+    ];
+
+    const question = scenarios[Math.floor(Math.random() * scenarios.length)];
+
+    return {
+        type: "userInput",
+        topic: "Division / 3-digit ÷ 1-digit",
+        question,
+        answer: String(quotient)
+    };
+};
+
 
 export const generateEstimation = () => {
     // Estimate sum to nearest 100
@@ -251,41 +378,27 @@ const gcd = (a, b) => {
     return gcd(b, a % b);
 };
 
-export const generateFractionTypes = () => {
-    const types = ["Proper Fraction", "Improper Fraction", "Mixed Fraction"];
-    const type = types[getRandomInt(0, 2)];
-    let question, answer;
+// Function 1: Proper vs Improper Fractions (50% chance each)
+export const generateProperImproperFractions = () => {
+    const types = ["Proper Fraction", "Improper Fraction"];
+    const type = types[getRandomInt(0, 1)]; // 50% chance each
+    let question, answer, imagePath;
 
     if (type === "Proper Fraction") {
-        let num, den;
-        do {
-            den = getRandomInt(3, 9);
-            num = getRandomInt(1, den - 1);
-        } while (gcd(num, den) !== 1); // retry if not simplified
+        // Select random proper fraction image (1-4)
+        const imageNum = getRandomInt(1, 4);
+        imagePath = `/assets/grade4/proper_fraction_${imageNum}.png`;
 
-        question = `Identify the type of fraction: $$ ${num}/${den} $$`;
+        question = `Identify the type of fraction shown in the image:`;
         answer = "Proper Fraction";
 
-    } else if (type === "Improper Fraction") {
-        let num, den;
-        do {
-            num = getRandomInt(5, 12);
-            den = getRandomInt(2, num - 1);
-        } while (gcd(num, den) !== 1); // retry if not simplified
+    } else { // Improper Fraction
+        // Select random improper fraction image (1-3)
+        const imageNum = getRandomInt(1, 3);
+        imagePath = `/assets/grade4/improper_fraction_${imageNum}.png`;
 
-        question = `Identify the type of fraction: $$ ${num}/${den} $$`;
+        question = `Identify the type of fraction shown in the image:`;
         answer = "Improper Fraction";
-
-    } else { // Mixed Fraction
-        let whole, num, den;
-        do {
-            whole = getRandomInt(1, 5);
-            den = getRandomInt(3, 9);
-            num = getRandomInt(1, den - 1);
-        } while (gcd(num, den) !== 1); // retry if not simplified
-
-        question = `Identify the type of fraction: $$ ${whole} ${num}/${den} $$`;
-        answer = "Mixed Fraction";
     }
 
     const options = shuffleArray([
@@ -300,7 +413,48 @@ export const generateFractionTypes = () => {
         question: question,
         topic: "Fractions / Types",
         options: options,
-        answer: answer
+        answer: answer,
+        image: imagePath
+    };
+};
+
+// Function 2: Mixed vs Unit Fractions (50% chance each)
+export const generateMixedUnitFractions = () => {
+    const types = ["Mixed Fraction", "Unit Fraction"];
+    const type = types[getRandomInt(0, 1)]; // 50% chance each
+    let question, answer, imagePath;
+
+    if (type === "Mixed Fraction") {
+        // Select random mixed fraction image (1-3)
+        const imageNum = getRandomInt(1, 3);
+        imagePath = `/assets/grade4/mixed_fraction_${imageNum}.png`;
+
+        question = `Identify the type of fraction shown in the image`;
+        answer = "Mixed Fraction";
+
+    } else { // Unit Fraction
+        // Select random unit fraction image (1-4)
+        const imageNum = getRandomInt(1, 4);
+        imagePath = `/assets/grade4/unit_fraction_${imageNum}.png`;
+
+        question = `Identify the type of fraction shown in the image`;
+        answer = "Unit Fraction";
+    }
+
+    const options = shuffleArray([
+        { value: "Proper Fraction", label: "Proper Fraction" },
+        { value: "Improper Fraction", label: "Improper Fraction" },
+        { value: "Mixed Fraction", label: "Mixed Fraction" },
+        { value: "Unit Fraction", label: "Unit Fraction" }
+    ]);
+
+    return {
+        type: "mcq",
+        question: question,
+        topic: "Fractions / Types",
+        options: options,
+        answer: answer,
+        image: imagePath
     };
 };
 
@@ -316,22 +470,22 @@ export const generateFractionOperations = () => {
 
     if (isAddition) {
         answerNum = num1 + num2;
-        question = `Solve: $$ ${num1}/${den} + ${num2}/${den} = ? $$`;
+        question = `Solve: $$ \\frac{${num1}}{${den}} + \\frac{${num2}}{${den}} = ? $$`;
     } else {
         // Ensure num1 > num2 for subtraction
         const n1 = Math.max(num1, num2);
         const n2 = Math.min(num1, num2);
         answerNum = n1 - n2;
-        question = `Solve: $$ ${n1}/${den} - ${n2}/${den} = ? $$`;
+        question = `Solve: $$ \\frac{${n1}}{${den}} - \\frac{${n2}}{${den}} = ? $$`;
     }
 
-    const answer = `$$ ${answerNum}/${den} $$`;
+    const answer = `$$ \\frac{${answerNum}}{${den}} $$`;
 
     const options = shuffleArray([
         { value: answer, label: answer },
-        { value: `${answerNum + 1}/${den}`, label: `$$ ${answerNum + 1}/${den} $$` },
-        { value: `${answerNum}/${den + 1}`, label: `$$ ${answerNum}/${den + 1} $$` },
-        { value: `${den}/${answerNum}`, label: `$$ ${den}/${answerNum} $$` }
+        { value: `$$ \\frac{${answerNum + 1}}{${den}} $$`, label: `$$ \\frac{${answerNum + 1}}{${den}} $$` },
+        { value: `$$ \\frac{${answerNum}}{${den + 1}} $$`, label: `$$ \\frac{${answerNum}}{${den + 1}} $$` },
+        { value: `$$ \\frac{${den}}{${answerNum}} $$`, label: `$$ \\frac{${den}}{${answerNum}} $$` }
     ]);
 
     return {
@@ -346,19 +500,33 @@ export const generateFractionOperations = () => {
 // --- Geometry ---
 
 export const generateAngles = () => {
-    const types = ["Acute", "Obtuse", "Right"];
-    const type = types[getRandomInt(0, 2)];
-    let angle, question;
+    const types = ["Acute", "Obtuse", "Right", "Straight"];
+    const type = types[getRandomInt(0, 3)];
+    let imagePath, question;
 
     if (type === "Acute") {
-        angle = getRandomInt(10, 89);
-    } else if (type === "Obtuse") {
-        angle = getRandomInt(91, 179);
-    } else {
-        angle = 90;
-    }
+        // 3 acute angle images available
+        const imageNum = getRandomInt(1, 3);
+        imagePath = `/assets/grade4/acute_angle_${imageNum}.png`;
+        question = `Identify the type of angle shown in the image`;
 
-    question = `What type of angle is ${angle}°?`;
+    } else if (type === "Obtuse") {
+        // 3 obtuse angle images available
+        const imageNum = getRandomInt(1, 3);
+        imagePath = `/assets/grade4/obtuse_angle_${imageNum}.png`;
+        question = `Identify the type of angle shown in the image`;
+
+    } else if (type === "Right") {
+        // 2 right angle images available
+        const imageNum = getRandomInt(1, 2);
+        imagePath = `/assets/grade4/right_angle_${imageNum}.png`;
+        question = `Identify the type of angle shown in the image`;
+
+    } else { // Straight
+        // 1 straight angle image available
+        imagePath = `/assets/grade4/straight_angle_1.png`;
+        question = `Identify the type of angle shown in the image`;
+    }
 
     const options = shuffleArray([
         { value: "Acute", label: "Acute" },
@@ -372,7 +540,8 @@ export const generateAngles = () => {
         question: question,
         topic: "Geometry / Angles",
         options: options,
-        answer: type
+        answer: type,
+        image: imagePath
     };
 };
 
