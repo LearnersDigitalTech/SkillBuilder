@@ -42,7 +42,7 @@ const HeroChart = ({ summary, notAttempted }) => {
 import Navigation from "@/components/Navigation/Navigation.component";
 import MathRenderer from "@/components/MathRenderer/MathRenderer.component";
 import TypeFactorTree from "@/components/QuestionTypes/TypeFactorTree/TypeFactorTree.component";
-import { CheckCircle, XCircle, HelpCircle, Clock, Target, BookOpen, TrendingUp, BarChart3, FileText, X, AlertCircle, Download } from "lucide-react";
+import { CheckCircle, XCircle, HelpCircle, Clock, Target, BookOpen, TrendingUp, BarChart3, FileText, X, AlertCircle, Download, ArrowLeft } from "lucide-react";
 import { QuizSessionContext } from "../../app/context/QuizSessionContext";
 import analyzeResponses from "@/app/workload/GenerateReport";
 import Footer from "@/components/Footer/Footer.component";
