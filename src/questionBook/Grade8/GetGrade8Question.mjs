@@ -11,6 +11,18 @@ import {
     generateComparingQuantities
 } from './grade8Generators.mjs';
 
+import {
+    generateNaturalWholeNumbers,
+    generateIntegers as generateIntegersG10,
+    generateFractions as generateFractionsG10,
+    generateDecimals as generateDecimalsG10,
+    generateLCM as generateLCMG10,
+    generateHCF,
+    generateRatioProportion as generateProportionG10,
+    generateBODMAS,
+    generatePerimeter
+} from '../Grade10/grade10Generators.mjs';
+
 const generate = (generator, count = 10) => {
     return Array.from({ length: count }, () => generator());
 };
@@ -46,7 +58,18 @@ const Grade8Questions = {
     q27: generate(generateMensuration),
     q28: generate(generateGraphs),
     q29: generate(generateProportion),
-    q30: generate(generateComparingQuantities)
+    q30: generate(generateComparingQuantities),
+
+    // Grade 10 Logic Additions
+    q31: generate(generateNaturalWholeNumbers),
+    q32: generate(generateIntegersG10),
+    q33: generate(generateFractionsG10),
+    q34: generate(generateDecimalsG10),
+    q35: generate(generateLCMG10),
+    q36: generate(generateHCF),
+    q37: generate(generateProportionG10),
+    q38: generate(generateBODMAS),
+    q39: generate(generatePerimeter)
 };
 
 export default Grade8Questions;
