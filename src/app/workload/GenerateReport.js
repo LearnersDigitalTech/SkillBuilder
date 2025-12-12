@@ -46,37 +46,61 @@ function analyzeResponses(responses, grade) {
 
                 if (totalRows === 0) return givenAnswer === correctAnswer ? 1 : 0;
 
-                let matchCount = 0;
+                let totalScoreSum = 0;
+
                 for (let i = 0; i < totalRows; i++) {
                     const u = userObj[i];
                     const c = correctObj[i];
 
-                    // Check for fraction comparison
-                    if (u && c && (u.num !== undefined || u.d !== undefined) && (u.den !== undefined || u.d !== undefined) && c.num !== undefined && c.den !== undefined) {
-                        // Normalize key names: tableInput uses 'num'/'den'
-                        // Use parseFloat to handle strings like "4" or "4.0" or even "4.5" if user enters decimals
+                    // 1. Complex Object Row (e.g. {perimeter:..., area:...})
+                    if (typeof c === 'object' && c !== null) {
+                        // If user didn't answer this row at all (undefined/null), score is 0
+                        if (!u || typeof u !== 'object') {
+                            continue;
+                        }
+
+                        const cKeys = Object.keys(c);
+                        const totalKeys = cKeys.length;
+                        if (totalKeys === 0) {
+                            totalScoreSum += 1; // Empty object implies nothing to check?
+                            continue;
+                        }
+
+                        let correctKeysCount = 0;
+                        cKeys.forEach(key => {
+                            // Normalize both values
+                            const valC = normalizeFunc(c[key]);
+                            const valU = normalizeFunc(u[key]);
+                            if (valC === valU) {
+                                correctKeysCount++;
+                            }
+                        });
+
+                        totalScoreSum += (correctKeysCount / totalKeys);
+                    }
+                    // 2. Fraction Row (special object structure)
+                    else if (u && c && (u.num !== undefined || u.d !== undefined) && (u.den !== undefined || u.d !== undefined) && c.num !== undefined && c.den !== undefined) {
                         const uNum = parseFloat(u.num);
                         const uDen = parseFloat(u.den);
                         const cNum = parseFloat(c.num);
                         const cDen = parseFloat(c.den);
 
                         if (!isNaN(uNum) && !isNaN(uDen) && !isNaN(cNum) && !isNaN(cDen) && uDen !== 0 && cDen !== 0) {
-                            // Cross multiply with epsilon for float safety: |uNum/uDen - cNum/cDen| < epsilon
-                            // => |uNum*cDen - cNum*uDen| < epsilon
                             if (Math.abs(uNum * cDen - cNum * uDen) < 0.0001) {
-                                matchCount++;
-                                continue;
+                                totalScoreSum += 1;
                             }
                         }
                     }
-
-                    // Strict equality for JSON objects/strings fallback
-                    if (JSON.stringify(u) === JSON.stringify(c)) {
-                        matchCount++;
+                    // 3. Simple Primitive Row (String/Number)
+                    else {
+                        // Strict equality for strings
+                        if (JSON.stringify(u) === JSON.stringify(c)) {
+                            totalScoreSum += 1;
+                        }
                     }
                 }
 
-                return matchCount / totalRows;
+                return totalScoreSum / totalRows;
             } catch (e) {
                 // If parsing fails, fall back to strict match
                 return givenAnswer === correctAnswer ? 1 : 0;
