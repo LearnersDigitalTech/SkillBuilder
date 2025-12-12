@@ -160,6 +160,13 @@ const QuizClient = () => {
         return n + (s[(v - 20) % 10] || s[v] || s[0]);
     };
 
+    // Scroll to top when question changes
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            window.scrollTo(0, 0);
+        }
+    }, [activeQuestionIndex]);
+
     useEffect(() => {
         let gradeQuestionPaper = null;
 
