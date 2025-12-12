@@ -323,13 +323,30 @@ export const generateRatioProportion = () => {
 export const generateSquareRoots = () => {
     const rows = [];
 
+    // 1. Square Question
     const n1 = getRandomInt(11, 30);
     rows.push({ text: `Find the value of $(${n1})^2$`, answer: String(n1 * n1) });
 
-    // Q2 removed as per request (keep 1st and 3rd)
+    // 2. Square Root Question
+    // User requested "some chances" for the relation: 12^2 = 144, sqrt(144) = 12
+    // We'll give a 30% chance for the second question to be the inverse of the first.
+    // Otherwise, generate a random perfect square root problem (approx range 1..400+ as requested).
+    const isLinked = Math.random() < 0.3;
 
-    const n3 = getRandomInt(31, 50);
-    rows.push({ text: `Find the value of $(${n3})^2$`, answer: String(n3 * n3) });
+    let n2;
+    if (isLinked) {
+        n2 = n1;
+    } else {
+        // Range for roots: 2 to 30 (Square 4 to 900). 
+        // User mentioned "1,4,9...400", which corresponds to roots 1..20. 
+        // We'll extend slightly to 30 to match the difficulty of the first question.
+        n2 = getRandomInt(2, 30);
+        // Ensure it's not same as n1 just to avoid confusion if not linked (though mathematically fine)
+        if (!isLinked && n2 === n1) n2 = getRandomInt(2, 30);
+    }
+
+    const n2Squared = n2 * n2;
+    rows.push({ text: `Find the value of $\\sqrt{${n2Squared}}$`, answer: String(n2) });
 
     const answerObj = {};
     rows.forEach((r, i) => answerObj[i] = r.answer);
@@ -347,14 +364,29 @@ export const generateSquareRoots = () => {
 export const generateCubeRoots = () => {
     const rows = [];
 
-    const n1 = getRandomInt((-10), (-3)); // Negative cube
+    // 1. Cube Question: "cube only till 5"
+    // Assuming integers. Range 2 to 5.
+    // Previous code used negatives, so we'll allow both positive and negative for variety?
+    // "cube only till 5" likely means base magnitude <= 5.
+
+    // Choose base magnitude from 2 to 5
+    let n1 = getRandomInt(2, 5);
+    // 50% chance of negative base
+    if (Math.random() < 0.5) n1 *= -1;
+
     rows.push({ text: `Find the value of $(${n1})^3$`, answer: String(n1 * n1 * n1) });
 
-    // Q2 removed as per request (keep 1st and 3rd)
+    // 2. Cube Root Question: "cube root upto 125"
+    // Perfect cubes up to 125 are 1^3=1, 2^3=8, 3^3=27, 4^3=64, 5^3=125.
+    // So base magnitude is 2 to 5 (ignoring 1 as trivial).
 
-    const n3 = getRandomInt((-8), (-2));
-    const cb3 = n3 * n3 * n3;
-    rows.push({ text: `Find the value of $\\sqrt[3]{${cb3}}$`, answer: String(n3) });
+    let n2 = getRandomInt(2, 5);
+    // 50% chance of negative root
+    if (Math.random() < 0.5) n2 *= -1;
+
+    // Use n2 as the root, so the question is cbrt(n2^3)
+    const cb2 = n2 * n2 * n2;
+    rows.push({ text: `Find the value of $\\sqrt[3]{${cb2}}$`, answer: String(n2) });
 
     const answerObj = {};
     rows.forEach((r, i) => answerObj[i] = r.answer);
@@ -391,23 +423,23 @@ export const generateExponents = () => {
         val = m * n;
     } else {
         // Negative exponent: Find value of (-a)^(-n) or similar
-        // Image shows (-2)^(-2) -> 1/4 = 0.25 (options: -4, 1/4, -1/4, 4)
         const base = -1 * getRandomInt(2, 5);
         const exp = -1 * getRandomInt(2, 3); // -2 or -3
         question = `Find the value of $(${base})^{${exp}}$`;
 
-        // precise calculation
-        const realVal = Math.pow(base, exp);
         // format as fraction if possible
         const den = Math.pow(base, Math.abs(exp)); // e.g. (-2)^2 = 4, (-2)^3 = -8
-        // answer string "1/4" or "-1/8"
-        answerStr = (den > 0) ? `$1/${den}$` : `$-1/${Math.abs(den)}$`;
+
+        // answer string "\frac{1}{4}" or "-\frac{1}{8}" using proper LaTeX
+        answerStr = (den > 0) ? `$\\frac{1}{${den}}$` : `$-\\frac{1}{${Math.abs(den)}}$`;
+
+        const wrongSignFraction = (den > 0) ? `$-\\frac{1}{${den}}$` : `$\\frac{1}{${Math.abs(den)}}$`;
 
         // Custom distractors for this type
         const options = ensureUnique({ value: answerStr, label: answerStr }, [
             { value: `$${den}$`, label: `$${den}$` },          // 4
             { value: `$${-den}$`, label: `$${-den}$` },        // -4
-            { value: (den > 0) ? `$-1/${den}$` : `$1/${Math.abs(den)}$`, label: (den > 0) ? `$-1/${den}$` : `$1/${Math.abs(den)}$` } // wrong sign fraction
+            { value: wrongSignFraction, label: wrongSignFraction } // wrong sign fraction
         ]);
         return { type: 'mcq', question, answer: answerStr, options, topic: 'Laws of Exponents' };
     }
@@ -508,7 +540,7 @@ export const generateAlgebraicAdditionSubtraction = () => {
         { value: wrap(`${resX + 2}x${formatTerm(resY + 2, 'y')}${formatTerm(resZ + 2, 'z')}`), label: wrap(`${resX + 2}x${formatTerm(resY + 2, 'y')}${formatTerm(resZ + 2, 'z')}`) }
     ]);
 
-    return { type: 'mcq', question, answer: wrap(ansStr), options, topic: 'Algebraic Aggregation' };
+    return { type: 'mcq', question, answer: wrap(ansStr), options, topic: 'Algebraic Addition' };
 };
 
 // --- CAT13: Algebraic Multiplication ---
@@ -598,17 +630,27 @@ export const generateLinearEquationOneVar = () => {
     const c1 = a1 * x1 + b1;
     rows.push({ text: `Solve: $${a1}x + ${b1} = ${c1}$`, answer: String(x1) });
 
-    // Q2: ax - b = c
-    // Q2 removed as per request (keep 1st and 3rd)
+    // Q2: Structure like 2 - (3 - 4x) = 2x + 5  => a - (b - cx) = dx + e
+    const x2 = getRandomInt(2, 8); // Answer
+    const a2 = getRandomInt(2, 9);
+    const b2 = getRandomInt(2, 9);
+    const c2 = getRandomInt(4, 9); // Coeff of x inside bracket
+    const d2 = getRandomInt(2, 5); // Coeff of x on RHS
+
+    // a - b + cx = dx + e  =>  e = (a - b) + x(c - d)
+    const e2 = (a2 - b2) + x2 * (c2 - d2);
+
+    const rhsSign = e2 >= 0 ? '+' : '-';
+    rows.push({ text: `Solve: $${a2} - (${b2} - ${c2}x) = ${d2}x ${rhsSign} ${Math.abs(e2)}$`, answer: String(x2) });
 
     // Q3: Slightly harder? 2x = x + k
     // or variables on both sides? Image is simple 4x+48=12.
     // Let's do variables on both sides: 5x = 3x + 10
-    const x3 = getRandomInt(2, 10);
-    const diff = getRandomInt(2, 5); // 2x
-    const rhs = diff * x3; // 10
-    // 5x = 3x + 10 -> (3+diff)x = 3x + rhs
-    rows.push({ text: `Solve: $${3 + diff}x = 3x + ${rhs}$`, answer: String(x3) });
+    // const x3 = getRandomInt(2, 10);
+    // const diff = getRandomInt(2, 5); // 2x
+    // const rhs = diff * x3; // 10
+    // // 5x = 3x + 10 -> (3+diff)x = 3x + rhs
+    // rows.push({ text: `Solve: $${3 + diff}x = 3x + ${rhs}$`, answer: String(x3) });
 
     const answerObj = {};
     rows.forEach((r, i) => answerObj[i] = r.answer);
@@ -618,7 +660,7 @@ export const generateLinearEquationOneVar = () => {
         question: 'Find the value of x for the following equations:',
         answer: JSON.stringify(answerObj),
         rows: rows,
-        topic: 'Linear Equations 1 Var'
+        topic: 'Linear Equations in one Variable'
     };
 };
 
@@ -708,24 +750,48 @@ export const generatePerimeter = () => {
     const shapeType = getRandomInt(1, 4); // 1: Circle, 2: Rectangle, 3: Square
     let questionText = "";
     let answer = "";
+    let svg = "";
 
     if (shapeType === 1) {
         // Circle
         const r = 7 * getRandomInt(1, 5); // divisible by 7
         questionText = `Find the perimeter of circle with radius $${r}$ cm. (Take $\\pi = \\frac{22}{7}$)`;
         answer = String(2 * (22 / 7) * r);
+
+        svg = `<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="75" cy="75" r="50" stroke="#334155" stroke-width="2" fill="#eff6ff" />
+            <line x1="75" y1="75" x2="125" y2="75" stroke="#334155" stroke-width="2" />
+            <text x="80" y="70" font-family="sans-serif" font-size="14" fill="#334155">r = ${r}</text>
+        </svg>`;
+
     } else if (shapeType === 2) {
         // Rectangle
         const l = getRandomInt(5, 15);
         const w = getRandomInt(2, 10);
         questionText = `Find the perimeter of a rectangle with length $${l}$ cm and width $${w}$ cm.`;
         answer = String(2 * (l + w));
+
+        svg = `<svg width="200" height="150" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+            <rect x="25" y="40" width="150" height="70" stroke="#334155" stroke-width="2" fill="#eff6ff" />
+            <text x="100" y="35" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#334155">l = ${l}</text>
+            <text x="15" y="80" font-family="sans-serif" font-size="14" fill="#334155">w = ${w}</text>
+        </svg>`;
+
     } else {
         // Square
         const s = getRandomInt(4, 12);
         questionText = `Find the perimeter of a square with side $${s}$ cm.`;
         answer = String(4 * s);
+
+        svg = `<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+            <rect x="40" y="40" width="70" height="70" stroke="#334155" stroke-width="2" fill="#eff6ff" />
+            <text x="75" y="35" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#334155">s = ${s}</text>
+            <text x="20" y="80" font-family="sans-serif" font-size="14" fill="#334155">s = ${s}</text>
+        </svg>`;
     }
+
+    const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    const imgHtml = `<div style="display:flex; justify-content:center; margin: 15px 0;"><img src="${svgDataUrl}" alt="Shape" style="max-height: 150px;" /></div>`;
 
     rows.push({ text: `Perimeter =`, unit: 'cm', answer: answer });
 
@@ -733,7 +799,7 @@ export const generatePerimeter = () => {
 
     return {
         type: 'tableInput',
-        question: questionText,
+        question: questionText + imgHtml,
         answer: JSON.stringify(answerObj),
         rows: rows,
         topic: 'Perimeter of Plane Figures'
@@ -791,14 +857,22 @@ export const generateCartesianPoint = () => {
         return 'Quadrant-1';
     };
 
-    for (let i = 0; i < 4; i++) {
-        // Ensure non-zero coordinates to avoid axis ambiguity
-        let x = getRandomInt(1, 15);
-        let y = getRandomInt(1, 15);
+    // Generate one config for each quadrant:
+    // Q1: (+, +), Q2: (-, +), Q3: (-, -), Q4: (+, -)
+    const configs = [
+        { xSign: 1, ySign: 1 },
+        { xSign: -1, ySign: 1 },
+        { xSign: -1, ySign: -1 },
+        { xSign: 1, ySign: -1 }
+    ];
 
-        // Randomize signs
-        if (Math.random() < 0.5) x *= -1;
-        if (Math.random() < 0.5) y *= -1;
+    // Shuffle the quadrants so they appear in random order
+    const shuffledConfigs = shuffleArray(configs);
+
+    for (let i = 0; i < 4; i++) {
+        // Ensure non-zero coordinates
+        let x = getRandomInt(1, 15) * shuffledConfigs[i].xSign;
+        let y = getRandomInt(1, 15) * shuffledConfigs[i].ySign;
 
         rows.push({
             text: `$(${x}, ${y})$`,
@@ -862,57 +936,46 @@ export const generateCoordinateGeometry = () => {
 };
 
 // --- CAT22: Section Formula ---
+// --- CAT22: Section Formula ---
 export const generateSectionFormula = () => {
     // Internal Division
     // P = ( (m*x2 + n*x1)/(m+n), (m*y2 + n*y1)/(m+n) )
-
     const rows = [];
 
-    // Ratio m:n
-    const m = getRandomInt(1, 4);
-    const n = getRandomInt(1, 4);
+    // Dynamic Ratio m:n where m, n are randomly chosen from 1 to 3
+    const m = getRandomInt(1, 3);
+    const n = getRandomInt(1, 3);
     const sum = m + n;
 
-    // To ensure integer results for P(x, y):
-    // (m*x2 + n*x1) must be divisible by (m+n)
-    // (m*y2 + n*y1) must be divisible by (m+n)
+    // Helper to find valid mate coordinate
+    // We need |x2 - x1| to be a multiple of 3
+    // And x1, x2 in range [-5, 5]
+    const getValidPair = () => {
+        const c1 = getRandomInt(-5, 5);
+        const candidates = [];
+        for (let c2 = -5; c2 <= 5; c2++) {
+            if (c2 !== c1 && (c2 - c1) % sum === 0) {
+                candidates.push(c2);
+            }
+        }
+        // Fallback if no candidate (unlikely given range and step 3)
+        // -5 to 5 is span of 10. Steps of 3 fit easily.
+        if (candidates.length === 0) return [c1, c1]; // Should not happen
+        const c2 = candidates[getRandomInt(0, candidates.length - 1)];
+        return [c1, c2];
+    };
 
-    // Strategy: Pick P(x,y) and A(x1,y1) first, then calculate B(x2,y2)?
-    // Px = (m*x2 + n*x1) / sum => sum*Px = m*x2 + n*x1 => m*x2 = sum*Px - n*x1
-    // This requires m*x2 to be divisible by m... which is specific.
-
-    // Better Strategy:
-    // x2 - x1 = k * (m+n) / something?
-    // Let's generate A and B such that the difference (x2-x1) is a multiple of (m+n).
-
-    const x1 = getRandomInt(-10, 10);
-    const y1 = getRandomInt(-10, 10);
-
-    const kx = getRandomInt(-3, 3) || 1; // multiplier
-    const ky = getRandomInt(-3, 3) || 1;
-
-    const dx = kx * sum; // total distance in x
-    const dy = ky * sum; // total distance in y
-
-    const x2 = x1 + dx;
-    const y2 = y1 + dy;
+    const [x1, x2] = getValidPair();
+    const [y1, y2] = getValidPair();
 
     // Calculate P
+    // P = (1*x2 + 2*x1) / 3
     const px = (m * x2 + n * x1) / sum;
     const py = (m * y2 + n * y1) / sum;
 
     const questionText = `Given $A = (${x1}, ${y1})$ and $B = (${x2}, ${y2})$ what are the coordinates of point $P = (x, y)$ which internally divides line segment $\\overleftrightarrow{AB}$ in the ratio ${m}:${n}?`;
 
-    rows.push({ text: `P = `, answer: `(${px},${py})` }); // "text" here is just a label if needed, but we use special input
-
-    // We need to store x and y separately for the answer checker using the 'coordinate' variant logic
-    // The 'answer' string in row is for reference, but the validation usually checks exact string match or object match.
-    // My TypeTableInput logic saves result as {x: "...", y: "..."} for coordinate variant.
-    // So answerObj should key '0' to { x: String(px), y: String(py) } ?
-    // Or stringified?
-    // Let's check TypeTableInput initialization: JSON.parse(currentQuestion.userAnswer).
-    // And onAnswerChange: JSON.stringify(newAnswers).
-    // So the stored answer should be the stringified object.
+    rows.push({ text: `P = `, answer: `(${px},${py})` });
 
     const answerObj = { 0: { x: String(px), y: String(py) } };
 
@@ -935,7 +998,7 @@ export const generateTrigonometry = () => {
 
     // Pythagorean Triples (Opp, Adj, Hyp)
     const triples = [
-        [3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [20, 21, 29]
+        [3, 4, 5], [5, 12, 13], [8, 15, 17]
     ];
     // Randomly pick a triple and swap adj/opp for variety
     let [opp, adj, hyp] = triples[getRandomInt(0, triples.length - 1)];
@@ -994,7 +1057,7 @@ export const generateTrigonometry = () => {
     });
 
     // Given Text
-    const questionText = `If $\\sin A = \\frac{${opp}}{${hyp}}$ then match the following trigonometric ratios`;
+    const questionText = `If $\\sin A = \\frac{${opp}}{${hyp}}$ then match the following trigonometric ratios:`;
 
     return {
         type: 'tableInput',
@@ -1007,32 +1070,37 @@ export const generateTrigonometry = () => {
 };
 
 // --- CAT24: Trig Ratios of Standard Angles ---
+// --- CAT24: Trig Ratios of Standard Angles ---
 export const generateTrigRatios = () => {
     const rows = [];
 
-    const data = [
-        { angle: '30^\\circ', deg: 30, values: { sin: '1/2', cos: 'sqrt(3)/2', tan: '1/sqrt(3)', cot: 'sqrt(3)' } },
-        { angle: '45^\\circ', deg: 45, values: { sin: '1/sqrt(2)', cos: '1/sqrt(2)', tan: '1', cot: '1' } },
-        { angle: '60^\\circ', deg: 60, values: { sin: 'sqrt(3)/2', cos: '1/2', tan: 'sqrt(3)', cot: '1/sqrt(3)' } },
-        { angle: '90^\\circ', deg: 90, values: { sin: '1', cos: '0', cot: '0' } },
-        { angle: '180^\\circ', deg: 180, values: { sin: '0', cos: '-1', tan: '0' } },
-        { angle: '270^\\circ', deg: 270, values: { sin: '-1', cos: '0', cot: '0' } },
-        { angle: '0^\\circ', deg: 0, values: { sin: '0', cos: '1', tan: '0' } }
-    ];
+    // Define options for each function that result in integers
+    const config = {
+        'sin': [{ angle: '0^\\circ', val: '0' }, { angle: '90^\\circ', val: '1' }],
+        'cos': [{ angle: '0^\\circ', val: '1' }, { angle: '90^\\circ', val: '0' }],
+        'tan': [{ angle: '0^\\circ', val: '0' }, { angle: '45^\\circ', val: '1' }],
+        'cot': [{ angle: '45^\\circ', val: '1' }, { angle: '90^\\circ', val: '0' }],
+        'sec': [{ angle: '0^\\circ', val: '1' }, { angle: '60^\\circ', val: '2' }],
+        'cosec': [{ angle: '30^\\circ', val: '2' }, { angle: '90^\\circ', val: '1' }]
+    };
 
-    for (let i = 0; i < 4; i++) {
-        const item = data[getRandomInt(0, data.length - 1)];
-        const funcs = Object.keys(item.values);
-        const func = funcs[getRandomInt(0, funcs.length - 1)];
-        const val = item.values[func];
-        // Display function name in latex
-        const funcDisp = '\\' + func;
+    const functions = ['sin', 'cos', 'tan', 'cot', 'sec', 'cosec'];
+
+    // Shuffle the order of functions so they don't appear in fixed sequence
+    const shuffledFuncs = shuffleArray([...functions]);
+
+    shuffledFuncs.forEach(func => {
+        const options = config[func];
+        // Pick one random angle scenario for this function
+        const selected = options[getRandomInt(0, options.length - 1)];
+
+        let labelFunc = (func === 'cosec') ? '\\text{cosec}' : ('\\' + func);
 
         rows.push({
-            text: `$${funcDisp}(${item.angle}) =$`,
-            answer: val
+            text: `$${labelFunc}(${selected.angle}) =$`,
+            answer: selected.val
         });
-    }
+    });
 
     const answerObj = {};
     rows.forEach((r, i) => answerObj[i] = r.answer);
@@ -1047,16 +1115,67 @@ export const generateTrigRatios = () => {
 };
 
 // --- CAT25: Pythagoras ---
+// --- CAT25: Pythagoras ---
 export const generatePythagoras = () => {
     const rows = [];
-    const triples = [[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [20, 21, 29]];
-    const [base, height, hyp] = triples[getRandomInt(0, triples.length - 1)];
-    const k = getRandomInt(1, 4);
-    const h_val = height * k;
-    const hyp_val = hyp * k;
-    const b_val = base * k;
 
-    const questionText = `If a flag pole of height $${h_val}$ meters is erected with the help of a thread of length $${hyp_val}$ meters then what is the distance between base of the thread to base of pole in meters ? <br/> <img src="/assets/grade10/pyth.png" alt="Pythagoras Diagram" style="width: 80%; max-width: 300px; margin: 10px auto; display: block;" />`;
+    // Find tuples satisfying constraints: base <= 12, height <= 10, hypotenuse is integer
+    const candidates = [];
+    for (let b = 1; b <= 12; b++) { // Distance limit
+        for (let h = 1; h <= 10; h++) { // Height limit
+            const hypSq = b * b + h * h;
+            const hyp = Math.sqrt(hypSq);
+            if (Number.isInteger(hyp)) {
+                candidates.push({ b, h, hyp });
+            }
+        }
+    }
+
+    // Pick random valid tuple
+    // Fallback if empty (shouldn't happen as 3,4,5 exists)
+    const selection = candidates.length > 0 ? candidates[getRandomInt(0, candidates.length - 1)] : { b: 3, h: 4, hyp: 5 };
+    const { b: b_val, h: h_val, hyp: hyp_val } = selection;
+
+    // Generate Dynamic SVG
+    // Triangle coords: Base starts at (20, 130), goes to (130, 130) max width
+    // Simply stick to a right triangle visual. 
+    // Vertices: A(20, 20), B(20, 130), C(130, 130) is flipped.
+    // Flag pole usually vertical.
+    // Let's create a visual scaled reasonably 
+    // Pole at right side? Or left? Image showed pole on right.
+    // Thread hypotenuse.
+    // Let's settle coords:
+    // Base line: (20, 140) to (140, 140)
+    // Pole: (140, 140) up to (140, 20)
+    // Thread: (20, 140) to (140, 20)
+    // Vertices: P1(20, 140) [ground left], P2(140, 140) [base of pole], P3(140, 20) [top of pole]
+
+    // We can just label sides. visual scale doesn't need to match perfect aspect ratio for simple schemas, but distinct is nice.
+    const svg = `<svg width="200" height="160" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+        <!-- Ground -->
+        <line x1="10" y1="150" x2="190" y2="150" stroke="#94a3b8" stroke-width="2" />
+        
+        <!-- Triangle -->
+        <path d="M 40 150 L 160 150 L 160 30 Z" fill="#fef08a" stroke="none" opacity="0.5" />
+        <path d="M 40 150 L 160 150 L 160 30 Z" fill="none" stroke="#0f172a" stroke-width="2" />
+
+        <!-- Labels -->
+        <text x="170" y="90" font-family="sans-serif" font-size="14" fill="#0f172a">Pole</text>
+        <text x="80" y="80" transform="rotate(-38 90 80)" font-family="sans-serif" font-size="14" fill="#0f172a">Thread</text>
+        
+        <!-- Dimensions -->
+        <text x="100" y="145" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#0f172a">d</text>
+        <!-- Arrows for d -->
+        <path d="M 45 135 L 40 140 L 45 145" fill="none" stroke="#0f172a" stroke-width="1.5" />
+        <path d="M 155 135 L 160 140 L 155 145" fill="none" stroke="#0f172a" stroke-width="1.5" />
+        <line x1="40" y1="140" x2="160" y2="140" stroke="#0f172a" stroke-width="1" />
+    </svg>`;
+
+    const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    const imgHtml = `<div style="display:flex; justify-content:center; margin-top:10px;"><img src="${svgDataUrl}" alt="Triangle" /></div>`;
+
+    const questionText = `If a flag pole of height $${h_val}$ meters is erected with the help of a thread of length $${hyp_val}$ meters then what is the distance between base of the thread to base of pole in meters ? ${imgHtml}`;
+
     rows.push({ text: `$d =$`, unit: 'm', answer: String(b_val) });
     const answerObj = { 0: String(b_val) };
 

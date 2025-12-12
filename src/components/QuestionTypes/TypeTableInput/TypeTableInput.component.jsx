@@ -48,14 +48,30 @@ const TypeTableInput = ({ onClick, onPrevious, onAnswerChange, questionPaper, ac
         const newAnswers = { ...answers, [idx]: newRowAnswer };
         setAnswers(newAnswers);
 
+        // Check if there is any actual content
+        const hasContent = Object.values(newAnswers).some(val => {
+            if (typeof val === 'object') {
+                return Object.values(val).some(v => v && v.trim() !== '');
+            }
+            return val && val.trim() !== '';
+        });
+
         if (onAnswerChange) {
-            onAnswerChange(JSON.stringify(newAnswers));
+            onAnswerChange(hasContent ? JSON.stringify(newAnswers) : null);
         }
     };
 
     const handleSubmit = () => {
         if (onClick) {
-            onClick(JSON.stringify(answers), timeTakeRef.current);
+            // Check if there is any actual content before submitting
+            const hasContent = Object.values(answers).some(val => {
+                if (typeof val === 'object') {
+                    return Object.values(val).some(v => v && v.trim() !== '');
+                }
+                return val && val.trim() !== '';
+            });
+
+            onClick(hasContent ? JSON.stringify(answers) : null, timeTakeRef.current);
         }
     };
 
