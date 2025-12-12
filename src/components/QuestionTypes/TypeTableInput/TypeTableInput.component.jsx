@@ -196,6 +196,12 @@ const TypeTableInput = ({ onClick, onPrevious, onAnswerChange, questionPaper, ac
     return (
         <div className={Styles.quizContainer}>
             <div className={Styles.header}>
+                {grade && (
+                    <>
+                        <div className={Styles.gradeTitle}>{grade}</div>
+                        <div className={Styles.separator}>|</div>
+                    </>
+                )}
                 <div className={Styles.questionNumber}>{activeQuestionIndex + 1}</div>
                 <div className={Styles.topicTitle}>{topic}</div>
             </div>

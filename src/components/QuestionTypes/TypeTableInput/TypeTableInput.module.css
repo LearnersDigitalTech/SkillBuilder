@@ -37,6 +37,18 @@
     color: #64748b;
 }
 
+.gradeTitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.separator {
+    color: #cbd5e1;
+    font-weight: 300;
+    font-size: 1.5rem;
+}
+
 .questionText {
     font-size: 1.25rem;
     font-weight: 500;
@@ -506,10 +518,13 @@
         font-size: 1rem;
     }
 
-    .fractionRow {
+    .fractionRow,
+    .textRow {
         height: auto;
+        min-height: 60px;
         padding: 10px 0;
     }
+
 
     .cell,
     .inputField {
