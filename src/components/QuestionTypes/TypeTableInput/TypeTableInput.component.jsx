@@ -39,7 +39,7 @@ const TypeTableInput = ({ onClick, onPrevious, onAnswerChange, questionPaper, ac
         const currentAnswer = answers[idx] || {};
 
         let newRowAnswer;
-        if (variant === 'fraction' || variant === 'coordinate') {
+        if (variant === 'fraction' || variant === 'coordinate' || variant === 'double-input' || variant === 'triple-input') {
             newRowAnswer = { ...currentAnswer, [field]: value };
         } else {
             newRowAnswer = value;
@@ -220,16 +220,78 @@ const TypeTableInput = ({ onClick, onPrevious, onAnswerChange, questionPaper, ac
                     </div>
                 )}
 
+                {/* Header Row for Double/Triple Input Table */}
+                {(variant === 'double-input' || variant === 'triple-input') && (
+                    <div className={Styles.headerDoubleRow} style={{ gridTemplateColumns: variant === 'triple-input' ? '1.5fr 1fr 1fr 1fr' : '2fr 1fr 1fr' }}>
+                        <div className={Styles.headerCell}>{(currentQuestion.headers && currentQuestion.headers[0]) || 'Shape'}</div>
+                        <div className={Styles.headerCell}>{(currentQuestion.headers && currentQuestion.headers[1]) || 'Field 1'}</div>
+                        <div className={Styles.headerCell}>{(currentQuestion.headers && currentQuestion.headers[2]) || 'Field 2'}</div>
+                        {variant === 'triple-input' && (
+                            <div className={Styles.headerCell}>{(currentQuestion.headers && currentQuestion.headers[3]) || 'Field 3'}</div>
+                        )}
+                    </div>
+                )}
+
                 {rows.map((row, idx) => {
-                    if (row.text) {
+                    if (row.text !== undefined || row.image) {
                         let rowClass = Styles.textRow;
                         if (variant === 'fraction') rowClass = Styles.fractionTextRow;
                         if (variant === 'true-false') rowClass = Styles.trueFalseRow;
+                        if (variant === 'double-input' || variant === 'triple-input') rowClass = Styles.doubleInputRow;
+
+                        // Keys and Placeholders
+                        const key1 = (currentQuestion.inputKeys && currentQuestion.inputKeys[0]) || 'k1';
+                        const key2 = (currentQuestion.inputKeys && currentQuestion.inputKeys[1]) || 'k2';
+                        const key3 = (currentQuestion.inputKeys && currentQuestion.inputKeys[2]) || 'k3';
+                        const ph1 = (currentQuestion.placeholders && currentQuestion.placeholders[0]) || '';
+                        const ph2 = (currentQuestion.placeholders && currentQuestion.placeholders[1]) || '';
+                        const ph3 = (currentQuestion.placeholders && currentQuestion.placeholders[2]) || '';
 
                         return (
-                            <div key={idx} className={rowClass}>
-                                <div className={Styles.textCell}><MathRenderer content={row.text} /></div>
-                                {renderInputCell(idx)}
+                            <div key={idx} className={rowClass} style={{ gridTemplateColumns: variant === 'triple-input' ? '1.5fr 1fr 1fr 1fr' : (variant === 'double-input' ? '2fr 1fr 1fr' : undefined) }}>
+                                <div className={Styles.textCell}>
+                                    <MathRenderer content={row.text} />
+                                    {row.image && (
+                                        typeof row.image === 'string' && row.image.trim().startsWith('<svg') ?
+                                            <div style={{ marginTop: '8px' }} dangerouslySetInnerHTML={{ __html: row.image }} /> :
+                                            <img src={row.image} alt="visual" style={{ marginTop: '8px', maxWidth: '100%', maxHeight: '100px', display: 'block' }} />
+                                    )}
+                                </div>
+                                {(variant === 'double-input' || variant === 'triple-input') ? (
+                                    <>
+                                        <div className={Styles.inputCell}>
+                                            <input
+                                                type="text"
+                                                className={Styles.inputField}
+                                                value={(answers[idx] || {})[key1] || ""}
+                                                onChange={(e) => handleInputChange(idx, key1, e.target.value)}
+                                                placeholder={ph1}
+                                            />
+                                        </div>
+                                        <div className={Styles.inputCell}>
+                                            <input
+                                                type="text"
+                                                className={Styles.inputField}
+                                                value={(answers[idx] || {})[key2] || ""}
+                                                onChange={(e) => handleInputChange(idx, key2, e.target.value)}
+                                                placeholder={ph2}
+                                            />
+                                        </div>
+                                        {variant === 'triple-input' && (
+                                            <div className={Styles.inputCell}>
+                                                <input
+                                                    type="text"
+                                                    className={Styles.inputField}
+                                                    value={(answers[idx] || {})[key3] || ""}
+                                                    onChange={(e) => handleInputChange(idx, key3, e.target.value)}
+                                                    placeholder={ph3}
+                                                />
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    renderInputCell(idx)
+                                )}
                             </div>
                         );
                     }
@@ -247,6 +309,7 @@ const TypeTableInput = ({ onClick, onPrevious, onAnswerChange, questionPaper, ac
                         </div>
                     );
                 })}
+
             </div>
 
             <div className={Styles.navigationContainer}>
@@ -272,7 +335,7 @@ const TypeTableInput = ({ onClick, onPrevious, onAnswerChange, questionPaper, ac
                     {isLastQuestion ? 'Submit' : 'Next'}
                 </Button>
             </div>
-        </div>
+        </div >
     );
 };
 

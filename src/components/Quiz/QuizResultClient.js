@@ -32,8 +32,8 @@ const HeroChart = ({ summary, notAttempted }) => {
                 </BarChart>
             </ResponsiveContainer>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
-                <span>{summary.correct} Correct</span>
-                <span>{summary.wrong} Wrong</span>
+                <span>{Number(summary.correct).toFixed(2)} Correct</span>
+                <span>{Number(summary.wrong).toFixed(2)} Wrong</span>
             </div>
         </div>
     );
@@ -82,22 +82,24 @@ const formatAnswer = (answer) => {
             // Check if values are complex objects
             if (values.length > 0 && typeof values[0] === 'object') {
                 return values.map(v => {
+                    if (v.faces !== undefined && v.vertices !== undefined && v.edges !== undefined) {
+                        return `F: ${v.faces}, V: ${v.vertices}, E: ${v.edges}`;
+                    }
                     if (v.num !== undefined && v.den !== undefined) {
                         return `$\\frac{${v.num}}{${v.den}}$`;
                     }
                     if (v.x !== undefined && v.y !== undefined) {
                         return `(${v.x}, ${v.y})`;
                     }
-                    // Handle True/False variant (which might store value directly or in object?)
-                    // In TypeTableInput we saw it stores key: val directly?
-                    // Actually checking the code: 
-                    // TypeTableInput (default): answers[idx] = value (string) -> JSON: {"0":"True"}
-                    // So it falls to the 'else' block below (values.join).
+                    // Handle True/False variant
+                    if (v.perimeter !== undefined && v.area !== undefined) {
+                        return `P: ${v.perimeter}, A: ${v.area}`;
+                    }
                     if (v.value !== undefined) {
                         return v.value;
                     }
                     return JSON.stringify(v);
-                }).join(', ');
+                }).join(' | ');
             }
 
             return values.join(', ');
@@ -1037,11 +1039,11 @@ const QuizResultClient = () => {
 
                     <div className={Styles.heroStats}>
                         <div className={Styles.heroStatItem}>
-                            <span className={`${Styles.heroStatValue} ${Styles.statColorCorrect}`}>{summary.correct}</span>
+                            <span className={`${Styles.heroStatValue} ${Styles.statColorCorrect}`}>{Number(summary.correct).toFixed(2)}</span>
                             <span className={Styles.heroStatLabel}>Correct</span>
                         </div>
                         <div className={Styles.heroStatItem}>
-                            <span className={`${Styles.heroStatValue} ${Styles.statColorWrong}`}>{summary.wrong}</span>
+                            <span className={`${Styles.heroStatValue} ${Styles.statColorWrong}`}>{Number(summary.wrong).toFixed(2)}</span>
                             <span className={Styles.heroStatLabel}>Wrong</span>
                         </div>
                         <div className={Styles.heroStatItem}>
