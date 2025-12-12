@@ -15,6 +15,10 @@ import {
 } from './grade9Generators.mjs';
 
 import {
+    generateBODMAS,
+} from '../Grade7/grade7Generators.mjs';
+
+import {
     generateNaturalWholeNumbers,
     generateIntegers as generateIntegersG10,
     generateFractions as generateFractionsG10,
@@ -25,7 +29,6 @@ import {
     generateSquareRoots,
     generateCubeRoots,
     generateExponents,
-    generateBODMAS,
     generateAlgebraicAdditionSubtraction,
     generateAlgebraicMultiplication,
     generateAlgebraicDivision,
@@ -56,37 +59,40 @@ const Grade9Questions = {
     q1: generate(generateNaturalWholeNumbers),   // Real numbers basics
     q2: generate(generateIntegersG10),           // Integers & number line
     q3: generate(generateFractionsG10),          // Rational numbers
-    q4: generate(generateDecimalsG10),           // Decimal expansions
+    q4: generate(generateDecimalsG10),
+    q5: generate(generateLCMG10),
+    q6: generate(generateHCF),      // Decimal expansions
+    q7: generate(generateRatioProportion),
 
     // Polynomials
-    q5: generate(generatePolynomialBasics),
-    q6: generate(generatePolynomialOperations),
-    q7: generate(generatePolynomialFactorization),
-    q8: generate(generatePolynomialZeroes),
+    q8: generate(generatePolynomialBasics),
+    q8: generate(generatePolynomialOperations),
+    q9: generate(generatePolynomialFactorization),
+    q10: generate(generatePolynomialZeroes),
 
     // Linear Equations in Two Variables
-    q9: generate(generateLinearEquationSolutions),
-    q10: generate(generateLinearEquationSolving),
+    q11: generate(generateLinearEquationSolutions),
+    q12: generate(generateLinearEquationSolving),
 
     // Coordinate Geometry
-    q11: generate(generateCartesianPoint),
+    q13: generate(generateCartesianPoint),
     // q12: generate(generateCoordinateBasics),
-    q12: generate(generateCoordinateFormulas),
+    q14: generate(generateCoordinateFormulas),
 
     // Geometry: Lines, Angles, Triangles, Quadrilaterals
-    q13: generate(generateBODMAS),               // You can repurpose or remove if not needed
-    q14: generate(generateAlgebraicAdditionSubtraction), // Optional basic algebra
-    q15: generate(generateAlgebraicMultiplication),       // Optional
-    q16: generate(generateAlgebraicDivision),             // Optional
+    q15: generate(generateBODMAS),               // You can repurpose or remove if not needed
+    q16: generate(generateAlgebraicAdditionSubtraction), // Optional basic algebra
+    q17: generate(generateAlgebraicMultiplication),       // Optional
+    q18: generate(generateAlgebraicDivision),             // Optional
 
-    q17: generate(generatePerimeter),
-    q18: generate(generateArea),                 // Triangles & parallelograms
-    q19: generate(generateMensurationArea),      // Heron’s Formula cases
-    q20: generate(generateMensurationVolume),    // Cube, cuboid, cylinder
+    q19: generate(generatePerimeter),
+    q20: generate(generateArea),                 // Triangles & parallelograms
+    q21: generate(generateMensurationArea),      // Heron’s Formula cases
+    q22: generate(generateMensurationVolume),    // Cube, cuboid, cylinder
 
     // Statistics & Probability
-    q21: generate(generateStatistics),
-    q22: generate(generateProbability),
+    q23: generate(generateStatistics),
+    q24: generate(generateProbability),
 
     // Constructions (if you add generators later)
     // q24: generate(generateConstructionBasics), // keep placeholder if needed
