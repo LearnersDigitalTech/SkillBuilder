@@ -84,52 +84,37 @@ export const generateRealNumbers = () => {
 
 export const generatePolynomialBasics = () => {
     const type = Math.random() > 0.5 ? "Degree" : "Value";
-    let question, answer;
+    let questionText, answer;
+    const rows = [];
 
     if (type === "Degree") {
         const deg = getRandomInt(2, 5);
         const coeffs = [getRandomInt(2, 9), getRandomInt(2, 9)];
-        question = `Find the degree of the polynomial: $${coeffs[0]}x^{${deg}} + ${coeffs[1]}x^{${deg - 1}} + 5$`;
+        questionText = `Find the degree of the polynomial: $${coeffs[0]}x^{${deg}} + ${coeffs[1]}x^{${deg - 1}} + 5$`;
         answer = String(deg);
     } else {
         const x = getRandomInt(0, 3);
         const a = getRandomInt(1, 5);
         const b = getRandomInt(1, 5);
         const c = getRandomInt(1, 10);
-        question = `Find the value of $p(${x})$ for $p(x) = ${a}x^{2} + ${b}x + ${c}$`;
+        questionText = `Find the value of $p(${x})$ for <br> $p(x) = ${a}x^{2} + ${b}x + ${c}$`;
         const val = a * x * x + b * x + c;
         answer = String(val);
     }
 
-    const options = shuffleArray([
-        { value: answer, label: answer },
-        { value: String(Number(answer) + 1), label: String(Number(answer) + 1) },
-        { value: String(Number(answer) - 1), label: String(Number(answer) - 1) },
-        { value: String(Number(answer) * 2), label: String(Number(answer) * 2) }
-    ]);
+    rows.push({
+        text: questionText,
+        answer: answer
+    });
 
-    const uniqueOptions = [];
-    const seen = new Set();
-    for (const opt of options) {
-        if (!seen.has(opt.value)) {
-            seen.add(opt.value);
-            uniqueOptions.push(opt);
-        }
-    }
-    while (uniqueOptions.length < 4) {
-        const r = getRandomInt(10, 50);
-        const val = String(r);
-        if (!seen.has(val)) {
-            seen.add(val);
-            uniqueOptions.push({ value: val, label: val });
-        }
-    }
+    const answerObj = { 0: answer };
 
     return {
-        type: "userInput",
-        question: question,
+        type: "tableInput",
+        question: "Solve the following problem:",
         topic: "Polynomials / Basics",
-        answer: answer
+        answer: JSON.stringify(answerObj),
+        rows: rows
     };
 };
 
@@ -141,44 +126,21 @@ export const generatePolynomialOperations = () => {
     const b2 = getRandomInt(1, 9);
 
     const op = isAdd ? "+" : "-";
-    const question = `Simplify: $(${a1}x + ${b1}) ${op} (${a2}x + ${b2})$`;
+    const questionText = `$(${a1}x + ${b1}) ${op} (${a2}x + ${b2})$`;
 
     const resA = isAdd ? a1 + a2 : a1 - a2;
     const resB = isAdd ? b1 + b2 : b1 - b2;
 
     const answer = `$${resA}x ${resB >= 0 ? '+' : '-'} ${Math.abs(resB)}$`;
-
-    const options = shuffleArray([
-        { value: answer, label: answer },
-        { value: `$${resA}x ${resB >= 0 ? '-' : '+'} ${Math.abs(resB)}$`, label: `$${resA}x ${resB >= 0 ? '-' : '+'} ${Math.abs(resB)}$` },
-        { value: `$${resA + 1}x ${resB >= 0 ? '+' : '-'} ${Math.abs(resB)}$`, label: `$${resA + 1}x ${resB >= 0 ? '+' : '-'} ${Math.abs(resB)}$` },
-        { value: `$${resA}x ${resB + 2 >= 0 ? '+' : '-'} ${Math.abs(resB + 2)}$`, label: `$${resA}x ${resB + 2 >= 0 ? '+' : '-'} ${Math.abs(resB + 2)}$` }
-    ]);
-
-    const uniqueOptions = [];
-    const seen = new Set();
-    for (const opt of options) {
-        if (!seen.has(opt.value)) {
-            seen.add(opt.value);
-            uniqueOptions.push(opt);
-        }
-    }
-    while (uniqueOptions.length < 4) {
-        const r1 = getRandomInt(1, 10);
-        const r2 = getRandomInt(1, 10);
-        const val = `$${r1}x + ${r2}$`;
-        if (!seen.has(val)) {
-            seen.add(val);
-            uniqueOptions.push({ value: val, label: val });
-        }
-    }
+    const rows = [{ text: questionText, answer: answer }];
+    const answerObj = { 0: answer };
 
     return {
-        type: "mcq",
-        question: question,
+        type: "tableInput",
+        question: "Simplify:",
         topic: "Polynomials / Operations",
-        options: uniqueOptions,
-        answer: answer
+        answer: JSON.stringify(answerObj),
+        rows: rows
     };
 };
 
@@ -189,39 +151,17 @@ export const generatePolynomialFactorization = () => {
     const sum = a + b;
     const prod = a * b;
 
-    const question = `Factorise: $x^{2} + ${sum}x + ${prod}$`;
+    const questionText = `$x^{2} + ${sum}x + ${prod}$`;
     const answer = `$(x + ${a})(x + ${b})$`;
-
-    const options = shuffleArray([
-        { value: answer, label: answer },
-        { value: `$(x - ${a})(x - ${b})$`, label: `$(x - ${a})(x - ${b})$` },
-        { value: `$(x + ${a})(x - ${b})$`, label: `$(x + ${a})(x - ${b})$` },
-        { value: `$(x + ${a + 1})(x + ${b})$`, label: `$(x + ${a + 1})(x + ${b})$` }
-    ]);
-
-    const uniqueOptions = [];
-    const seen = new Set();
-    for (const opt of options) {
-        if (!seen.has(opt.value)) {
-            seen.add(opt.value);
-            uniqueOptions.push(opt);
-        }
-    }
-    while (uniqueOptions.length < 4) {
-        const r = getRandomInt(1, 10);
-        const val = `$(x + ${r})(x + ${r})$`;
-        if (!seen.has(val)) {
-            seen.add(val);
-            uniqueOptions.push({ value: val, label: val });
-        }
-    }
+    const rows = [{ text: questionText, answer: answer }];
+    const answerObj = { 0: answer };
 
     return {
-        type: "mcq",
-        question: question,
+        type: "tableInput",
+        question: "Factorise:",
         topic: "Polynomials / Factorization",
-        options: uniqueOptions,
-        answer: answer
+        answer: JSON.stringify(answerObj),
+        rows: rows
     };
 };
 
@@ -229,39 +169,18 @@ export const generatePolynomialZeroes = () => {
     const a = getRandomInt(2, 5);
     const b = a * getRandomInt(1, 5);
 
-    const question = `Find the zero of the polynomial $p(x) = ${a}x + ${b}$`;
+    const questionText = `$p(x) = ${a}x + ${b}$`;
     const root = -b / a;
     const answer = String(root);
-
-    const options = shuffleArray([
-        { value: answer, label: answer },
-        { value: String(-root), label: String(-root) },
-        { value: String(root + 1), label: String(root + 1) },
-        { value: "0", label: "$0$" }
-    ]);
-
-    const uniqueOptions = [];
-    const seen = new Set();
-    for (const opt of options) {
-        if (!seen.has(opt.value)) {
-            seen.add(opt.value);
-            uniqueOptions.push(opt);
-        }
-    }
-    while (uniqueOptions.length < 4) {
-        const r = getRandomInt(-10, 10);
-        const val = String(r);
-        if (!seen.has(val)) {
-            seen.add(val);
-            uniqueOptions.push({ value: val, label: val });
-        }
-    }
+    const rows = [{ text: questionText, answer: answer }];
+    const answerObj = { 0: answer };
 
     return {
-        type: "userInput",
-        question: question,
+        type: "tableInput",
+        question: "Find the zero of the following problem:",
         topic: "Polynomials / Zeroes",
-        answer: answer
+        answer: JSON.stringify(answerObj),
+        rows: rows
     };
 };
 
@@ -274,40 +193,17 @@ export const generateLinearEquationSolutions = () => {
     const y = getRandomInt(0, 5);
     const c = a * x + b * y;
 
-    const question = `Check which point is a solution to the equation: $${a}x + ${b}y = ${c}$`;
+    const questionText = `$${a}x + ${b}y = ${c}$`;
     const answer = `(${x}, ${y})`;
-
-    const options = shuffleArray([
-        { value: answer, label: `$(${x}, ${y})$` },
-        { value: `(${x + 1}, ${y})`, label: `$(${x + 1}, ${y})$` },
-        { value: `(${x}, ${y + 1})`, label: `$(${x}, ${y + 1})$` },
-        { value: `(0, 0)`, label: `$(0, 0)$` }
-    ]);
-
-    const uniqueOptions = [];
-    const seen = new Set();
-    for (const opt of options) {
-        if (!seen.has(opt.value)) {
-            seen.add(opt.value);
-            uniqueOptions.push(opt);
-        }
-    }
-    while (uniqueOptions.length < 4) {
-        const r1 = getRandomInt(0, 10);
-        const r2 = getRandomInt(0, 10);
-        const val = `(${r1}, ${r2})`;
-        if (!seen.has(val)) {
-            seen.add(val);
-            uniqueOptions.push({ value: val, label: `$(${r1}, ${r2})$` });
-        }
-    }
+    const rows = [{ text: questionText, answer: answer }];
+    const answerObj = { 0: answer };
 
     return {
-        type: "mcq",
-        question: question,
+        type: "tableInput",
+        question: "Check which point is a solution to the following problem:",
         topic: "Linear Equations / Solutions",
-        options: uniqueOptions,
-        answer: answer
+        answer: JSON.stringify(answerObj),
+        rows: rows
     };
 };
 
@@ -318,38 +214,17 @@ export const generateLinearEquationSolving = () => {
     const y = getRandomInt(1, 5);
     const c = a * x + b * y;
 
-    const question = `Find the value of $y$ in $${a}x + ${b}y = ${c}$ if $x = ${x}$.`;
+    const questionText = `$${a}x + ${b}y = ${c}$ if $x = ${x}$.`;
     const answer = String(y);
-
-    const options = shuffleArray([
-        { value: answer, label: answer },
-        { value: String(y + 1), label: String(y + 1) },
-        { value: String(y - 1), label: String(y - 1) },
-        { value: "0", label: "$0$" }
-    ]);
-
-    const uniqueOptions = [];
-    const seen = new Set();
-    for (const opt of options) {
-        if (!seen.has(opt.value)) {
-            seen.add(opt.value);
-            uniqueOptions.push(opt);
-        }
-    }
-    while (uniqueOptions.length < 4) {
-        const r = getRandomInt(-10, 10);
-        const val = String(r);
-        if (!seen.has(val)) {
-            seen.add(val);
-            uniqueOptions.push({ value: val, label: val });
-        }
-    }
+    const rows = [{ text: questionText, answer: answer }];
+    const answerObj = { 0: answer };
 
     return {
-        type: "userInput",
-        question: question,
+        type: "tableInput",
+        question: "Solve the following problem:",
         topic: "Linear Equations / Solving",
-        answer: answer
+        answer: JSON.stringify(answerObj),
+        rows: rows
     };
 };
 
@@ -360,26 +235,30 @@ export const generateCoordinateBasics = () => {
     const y = getRandomInt(-5, 5);
     if (x === 0 || y === 0) return generateCoordinateBasics();
 
-    const question = `In which quadrant does the point $(${x}, ${y})$ lie?`;
+    const questionText = `In which quadrant does the point $(${x}, ${y})$ lie? (I/II/III/IV)`;
     let answer;
     if (x > 0 && y > 0) answer = "Quadrant I";
     else if (x < 0 && y > 0) answer = "Quadrant II";
     else if (x < 0 && y < 0) answer = "Quadrant III";
     else answer = "Quadrant IV";
 
-    const options = shuffleArray([
-        { value: "Quadrant I", label: "Quadrant I" },
-        { value: "Quadrant II", label: "Quadrant II" },
-        { value: "Quadrant III", label: "Quadrant III" },
-        { value: "Quadrant IV", label: "Quadrant IV" }
-    ]);
+    // For table input we might want a dropdown, but for now simple text match or rewrite
+    // To match user's request for identical UI, we'll use Select if possible or just text
+    // Assuming simple text row for consistency
+    const rows = [{
+        text: questionText,
+        inputType: 'select',
+        options: ['Quadrant I', 'Quadrant II', 'Quadrant III', 'Quadrant IV'],
+        answer: answer
+    }];
+    const answerObj = { 0: answer };
 
     return {
-        type: "mcq",
-        question: question,
+        type: "tableInput",
+        question: "Select the correct option:",
         topic: "Coordinate Geometry / Basics",
-        options: options,
-        answer: answer
+        answer: JSON.stringify(answerObj),
+        rows: rows
     };
 };
 
@@ -392,38 +271,17 @@ export const generateCoordinateFormulas = () => {
     const x2 = x1 + dx;
     const y2 = y1 + dy;
 
-    const question = `Find the distance between points $A(${x1}, ${y1})$ and $B(${x2}, ${y2})$.`;
+    const questionText = `$A(${x1}, ${y1})$ and $B(${x2}, ${y2})$.`;
     const answer = String(d);
-
-    const options = shuffleArray([
-        { value: answer, label: answer },
-        { value: String(d + 1), label: String(d + 1) },
-        { value: String(d - 1), label: String(d - 1) },
-        { value: String(d * 2), label: String(d * 2) }
-    ]);
-
-    const uniqueOptions = [];
-    const seen = new Set();
-    for (const opt of options) {
-        if (!seen.has(opt.value)) {
-            seen.add(opt.value);
-            uniqueOptions.push(opt);
-        }
-    }
-    while (uniqueOptions.length < 4) {
-        const r = getRandomInt(1, 20);
-        const val = String(r);
-        if (!seen.has(val)) {
-            seen.add(val);
-            uniqueOptions.push({ value: val, label: val });
-        }
-    }
+    const rows = [{ text: questionText, answer: answer }];
+    const answerObj = { 0: answer };
 
     return {
-        type: "userInput",
-        question: question,
+        type: "tableInput",
+        question: "Find the distance between points given",
         topic: "Coordinate Geometry / Formulas",
-        answer: answer
+        answer: JSON.stringify(answerObj),
+        rows: rows
     };
 };
 
@@ -437,91 +295,51 @@ export const generateMensurationArea = () => {
     const s = (a + b + c) / 2;
     const area = Math.sqrt(s * (s - a) * (s - b) * (s - c));
 
-    const question = `Find the area of a triangle with sides $${a}$ cm, $${b}$ cm, and $${c}$ cm.`;
+    const questionText = `Find the area of a triangle with sides $${a}$ cm, $${b}$ cm, and $${c}$ cm.`;
     const answer = `${area} cm²`;
-
-    const options = shuffleArray([
-        { value: answer, label: `$${area}$ cm²` },
-        { value: `${area + 2} cm²`, label: `$${area + 2}$ cm²` },
-        { value: `${area * 2} cm²`, label: `$${area * 2}$ cm²` },
-        { value: `${area / 2} cm²`, label: `$${area / 2}$ cm²` }
-    ]);
-
-    const uniqueOptions = [];
-    const seen = new Set();
-    for (const opt of options) {
-        if (!seen.has(opt.value)) {
-            seen.add(opt.value);
-            uniqueOptions.push(opt);
-        }
-    }
-    while (uniqueOptions.length < 4) {
-        const r = getRandomInt(10, 50);
-        const val = `${r} cm²`;
-        if (!seen.has(val)) {
-            seen.add(val);
-            uniqueOptions.push({ value: val, label: `$${r}$ cm²` });
-        }
-    }
+    const rows = [{ text: questionText, answer: String(area), unit: 'cm²' }];
+    const answerObj = { 0: String(area) };
 
     return {
-        type: "userInput",
-        question: question + " (number only)",
+        type: "tableInput",
+        question: "Solve the following problem:",
         topic: "Mensuration / Area",
-        answer: String(area)
+        answer: JSON.stringify(answerObj),
+        rows: rows
     };
 };
 
 export const generateMensurationVolume = () => {
     const type = Math.random() > 0.5 ? "Cube" : "Cuboid";
-    let question, answer;
+    let questionText, answer, val, unit;
 
     if (type === "Cube") {
         const side = getRandomInt(2, 10);
         const vol = side * side * side;
-        question = `Find the volume of a cube with side $${side}$ cm.`;
+        questionText = `Find the volume of a cube with side $${side}$ cm.`;
+        val = vol;
+        unit = "cm³";
         answer = `${vol} cm³`;
     } else {
         const l = getRandomInt(2, 10);
         const w = getRandomInt(2, 10);
         const h = getRandomInt(2, 10);
         const sa = 2 * (l * w + w * h + h * l);
-        question = `Find the total surface area of a cuboid with dimensions $${l}$ cm $\\times$ $${w}$ cm $\\times$ $${h}$ cm.`;
+        questionText = `Find the total surface area of a cuboid with dimensions $${l}$ cm $\\times$ $${w}$ cm $\\times$ $${h}$ cm.`;
+        val = sa;
+        unit = "cm²";
         answer = `${sa} cm²`;
     }
 
-    const val = parseFloat(answer.split(' ')[0]);
-    const unit = answer.split(' ')[1];
-
-    const options = shuffleArray([
-        { value: answer, label: `$${val}$ ${unit}` },
-        { value: `${val + 10} ${unit}`, label: `$${val + 10}$ ${unit}` },
-        { value: `${val * 2} ${unit}`, label: `$${val * 2}$ ${unit}` },
-        { value: `${val - 5} ${unit}`, label: `$${val - 5}$ ${unit}` }
-    ]);
-
-    const uniqueOptions = [];
-    const seen = new Set();
-    for (const opt of options) {
-        if (!seen.has(opt.value)) {
-            seen.add(opt.value);
-            uniqueOptions.push(opt);
-        }
-    }
-    while (uniqueOptions.length < 4) {
-        const r = getRandomInt(10, 100);
-        const valStr = `${r} ${unit}`;
-        if (!seen.has(valStr)) {
-            seen.add(valStr);
-            uniqueOptions.push({ value: valStr, label: `$${r}$ ${unit}` });
-        }
-    }
+    const rows = [{ text: questionText, answer: String(val), unit: unit }];
+    const answerObj = { 0: String(val) };
 
     return {
-        type: "userInput",
-        question: question + " (number only)",
+        type: "tableInput",
+        question: "Solve the following problem:",
         topic: "Mensuration / Volume & SA",
-        answer: String(val)
+        answer: JSON.stringify(answerObj),
+        rows: rows
     };
 };
 
@@ -529,7 +347,7 @@ export const generateMensurationVolume = () => {
 
 export const generateStatistics = () => {
     const type = ["Mean", "Median", "Mode"][getRandomInt(0, 2)];
-    let question, answer;
+    let questionText, answer;
     const data = Array.from({ length: 5 }, () => getRandomInt(1, 10));
 
     if (type === "Mean") {
@@ -540,102 +358,62 @@ export const generateStatistics = () => {
         }
         const newSum = data.reduce((a, b) => a + b, 0);
         const mean = newSum / 5;
-        question = `Find the mean of the data: $${data.join(", ")}$`;
+        questionText = `Find the mean of the data: $${data.join(", ")}$`;
         answer = String(mean);
     } else if (type === "Median") {
         data.sort((a, b) => a - b);
         const median = data[2];
-        question = `Find the median of the data: $${shuffleArray([...data]).join(", ")}$`;
+        questionText = `Find the median of the data: $${shuffleArray([...data]).join(", ")}$`;
         answer = String(median);
     } else {
         const modeVal = getRandomInt(1, 5);
         const dataMode = [modeVal, modeVal, modeVal, getRandomInt(6, 9), getRandomInt(6, 9)];
-        question = `Find the mode of the data: $${shuffleArray(dataMode).join(", ")}$`;
+        questionText = `Find the mode of the data: $${shuffleArray(dataMode).join(", ")}$`;
         answer = String(modeVal);
     }
 
-    const options = shuffleArray([
-        { value: answer, label: answer },
-        { value: String(Number(answer) + 1), label: String(Number(answer) + 1) },
-        { value: String(Number(answer) - 1), label: String(Number(answer) - 1) },
-        { value: String(Number(answer) + 2), label: String(Number(answer) + 2) }
-    ]);
-
-    const uniqueOptions = [];
-    const seen = new Set();
-    for (const opt of options) {
-        if (!seen.has(opt.value)) {
-            seen.add(opt.value);
-            uniqueOptions.push(opt);
-        }
-    }
-    while (uniqueOptions.length < 4) {
-        const r = getRandomInt(1, 10);
-        const val = String(r);
-        if (!seen.has(val)) {
-            seen.add(val);
-            uniqueOptions.push({ value: val, label: val });
-        }
-    }
+    const rows = [{ text: questionText, answer: answer }];
+    const answerObj = { 0: answer };
 
     return {
-        type: "userInput",
-        question: question,
+        type: "tableInput",
+        question: "Solve the following problem:",
         topic: "Statistics",
-        answer: answer
+        answer: JSON.stringify(answerObj),
+        rows: rows
     };
 };
 
 export const generateProbability = () => {
     const type = Math.random() > 0.5 ? "Coin" : "Dice";
-    let question, answer;
+    let questionText, answer, answerVal;
 
     if (type === "Coin") {
-        question = "Two coins are tossed simultaneously. Find the probability of getting exactly one head.";
+        questionText = "Two coins are tossed simultaneously. Find the probability of getting exactly one head.";
         answer = "1/2";
+        answerVal = { num: '1', den: '2' };
     } else {
         const eventType = Math.random() > 0.5 ? "Even" : "GreaterThan4";
         if (eventType === "Even") {
-            question = "A die is thrown. Find the probability of getting an even number.";
+            questionText = "A die is thrown. Find the probability of getting an even number.";
             answer = "1/2";
+            answerVal = { num: '1', den: '2' };
         } else {
-            question = "A die is thrown. Find the probability of getting a number greater than $4$.";
+            questionText = "A die is thrown. Find the probability of getting a number greater than $4$.";
             answer = "1/3";
+            answerVal = { num: '1', den: '3' };
         }
     }
 
-    const options = shuffleArray([
-        { value: answer, label: `$\\frac{${answer.split('/')[0]}}{${answer.split('/')[1]}}$` },
-        { value: "1/4", label: "$\\frac{1}{4}$" },
-        { value: "1/6", label: "$\\frac{1}{6}$" },
-        { value: "2/3", label: "$\\frac{2}{3}$" }
-    ]);
-
-    const uniqueOptions = [];
-    const seen = new Set();
-    for (const opt of options) {
-        if (!seen.has(opt.value)) {
-            seen.add(opt.value);
-            uniqueOptions.push(opt);
-        }
-    }
-    if (uniqueOptions.length < 4 && !seen.has("1")) { uniqueOptions.push({ value: "1", label: "$1$" }); seen.add("1"); }
-    if (uniqueOptions.length < 4 && !seen.has("0")) { uniqueOptions.push({ value: "0", label: "$0$" }); seen.add("0"); }
-
-    while (uniqueOptions.length < 4) {
-        const r = getRandomInt(2, 5);
-        const val = `1/${r}`;
-        if (!seen.has(val)) {
-            seen.add(val);
-            uniqueOptions.push({ value: val, label: `$\\frac{1}{${r}}$` });
-        }
-    }
+    const rows = [{ text: questionText, answer: answerVal }];
+    const answerObj = { 0: answerVal };
 
     return {
-        type: "mcq",
-        question: question,
+        type: "tableInput",
+        variant: "fraction",
+        question: "Solve the following probability:",
         topic: "Probability",
-        options: uniqueOptions,
-        answer: answer
+        answer: JSON.stringify(answerObj),
+        rows: rows
     };
 };

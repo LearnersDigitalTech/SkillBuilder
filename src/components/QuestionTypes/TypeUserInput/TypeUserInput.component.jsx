@@ -12,7 +12,7 @@ const TypeUserInput = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, q
     const isMarkedForReview = questionPaper && questionPaper[activeQuestionIndex]?.markedForReview || false;
 
     // Logic to hide operators for Grades 1-6
-    const gradesWithoutOperators = ["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6"];
+    const gradesWithoutOperators = ["Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 9"];
     const showOperators = !(grade && gradesWithoutOperators.includes(grade.toString()));
 
     const handleChange = (character) => {
