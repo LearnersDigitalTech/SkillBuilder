@@ -15,30 +15,44 @@ const shuffleArray = (array) => {
 
 const generateQuadrilateralSVG = (type, angles) => {
     // scale: 200x150
-    // Parallelogram: (20,130) -> (120,130) -> (180,30) -> (80,30)
-    // Angles: A(20,130), B(120,130), C(180,30), D(80,30)
-    // Labeled angles logic
-    let svg = `<svg width="250" height="160" viewBox="0 0 250 160" xmlns="http://www.w3.org/2000/svg" style="background:white; border:1px solid #ccc; margin-bottom:10px;">
-        <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#000" /></marker></defs>`;
+    // Parallelogram: (30,130) -> (150,130) -> (190,30) -> (70,30)
+    // Angles: A(30,130), B(150,130), C(190,30), D(70,30)
+    let svg = `<svg width="250" height="160" viewBox="0 0 250 160" xmlns="http://www.w3.org/2000/svg" style="background:white; margin-bottom:10px;">
+        <defs></defs>`;
 
     if (type === "Parallelogram") {
         svg += `<polygon points="30,130 150,130 190,30 70,30" fill="none" stroke="black" stroke-width="2" />
-        <text x="25" y="145" font-family="Arial" font-size="14">A</text>
-        <text x="155" y="145" font-family="Arial" font-size="14">B</text>
-        <text x="195" y="25" font-family="Arial" font-size="14">C</text>
-        <text x="55" y="25" font-family="Arial" font-size="14">D</text>`;
+        
+        <!-- Angle Arcs (Radius 25) -->
+        <!-- A: (30,130). Right to AD. P1(55,130), P2(39,107) -->
+        <path d="M 55,130 A 25,25 0 0,0 39,107" fill="none" stroke="black" />
+        
+        <!-- B: (150,130). Left to BC. P1(125,130), P2(159,107) -->
+        <path d="M 125,130 A 25,25 0 0,1 159,107" fill="none" stroke="black" />
+        
+        <!-- C: (190,30). Left to CB. P1(165,30), P2(181,53) -->
+        <path d="M 165,30 A 25,25 0 0,0 181,53" fill="none" stroke="black" />
+        
+        <!-- D: (70,30). Right to DA. P1(95,30), P2(61,53) -->
+        <path d="M 95,30 A 25,25 0 0,1 61,53" fill="none" stroke="black" />
 
-        if (angles.A) svg += `<text x="45" y="125" font-size="12">${angles.A}°</text>`; // A
-        if (angles.B) svg += `<text x="135" y="125" font-size="12">${angles.B}</text>`;  // B
-        if (angles.C) svg += `<text x="170" y="45" font-size="12">${angles.C}</text>`;   // C
-        if (angles.D) svg += `<text x="80" y="45" font-size="12">${angles.D}</text>`;     // D
+        <!-- Vertical Labels -->
+        <text x="20" y="145" font-family="Arial" font-size="14">A</text>
+        <text x="160" y="145" font-family="Arial" font-size="14">B</text>
+        <text x="200" y="25" font-family="Arial" font-size="14">C</text>
+        <text x="60" y="25" font-family="Arial" font-size="14">D</text>`;
+
+        if (angles.A) svg += `<text x="50" y="120" font-size="12">${angles.A}°</text>`; // A
+        if (angles.B) svg += `<text x="130" y="120" font-size="12">${angles.B}</text>`;  // B
+        if (angles.C) svg += `<text x="160" y="50" font-size="12">${angles.C}</text>`;   // C
+        if (angles.D) svg += `<text x="80" y="50" font-size="12">${angles.D}</text>`;     // D
     }
     svg += `</svg>`;
     return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
 };
 
 const generateSolidShapeSVG = (shape, params) => {
-    let svg = `<svg width="200" height="150" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg" style="background:white; border:1px solid #ccc;">`;
+    let svg = `<svg width="200" height="150" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg" style="background:white;">`;
     // Simple Cube/Cuboid
     // Front face (50,50,100,100), Back (80,30,100,100)
     svg += `<rect x="50" y="60" width="80" height="60" fill="none" stroke="black" stroke-width="2"/>
@@ -53,7 +67,7 @@ const generateSolidShapeSVG = (shape, params) => {
 
 const generateMensurationSVG = (params) => {
     // Trapezium Field
-    let svg = `<svg width="250" height="150" viewBox="0 0 250 150" xmlns="http://www.w3.org/2000/svg" style="background:white; border:1px solid #ccc;">`;
+    let svg = `<svg width="250" height="150" viewBox="0 0 250 150" xmlns="http://www.w3.org/2000/svg" style="background:white;">`;
     // (50, 120) -> (200, 120) -> (170, 40) -> (80, 40)
     svg += `<polygon points="50,120 200,120 170,40 80,40" fill="#e0f7fa" stroke="black" stroke-width="2"/>
             <line x1="80" y1="40" x2="80" y2="120" stroke="black" stroke-dasharray="4" />
@@ -87,7 +101,7 @@ const generatePieChartSVG = (percentage) => {
     const largeArc = angle > 180 ? 1 : 0;
     const sweep = 1; // Clockwise
 
-    let svg = `<svg width="250" height="250" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="background:white; border:1px solid #ccc; display:block; margin:auto;">`;
+    let svg = `<svg width="250" height="250" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="background:white; display:block; margin:auto;">`;
 
     // Draw full lighter circle as background (the "rest")
     svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#e0f7fa" stroke="black" stroke-width="1"/>`;
@@ -229,17 +243,11 @@ export const generateSquaresCubes = () => {
     rows.push({ text: `Find the square root of ${sq2} ($\\sqrt{${sq2}}$).`, inputType: "text" });
     answerObj[1] = String(n2);
 
-    // Row 3: Square of a smaller number or decimal literal
-    const n3 = getRandomInt(30, 50);
-    const sq3 = n3 * n3;
-    // Let's ask for Square Root of something ending in 00 or 25 for variety, or just another root
-    rows.push({ text: `Evaluate: $\\sqrt{${sq3}}$`, inputType: "text" });
-    answerObj[2] = String(n3);
+
 
     return {
         type: "tableInput",
         variant: "default",
-        question: "Calculate the squares and square roots:",
         topic: "Squares & Cubes",
         headers: ["Problem", "Value"],
         answer: JSON.stringify(answerObj),
@@ -253,41 +261,45 @@ export const generateAlgebraExpressions = () => {
     const type = Math.random() > 0.5 ? "Operation" : "Identity";
     let question, answer;
 
+    const formatCoeff = (coeff, variable = "") => {
+        if (coeff === 1) return variable ? variable : "1";
+        if (coeff === -1) return variable ? `-${variable}` : "-1";
+        return `${coeff}${variable}`;
+    };
+
     if (type === "Operation") {
-        const a = getRandomInt(2, 9);
+        const a = getRandomInt(1, 9); // Changed to 1-9 to utilize formatting
         const b = getRandomInt(1, 10);
-        const c = getRandomInt(2, 9);
+        const c = getRandomInt(1, 9); // Changed to 1-9
         const d = getRandomInt(1, 10);
 
-        question = `Simplify: $(${a}x + ${b}) + (${c}x - ${d})$`;
+        question = `Simplify: $(${formatCoeff(a, "x")} + ${b}) + (${formatCoeff(c, "x")} - ${d})$`;
         const coeff = a + c;
         const constTerm = b - d;
-        answer = `$${coeff}x ${constTerm >= 0 ? '+' : '-'} ${Math.abs(constTerm)}$`;
+        answer = `$${formatCoeff(coeff, "x")} ${constTerm >= 0 ? '+' : '-'} ${Math.abs(constTerm)}$`;
     } else {
         const a = getRandomInt(1, 9);
         question = `Expand: $(x + ${a})^{2}$`;
-        answer = `$x^{2} + ${2 * a}x + ${a * a}$`;
+        answer = `$x^{2} + ${formatCoeff(2 * a, "x")} + ${a * a}$`;
     }
 
-    const uniqueOptions = [];
-    const seen = new Set();
-    uniqueOptions.push({ value: answer, label: answer });
-    seen.add(answer);
+    const uniqueOptions = new Set([answer]);
+    const optionsArr = [{ value: answer, label: answer }];
 
-    while (uniqueOptions.length < 4) {
+    while (optionsArr.length < 4) {
         let wrong;
         if (type === "Operation") {
             const r1 = getRandomInt(2, 20);
             const r2 = getRandomInt(1, 10);
-            wrong = `$${r1}x + ${r2}$`;
+            wrong = `$${formatCoeff(r1, "x")} + ${r2}$`; // Simply x term + const for wrong option
         } else {
             const r = getRandomInt(1, 10);
-            wrong = `$x^{2} + ${r}x + ${r * r}$`;
+            wrong = `$x^{2} + ${formatCoeff(r, "x")} + ${r * r}$`;
         }
 
-        if (!seen.has(wrong)) {
-            seen.add(wrong);
-            uniqueOptions.push({ value: wrong, label: wrong });
+        if (!uniqueOptions.has(wrong)) {
+            uniqueOptions.add(wrong);
+            optionsArr.push({ value: wrong, label: wrong });
         }
     }
 
@@ -295,7 +307,7 @@ export const generateAlgebraExpressions = () => {
         type: "mcq",
         question: question,
         topic: "Algebraic Expressions",
-        options: shuffleArray(uniqueOptions),
+        options: shuffleArray(optionsArr),
         answer: answer
     };
 };
@@ -378,7 +390,6 @@ export const generateLinearEquationsGrade8 = () => {
     return {
         type: "tableInput",
         variant: "default",
-        question: "Solve the following linear equations:",
         topic: "Linear Equations",
         headers: ["Equation", "Value of x"],
         answer: JSON.stringify(answerObj),
@@ -465,7 +476,6 @@ export const generateGraphs = () => {
     return {
         type: "tableInput",
         variant: "default",
-        question: "Identify the quadrant for each point:",
         topic: "Introduction to Graphs",
         headers: ["Point", "Quadrant"],
         answer: JSON.stringify(answerObj),
@@ -565,7 +575,6 @@ export const generateComparingQuantities = () => {
     return {
         type: "tableInput",
         variant: "default",
-        question: "Solve the following problems:",
         topic: "Comparing Quantities",
         headers: ["Problem", "Value"],
         answer: JSON.stringify(answerObj),
@@ -586,18 +595,10 @@ export const generateQuadrilateralsGrade8 = () => {
 
     // Rows
     const rows = [
-        { text: "Refer to the parallelogram ABCD. Find $x$ (opposite to B)." }, // x is B here in drawing log.. wait
-        // Drawing: A(bott-left), B(bott-right), C(top-right), D(top-left).
-        // A and B adjacent. C opp A. D opp B.
-        // If A is given. B=180-A. C=A. D=180-A.
-        // My SVG call: { A: angleA, B: "x", C: "y", D: "z" }
-        // So B is x -> x = 180-A.
-        // C is y -> y = A.
-        // D is z -> z = 180-A.
-
-        { text: "Find the value of angle $x$ (adjacent to A)." },
-        { text: "Find the value of angle $y$ (opposite to A)." },
-        { text: "Find the value of angle $z$ (opposite to x)." }
+        // { text: "Refer to the parallelogram ABCD. Find $x$ (opposite to B)." }, // Removed as per request
+        { text: "Find the value of angle $x$ ($\\angle B$)." },
+        { text: "Find the value of angle $y$ ($\\angle C$)." },
+        { text: "Find the value of angle $z$ ($\\angle D$)." }
     ];
 
     const answerObj = {
@@ -716,27 +717,22 @@ export const generateCubesRoots = () => {
     const answerObj = {};
 
     // Row 1: Cube of a number (2-12)
-    const n1 = getRandomInt(3, 12);
+    const n1 = getRandomInt(2, 5);
     const cb1 = n1 * n1 * n1;
     rows.push({ text: `Find the cube of ${n1} ($${n1}^3$).`, inputType: "text" });
     answerObj[0] = String(cb1);
 
     // Row 2: Cube Root (Perfect cube)
-    const n2 = getRandomInt(4, 15);
+    const n2 = getRandomInt(2, 5);
     const cb2 = n2 * n2 * n2;
     rows.push({ text: `Find the cube root of ${cb2} ($\\sqrt[3]{${cb2}}$).`, inputType: "text" });
     answerObj[1] = String(n2);
 
-    // Row 3: Cube Root of 1000s or similar simple large number
-    const n3 = getRandomInt(1, 9) * 10; // 10, 20, ... 90
-    const cb3 = n3 * n3 * n3;
-    rows.push({ text: `Evaluate: $\\sqrt[3]{${cb3}}$`, inputType: "text" });
-    answerObj[2] = String(n3);
+
 
     return {
         type: "tableInput",
         variant: "default",
-        question: "Calculate the cubes and cube roots:",
         topic: "Cubes and Cube Roots",
         headers: ["Problem", "Value"],
         answer: JSON.stringify(answerObj),
@@ -751,26 +747,32 @@ export const generateAlgebraIdentities = () => {
     const type = getRandomInt(0, 3);
     let question, answer;
 
+    const formatCoeff = (coeff, variable = "") => {
+        if (coeff === 1) return variable ? variable : "1";
+        if (coeff === -1) return variable ? `-${variable}` : "-1";
+        return `${coeff}${variable}`;
+    };
+
     if (type === 0) { // (a+b)^2
         const a = getRandomInt(1, 9);
         const b = getRandomInt(1, 9);
-        question = `Expand using identity: $(${a}x + ${b})^2$`;
-        answer = `$${a * a}x^2 + ${2 * a * b}x + ${b * b}$`;
+        question = `Expand using identity: $(${formatCoeff(a, "x")} + ${b})^2$`;
+        answer = `$${formatCoeff(a * a, "x^2")} + ${formatCoeff(2 * a * b, "x")} + ${b * b}$`;
     } else if (type === 1) { // (a-b)^2
         const a = getRandomInt(2, 9);
         const b = getRandomInt(1, 9);
-        question = `Expand using identity: $(${a}x - ${b})^2$`;
-        answer = `$${a * a}x^2 - ${2 * a * b}x + ${b * b}$`;
+        question = `Expand using identity: $(${formatCoeff(a, "x")} - ${b})^2$`;
+        answer = `$${formatCoeff(a * a, "x^2")} - ${formatCoeff(2 * a * b, "x")} + ${b * b}$`;
     } else if (type === 2) { // a^2 - b^2
         const a = getRandomInt(2, 9);
         const b = getRandomInt(1, 9);
-        question = `Factorise using identity: $${a * a}x^2 - ${b * b}$`;
-        answer = `$(${a}x - ${b})(${a}x + ${b})$`;
+        question = `Factorise using identity: $${formatCoeff(a * a, "x^2")} - ${b * b}$`;
+        answer = `$(${formatCoeff(a, "x")} - ${b})(${formatCoeff(a, "x")} + ${b})$`;
     } else { // (x+a)(x+b)
         const a = getRandomInt(1, 5);
         const b = getRandomInt(1, 5);
         question = `Expand: $(x + ${a})(x + ${b})$`;
-        answer = `$x^2 + ${a + b}x + ${a * b}$`;
+        answer = `$x^2 + ${formatCoeff(a + b, "x")} + ${a * b}$`;
     }
 
     const uniqueOptions = new Set([answer]);
@@ -778,10 +780,10 @@ export const generateAlgebraIdentities = () => {
 
     while (optionsArr.length < 4) {
         let wrong;
-        if (type === 0) wrong = `$${getRandomInt(1, 9)}x^2 + ${getRandomInt(10, 20)}x + ${getRandomInt(1, 9)}$`;
-        else if (type === 1) wrong = `$${getRandomInt(1, 9)}x^2 - ${getRandomInt(10, 20)}x + ${getRandomInt(1, 9)}$`;
-        else if (type === 2) wrong = `$(${getRandomInt(1, 9)}x - ${getRandomInt(1, 9)})(${getRandomInt(1, 9)}x - ${getRandomInt(1, 9)})$`;
-        else wrong = `$x^2 + ${getRandomInt(1, 8)}x + ${getRandomInt(1, 8)}$`;
+        if (type === 0) wrong = `$${formatCoeff(getRandomInt(1, 9), "x^2")} + ${formatCoeff(getRandomInt(10, 20), "x")} + ${getRandomInt(1, 9)}$`;
+        else if (type === 1) wrong = `$${formatCoeff(getRandomInt(1, 9), "x^2")} - ${formatCoeff(getRandomInt(10, 20), "x")} + ${getRandomInt(1, 9)}$`;
+        else if (type === 2) wrong = `$(${formatCoeff(getRandomInt(1, 9), "x")} - ${getRandomInt(1, 9)})(${formatCoeff(getRandomInt(1, 9), "x")} - ${getRandomInt(1, 9)})$`;
+        else wrong = `$x^2 + ${formatCoeff(getRandomInt(1, 8), "x")} + ${getRandomInt(1, 8)}$`;
 
         if (!uniqueOptions.has(wrong)) {
             uniqueOptions.add(wrong);
@@ -940,7 +942,7 @@ export const generateDirectInverseVariation = () => {
     const wb = divisors[getRandomInt(0, divisors.length - 1)];
     const db = totalWork / wb;
 
-    rows.push({ text: `If ${wa} workers take ${da} days, how many days for ${wb} workers?`, inputType: "text" });
+    rows.push({ text: `If ${wa} workers take ${da} days to complete a task, how many days will it take for ${wb} workers?`, inputType: "text" });
     answerObj[1] = String(db);
 
     // Row 3: Speed & Time (Inverse)
@@ -958,13 +960,12 @@ export const generateDirectInverseVariation = () => {
     const speedB = (speedA === 40) ? 60 : 40; // Swap
     const timeB = dist2 / speedB; // 3 or 2
 
-    rows.push({ text: `A car at ${speedA} km/h takes ${timeA} hrs. Time taken at ${speedB} km/h?`, inputType: "text" });
+    rows.push({ text: `A car travelling at ${speedA} km/h takes ${timeA} hours to reach a destination. How long will it take if it travels at ${speedB} km/h?`, inputType: "text" });
     answerObj[2] = String(timeB);
 
     return {
         type: "tableInput",
         variant: "default",
-        question: "Solve the variation problems:",
         topic: "Direct and Inverse Proportions",
         headers: ["Problem", "Answer"],
         answer: JSON.stringify(answerObj),
