@@ -73,7 +73,7 @@ export default function Home() {
       range: "1 digit"
     },
     normal: {
-      label: "Normal",
+      label: "Standard",
       description: "Standard Mix",
       icon: GraduationCap,
       color: "text-blue-500",

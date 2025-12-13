@@ -573,17 +573,38 @@ export const generateAlgebraicMultiplication = () => {
 
     const question = `$(${a}x + ${b}y)(${c}x - ${d}y)$`;
 
-    const term2Str = term2 >= 0 ? `+ ${term2}xy` : `- ${Math.abs(term2)}xy`;
-    const ansStr = `${term1}x^2 ${term2Str} - ${term3}y^2`;
+    // Helper to format xy term
+    const formatXY = (coeff) => {
+        if (coeff === 0) return "";
+        const sign = coeff > 0 ? "+" : "-";
+        const val = Math.abs(coeff) === 1 ? "" : Math.abs(coeff);
+        return ` ${sign} ${val}xy`;
+    };
+
+    const term2Str = formatXY(term2);
+    const ansStr = `${term1}x^2${term2Str} - ${term3}y^2`;
 
     // format option wrapper with LaTeX delimiters
     const fo = (s) => ({ value: `$${s}$`, label: `$${s}$` });
 
+    // Ensure distractors also format correctly
+    // We reuse formatXY or manually build strings ensuring no 0xy
+
+    // Distractor 1: Logic error in xy term
+    const d1_term2 = term2 - 2; // e.g. -2xy
+    const d1 = `${term1}x^2${formatXY(d1_term2)} - ${term3}y^2`;
+
+    // Distractor 2: Sign error in y^2 (and reuse term2Str)
+    const d2 = `${term1}x^2${term2Str} + ${term3}y^2`;
+
+    // Distractor 3: Coefficient error in x^2
+    const d3 = `${term1 + 1}x^2${term2Str} - ${term3}y^2`;
+
     const options = ensureUnique(fo(ansStr), [
-        fo(`${term1}x^2 - ${Math.abs(term2) + 2}xy - ${term3}y^2`),
-        fo(`${term1}x^2 ${term2Str} + ${term3}y^2`), // wrong last sign
-        fo(`${term1 + 1}x^2 ${term2Str} - ${term3}y^2`),
-        fo(`${term1}x^2 + ${Math.abs(term2) + 5}xy - ${term3}y^2`)
+        fo(d1),
+        fo(d2),
+        fo(d3),
+        fo(`${term1}x^2${formatXY(Math.abs(term2) + 5)} - ${term3}y^2`)
     ]);
 
     return { type: 'mcq', question, answer: `$${ansStr}$`, options, topic: 'Algebraic Multiplication' };
@@ -770,10 +791,10 @@ export const generatePerimeter = () => {
         questionText = `Find the perimeter of circle with radius $${r}$ cm. (Take $\\pi = \\frac{22}{7}$)`;
         answer = String(2 * (22 / 7) * r);
 
-        svg = `<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="75" cy="75" r="50" stroke="#334155" stroke-width="2" fill="#eff6ff" />
-            <line x1="75" y1="75" x2="125" y2="75" stroke="#334155" stroke-width="2" />
-            <text x="80" y="70" font-family="sans-serif" font-size="14" fill="#334155">r = ${r}</text>
+        svg = `<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="70" stroke="#334155" stroke-width="2" fill="#eff6ff" />
+            <line x1="100" y1="100" x2="170" y2="100" stroke="#334155" stroke-width="2" />
+            <text x="110" y="90" font-family="sans-serif" font-size="16" fill="#334155">${r} cm</text>
         </svg>`;
 
     } else if (shapeType === 2) {
@@ -783,10 +804,10 @@ export const generatePerimeter = () => {
         questionText = `Find the perimeter of a rectangle with length $${l}$ cm and width $${w}$ cm.`;
         answer = String(2 * (l + w));
 
-        svg = `<svg width="200" height="150" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
-            <rect x="25" y="40" width="150" height="70" stroke="#334155" stroke-width="2" fill="#eff6ff" />
-            <text x="100" y="35" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#334155">l = ${l}</text>
-            <text x="15" y="80" font-family="sans-serif" font-size="14" fill="#334155">w = ${w}</text>
+        svg = `<svg width="250" height="200" viewBox="0 0 250 200" xmlns="http://www.w3.org/2000/svg">
+            <rect x="25" y="50" width="200" height="100" stroke="#334155" stroke-width="2" fill="#eff6ff" />
+            <text x="125" y="40" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#334155">${l} cm</text>
+            <text x="10" y="105" font-family="sans-serif" font-size="16" fill="#334155">${w} cm</text>
         </svg>`;
 
     } else {
@@ -795,15 +816,15 @@ export const generatePerimeter = () => {
         questionText = `Find the perimeter of a square with side $${s}$ cm.`;
         answer = String(4 * s);
 
-        svg = `<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
-            <rect x="40" y="40" width="70" height="70" stroke="#334155" stroke-width="2" fill="#eff6ff" />
-            <text x="75" y="35" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#334155">s = ${s}</text>
-            <text x="20" y="80" font-family="sans-serif" font-size="14" fill="#334155">s = ${s}</text>
+        svg = `<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <rect x="50" y="50" width="100" height="100" stroke="#334155" stroke-width="2" fill="#eff6ff" />
+            <text x="100" y="40" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#334155">${s} cm</text>
+            <text x="15" y="105" font-family="sans-serif" font-size="16" fill="#334155">${s} cm</text>
         </svg>`;
     }
 
     const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-    const imgHtml = `<div style="display:flex; justify-content:center; margin: 15px 0;"><img src="${svgDataUrl}" alt="Shape" style="max-height: 150px;" /></div>`;
+    const imgHtml = `<div style="display:flex; justify-content:center; margin: 15px 0;"><img src="${svgDataUrl}" alt="Shape" style="max-height: 200px;" /></div>`;
 
     rows.push({ text: `Perimeter =`, unit: 'cm', answer: answer });
 
@@ -825,23 +846,28 @@ export const generateArea = () => {
 
     // Logic: Triangle Area. Mixed Units.
     // Area (A) in sq.cm. Base (b) in m. Find Height (h) in cm.
-    // A = 0.5 * (b_m * 100) * h_cm
-    // => h_cm = (2 * A) / (b_m * 100)
+    // User requested: Area <= 50 sq cm. Base = 0.1m or 0.2m.
 
-    // Let's pick h_cm and b_cm first to ensure integers.
-    const h_cm = getRandomInt(10, 300);
-    // Picks b_cm from a set that converts nicely to meters (e.g. 4cm=0.04m, 20cm=0.2m, 50cm=0.5m)
-    const baseOptionsCm = [2, 4, 5, 8, 10, 20, 25, 40, 50, 80];
-    const b_cm = baseOptionsCm[getRandomInt(0, baseOptionsCm.length - 1)];
+    // 1. Pick base in m: 0.1 or 0.2
+    const b_m = Math.random() > 0.5 ? 0.1 : 0.2;
+    const b_cm = b_m * 100; // 10 or 20 cm
 
-    const b_m = b_cm / 100; // e.g. 0.04
-    const area = 0.5 * b_cm * h_cm; // in sq.cm
+    // 2. Determine Height such that Area <= 50
+    // Area = 0.5 * b_cm * h_cm
+    // 50 >= 0.5 * b_cm * h_cm  => 100 >= b_cm * h_cm => h_cm <= 100 / b_cm
 
-    // Text: "If the area of \triangle ABC is {area} sq.cm and the base measure {b_m} m then the height is in cm"
-    // Use MathJax for triangle.
+    // Max height allowed:
+    const max_h = Math.floor(100 / b_cm); // If b=10, max_h=10; If b=20, max_h=5
+
+    // Ensure height is at least 1 and integer
+    const h_cm = getRandomInt(1, max_h);
+
+    const area = 0.5 * b_cm * h_cm; // in sq.cm. Will be <= 50.
+
+    // Text: "If the area of \triangle ABC is {area} sq.cm and the base measure {b_m} m then find the height in cm."
     const questionText = `If the area of $\\triangle ABC$ is $${area}$ sq.cm and the base measure $${b_m}$ m then find the height in cm.`;
 
-    rows.push({ text: `height =`, unit: 'cm', answer: String(h_cm) });
+    rows.push({ text: `Height =`, unit: 'cm', answer: String(h_cm) });
 
     const answerObj = { 0: String(h_cm) };
 

@@ -187,7 +187,7 @@ const HomeContent = () => {
                                 }
                             }}
                         >
-                            Take Skill Assessment
+                            Start Assessment
                         </Button>
                     </div>
 
