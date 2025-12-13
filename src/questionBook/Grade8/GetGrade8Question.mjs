@@ -78,37 +78,37 @@ const Grade8Questions = {
     // q11: generate(generateRationalNumbers),                 // Ch 1
     q10: generate(generateLinearEquationsGrade8),           // Ch 2
     q11: generate(generateQuadrilateralsGrade8),            // Ch 3
-    q12: generate(generatePracticalGeometryGrade8),         // Ch 4
+    // q12: generate(generatePracticalGeometryGrade8),         // Ch 4
     // q15: generate(generateDataHandling),                    // Ch 5
-    q13: generate(generateSquaresCubes),                    // Ch 6
-    q14: generate(generateCubesRoots),                      // Ch 7
-    q15: generate(generateComparingQuantities),             // Ch 8
-    q16: generate(generateAlgebraExpressions),              // Ch 9
-    q17: generate(generateAlgebraIdentities),              // Ch 9 extension
+    q12: generate(generateSquaresCubes),                    // Ch 6
+    q13: generate(generateCubesRoots),                      // Ch 7
+    q14: generate(generateComparingQuantities),             // Ch 8
+    q15: generate(generateAlgebraExpressions),              // Ch 9
+    q16: generate(generateAlgebraIdentities),              // Ch 9 extension
     // q21: generate(generateVisualizingSolidShapes),         // Ch 10
-    q18: generate(generateMensurationGrade8),              // Ch 11
+    q17: generate(generateMensurationGrade8),              // Ch 11
     // q20: generate(generateExponentsGrade8),                // Ch 12
-    q19: generate(generateDirectInverseVariation),         // Ch 13
+    q18: generate(generateDirectInverseVariation),         // Ch 13
     // q25: generate(generateFactorisation),                  // Ch 14
-    q20: generate(generateGraphs),                         // Ch 15
+    q19: generate(generateGraphs),                         // Ch 15
     // q27: generate(generatePlayingWithNumbers),             // Ch 16
     // q28: generate(generateCommercialMath),                 // Used in Ch 8
     // q29: generate(generatePercentage),                     // Used in Ch 8
     // q30: generate(generateSimpleInterestGrade8),           // Used in Ch 8
     // q31: generate(generateWordProblemsLinearEq),           // Ch 2 extension
     // q32: generate(generateQuadrilateralPropertiesAdvanced),
-    q21: generate(generateDataInterpretationAdvanced),
+    q20: generate(generateDataInterpretationAdvanced),
     // q34: generate(generateMensuration3D),
     // q35: generate(generateGraphInterpretation),
     // q36: generate(() => generateExponentLaws([0, 1])),     // Grade 7 Q11
     // q37: generate(() => generateExponentLaws([2, 3])),     // Grade 7 Q12
-    q22: generate(generateGrade7Algebra),                  // Grade 7 Q13
+    q21: generate(generateGrade7Algebra),                  // Grade 7 Q13
     // q39: generate(generateAlgebraWordProblemTable),        // Grade 7 Q14
-    q23: generate(generateLinesAndAngles),                 // Grade 7 Q15
-    q24: generate(generateTrianglesProperties),            // Grade 7 Q16
-    q25: generate(generateSolidShapesProperties),          // Grade 7 Q17
+    q22: generate(generateLinesAndAngles),                 // Grade 7 Q15
+    q23: generate(generateTrianglesProperties),            // Grade 7 Q16
+    q24: generate(generateSolidShapesProperties),          // Grade 7 Q17
     // q43: generate(generatePercentageG7),                   // Grade 7 Q18
-    q26: generate(generateDataHandlingG7),                 // Grade 7 Q19
+    q25: generate(generateDataHandlingG7),                 // Grade 7 Q19
     // q29: generate(generateBarGraph),                       // Grade 7 Q20
 };
 

@@ -158,17 +158,29 @@ export const generatePolynomialOperations = () => {
     const resA = isAdd ? a1 + a2 : a1 - a2;
     const resB = isAdd ? b1 + b2 : b1 - b2;
 
-    // const answer = `$${resA}x ${resB >= 0 ? '+' : '-'} ${Math.abs(resB)}$`;
-    const answer = `$${formatLinearExpression([{ coeff: resA, var: 'x' }, { coeff: resB, var: '' }])}$`;
-    const rows = [{ text: questionText, answer: answer }];
-    const answerObj = { 0: answer };
+    const answer = `$${resA}x ${resB >= 0 ? '+' : '-'} ${Math.abs(resB)}$`;
+
+    // Distractors
+    const w1 = `$${resA}x ${resB >= 0 ? '-' : '+'} ${Math.abs(resB)}$`; // Flip sign of constant
+    const w2 = `$${resA + 1}x ${resB >= 0 ? '+' : '-'} ${Math.abs(resB)}$`; // Wrong coeff
+    const w3 = `$${resA}x ${resB >= 0 ? '+' : '-'} ${Math.abs(resB) + 1}$`; // Wrong constant
+
+    const options = shuffleArray([
+        { value: answer, label: answer },
+        { value: w1, label: w1 },
+        { value: w2, label: w2 },
+        { value: w3, label: w3 }
+    ]);
+    const uniqueOptions = [];
+    const seen = new Set();
+    for (const o of options) { if (!seen.has(o.value)) { seen.add(o.value); uniqueOptions.push(o); } }
 
     return {
-        type: "tableInput",
+        type: "mcq",
         question: `Simplify: ${questionText}`,
         topic: "Polynomials / Operations",
-        answer: JSON.stringify(answerObj),
-        rows: rows
+        options: uniqueOptions,
+        answer: answer
     };
 };
 
@@ -179,26 +191,30 @@ export const generatePolynomialFactorization = () => {
     const sum = a + b;
     const prod = a * b;
 
-    // const questionText = `$x^{2} + ${sum}x + ${prod}$`;
-    const questionText = `$${formatLinearExpression([{ coeff: 1, var: 'x^{2}' }, { coeff: sum, var: 'x' }, { coeff: prod, var: '' }])}$`;
+    const questionText = `$x^{2} + ${sum}x + ${prod}$`;
+    const answer = `$(x + ${a})(x + ${b})$`;
 
-    // const answer = `$(x + ${a})(x + ${b})$`;
-    // Factors are always positive in this generator (1 to 5), so (x+a) check is strictly positive.
-    // simpler to just format manually for factors or use helper if desired.
-    // Helper doesn't do factored form logic, just linear sums.
-    // But inside the parenthesis it is a linear expression x + a.
-    const factor1 = formatLinearExpression([{ coeff: 1, var: 'x' }, { coeff: a, var: '' }]);
-    const factor2 = formatLinearExpression([{ coeff: 1, var: 'x' }, { coeff: b, var: '' }]);
-    const answer = `$(${factor1})(${factor2})$`;
-    const rows = [{ text: questionText, answer: answer }];
-    const answerObj = { 0: answer };
+    // Distractors
+    const w1 = `$(x - ${a})(x - ${b})$`;
+    const w2 = `$(x + ${a})(x - ${b})$`;
+    const w3 = `$(x - ${a})(x + ${b})$`;
+
+    const options = shuffleArray([
+        { value: answer, label: answer },
+        { value: w1, label: w1 },
+        { value: w2, label: w2 },
+        { value: w3, label: w3 }
+    ]);
+    const uniqueOptions = [];
+    const seen = new Set();
+    for (const o of options) { if (!seen.has(o.value)) { seen.add(o.value); uniqueOptions.push(o); } }
 
     return {
-        type: "tableInput",
+        type: "mcq",
         question: `Factorise: ${questionText}`,
         topic: "Polynomials / Factorization",
-        answer: JSON.stringify(answerObj),
-        rows: rows
+        options: uniqueOptions,
+        answer: answer
     };
 };
 

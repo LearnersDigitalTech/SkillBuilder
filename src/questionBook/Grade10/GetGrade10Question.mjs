@@ -8,7 +8,7 @@ import {
     generateRatioProportion,
     generateSquareRoots,
     generateCubeRoots,
-    generateExponents,
+    generateExponentsNegative,
     generateBODMAS,
     generateAlgebraicAdditionSubtraction,
     generateAlgebraicMultiplication,
@@ -32,6 +32,7 @@ import {
 } from './grade10Generators.mjs';
 
 const generate = (generator, count = 10) => {
+    // Generator wrapper
     return Array.from({ length: count }, () => generator());
 };
 
@@ -45,7 +46,7 @@ const Grade10Questions = {
     q7: generate(generateRatioProportion),
     q8: generate(generateSquareRoots),
     q9: generate(generateCubeRoots),
-    q10: generate(generateExponents),
+    q10: generate(generateExponentsNegative),
     q11: generate(generateBODMAS),
     q12: generate(generateAlgebraicAdditionSubtraction),
     q13: generate(generateAlgebraicMultiplication),

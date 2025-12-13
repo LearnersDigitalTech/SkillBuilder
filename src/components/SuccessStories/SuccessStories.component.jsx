@@ -42,7 +42,7 @@ const SuccessStories = () => {
     return (
         <section className={Styles.container}>
             <h2 className={Styles.title}>Math Mastery Hall of Fame</h2>
-            <p className={Styles.subtitle}>Recognizing students who demonstrated absolute precision in our Basic Math Skills assessment.</p>
+            <p className={Styles.subtitle}>Recognizing students who demonstrated <span style={{ color: '#3c91f3', fontWeight: 'bold' }}>absolute precision</span> in our <span style={{ color: '#3c91f3', fontWeight: 'bold' }}>Basic Math Skills</span> assessment.</p>
             <div className={Styles.carouselContainer}>
                 <div className={Styles.track}>
                     {allStudents.map((student, index) => (

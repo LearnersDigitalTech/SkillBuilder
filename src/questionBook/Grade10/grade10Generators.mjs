@@ -75,7 +75,6 @@ export const generateNaturalWholeNumbers = () => {
     const answerObj = { 0: rows[0].answer, 1: rows[1].answer, 2: rows[2].answer, 3: rows[3].answer };
     return {
         type: 'tableInput',
-        question: 'Solve the following operations:',
         answer: JSON.stringify(answerObj),
         rows: rows,
         topic: 'Fundamental Operations on Natural and Whole Numbers'
@@ -105,7 +104,6 @@ export const generateIntegers = () => {
     const answerObj = { 0: rows[0].answer, 1: rows[1].answer, 2: rows[2].answer, 3: rows[3].answer };
     return {
         type: 'tableInput',
-        question: 'Solve the following integer operations:',
         answer: JSON.stringify(answerObj),
         rows: rows,
         topic: 'Fundamental Operations On Integers'
@@ -115,75 +113,82 @@ export const generateIntegers = () => {
 // --- CAT03: Fractions ---
 export const generateFractions = () => {
     const rows = [];
+    const simplify = (n, d) => {
+        const common = gcd(n, d);
+        return { n: n / common, d: d / common };
+    };
 
-    // Addition with unlike denominators
-    let d1 = getRandomInt(2, 9);
-    let d2 = getRandomInt(2, 9);
-    while (d1 === d2) { d2 = getRandomInt(2, 9); } // Ensure distinct
-    const n1 = getRandomInt(1, 9);
-    const n2 = getRandomInt(1, 9);
-    // Ans = (n1*d2 + n2*d1) / (d1*d2)
-    const ansNum1 = n1 * d2 + n2 * d1;
-    const ansDen1 = d1 * d2;
+    const getProperFraction = () => {
+        let d = getRandomInt(2, 9);
+        let n = getRandomInt(1, d - 1);
+        return simplify(n, d);
+    };
+
+    // 1. Addition with unlike denominators
+    let f1 = getProperFraction();
+    let f2 = getProperFraction();
+    while (f1.d === f2.d) { f2 = getProperFraction(); } // Ensure distinct
+
+    let ansAddN = f1.n * f2.d + f2.n * f1.d;
+    let ansAddD = f1.d * f2.d;
+    let ansAdd = simplify(ansAddN, ansAddD);
 
     rows.push({
-        left: { n: n1, d: d1 }, op: '+', right: { n: n2, d: d2 },
-        answer: { num: String(ansNum1), den: String(ansDen1) }
+        left: { n: f1.n, d: f1.d }, op: '+', right: { n: f2.n, d: f2.d },
+        answer: { num: String(ansAdd.n), den: String(ansAdd.d) }
     });
 
-    // Subtraction with unlike denominators
-    let d3 = getRandomInt(2, 9);
-    let d4 = getRandomInt(2, 9);
-    while (d3 === d4) { d4 = getRandomInt(2, 9); }
-    let n3 = getRandomInt(1, 9);
-    let n4 = getRandomInt(1, 9);
+    // 2. Subtraction with unlike denominators
+    let f3 = getProperFraction();
+    let f4 = getProperFraction();
+    while (f3.d === f4.d) { f4 = getProperFraction(); }
 
-    // Ensure positive result: n3/d3 >= n4/d4  => n3*d4 >= n4*d3
-    if (n3 * d4 < n4 * d3) {
-        // Swap fractions
-        [n3, n4] = [n4, n3];
-        [d3, d4] = [d4, d3];
+    // Ensure positive result: f3 >= f4
+    if (f3.n * f4.d < f4.n * f3.d) {
+        [f3, f4] = [f4, f3];
     }
 
-    const ansNum2 = n3 * d4 - n4 * d3;
-    const ansDen2 = d3 * d4;
+    let ansSubN = f3.n * f4.d - f4.n * f3.d;
+    let ansSubD = f3.d * f4.d;
+    let ansSub = simplify(ansSubN, ansSubD);
 
     rows.push({
-        left: { n: n3, d: d3 }, op: '-', right: { n: n4, d: d4 },
-        answer: { num: String(ansNum2), den: String(ansDen2) }
+        left: { n: f3.n, d: f3.d }, op: '-', right: { n: f4.n, d: f4.d },
+        answer: { num: String(ansSub.n), den: String(ansSub.d) }
     });
 
-    // Multiplication with unlike denominators (if possible within range)
-    let d5 = getRandomInt(2, 9);
-    let d6 = getRandomInt(2, 9);
-    // Attempt to make them distinct, though not strictly required for logic, user asked for "not same"
-    while (d5 === d6) { d6 = getRandomInt(2, 9); }
+    // 3. Multiplication with unlike denominators
+    let f5 = getProperFraction();
+    let f6 = getProperFraction();
+    while (f5.d === f6.d) { f6 = getProperFraction(); }
 
-    const n5 = getRandomInt(1, d5 - 1); // Proper fraction
-    const n6 = getRandomInt(1, d6 - 1); // Proper fraction
+    let ansMulN = f5.n * f6.n;
+    let ansMulD = f5.d * f6.d;
+    let ansMul = simplify(ansMulN, ansMulD);
+
     rows.push({
-        left: { n: n5, d: d5 }, op: '×', right: { n: n6, d: d6 },
-        answer: { num: String(n5 * n6), den: String(d5 * d6) }
+        left: { n: f5.n, d: f5.d }, op: '×', right: { n: f6.n, d: f6.d },
+        answer: { num: String(ansMul.n), den: String(ansMul.d) }
     });
 
-    // Division
-    let d7 = getRandomInt(2, 9);
-    let d8 = getRandomInt(2, 9);
-    while (d7 === d8) { d8 = getRandomInt(2, 9); }
+    // 4. Division with unlike denominators
+    let f7 = getProperFraction();
+    let f8 = getProperFraction();
+    while (f7.d === f8.d) { f8 = getProperFraction(); }
 
-    const n7 = getRandomInt(1, 9);
-    const n8 = getRandomInt(1, 9);
-    // n7/d7 ÷ n8/d8 = (n7*d8) / (d7*n8)
+    let ansDivN = f7.n * f8.d;
+    let ansDivD = f7.d * f8.n;
+    let ansDiv = simplify(ansDivN, ansDivD);
+
     rows.push({
-        left: { n: n7, d: d7 }, op: '÷', right: { n: n8, d: d8 },
-        answer: { num: String(n7 * d8), den: String(d7 * n8) }
+        left: { n: f7.n, d: f7.d }, op: '÷', right: { n: f8.n, d: f8.d },
+        answer: { num: String(ansDiv.n), den: String(ansDiv.d) }
     });
 
     const answerObj = { 0: rows[0].answer, 1: rows[1].answer, 2: rows[2].answer, 3: rows[3].answer };
     return {
         type: 'tableInput',
         variant: 'fraction',
-        question: 'Solve the following fraction operations:',
         answer: JSON.stringify(answerObj),
         rows: rows,
         topic: 'Fractions'
@@ -219,7 +224,6 @@ export const generateDecimals = () => {
     const answerObj = { 0: rows[0].answer, 1: rows[1].answer, 2: rows[2].answer, 3: rows[3].answer };
     return {
         type: 'tableInput',
-        question: 'Solve the following decimal operations:',
         answer: JSON.stringify(answerObj),
         rows: rows,
         topic: 'Fundamental operations on decimals'
@@ -248,7 +252,6 @@ export const generateLCM = () => {
 
     return {
         type: 'tableInput',
-        question: 'Find the Least Common Multiple (LCM) for the following numbers:',
         answer: JSON.stringify(answerObj),
         rows: rows,
         topic: 'Least Common Multiple'
@@ -259,17 +262,27 @@ export const generateLCM = () => {
 export const generateHCF = () => {
     const rows = [];
 
-    const a1 = getRandomInt(12, 40);
-    const b1 = getRandomInt(12, 40);
-    const val1 = gcd(a1, b1);
+    let a1 = getRandomInt(12, 40);
+    let b1 = getRandomInt(12, 40);
+    let val1 = gcd(a1, b1);
+    while (val1 <= 1 || a1 === b1) { // Ensure distinct and HCF > 1
+        a1 = getRandomInt(12, 40);
+        b1 = getRandomInt(12, 40);
+        val1 = gcd(a1, b1);
+    }
     rows.push({ text: `Find the HCF of $${a1}, ${b1}$`, answer: String(val1) });
 
     // Q2 removed as per request (keep 1st and 3rd)
 
     const factor = getRandomInt(2, 6);
-    const a3 = factor * getRandomInt(3, 8);
-    const b3 = factor * getRandomInt(3, 8);
-    const c3 = factor * getRandomInt(3, 8);
+    const multipliers = new Set();
+    while (multipliers.size < 3) {
+        multipliers.add(getRandomInt(3, 9)); // Increased range slightly to avoid infinite loops if range is too small
+    }
+    const [m1, m2, m3] = [...multipliers];
+    const a3 = factor * m1;
+    const b3 = factor * m2;
+    const c3 = factor * m3;
     const val3 = gcd(a3, gcd(b3, c3));
     rows.push({ text: `Find the HCF of $${a3}, ${b3}, ${c3}$`, answer: String(val3) });
 
@@ -278,7 +291,6 @@ export const generateHCF = () => {
 
     return {
         type: 'tableInput',
-        question: 'Find the Highest Common Factor (HCF) for the following numbers:',
         answer: JSON.stringify(answerObj),
         rows: rows,
         topic: 'Highest Common Factor'
@@ -312,7 +324,6 @@ export const generateRatioProportion = () => {
 
     return {
         type: 'tableInput',
-        question: 'Solve the following Ratio and Proportion problems:',
         answer: JSON.stringify(answerObj),
         rows: rows,
         topic: 'Ratio and Proportion'
@@ -401,58 +412,26 @@ export const generateCubeRoots = () => {
 };
 
 // --- CAT10: Laws of Exponents ---
-export const generateExponents = () => {
-    // Mix of 3 types: a^m * a^n, (a^m)^n, a^(-n)
-    const type = getRandomInt(0, 2);
-    let question, answerStr, val;
-    const a = getRandomInt(2, 5);
+export const generateExponentsNegative = () => {
+    // Negative exponent: Find value of (-a)^(-n)
+    const base = -1 * getRandomInt(2, 5);
+    const exp = -1 * getRandomInt(2, 3); // -2 or -3
+    const question = `Find the value of $(${base})^{${exp}}$`;
 
-    if (type === 0) {
-        // a^m * a^n
-        const m = getRandomInt(2, 5);
-        const n = getRandomInt(2, 5);
-        question = `Simplify $${a}^{${m}} \\times ${a}^{${n}}$`;
-        answerStr = `$${a}^{${m + n}}$`;
-        val = m + n;
-    } else if (type === 1) {
-        // (a^m)^n
-        const m = getRandomInt(2, 4);
-        const n = getRandomInt(2, 3);
-        question = `Simplify $(${a}^{${m}})^{${n}}$`;
-        answerStr = `$${a}^{${m * n}}$`;
-        val = m * n;
-    } else {
-        // Negative exponent: Find value of (-a)^(-n) or similar
-        const base = -1 * getRandomInt(2, 5);
-        const exp = -1 * getRandomInt(2, 3); // -2 or -3
-        question = `Find the value of $(${base})^{${exp}}$`;
+    // format as fraction if possible
+    const den = Math.pow(base, Math.abs(exp)); // e.g. (-2)^2 = 4, (-2)^3 = -8
 
-        // format as fraction if possible
-        const den = Math.pow(base, Math.abs(exp)); // e.g. (-2)^2 = 4, (-2)^3 = -8
+    // answer string "\frac{1}{4}" or "-\frac{1}{8}" using proper LaTeX
+    const answerStr = (den > 0) ? `$\\frac{1}{${den}}$` : `$-\\frac{1}{${Math.abs(den)}}$`;
 
-        // answer string "\frac{1}{4}" or "-\frac{1}{8}" using proper LaTeX
-        answerStr = (den > 0) ? `$\\frac{1}{${den}}$` : `$-\\frac{1}{${Math.abs(den)}}$`;
+    const wrongSignFraction = (den > 0) ? `$-\\frac{1}{${den}}$` : `$\\frac{1}{${Math.abs(den)}}$`;
 
-        const wrongSignFraction = (den > 0) ? `$-\\frac{1}{${den}}$` : `$\\frac{1}{${Math.abs(den)}}$`;
-
-        // Custom distractors for this type
-        const options = ensureUnique({ value: answerStr, label: answerStr }, [
-            { value: `$${den}$`, label: `$${den}$` },          // 4
-            { value: `$${-den}$`, label: `$${-den}$` },        // -4
-            { value: wrongSignFraction, label: wrongSignFraction } // wrong sign fraction
-        ]);
-        return { type: 'mcq', question, answer: answerStr, options, topic: 'Laws of Exponents' };
-    }
-
-    const options = ensureUnique(
-        { value: answerStr, label: answerStr },
-        [
-            { value: `$${a}^{${val + 1}}$`, label: `$${a}^{${val + 1}}$` },
-            { value: `$${a}^{${Math.abs(val - 1)}}$`, label: `$${a}^{${Math.abs(val - 1)}}$` },
-            { value: `$${a + 1}^{${val}}$`, label: `$${a + 1}^{${val}}$` },
-            { value: `$${a}^{${val + 2}}$`, label: `$${a}^{${val + 2}}$` }
-        ]
-    );
+    // Custom distractors for this type
+    const options = ensureUnique({ value: answerStr, label: answerStr }, [
+        { value: `$${den}$`, label: `$${den}$` },          // 4 or -8
+        { value: `$${-den}$`, label: `$${-den}$` },        // -4 or 8
+        { value: wrongSignFraction, label: wrongSignFraction } // wrong sign fraction
+    ]);
     return { type: 'mcq', question, answer: answerStr, options, topic: 'Laws of Exponents' };
 };
 
@@ -514,33 +493,66 @@ export const generateAlgebraicAdditionSubtraction = () => {
 
     const question = `$(${a1}x - ${b1}y + ${c1}z) + (${a2}x + ${b2}y ${c2}z)$`;
 
-    const formatTerm = (n, v) => {
-        if (n === 0) return "";
-        const sign = n > 0 ? "+" : "-";
-        return `${sign}${Math.abs(n)}${v}`;
+    const formatTerm = (coeff, variable, isFirst = false) => {
+        if (coeff === 0) return "";
+        let sign = coeff > 0 ? "+" : "-";
+        if (isFirst && coeff > 0) sign = ""; // omit plus for first positive term
+
+        const absCoeff = Math.abs(coeff);
+        const val = absCoeff === 1 ? variable : `${absCoeff}${variable}`;
+
+        // Add spacing around operator if not first
+        return isFirst ? `${sign}${val}` : ` ${sign} ${val}`;
     };
-    // First term doesn't need plus sign if positive
-    let ansStr = `${resX}x`;
-    ansStr += formatTerm(resY, 'y');
-    ansStr += formatTerm(resZ, 'z');
+
+    let ansStr = formatTerm(resX, 'x', true);
+    // If x term was 0, then y becomes the first term visually (though we can just append, but we need to handle the sign correctly)
+    // Actually simpler: build array of terms and join
+    let terms = [];
+    if (resX !== 0) terms.push(formatTerm(resX, 'x', true));
+    // For subsequent terms, pass false for isFirst, but we need to be careful if previous terms were 0
+    // Simpler approach:
+
+    const buildExpr = (x, y, z) => {
+        let t = [];
+        if (x !== 0) t.push(x === 1 ? "x" : (x === -1 ? "-x" : `${x}x`));
+
+        if (y !== 0) {
+            let s = (y > 0) ? "+" : "-";
+            let val = Math.abs(y) === 1 ? "y" : `${Math.abs(y)}y`;
+            if (t.length === 0) t.push(y === 1 ? "y" : (y === -1 ? "-y" : `${y}y`)); // First term behavior
+            else t.push(`${s} ${val}`);
+        }
+
+        if (z !== 0) {
+            let s = (z > 0) ? "+" : "-";
+            let val = Math.abs(z) === 1 ? "z" : `${Math.abs(z)}z`;
+            if (t.length === 0) t.push(z === 1 ? "z" : (z === -1 ? "-z" : `${z}z`)); // First term behavior
+            else t.push(`${s} ${val}`);
+        }
+
+        return t.length === 0 ? "0" : t.join(" ");
+    };
+
+    let ansStrFinal = buildExpr(resX, resY, resZ);
 
     // distractors
-    // error 1: subtract instead of add somewhere
-    let d1 = `${resX}x` + formatTerm(resY - 2, 'y') + formatTerm(resZ, 'z');
-    let d2 = `${resX + 1}x` + formatTerm(resY, 'y') + formatTerm(resZ, 'z');
-    let d3 = `${resX}x` + formatTerm(resY, 'y') + formatTerm(resZ + 2, 'z');
+    let d1 = buildExpr(resX, resY - 2, resZ);
+    let d2 = buildExpr(resX + 1, resY, resZ);
+    let d3 = buildExpr(resX, resY, resZ + 2);
+    let d4 = buildExpr(resX + 2, resY + 2, resZ + 2);
 
     // Helper to wrap
     const wrap = (s) => `$${s}$`;
 
-    const options = ensureUnique({ value: wrap(ansStr), label: wrap(ansStr) }, [
+    const options = ensureUnique({ value: wrap(ansStrFinal), label: wrap(ansStrFinal) }, [
         { value: wrap(d1), label: wrap(d1) },
         { value: wrap(d2), label: wrap(d2) },
         { value: wrap(d3), label: wrap(d3) },
-        { value: wrap(`${resX + 2}x${formatTerm(resY + 2, 'y')}${formatTerm(resZ + 2, 'z')}`), label: wrap(`${resX + 2}x${formatTerm(resY + 2, 'y')}${formatTerm(resZ + 2, 'z')}`) }
+        { value: wrap(d4), label: wrap(d4) }
     ]);
 
-    return { type: 'mcq', question, answer: wrap(ansStr), options, topic: 'Algebraic Addition' };
+    return { type: 'mcq', question, answer: wrap(ansStrFinal), options, topic: 'Algebraic Addition' };
 };
 
 // --- CAT13: Algebraic Multiplication ---
@@ -969,8 +981,9 @@ export const generateSectionFormula = () => {
     const rows = [];
 
     // Dynamic Ratio m:n where m, n are randomly chosen from 1 to 3
-    const m = getRandomInt(1, 3);
-    const n = getRandomInt(1, 3);
+    let m = getRandomInt(1, 3);
+    let n = getRandomInt(1, 3);
+    while (m === n) n = getRandomInt(1, 3); // Ensure ratio is not 1:1 or 2:2
     const sum = m + n;
 
     // Helper to find valid mate coordinate
