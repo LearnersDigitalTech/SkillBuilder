@@ -25,6 +25,26 @@ const HomeContent = () => {
     const { user, userData } = useAuth();
     const [authModalOpen, setAuthModalOpen] = useState(false);
     const [alreadyAttemptedModalOpen, setAlreadyAttemptedModalOpen] = useState(false);
+    const [gradeModalOpen, setGradeModalOpen] = useState(false);
+
+    const handlePracticeClick = () => {
+        setGradeModalOpen(true);
+    };
+
+    const handleGradeSelect = (grade) => {
+        setGradeModalOpen(false);
+        if (grade === 1) {
+            router.push(`/practice?grade=${grade}`);
+        } else {
+            // For now, only Grade 1 is linked as per instructions.
+            // But let's allow navigation to practice page for all, maybe reusing Grade 1 content as placeholder 
+            // OR just standard "Coming Soon". 
+            // User said: "link the practice mode for the first grade... change the route links as well accordingly".
+            // Assuming other grades might not have content yet.
+            // I'll route them all to practice but pass the grade. PracticeClient can handle fallback/loading.
+            router.push(`/practice?grade=${grade}`);
+        }
+    };
 
     const handleStartAssessment = async () => {
         // Check for local session first
@@ -219,7 +239,7 @@ const HomeContent = () => {
             </div>
 
             <SuccessStories />
-            <MathClub onStart={handleStartAssessment} />
+            <MathClub onStart={handlePracticeClick} />
             {/* <div className={Styles.whyChooseUsContainer}>
                 <div>
                     <Award size={40} />
@@ -373,6 +393,60 @@ const HomeContent = () => {
                 }
             >
             </CustomModal>
+
+            <CustomModal
+                open={gradeModalOpen}
+                onClose={() => setGradeModalOpen(false)}
+                title="Select Your Grade"
+                content={
+                    <div style={{ padding: '16px' }}>
+                        <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '24px' }}>
+                            Choose your grade level to start practicing
+                        </p>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((grade) => {
+                                const isAvailable = grade === 1;
+                                return (
+                                    <Button
+                                        key={grade}
+                                        variant={isAvailable ? "contained" : "outlined"}
+                                        onClick={() => handleGradeSelect(grade)}
+                                        sx={{
+                                            padding: '20px',
+                                            fontSize: '1.25rem',
+                                            fontWeight: '700',
+                                            borderRadius: '16px',
+                                            textTransform: 'none',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '4px',
+                                            borderColor: isAvailable ? 'transparent' : '#e2e8f0',
+                                            backgroundColor: isAvailable ? '#3c91f3' : 'transparent',
+                                            color: isAvailable ? 'white' : '#64748b',
+                                            boxShadow: isAvailable ? '0 4px 12px rgba(60, 145, 243, 0.3)' : 'none',
+                                            opacity: isAvailable ? 1 : 0.7,
+                                            '&:hover': {
+                                                borderColor: isAvailable ? 'transparent' : '#cbd5e1',
+                                                backgroundColor: isAvailable ? '#2563eb' : '#f8fafc',
+                                                transform: 'translateY(-2px)'
+                                            },
+                                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                                        }}
+                                    >
+                                        <span>Grade {grade}</span>
+                                        {!isAvailable && (
+                                            <span style={{ fontSize: '0.75rem', fontWeight: '500', opacity: 0.7 }}>Coming Soon</span>
+                                        )}
+                                        {isAvailable && (
+                                            <span style={{ fontSize: '0.75rem', fontWeight: '500', opacity: 0.9 }}>Available Now</span>
+                                        )}
+                                    </Button>
+                                )
+                            })}
+                        </div>
+                    </div>
+                }
+            />
         </div>
     );
 }
