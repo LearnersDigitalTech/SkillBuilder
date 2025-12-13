@@ -152,8 +152,8 @@ export const generatePolynomialOperations = () => {
         type: "mcq",
         question: `Simplify: ${questionText}`,
         topic: "Polynomials / Operations",
-        options: uniqueOptions,
-        answer: answer
+        answer: JSON.stringify(answerObj),
+        rows: rows
     };
 };
 
@@ -186,8 +186,8 @@ export const generatePolynomialFactorization = () => {
         type: "mcq",
         question: `Factorise: ${questionText}`,
         topic: "Polynomials / Factorization",
-        options: uniqueOptions,
-        answer: answer
+        answer: JSON.stringify(answerObj),
+        rows: rows
     };
 };
 
