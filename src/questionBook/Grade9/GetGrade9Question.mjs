@@ -65,7 +65,7 @@ const Grade9Questions = {
     q7: generate(generateRatioProportion),
 
     // Polynomials
-    q8: generate(generatePolynomialBasics),
+    // q8: generate(generatePolynomialBasics),
     q8: generate(generatePolynomialOperations),
     q9: generate(generatePolynomialFactorization),
     q10: generate(generatePolynomialZeroes),

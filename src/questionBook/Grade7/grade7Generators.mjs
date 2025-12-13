@@ -124,68 +124,85 @@ export const generateRationalOps = () => {
 // --- Exponents ---
 
 export const generateExponentLaws = (allowedTypes = [0, 1, 2, 3]) => {
-    // Helper to generate a single sub-problem
-    const generateSubProblem = () => {
-        // Pick from allowed types
-        const typeIdx = allowedTypes[getRandomInt(0, allowedTypes.length - 1)];
-        const base = getRandomInt(2, 5);
-        const p1 = getRandomInt(2, 5);
-        const p2 = getRandomInt(2, 5);
-        let q, a, w; // Question, Answer, Wrong Answer
-
-        if (typeIdx === 0) { // Product
-            q = `$${base}^{${p1}} \\times ${base}^{${p2}}$`;
-            a = `$${base}^{${p1 + p2}}$`;
-            w = `$${base}^{${p1 * p2}}$`;
-        } else if (typeIdx === 1) { // Quotient
-            const big = Math.max(p1, p2) + 2;
-            const small = Math.min(p1, p2);
-            q = `$${base}^{${big}} \\div ${base}^{${small}}$`;
-            a = `$${base}^{${big - small}}$`;
-            w = `$${base}^{${big + small}}$`;
-        } else if (typeIdx === 2) { // Power of Power
-            q = `$(${base}^{${p1}})^{${p2}}$`;
-            a = `$${base}^{${p1 * p2}}$`;
-            w = `$${base}^{${p1 + p2}}$`;
-        } else { // Zero Exponent mixed
-            const complexBase = getRandomInt(10, 100);
-            q = `$(${complexBase} \\times ${base}^{${p1}})^0$`;
-            a = `$1$`;
-            w = `$0$`;
-        }
-        return { q, a, w };
+    // Law Names Map (0-6)
+    const lawNames = {
+        0: "Product Law",
+        1: "Quotient Law",
+        2: "Power of a Power Law",
+        3: "Zero Exponent Law",
+        4: "Power of a Product Law",
+        5: "Power of a Quotient Law",
+        6: "Negative Exponent Law"
     };
 
-    // Generate 2 distinct sub-questions
-    const sp1 = generateSubProblem();
-    let sp2 = generateSubProblem();
-    // Ensure they aren't identical text (unlikely but good to check)
-    // Also if allowedTypes has only 1 type (rare edge case), we accept duplicates or just diff numbers
-    while (sp2.q === sp1.q) {
-        sp2 = generateSubProblem();
+    // Pick a type
+    const typeIdx = allowedTypes[getRandomInt(0, allowedTypes.length - 1)];
+    const lawName = lawNames[typeIdx] || "Exponent Law";
+
+    const base = getRandomInt(2, 5);
+    const p1 = getRandomInt(2, 5);
+    const p2 = getRandomInt(2, 5);
+    let expr, ans, wrong1, wrong2, wrong3;
+
+    if (typeIdx === 0) { // Product: a^m * a^n = a^(m+n)
+        expr = `$${base}^{${p1}} \\times ${base}^{${p2}}$`;
+        ans = `$${base}^{${p1 + p2}}$`;
+        wrong1 = `$${base}^{${p1 * p2}}$`;
+        wrong2 = `$${base}^{${Math.abs(p1 - p2)}}$`;
+        wrong3 = `$${base * 2}^{${p1 + p2}}$`;
+    } else if (typeIdx === 1) { // Quotient: a^m / a^n = a^(m-n)
+        const big = Math.max(p1, p2) + 2;
+        const small = Math.min(p1, p2);
+        expr = `$${base}^{${big}} \\div ${base}^{${small}}$`;
+        ans = `$${base}^{${big - small}}$`;
+        wrong1 = `$${base}^{${big + small}}$`;
+        wrong2 = `$${base}^{${big * small}}$`;
+        wrong3 = `$1$`;
+    } else if (typeIdx === 2) { // Power of Power: (a^m)^n = a^(mn)
+        expr = `$(${base}^{${p1}})^{${p2}}$`;
+        ans = `$${base}^{${p1 * p2}}$`;
+        wrong1 = `$${base}^{${p1 + p2}}$`;
+        wrong2 = `$${base}^{${Math.abs(p1 - p2)}}$`;
+        wrong3 = `$${base}^{${p1 * p2 * 2}}$`;
+    } else if (typeIdx === 3) { // Zero Exponent: a^0 = 1
+        const complexBase = getRandomInt(10, 100);
+        expr = `$(${complexBase} \\times ${base}^{${p1}})^0$`;
+        ans = `$1$`;
+        wrong1 = `$0$`;
+        wrong2 = `$${base}$`;
+        wrong3 = `$${complexBase}$`;
+    } else if (typeIdx === 4) { // Power of Product: (ab)^m = a^m b^m
+        const base2 = getRandomInt(2, 5);
+        expr = `$(${base} \\times ${base2})^{${p1}}$`;
+        ans = `$${base}^{${p1}} \\times ${base2}^{${p1}}$`;
+        wrong1 = `$${base}^{${p1}} \\times ${base2}$`;
+        wrong2 = `$${base} \\times ${base2}^{${p1}}$`;
+        wrong3 = `$${base + base2}^{${p1}}$`;
+    } else if (typeIdx === 5) { // Power of Quotient: (a/b)^m = a^m / b^m
+        const base2 = getRandomInt(2, 5);
+        expr = `$(\\frac{${base}}{${base2}})^{${p1}}$`;
+        ans = `$\\frac{${base}^{${p1}}}{${base2}^{${p1}}}$`;
+        wrong1 = `$\\frac{${base}^{${p1}}}{${base2}}$`;
+        wrong2 = `$\\frac{${base}}{${base2}^{${p1}}}$`;
+        wrong3 = `$\\frac{${base * p1}}{${base2 * p1}}$`;
+    } else if (typeIdx === 6) { // Negative Exponent: a^-m = 1/a^m
+        expr = `$${base}^{-${p1}}$`;
+        ans = `$\\frac{1}{${base}^{${p1}}}$`;
+        wrong1 = `$${base}^{${p1}}$`;
+        wrong2 = `$-${base}^{${p1}}$`;
+        wrong3 = `$\\frac{1}{${base}^{-${p1}}}$`;
     }
 
-    const question = `Simplify:<br/>(i) ${sp1.q}<br/>(ii) ${sp2.q}`;
-
-    // Correct Answer Pair
-    const ansText = `(i) ${sp1.a}<br/>(ii) ${sp2.a}`;
-
-    // Distractors
-    // 1: Correct 1, Wrong 2
-    const w1 = `(i) ${sp1.a}<br/>(ii) ${sp2.w}`;
-    // 2: Wrong 1, Correct 2
-    const w2 = `(i) ${sp1.w}<br/>(ii) ${sp2.a}`;
-    // 3: Wrong 1, Wrong 2
-    const w3 = `(i) ${sp1.w}<br/>(ii) ${sp2.w}`;
+    const question = `Using the <b>${lawName}</b>, simplify: ${expr}`;
 
     const options = shuffleArray([
-        { value: ansText, label: ansText },
-        { value: w1, label: w1 },
-        { value: w2, label: w2 },
-        { value: w3, label: w3 }
+        { value: ans, label: ans },
+        { value: wrong1, label: wrong1 },
+        { value: wrong2, label: wrong2 },
+        { value: wrong3, label: wrong3 }
     ]);
 
-    // Dedupe options (in case wrong answer == correct answer by chance, e.g. 2+2 vs 2*2)
+    // Dedupe
     const uniqueOptions = [];
     const seen = new Set();
     for (const opt of options) {
@@ -194,24 +211,22 @@ export const generateExponentLaws = (allowedTypes = [0, 1, 2, 3]) => {
             uniqueOptions.push(opt);
         }
     }
-
-    // Fallback if deduping reduced count (rare)
+    // Fill if needed (rare)
     while (uniqueOptions.length < 4) {
-        const r1 = getRandomInt(2, 9);
-        const r2 = getRandomInt(2, 9);
-        const dummy = `(i) $x^{${r1}}$, (ii) $y^{${r2}}$`;
-        if (!seen.has(dummy)) {
-            seen.add(dummy);
-            uniqueOptions.push({ value: dummy, label: dummy });
+        const r = getRandomInt(1, 10);
+        const val = `$${r}$`;
+        if (!seen.has(val)) {
+            seen.add(val);
+            uniqueOptions.push({ value: val, label: val });
         }
     }
 
     return {
         type: "mcq",
         question: question,
-        topic: "Exponents / Laws",
+        topic: `Exponents / ${lawName}`,
         options: uniqueOptions,
-        answer: ansText
+        answer: ans
     };
 };
 
@@ -933,7 +948,6 @@ export const generateSolidShapesProperties = () => {
         topic: "Visualizing Solid Shapes",
         headers: ["Shape", "Faces", "Vertices", "Edges"],
         inputKeys: ["faces", "vertices", "edges"],
-        placeholders: ["F", "V", "E"],
         answer: JSON.stringify(answerObj),
         rows: rows
     };

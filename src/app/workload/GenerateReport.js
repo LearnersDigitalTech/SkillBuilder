@@ -52,8 +52,28 @@ function analyzeResponses(responses, grade) {
                     const u = userObj[i];
                     const c = correctObj[i];
 
-                    // 1. Complex Object Row (e.g. {perimeter:..., area:...})
-                    if (typeof c === 'object' && c !== null) {
+                    // 1. Fraction Row (special object structure) - Prioritize this check!
+                    // Check if both user and correct answers have fraction properties (num/den or n/d)
+                    const isFraction = u && c &&
+                        (u.num !== undefined || u.d !== undefined || u.n !== undefined) &&
+                        (u.den !== undefined || u.d !== undefined) &&
+                        (c.num !== undefined || c.n !== undefined || c.num !== undefined) &&
+                        (c.den !== undefined || c.d !== undefined);
+
+                    if (isFraction) {
+                        const uNum = parseFloat(u.num || u.n);
+                        const uDen = parseFloat(u.den || u.d);
+                        const cNum = parseFloat(c.num || c.n);
+                        const cDen = parseFloat(c.den || c.d);
+
+                        if (!isNaN(uNum) && !isNaN(uDen) && !isNaN(cNum) && !isNaN(cDen) && uDen !== 0 && cDen !== 0) {
+                            if (Math.abs(uNum * cDen - cNum * uDen) < 0.0001) {
+                                totalScoreSum += 1;
+                            }
+                        }
+                    }
+                    // 2. Complex Object Row (e.g. {perimeter:..., area:...})
+                    else if (typeof c === 'object' && c !== null) {
                         // If user didn't answer this row at all (undefined/null), score is 0
                         if (!u || typeof u !== 'object') {
                             continue;
@@ -78,19 +98,6 @@ function analyzeResponses(responses, grade) {
 
                         totalScoreSum += (correctKeysCount / totalKeys);
                     }
-                    // 2. Fraction Row (special object structure)
-                    else if (u && c && (u.num !== undefined || u.d !== undefined) && (u.den !== undefined || u.d !== undefined) && c.num !== undefined && c.den !== undefined) {
-                        const uNum = parseFloat(u.num);
-                        const uDen = parseFloat(u.den);
-                        const cNum = parseFloat(c.num);
-                        const cDen = parseFloat(c.den);
-
-                        if (!isNaN(uNum) && !isNaN(uDen) && !isNaN(cNum) && !isNaN(cDen) && uDen !== 0 && cDen !== 0) {
-                            if (Math.abs(uNum * cDen - cNum * uDen) < 0.0001) {
-                                totalScoreSum += 1;
-                            }
-                        }
-                    }
                     // 3. Simple Primitive Row (String/Number)
                     else {
                         // Strict equality for strings
@@ -102,6 +109,7 @@ function analyzeResponses(responses, grade) {
 
                 return totalScoreSum / totalRows;
             } catch (e) {
+                console.log("Error checking score: ", e);
                 // If parsing fails, fall back to strict match
                 return givenAnswer === correctAnswer ? 1 : 0;
             }
