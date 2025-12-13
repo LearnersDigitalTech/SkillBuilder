@@ -135,7 +135,7 @@ export const generatePolynomialBasics = () => {
 
     return {
         type: "tableInput",
-        question: "Solve the following problem:",
+        question: "",
         topic: "Polynomials / Basics",
         answer: JSON.stringify(answerObj),
         rows: rows
@@ -277,7 +277,7 @@ export const generateLinearEquationSolving = () => {
 
     return {
         type: "tableInput",
-        question: "Solve the following problem:",
+        question: "",
         topic: "Linear Equations / Solving",
         answer: JSON.stringify(answerObj),
         rows: rows
@@ -358,7 +358,7 @@ export const generateMensurationArea = () => {
 
     return {
         type: "tableInput",
-        question: "Solve the following problem:",
+        question: "",
         topic: "Mensuration / Area",
         answer: JSON.stringify(answerObj),
         rows: rows
@@ -392,7 +392,7 @@ export const generateMensurationVolume = () => {
 
     return {
         type: "tableInput",
-        question: "Solve the following problem:",
+        question: "",
         topic: "Mensuration / Volume & SA",
         answer: JSON.stringify(answerObj),
         rows: rows
@@ -426,7 +426,7 @@ export const generateStatistics = () => {
 
     return {
         type: "tableInput",
-        question: "Solve the following problem:",
+        question: "",
         topic: "Statistics",
         answer: JSON.stringify(answerObj),
         rows: rows
@@ -460,7 +460,7 @@ export const generateProbability = () => {
     return {
         type: "tableInput",
         variant: "fraction",
-        question: "Solve the following probability:",
+        question: "",
         topic: "Probability",
         answer: JSON.stringify(answerObj),
         rows: rows

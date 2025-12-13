@@ -530,6 +530,50 @@ const DashboardClient = () => {
                                             Add Child
                                         </button>
                                     </div>
+
+                                    {/* QUICK STATS - Fill empty space above Sign Out */}
+                                    {reports && (
+                                        <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-3 border border-blue-100 dark:border-blue-800/30">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <Award size={14} className="text-blue-600 dark:text-blue-400" />
+                                                        <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Tests</span>
+                                                    </div>
+                                                    <div className="text-xl font-bold text-slate-800 dark:text-white">
+                                                        {(() => {
+                                                            let count = 0;
+                                                            if (reports.summary) count++;
+                                                            Object.entries(reports).forEach(([key, val]) => {
+                                                                if (key !== 'summary' && val && typeof val === 'object' && val.summary) count++;
+                                                            });
+                                                            return count;
+                                                        })()}
+                                                    </div>
+                                                </div>
+                                                <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl p-3 border border-emerald-100 dark:border-emerald-800/30">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <TrendingUp size={14} className="text-emerald-600 dark:text-emerald-400" />
+                                                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Avg</span>
+                                                    </div>
+                                                    <div className="text-xl font-bold text-slate-800 dark:text-white">
+                                                        {(() => {
+                                                            let allReports = [];
+                                                            if (reports.summary) allReports.push(reports);
+                                                            Object.entries(reports).forEach(([key, val]) => {
+                                                                if (key !== 'summary' && val && typeof val === 'object' && val.summary) {
+                                                                    allReports.push(val);
+                                                                }
+                                                            });
+                                                            if (allReports.length === 0) return '0%';
+                                                            const avg = allReports.reduce((sum, r) => sum + (r.summary?.accuracyPercent || 0), 0) / allReports.length;
+                                                            return Math.round(avg) + '%';
+                                                        })()}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 /* SCENARIO 2: PROFILE LIST (Optimized) */

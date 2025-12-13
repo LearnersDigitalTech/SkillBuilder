@@ -58,134 +58,136 @@ const Navigation = () => {
     return (
         <>
             <div className={`${Styles.navigationContainer} ${scrolled ? Styles.scrolled : ''}`}>
-                <div className={Styles.logoContainer} onClick={() => router.push("/")}>
-                    <div className={Styles.brainWrap} aria-hidden>
-                        <img src="/LearnersLogoTransparent.png" className={Styles.brainIcon} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                    <div className={Styles.logoContainer} onClick={() => router.push("/")}>
+                        <div className={Styles.brainWrap} aria-hidden>
+                            <img src="/LearnersLogoTransparent.png" className={Styles.brainIcon} />
+                        </div>
+                        <div>
+                            <h3 className={Styles.logoTitle}>Math Skill Conquest</h3>
+                            {/* <p className={Styles.logoSubtitle}>Educational Assessment</p> */}
+                        </div>
                     </div>
-                    <div>
-                        <h3 className={Styles.logoTitle}>Math Skill Conquest</h3>
-                        {/* <p className={Styles.logoSubtitle}>Educational Assessment</p> */}
-                    </div>
-                </div>
-                <div className={Styles.navActionContainer}>
-                    <Tooltip title="Take Test" arrow>
-                        <button
-                            onClick={async () => {
-                                if (user) {
-                                    // Logic to correctly initialize session for the active child
-                                    try {
-                                        // Robust user key retrieval
-                                        let userKey = null;
-                                        if (user) {
-                                            userKey = getUserDatabaseKey(user);
-                                        }
-                                        if (!userKey && userData) {
-                                            userKey = userData.userKey || userData.phoneNumber || userData.parentPhone || userData.parentEmail;
-                                        }
-
-                                        if (!userKey) {
-                                            console.warn("Navigation: No userKey found, cannot start test correctly.");
-                                        }
-
-                                        const children = userData?.children || null;
-                                        const childKeys = children ? Object.keys(children) : [];
-                                        let activeChildId = childKeys[0] || null;
-
-                                        // Prefer stored active child
-                                        if (typeof window !== "undefined") {
-                                            const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
-                                            const lastActiveChild = window.localStorage.getItem('lastActiveChild'); // Fallback
-
-                                            // Prioritize specific key, then fallback
-                                            if (storedChildId && childKeys.includes(storedChildId)) {
-                                                activeChildId = storedChildId;
-                                            } else if (lastActiveChild && childKeys.includes(lastActiveChild)) {
-                                                activeChildId = lastActiveChild;
+                    <div className={Styles.navActionContainer}>
+                        <Tooltip title="Take Test" arrow>
+                            <button
+                                onClick={async () => {
+                                    if (user) {
+                                        // Logic to correctly initialize session for the active child
+                                        try {
+                                            // Robust user key retrieval
+                                            let userKey = null;
+                                            if (user) {
+                                                userKey = getUserDatabaseKey(user);
                                             }
-                                        }
-
-                                        if (children && activeChildId) {
-                                            const activeChild = children[activeChildId];
-                                            const userDetails = {
-                                                ...activeChild,
-                                                phoneNumber: userKey,
-                                                childId: activeChildId,
-                                                activeChildId: activeChildId,
-                                            };
-
-                                            // Reset session for this specific child
-                                            if (setQuizContext) {
-                                                setQuizContext({ userDetails, questionPaper: null });
+                                            if (!userKey && userData) {
+                                                userKey = userData.userKey || userData.phoneNumber || userData.parentPhone || userData.parentEmail;
                                             }
+
+                                            if (!userKey) {
+                                                console.warn("Navigation: No userKey found, cannot start test correctly.");
+                                            }
+
+                                            const children = userData?.children || null;
+                                            const childKeys = children ? Object.keys(children) : [];
+                                            let activeChildId = childKeys[0] || null;
+
+                                            // Prefer stored active child
                                             if (typeof window !== "undefined") {
-                                                window.localStorage.removeItem("quizSession");
-                                            }
-                                        } else {
-                                            // Fallback: If we couldn't rebuild context (e.g. missing userData),
-                                            // at least ensure we don't load a STALE session for a DIFFERENT child.
-                                            if (typeof window !== "undefined" && activeChildId) {
-                                                try {
-                                                    const storedSession = window.localStorage.getItem("quizSession");
-                                                    if (storedSession) {
-                                                        const parsed = JSON.parse(storedSession);
-                                                        // If stored session is for a different child, KILL IT.
-                                                        if (parsed?.userDetails?.childId && parsed.userDetails.childId !== activeChildId) {
-                                                            window.localStorage.removeItem("quizSession");
-                                                        }
-                                                    }
-                                                } catch (e) {
-                                                    // On error, better to clear than show wrong data
-                                                    window.localStorage.removeItem("quizSession");
+                                                const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
+                                                const lastActiveChild = window.localStorage.getItem('lastActiveChild'); // Fallback
+
+                                                // Prioritize specific key, then fallback
+                                                if (storedChildId && childKeys.includes(storedChildId)) {
+                                                    activeChildId = storedChildId;
+                                                } else if (lastActiveChild && childKeys.includes(lastActiveChild)) {
+                                                    activeChildId = lastActiveChild;
                                                 }
                                             }
+
+                                            if (children && activeChildId) {
+                                                const activeChild = children[activeChildId];
+                                                const userDetails = {
+                                                    ...activeChild,
+                                                    phoneNumber: userKey,
+                                                    childId: activeChildId,
+                                                    activeChildId: activeChildId,
+                                                };
+
+                                                // Reset session for this specific child
+                                                if (setQuizContext) {
+                                                    setQuizContext({ userDetails, questionPaper: null });
+                                                }
+                                                if (typeof window !== "undefined") {
+                                                    window.localStorage.removeItem("quizSession");
+                                                }
+                                            } else {
+                                                // Fallback: If we couldn't rebuild context (e.g. missing userData),
+                                                // at least ensure we don't load a STALE session for a DIFFERENT child.
+                                                if (typeof window !== "undefined" && activeChildId) {
+                                                    try {
+                                                        const storedSession = window.localStorage.getItem("quizSession");
+                                                        if (storedSession) {
+                                                            const parsed = JSON.parse(storedSession);
+                                                            // If stored session is for a different child, KILL IT.
+                                                            if (parsed?.userDetails?.childId && parsed.userDetails.childId !== activeChildId) {
+                                                                window.localStorage.removeItem("quizSession");
+                                                            }
+                                                        }
+                                                    } catch (e) {
+                                                        // On error, better to clear than show wrong data
+                                                        window.localStorage.removeItem("quizSession");
+                                                    }
+                                                }
+                                            }
+                                        } catch (e) {
+                                            console.error("Navigation start test error:", e);
                                         }
-                                    } catch (e) {
-                                        console.error("Navigation start test error:", e);
+                                        router.push("/quiz");
+                                    } else if (hasSession) {
+                                        router.push("/quiz");
+                                    } else {
+                                        setAuthModalOpen(true);
                                     }
-                                    router.push("/quiz");
-                                } else if (hasSession) {
-                                    router.push("/quiz");
-                                } else {
-                                    setAuthModalOpen(true);
-                                }
-                            }}
-                            style={{ backgroundColor: "#3c91f3ff", color: "white" }}
-                            className={Styles.navButton}
-                        >
-                            <Play size={16} />
-                            <span className={Styles.buttonText}>Take Test</span>
-                        </button>
-                    </Tooltip>
-
-                    <Tooltip title="Rapid Math" arrow>
-                        <button onClick={() => router.push("/rapid-math")} className={`${Styles.navButton} ${Styles.outlined}`}>
-                            <Zap size={16} />
-                            <span className={Styles.buttonText}>Rapid Math</span>
-                        </button>
-                    </Tooltip>
-
-                    {user || hasSession ? (
-                        <Tooltip title="View Dashboard" arrow>
-                            <button onClick={() => router.push("/dashboard")} className={`${Styles.navButton} ${Styles.outlined}`}>
-                                <User size={16} />
-                                <span className={Styles.buttonText}>Profile</span>
+                                }}
+                                style={{ backgroundColor: "#3c91f3ff", color: "white" }}
+                                className={Styles.navButton}
+                            >
+                                <Play size={16} />
+                                <span className={Styles.buttonText}>Take Test</span>
                             </button>
                         </Tooltip>
-                    ) : (
-                        <Tooltip title="Sign In" arrow>
-                            <button onClick={() => setAuthModalOpen(true)} className={`${Styles.navButton} ${Styles.outlined}`}>
-                                <User size={16} />
-                                <span className={Styles.buttonText}>Sign In</span>
+
+                        <Tooltip title="Rapid Math" arrow>
+                            <button onClick={() => router.push("/rapid-math")} className={`${Styles.navButton} ${Styles.outlined}`}>
+                                <Zap size={16} />
+                                <span className={Styles.buttonText}>Rapid Math</span>
                             </button>
                         </Tooltip>
-                    )}
 
-                    <Tooltip title="Reach out to us" arrow>
-                        <button onClick={() => window.location.href = "tel:+919916933202"} className={`${Styles.navButton} ${Styles.outlined}`}>
-                            <Phone size={16} />
-                            <span className={Styles.buttonText}>Reach Us</span>
-                        </button>
-                    </Tooltip>
+                        {user || hasSession ? (
+                            <Tooltip title="View Dashboard" arrow>
+                                <button onClick={() => router.push("/dashboard")} className={`${Styles.navButton} ${Styles.outlined}`}>
+                                    <User size={16} />
+                                    <span className={Styles.buttonText}>Profile</span>
+                                </button>
+                            </Tooltip>
+                        ) : (
+                            <Tooltip title="Sign In" arrow>
+                                <button onClick={() => setAuthModalOpen(true)} className={`${Styles.navButton} ${Styles.outlined}`}>
+                                    <User size={16} />
+                                    <span className={Styles.buttonText}>Sign In</span>
+                                </button>
+                            </Tooltip>
+                        )}
+
+                        <Tooltip title="Reach out to us" arrow>
+                            <button onClick={() => window.location.href = "tel:+919916933202"} className={`${Styles.navButton} ${Styles.outlined}`}>
+                                <Phone size={16} />
+                                <span className={Styles.buttonText}>Reach Us</span>
+                            </button>
+                        </Tooltip>
+                    </div>
                 </div>
             </div>
             <AuthModal open={authModalOpen} onClose={() => setAuthModalOpen(false)} />
