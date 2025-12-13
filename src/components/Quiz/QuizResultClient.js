@@ -51,7 +51,7 @@ import autoTable from 'jspdf-autotable';
 import { ref, set, get, push } from "firebase/database";
 import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button, Dialog, DialogTitle, DialogContent, IconButton, CircularProgress, TextField, MenuItem, Link as MuiLink } from "@mui/material";
+import { Button, Dialog, DialogTitle, DialogContent, IconButton, CircularProgress, TextField, MenuItem, Link as MuiLink, Select, FormControl, InputLabel } from "@mui/material";
 import { useAuth } from "@/context/AuthContext";
 
 
@@ -475,6 +475,44 @@ const QuizResultClient = () => {
     const [topicModalOpen, setTopicModalOpen] = useState(false);
     const [questionModalOpen, setQuestionModalOpen] = useState(false);
     const [learningPlanModalOpen, setLearningPlanModalOpen] = useState(false);
+
+    // Filters for Question-wise Performance
+    const [filterCategory, setFilterCategory] = useState("All");
+    const [filterStatus, setFilterStatus] = useState("All");
+
+    // Compute unique topics and filtered questions
+    const allTopics = ["All", ...new Set(perQuestionReport.map(q => q.topic))];
+
+    // Calculate counts for status filter
+    const statusCounts = perQuestionReport.reduce((acc, q) => {
+        const score = q.score !== undefined ? q.score : (q.isCorrect ? 1 : 0);
+        const isCorrect = score === 1;
+        const isWrong = score === 0 && q.attempted;
+        const isSkipped = !q.attempted;
+
+        acc.All++;
+        if (isCorrect) acc.Correct++;
+        if (isWrong) acc.Wrong++;
+        if (isSkipped) acc.Skipped++;
+        return acc;
+    }, { All: 0, Correct: 0, Wrong: 0, Skipped: 0 });
+
+    const filteredQuestions = perQuestionReport.filter(q => {
+        // Filter by Category
+        if (filterCategory !== "All" && q.topic !== filterCategory) return false;
+
+        // Filter by Status
+        const score = q.score !== undefined ? q.score : (q.isCorrect ? 1 : 0);
+        const isCorrect = score === 1;
+        const isWrong = score === 0 && q.attempted;
+        const isSkipped = !q.attempted;
+
+        if (filterStatus === "Correct" && !isCorrect) return false;
+        if (filterStatus === "Wrong" && !isWrong) return false;
+        if (filterStatus === "Skipped" && !isSkipped) return false;
+
+        return true;
+    });
 
     // Tutor booking dialog state
     const [tutorDialogOpen, setTutorDialogOpen] = useState(false);
@@ -1119,7 +1157,7 @@ const QuizResultClient = () => {
                             <h2 className={Styles.celebrationTitle}>100% Club!</h2>
                             <p className={Styles.celebrationText}>
                                 Congratulations on getting a perfect score!<br />
-                                You've mastered this topic perfectly.<br /><br />
+                                You've learned this topic perfectly.<br /><br />
                                 <strong>High Performers like you get special attention!</strong><br />
                                 Our academic tutor will contact you soon for advanced coaching.
                             </p>
@@ -1356,7 +1394,7 @@ const QuizResultClient = () => {
                                         <Target size={16} />
                                         <span>What you can improve</span>
                                     </div>
-                                    <p>{data.improvementFeedback}</p>
+                                    <p>{(data.correctCount + data.wrongCount) === 0 ? "Start practicing questions in this topic to identify areas for improvement." : data.improvementFeedback}</p>
                                 </div>
                             </div>
                         </div>
@@ -1535,97 +1573,163 @@ const QuizResultClient = () => {
                     </IconButton>
                 </DialogTitle>
                 <DialogContent className={Styles.modalContent}>
-                    <div className={Styles.questionList}>
-                        {perQuestionReport.map((q, index) => (
-                            <div key={`${q.questionId || 'q'}-${index}`} className={Styles.questionItem}>
-                                <div className={Styles.questionNumber}>Q{index + 1}</div>
-                                <div className={Styles.questionDetails}>
-                                    <div className={Styles.questionText}>
-                                        <MathRenderer content={q.question} />
-                                    </div>
-                                    {q.image && (
-                                        <img
-                                            src={q.image}
-                                            alt="Question Visual"
-                                            style={{ maxWidth: '100%', maxHeight: '200px', display: 'block', marginTop: '10px', marginBottom: '10px' }}
-                                        />
-                                    )}
-                                    <span className={Styles.topicBadge}>{q.topic}</span>
-                                    <div className={Styles.answerSection}>
-                                        <div className={Styles.answerRow}>
-                                            <span className={Styles.answerLabel}>Correct Answer:</span>
-                                            <div className={Styles.correctAnswer}>
-                                                {renderAnswer(q.correctAnswer)}
-                                            </div>
-                                        </div>
-                                        <div className={Styles.answerRow}>
-                                            <span className={Styles.answerLabel}>Your Answer:</span>
-                                            <div className={`${Styles.userAnswer} ${q.isCorrect ? Styles.correct : (q.attempted ? Styles.wrong : Styles.skipped)}`}>
-                                                {q.userAnswer ? renderAnswer(q.userAnswer) : "Not Attempted"}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {q.type === 'factorTree' && q.tree && (
-                                        <div style={{ marginTop: '16px', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '12px', overflowX: 'auto' }}>
-                                            <div style={{ minWidth: '300px' }}>
-                                                <TypeFactorTree
-                                                    treeDataProp={q.tree}
-                                                    userAnswersProp={q.userAnswer ? JSON.parse(q.userAnswer) : {}}
-                                                    readOnly={true}
-                                                    onClick={null}
-                                                    onPrevious={null}
-                                                    onAnswerChange={null}
-                                                    questionPaper={null}
-                                                    activeQuestionIndex={0}
-                                                    topic={q.topic}
-                                                    grade={null}
-                                                    timeTakeRef={null}
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                                <div className={Styles.questionStatus}>
-                                    {(() => {
-                                        // q.score is now available from analyzeResponses
-                                        const score = q.score !== undefined ? q.score : (q.isCorrect ? 1 : 0);
-                                        const isPartial = score > 0 && score < 1;
-                                        const isCorrect = score === 1;
-                                        const isWrong = score === 0 && q.attempted;
-                                        const isSkipped = !q.attempted;
+                    {/* Professional Filter Bar */}
+                    {/* Professional Filter Bar */}
+                    <div className={Styles.filterContainer}>
+                        {/* Status Filter Logic (Chips) */}
+                        <div className={Styles.filterChipsRow}>
+                            <span className={Styles.filterLabel}>Show:</span>
+                            {[
+                                { id: 'All', label: 'All', icon: null, color: '#64748b', bg: '#f1f5f9' },
+                                { id: 'Correct', label: 'Correct', icon: <CheckCircle size={14} />, color: '#16a34a', bg: '#dcfce7' },
+                                { id: 'Wrong', label: 'Wrong', icon: <XCircle size={14} />, color: '#dc2626', bg: '#fee2e2' },
+                                { id: 'Skipped', label: 'Skipped', icon: <HelpCircle size={14} />, color: '#d97706', bg: '#fef3c7' }
+                            ].map(status => {
+                                const isActive = filterStatus === status.id;
+                                return (
+                                    <button
+                                        key={status.id}
+                                        onClick={() => setFilterStatus(status.id)}
+                                        className={`${Styles.filterChip} ${isActive ? Styles.filterChipActive : ''}`}
+                                        style={{
+                                            color: isActive ? status.color : '#475569',
+                                            backgroundColor: isActive ? 'white' : status.bg, // Keep bg color overrides for inactive state if needed, or move to css
+                                            borderColor: isActive ? status.color : 'transparent'
+                                        }}
+                                    >
+                                        {status.icon}
+                                        <span>{status.label}</span>
+                                        <span className={Styles.filterChipCount} style={{
+                                            backgroundColor: isActive ? status.color : 'rgba(0,0,0,0.1)',
+                                            color: isActive ? 'white' : '#475569',
+                                        }}>
+                                            {statusCounts[status.id]}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
 
-                                        let statusClass = Styles.statusSkipped;
-                                        let Icon = HelpCircle;
-                                        let text = "Not Answered";
+                        {/* Divider */}
+                        <div className={Styles.filterDivider}></div>
 
-                                        if (isCorrect) {
-                                            statusClass = Styles.statusCorrect;
-                                            Icon = CheckCircle;
-                                            text = "Correct";
-                                        } else if (isPartial) {
-                                            statusClass = Styles.statusPartial;
-                                            Icon = AlertCircle;
-                                            text = "Partially Correct";
-                                        } else if (isWrong) {
-                                            statusClass = Styles.statusWrong;
-                                            Icon = XCircle;
-                                            text = "Wrong";
-                                        }
-
-                                        return (
-                                            <div className={`${Styles.statusBadge} ${statusClass}`}>
-                                                <Icon size={16} />
-                                                <span>{text}</span>
-                                            </div>
-                                        );
-                                    })()}
-                                    <div className={Styles.timeInfo}>
-                                        <Clock size={14} />
-                                        <span>{q.timeTaken !== null ? `${q.timeTaken}s` : "N/A"}</span>
-                                    </div>
+                        {/* Category Filter */}
+                        <div className={Styles.filterCategoryRow}>
+                            <span className={Styles.filterLabel}>Filter by Topic:</span>
+                            <div className={Styles.categorySelectWrapper}>
+                                <select
+                                    value={filterCategory}
+                                    onChange={(e) => setFilterCategory(e.target.value)}
+                                    className={Styles.categorySelect}
+                                >
+                                    {allTopics.map(topic => (
+                                        <option key={topic} value={topic}>{topic}</option>
+                                    ))}
+                                </select>
+                                <div className={Styles.categorySelectArrow}>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6" /></svg>
                                 </div>
                             </div>
-                        ))}
+                        </div>
+                    </div>
+
+                    <div className={Styles.questionList}>
+                        {filteredQuestions.length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
+                                No questions match the selected filters.
+                            </div>
+                        ) : (
+                            filteredQuestions.map((q, index) => (
+                                <div key={`${q.questionId || 'q'}-${index}`} className={Styles.questionItem}>
+                                    <div className={Styles.questionNumber}>Q{index + 1}</div>
+                                    <div className={Styles.questionDetails}>
+                                        <div className={Styles.questionText}>
+                                            <MathRenderer content={q.question} />
+                                        </div>
+                                        {q.image && (
+                                            <img
+                                                src={q.image}
+                                                alt="Question Visual"
+                                                style={{ maxWidth: '100%', maxHeight: '200px', display: 'block', marginTop: '10px', marginBottom: '10px' }}
+                                            />
+                                        )}
+                                        <span className={Styles.topicBadge}>{q.topic}</span>
+                                        <div className={Styles.answerSection}>
+                                            <div className={Styles.answerRow}>
+                                                <span className={Styles.answerLabel}>Correct Answer:</span>
+                                                <div className={Styles.correctAnswer}>
+                                                    {renderAnswer(q.correctAnswer)}
+                                                </div>
+                                            </div>
+                                            <div className={Styles.answerRow}>
+                                                <span className={Styles.answerLabel}>Your Answer:</span>
+                                                <div className={`${Styles.userAnswer} ${q.isCorrect ? Styles.correct : (q.attempted ? Styles.wrong : Styles.skipped)}`}>
+                                                    {q.userAnswer ? renderAnswer(q.userAnswer) : "Not Attempted"}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {q.type === 'factorTree' && q.tree && (
+                                            <div style={{ marginTop: '16px', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '12px', overflowX: 'auto' }}>
+                                                <div style={{ minWidth: '300px' }}>
+                                                    <TypeFactorTree
+                                                        treeDataProp={q.tree}
+                                                        userAnswersProp={q.userAnswer ? JSON.parse(q.userAnswer) : {}}
+                                                        readOnly={true}
+                                                        onClick={null}
+                                                        onPrevious={null}
+                                                        onAnswerChange={null}
+                                                        questionPaper={null}
+                                                        activeQuestionIndex={0}
+                                                        topic={q.topic}
+                                                        grade={null}
+                                                        timeTakeRef={null}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className={Styles.questionStatus}>
+                                        {(() => {
+                                            // q.score is now available from analyzeResponses
+                                            const score = q.score !== undefined ? q.score : (q.isCorrect ? 1 : 0);
+                                            const isPartial = score > 0 && score < 1;
+                                            const isCorrect = score === 1;
+                                            const isWrong = score === 0 && q.attempted;
+                                            const isSkipped = !q.attempted;
+
+                                            let statusClass = Styles.statusSkipped;
+                                            let Icon = HelpCircle;
+                                            let text = "Not Answered";
+
+                                            if (isCorrect) {
+                                                statusClass = Styles.statusCorrect;
+                                                Icon = CheckCircle;
+                                                text = "Correct";
+                                            } else if (isPartial) {
+                                                statusClass = Styles.statusPartial;
+                                                Icon = AlertCircle;
+                                                text = "Partially Correct";
+                                            } else if (isWrong) {
+                                                statusClass = Styles.statusWrong;
+                                                Icon = XCircle;
+                                                text = "Wrong";
+                                            }
+
+                                            return (
+                                                <div className={`${Styles.statusBadge} ${statusClass}`}>
+                                                    <Icon size={16} />
+                                                    <span>{text}</span>
+                                                </div>
+                                            );
+                                        })()}
+                                        <div className={Styles.timeInfo}>
+                                            <Clock size={14} />
+                                            <span>{q.timeTaken !== null ? `${q.timeTaken}s` : "N/A"}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </DialogContent>
             </Dialog >

@@ -16,6 +16,7 @@ import {
 
 import {
     generateBODMAS,
+    generatePerimeterAndArea,
 } from '../Grade7/grade7Generators.mjs';
 
 import {
@@ -66,33 +67,34 @@ const Grade9Questions = {
 
     // Polynomials
     q8: generate(generatePolynomialBasics),
-    q8: generate(generatePolynomialOperations),
-    q9: generate(generatePolynomialFactorization),
-    q10: generate(generatePolynomialZeroes),
+    q9: generate(generatePolynomialOperations),
+    q10: generate(generatePolynomialFactorization),
+    q11: generate(generatePolynomialZeroes),
 
     // Linear Equations in Two Variables
-    q11: generate(generateLinearEquationSolutions),
-    q12: generate(generateLinearEquationSolving),
+    q12: generate(generateLinearEquationSolutions),
+    q13: generate(generateLinearEquationSolving),
 
     // Coordinate Geometry
-    q13: generate(generateCartesianPoint),
+    q14: generate(generateCartesianPoint),
     // q12: generate(generateCoordinateBasics),
-    q14: generate(generateCoordinateFormulas),
+    // q14: generate(generateCoordinateFormulas),
 
     // Geometry: Lines, Angles, Triangles, Quadrilaterals
-    q15: generate(generateBODMAS),               // You can repurpose or remove if not needed
-    q16: generate(generateAlgebraicAdditionSubtraction), // Optional basic algebra
-    q17: generate(generateAlgebraicMultiplication),       // Optional
-    q18: generate(generateAlgebraicDivision),             // Optional
+    // q14: generate(generateBODMAS),               // You can repurpose or remove if not needed
+    q15: generate(generateAlgebraicAdditionSubtraction), // Optional basic algebra
+    q16: generate(generateAlgebraicMultiplication),       // Optional
+    q17: generate(generateAlgebraicDivision),             // Optional
 
-    q19: generate(generatePerimeter),
-    q20: generate(generateArea),                 // Triangles & parallelograms
-    q21: generate(generateMensurationArea),      // Heron’s Formula cases
-    q22: generate(generateMensurationVolume),    // Cube, cuboid, cylinder
+    q18: generate(generatePerimeterAndArea),
+    // q19: generate(generatePerimeter),
+    q19: generate(generateArea),                 // Triangles & parallelograms
+    q20: generate(generateMensurationArea),      // Heron’s Formula cases
+    q21: generate(generateMensurationVolume),    // Cube, cuboid, cylinder
 
     // Statistics & Probability
-    q23: generate(generateStatistics),
-    q24: generate(generateProbability),
+    q22: generate(generateStatistics),
+    q23: generate(generateProbability),
 
     // Constructions (if you add generators later)
     // q24: generate(generateConstructionBasics), // keep placeholder if needed

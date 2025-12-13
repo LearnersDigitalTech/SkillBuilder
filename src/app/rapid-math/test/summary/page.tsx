@@ -226,7 +226,7 @@ export default function SummaryPage() {
             border="border-green-100 dark:border-green-800"
           />
           <StatsCard
-            label="Mistakes/Skips"
+            label="Skips"
             value={(total - correct).toString()}
             subtext="Review them below"
             icon={XCircle}

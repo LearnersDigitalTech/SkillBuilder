@@ -259,7 +259,11 @@ function analyzeResponses(responses, grade) {
                 t.improvementFeedback = `You need some improvement in ${topic}. Review the core concepts and solve a few guided practice problems.`;
             }
         } else {
-            t.improvementFeedback = "No major issues noticed in this topic so far.";
+            if (totalTopicAttempts === 0) {
+                t.improvementFeedback = "Start practicing questions in this topic to identify areas for improvement.";
+            } else {
+                t.improvementFeedback = "No major issues noticed in this topic so far. Keep it up!";
+            }
         }
     });
 

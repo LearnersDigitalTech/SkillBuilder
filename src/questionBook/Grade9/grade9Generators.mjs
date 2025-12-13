@@ -8,6 +8,8 @@ const shuffleArray = (array) => {
     return array;
 };
 
+import { formatLinearExpression } from '../mathUtils.mjs';
+
 // --- Number System ---
 
 export const generateRealNumbers = () => {
@@ -90,6 +92,10 @@ export const generatePolynomialBasics = () => {
     if (type === "Degree") {
         const deg = getRandomInt(2, 5);
         const coeffs = [getRandomInt(2, 9), getRandomInt(2, 9)];
+        // questionText = `Find the degree of the polynomial: $${coeffs[0]}x^{${deg}} + ${coeffs[1]}x^{${deg - 1}} + 5$`;
+        // Manually building this one for now as it involves exponents, but could extend util later if needed.
+        // For now, simple coefficients check isn't the main issue here as they are rand(2,9).
+        // Let's stick to the requested linear/polynomial standard forms where coeffs might be 1.
         questionText = `Find the degree of the polynomial: $${coeffs[0]}x^{${deg}} + ${coeffs[1]}x^{${deg - 1}} + 5$`;
         answer = String(deg);
     } else {
@@ -97,7 +103,25 @@ export const generatePolynomialBasics = () => {
         const a = getRandomInt(1, 5);
         const b = getRandomInt(1, 5);
         const c = getRandomInt(1, 10);
-        questionText = `Find the value of $p(${x})$ for <br> $p(x) = ${a}x^{2} + ${b}x + ${c}$`;
+        // questionText = `Find the value of $p(${x})$ for <br> $p(x) = ${a}x^{2} + ${b}x + ${c}$`;
+        // Similarly, these are quadratic. Let's focus on the linear parts mainly or apply careful formatting.
+        // Actually, let's use the formatter for the linear part if possible, or just build carefully.
+        // Since random ints are 1-5, we might get 1x.
+
+        // Let's construct polynomial string manually to handle powers correctly with the helper?
+        // The helper handles linear terms. simpler to just inline fix here or leave as is if user only asked for linear.
+        // User asked: "in math we dont define 1x +1y... we say x+y... update for this type of scenarios"
+        // So I should fix ALL occurrences.
+
+        // Manual fix for quadratic since helper is 'formatLinearExpression' (list of terms).
+        // I can treat terms as {coeff, var: 'x^2'}, {coeff, var: 'x'}, {coeff, var: ''}
+        const polyStr = formatLinearExpression([
+            { coeff: a, var: 'x^{2}' },
+            { coeff: b, var: 'x' },
+            { coeff: c, var: '' }
+        ]);
+        questionText = `Find the value of $p(${x})$ for <br> $p(x) = ${polyStr}$`;
+
         const val = a * x * x + b * x + c;
         answer = String(val);
     }
@@ -126,12 +150,16 @@ export const generatePolynomialOperations = () => {
     const b2 = getRandomInt(1, 9);
 
     const op = isAdd ? "+" : "-";
-    const questionText = `$(${a1}x + ${b1}) ${op} (${a2}x + ${b2})$`;
+    // const questionText = `$(${a1}x + ${b1}) ${op} (${a2}x + ${b2})$`;
+    const poly1 = formatLinearExpression([{ coeff: a1, var: 'x' }, { coeff: b1, var: '' }]);
+    const poly2 = formatLinearExpression([{ coeff: a2, var: 'x' }, { coeff: b2, var: '' }]);
+    const questionText = `$(${poly1}) ${op} (${poly2})$`;
 
     const resA = isAdd ? a1 + a2 : a1 - a2;
     const resB = isAdd ? b1 + b2 : b1 - b2;
 
-    const answer = `$${resA}x ${resB >= 0 ? '+' : '-'} ${Math.abs(resB)}$`;
+    // const answer = `$${resA}x ${resB >= 0 ? '+' : '-'} ${Math.abs(resB)}$`;
+    const answer = `$${formatLinearExpression([{ coeff: resA, var: 'x' }, { coeff: resB, var: '' }])}$`;
     const rows = [{ text: questionText, answer: answer }];
     const answerObj = { 0: answer };
 
@@ -151,8 +179,17 @@ export const generatePolynomialFactorization = () => {
     const sum = a + b;
     const prod = a * b;
 
-    const questionText = `$x^{2} + ${sum}x + ${prod}$`;
-    const answer = `$(x + ${a})(x + ${b})$`;
+    // const questionText = `$x^{2} + ${sum}x + ${prod}$`;
+    const questionText = `$${formatLinearExpression([{ coeff: 1, var: 'x^{2}' }, { coeff: sum, var: 'x' }, { coeff: prod, var: '' }])}$`;
+
+    // const answer = `$(x + ${a})(x + ${b})$`;
+    // Factors are always positive in this generator (1 to 5), so (x+a) check is strictly positive.
+    // simpler to just format manually for factors or use helper if desired.
+    // Helper doesn't do factored form logic, just linear sums.
+    // But inside the parenthesis it is a linear expression x + a.
+    const factor1 = formatLinearExpression([{ coeff: 1, var: 'x' }, { coeff: a, var: '' }]);
+    const factor2 = formatLinearExpression([{ coeff: 1, var: 'x' }, { coeff: b, var: '' }]);
+    const answer = `$(${factor1})(${factor2})$`;
     const rows = [{ text: questionText, answer: answer }];
     const answerObj = { 0: answer };
 
@@ -169,7 +206,8 @@ export const generatePolynomialZeroes = () => {
     const a = getRandomInt(2, 5);
     const b = a * getRandomInt(1, 5);
 
-    const questionText = `$p(x) = ${a}x + ${b}$`;
+    // const questionText = `$p(x) = ${a}x + ${b}$`;
+    const questionText = `$p(x) = ${formatLinearExpression([{ coeff: a, var: 'x' }, { coeff: b, var: '' }])}$`;
     const root = -b / a;
     const answer = String(root);
     const rows = [{ text: questionText, answer: answer }];
@@ -193,7 +231,8 @@ export const generateLinearEquationSolutions = () => {
     const y = getRandomInt(0, 5);
     const c = a * x + b * y;
 
-    const questionText = `$${a}x + ${b}y = ${c}$`;
+    // const questionText = `$${a}x + ${b}y = ${c}$`;
+    const questionText = `$${formatLinearExpression([{ coeff: a, var: 'x' }, { coeff: b, var: 'y' }])} = ${c}$`;
     const answer = `(${x}, ${y})`;
     const rows = [{ text: questionText, answer: answer }];
     const answerObj = { 0: answer };
@@ -214,7 +253,8 @@ export const generateLinearEquationSolving = () => {
     const y = getRandomInt(1, 5);
     const c = a * x + b * y;
 
-    const questionText = `$${a}x + ${b}y = ${c}$ if $x = ${x}$.`;
+    // const questionText = `$${a}x + ${b}y = ${c}$ if $x = ${x}$.`;
+    const questionText = `$${formatLinearExpression([{ coeff: a, var: 'x' }, { coeff: b, var: 'y' }])} = ${c}$ if $x = ${x}$.`;
     const answer = String(y);
     const rows = [{ text: questionText, answer: answer }];
     const answerObj = { 0: answer };
@@ -325,7 +365,7 @@ export const generateMensurationVolume = () => {
         const w = getRandomInt(2, 10);
         const h = getRandomInt(2, 10);
         const sa = 2 * (l * w + w * h + h * l);
-        questionText = `Find the total surface area of a cuboid with dimensions $${l}$ cm $\\times$ $${w}$ cm $\\times$ $${h}$ cm.`;
+        questionText = `Find the total surface area of a cuboid with dimensions </br> $${l}$ cm $\\times$ $${w}$ cm $\\times$ $${h}$ cm.`;
         val = sa;
         unit = "cm²";
         answer = `${sa} cm²`;
@@ -346,31 +386,24 @@ export const generateMensurationVolume = () => {
 // --- Statistics & Probability ---
 
 export const generateStatistics = () => {
-    const type = ["Mean", "Median", "Mode"][getRandomInt(0, 2)];
+    // User requested only "Mean" problems
+    const type = "Mean";
     let questionText, answer;
     const data = Array.from({ length: 5 }, () => getRandomInt(1, 10));
 
-    if (type === "Mean") {
-        const sum = data.reduce((a, b) => a + b, 0);
-        const remainder = sum % 5;
-        if (remainder !== 0) {
-            data[4] += (5 - remainder);
-        }
-        const newSum = data.reduce((a, b) => a + b, 0);
-        const mean = newSum / 5;
-        questionText = `Find the mean of the data: $${data.join(", ")}$`;
-        answer = String(mean);
-    } else if (type === "Median") {
-        data.sort((a, b) => a - b);
-        const median = data[2];
-        questionText = `Find the median of the data: $${shuffleArray([...data]).join(", ")}$`;
-        answer = String(median);
-    } else {
-        const modeVal = getRandomInt(1, 5);
-        const dataMode = [modeVal, modeVal, modeVal, getRandomInt(6, 9), getRandomInt(6, 9)];
-        questionText = `Find the mode of the data: $${shuffleArray(dataMode).join(", ")}$`;
-        answer = String(modeVal);
+    // Calculate sum
+    const sum = data.reduce((a, b) => a + b, 0);
+    // Adjust last number to ensure mean is an integer (sum divisible by 5)
+    const remainder = sum % 5;
+    if (remainder !== 0) {
+        data[4] += (5 - remainder);
     }
+
+    const newSum = data.reduce((a, b) => a + b, 0);
+    const mean = newSum / 5;
+
+    questionText = `Find the mean of the data: $${data.join(", ")}$`;
+    answer = String(mean);
 
     const rows = [{ text: questionText, answer: answer }];
     const answerObj = { 0: answer };
