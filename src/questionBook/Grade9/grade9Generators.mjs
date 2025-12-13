@@ -132,15 +132,28 @@ export const generatePolynomialOperations = () => {
     const resB = isAdd ? b1 + b2 : b1 - b2;
 
     const answer = `$${resA}x ${resB >= 0 ? '+' : '-'} ${Math.abs(resB)}$`;
-    const rows = [{ text: questionText, answer: answer }];
-    const answerObj = { 0: answer };
+
+    // Distractors
+    const w1 = `$${resA}x ${resB >= 0 ? '-' : '+'} ${Math.abs(resB)}$`; // Flip sign of constant
+    const w2 = `$${resA + 1}x ${resB >= 0 ? '+' : '-'} ${Math.abs(resB)}$`; // Wrong coeff
+    const w3 = `$${resA}x ${resB >= 0 ? '+' : '-'} ${Math.abs(resB) + 1}$`; // Wrong constant
+
+    const options = shuffleArray([
+        { value: answer, label: answer },
+        { value: w1, label: w1 },
+        { value: w2, label: w2 },
+        { value: w3, label: w3 }
+    ]);
+    const uniqueOptions = [];
+    const seen = new Set();
+    for (const o of options) { if (!seen.has(o.value)) { seen.add(o.value); uniqueOptions.push(o); } }
 
     return {
-        type: "tableInput",
-        question: "Simplify:",
+        type: "mcq",
+        question: `Simplify: ${questionText}`,
         topic: "Polynomials / Operations",
-        answer: JSON.stringify(answerObj),
-        rows: rows
+        options: uniqueOptions,
+        answer: answer
     };
 };
 
@@ -153,15 +166,28 @@ export const generatePolynomialFactorization = () => {
 
     const questionText = `$x^{2} + ${sum}x + ${prod}$`;
     const answer = `$(x + ${a})(x + ${b})$`;
-    const rows = [{ text: questionText, answer: answer }];
-    const answerObj = { 0: answer };
+
+    // Distractors
+    const w1 = `$(x - ${a})(x - ${b})$`;
+    const w2 = `$(x + ${a})(x - ${b})$`;
+    const w3 = `$(x - ${a})(x + ${b})$`;
+
+    const options = shuffleArray([
+        { value: answer, label: answer },
+        { value: w1, label: w1 },
+        { value: w2, label: w2 },
+        { value: w3, label: w3 }
+    ]);
+    const uniqueOptions = [];
+    const seen = new Set();
+    for (const o of options) { if (!seen.has(o.value)) { seen.add(o.value); uniqueOptions.push(o); } }
 
     return {
-        type: "tableInput",
-        question: "Factorise:",
+        type: "mcq",
+        question: `Factorise: ${questionText}`,
         topic: "Polynomials / Factorization",
-        answer: JSON.stringify(answerObj),
-        rows: rows
+        options: uniqueOptions,
+        answer: answer
     };
 };
 
