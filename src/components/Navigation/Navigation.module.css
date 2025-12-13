@@ -1,13 +1,21 @@
 .navigationContainer {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    padding: 1rem 10%;
+    padding: 1rem 5%;
     background: transparent;
     position: sticky;
     top: 0;
     z-index: 1000;
     transition: all 0.3s ease;
+}
+
+.navigationContainer>* {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    width: 100%;
 }
 
 .scrolled {
