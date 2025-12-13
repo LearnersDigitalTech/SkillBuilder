@@ -213,7 +213,7 @@ const HomeContent = () => {
                     <img
                         src="/HeroIllustration.gif"
                         alt="Landing Illustration"
-                        style={{ width: '75%', height: 'auto', mixBlendMode: 'multiply', filter: 'brightness(1.05)' }}
+                        style={{ width: '95%', height: 'auto', mixBlendMode: 'multiply', filter: 'brightness(1.05)' }}
                     />
                 </div>
             </div>

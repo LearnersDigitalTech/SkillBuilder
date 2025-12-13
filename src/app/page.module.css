@@ -8,8 +8,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 3rem 5%;
-    min-height: calc(90vh - 80px);
+    padding: 1.5rem 5% 2rem;
+    min-height: calc(85vh - 80px);
     background: radial-gradient(circle at 50% 50%, #ffffff 0%, #eff6ff 100%);
     position: relative;
     overflow: hidden;
@@ -25,7 +25,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 4rem;
+    gap: 3rem;
     max-width: 1400px;
     width: 100%;
     margin: 0 auto;
@@ -33,38 +33,36 @@
 
 .contentContainer {
     flex: 1;
-    max-width: 650px;
+    max-width: 600px;
     z-index: 2;
 }
 
 .contentContainer h1 {
-    font-size: 3rem;
-    /* Slightly smaller for compactness */
+    font-size: 2.75rem;
     font-weight: 800;
-    line-height: 1.15;
-    margin-bottom: 1rem;
+    line-height: 1.1;
+    margin-bottom: 0.75rem;
     color: #1a202c;
     background: linear-gradient(to right, #2563eb, #7c3aed);
-    /* More vibrant blue-purple */
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .contentContainer>p:first-of-type {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: #4f46e5;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
 }
 
 .contentContainer>p:nth-of-type(2) {
-    font-size: 1.25rem;
-    line-height: 1.5;
+    font-size: 1.15rem;
+    line-height: 1.4;
     color: #4b5563;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .contentContainer button {
@@ -148,11 +146,11 @@
 }
 
 .illustrationContainer {
-    flex: 1;
+    flex: 1.1;
     display: flex;
     justify-content: center;
     align-items: center;
-    max-width: 600px;
+    max-width: 650px;
 }
 
 .whyChooseUsContainer {
