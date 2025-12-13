@@ -48,16 +48,21 @@ const Grade7Questions = {
     q8: generate(generateBODMAS),
     q9: generate(generatePerimeterAndArea),
     q10: generate(generateCommercialMath),
-    q11: generate(() => generateExponentLaws([0, 1])),
-    q12: generate(() => generateExponentLaws([2, 3])),
-    q13: generate(generateGrade7Algebra),
-    q14: generate(generateAlgebraWordProblemTable),
-    q15: generate(generateLinesAndAngles),
-    q16: generate(generateTrianglesProperties),
-    q17: generate(generateSolidShapesProperties),
-    q18: generate(generatePercentage),
-    q19: generate(generateDataHandling),
-    q20: generate(generateBarGraph),
+    q11: generate(() => generateExponentLaws([0])), // Product Law
+    q12: generate(() => generateExponentLaws([1])), // Quotient Law
+    q13: generate(() => generateExponentLaws([2])), // Power of Power
+    q14: generate(() => generateExponentLaws([4])), // Power of Product
+    q15: generate(() => generateExponentLaws([5])), // Power of Quotient
+    q16: generate(() => generateExponentLaws([3])), // Zero Exponent
+    q17: generate(() => generateExponentLaws([6])), // Negative Exponent
+    q18: generate(generateGrade7Algebra),
+    q19: generate(generateAlgebraWordProblemTable),
+    q20: generate(generateLinesAndAngles),
+    q21: generate(generateTrianglesProperties),
+    q22: generate(generateSolidShapesProperties),
+    q23: generate(generatePercentage),
+    q24: generate(generateDataHandling),
+    q25: generate(generateBarGraph),
     // Fill remaining slots to reach q30
     // q21: generate(generateIntegerOps),
     // q22: generate(generateRationalOps),

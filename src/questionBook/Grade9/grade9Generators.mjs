@@ -165,7 +165,7 @@ export const generatePolynomialOperations = () => {
 
     return {
         type: "tableInput",
-        question: "Simplify:",
+        question: `Simplify: ${questionText}`,
         topic: "Polynomials / Operations",
         answer: JSON.stringify(answerObj),
         rows: rows
@@ -195,7 +195,7 @@ export const generatePolynomialFactorization = () => {
 
     return {
         type: "tableInput",
-        question: "Factorise:",
+        question: `Factorise: ${questionText}`,
         topic: "Polynomials / Factorization",
         answer: JSON.stringify(answerObj),
         rows: rows
