@@ -458,7 +458,7 @@ const DashboardClient = () => {
 
             <div className={Styles.dashboardContainer}>
                 {/* Profile Section - Sticky & Reorganized */}
-                <section ref={profileCardRef} className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 mb-6 relative overflow-hidden flex flex-col transition-all duration-300 md:sticky md:top-6 md:self-start z-10">
+                <section ref={profileCardRef} className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 mb-6 relative overflow-hidden flex flex-col transition-all duration-300 z-10">
                     <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-10 pointer-events-none" />
 
                     <div className="relative z-10 flex-1 flex flex-col h-full">
