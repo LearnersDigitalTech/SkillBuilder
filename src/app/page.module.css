@@ -8,10 +8,11 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 4rem 10%;
-    gap: 4rem;
-    min-height: calc(100vh - 80px);
-    background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+    padding: 2rem 5%;
+    gap: 2rem;
+    min-height: calc(85vh - 80px);
+    /* Reduced height to keep above fold */
+    background: radial-gradient(circle at 70% 50%, #ffffff 0%, #eff6ff 100%);
     position: relative;
     overflow: hidden;
 }
@@ -22,12 +23,14 @@
 }
 
 .contentContainer h1 {
-    font-size: 3.5rem;
+    font-size: 3rem;
+    /* Slightly smaller for compactness */
     font-weight: 800;
-    line-height: 1.2;
-    margin-bottom: 1.5rem;
+    line-height: 1.15;
+    margin-bottom: 1rem;
     color: #1a202c;
-    background: linear-gradient(to right, #2563eb, #9333ea);
+    background: linear-gradient(to right, #2563eb, #7c3aed);
+    /* More vibrant blue-purple */
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -44,9 +47,9 @@
 
 .contentContainer>p:nth-of-type(2) {
     font-size: 1.25rem;
-    line-height: 1.6;
+    line-height: 1.5;
     color: #4b5563;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
 }
 
 .contentContainer button {
@@ -141,56 +144,151 @@
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 2rem;
     margin-top: 0;
-    padding: 4rem 10%;
+    margin-top: 0;
+    padding: 1rem 5%;
+    /* Tight packing to remove gaps */
     background-color: #f8fafc;
 }
 
 .whyChooseUsContainer>div {
+    /* Card Styles - Horizontal Compact */
     background: white;
-    padding: 2rem;
+    padding: 1.5rem;
+    /* Reduced internal padding */
     border-radius: 1rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease-in-out;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    /* Horizontal Layout */
     align-items: flex-start;
+    /* Align icon to top */
     gap: 1rem;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: none;
+    /* Removed border */
+
+    position: relative;
+    overflow: hidden;
+
+    /* Animation Initial State */
+    opacity: 0;
+    /* Fast, subtle entrance only. No continuous float. */
+    animation: fadeInUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* Staggered Animation Delays - Faster Sequence */
+.whyChooseUsContainer>div:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.whyChooseUsContainer>div:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.whyChooseUsContainer>div:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+.whyChooseUsContainer>div:nth-child(4) {
+    animation-delay: 0.2s;
+}
+
+.whyChooseUsContainer>div:nth-child(5) {
+    animation-delay: 0.25s;
+}
+
+.whyChooseUsContainer>div:nth-child(6) {
+    animation-delay: 0.3s;
+}
+
+.whyChooseUsContainer>div:nth-child(7) {
+    animation-delay: 0.35s;
+}
+
+.whyChooseUsContainer>div:nth-child(8) {
+    animation-delay: 0.4s;
+}
+
+/* Keyframes for "Moving Fade In" */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Removed @keyframes float */
+
+/* Remove gradient top border to look cleaner */
+.whyChooseUsContainer>div::before {
+    display: none;
 }
 
 .whyChooseUsContainer>div:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    transform: translateY(-4px);
+    /* Subtle lift */
+    box-shadow: 0 12px 24px -8px rgba(37, 99, 235, 0.15);
+    /* Blue-tinted shadow */
+    border-color: #2563eb;
+    /* Active Brand Color border */
 }
 
+/* Unified Icon Style - Compact */
 .whyChooseUsContainer svg {
-    color: #2563eb;
-    background: rgba(37, 99, 235, 0.1);
-    padding: 8px;
-    border-radius: 8px;
+    flex-shrink: 0;
+    /* Prevent icon shrinking */
+    color: #2563eb !important;
+    /* Primary Blue */
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    /* Soft Blue Glass */
+    padding: 10px;
+    /* Slightly smaller padding */
+    border-radius: 10px;
     box-sizing: content-box;
+    width: 24px;
+    height: 24px;
+    margin-bottom: 0;
+    /* Remove bottom margin as it is side-by-side now */
+    border: 1px solid #bfdbfe;
+    /* Subtle inner border for definition */
+}
+
+/* Clean up old individual colors */
+.whyChooseUsContainer>div:nth-child(n) svg {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    box-shadow: none;
 }
 
 .whyChooseUsContainer h4 {
     margin: 0;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #1e293b;
+    font-size: 1.35rem;
+    /* Larger title */
+    font-weight: 800;
+    /* Bolder */
+    color: #111827;
+    /* Darker black */
+    letter-spacing: -0.02em;
 }
 
 .whyChooseUsContainer p {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: 1rem;
     line-height: 1.6;
-    color: #64748b;
+    color: #4b5563;
+    font-weight: 500;
 }
 
 .poweredByContainer {
     display: flex;
     align-items: center;
     gap: 4rem;
-    margin-top: 4rem;
-    padding: 4rem 10%;
+    margin-top: 2rem;
+    padding: 3rem 5%;
     background-color: #fff;
 }
 
@@ -254,8 +352,8 @@
 .empoweringParentsContainer {
     display: flex;
     align-items: center;
-    gap: 4rem;
-    padding: 4rem 10%;
+    gap: 2rem;
+    padding: 3rem 5%;
     background-color: #fff;
 }
 
@@ -331,8 +429,8 @@
 .placesContainer {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    padding: 4rem 10%;
+    gap: 1.5rem;
+    padding: 3rem 5%;
     background-color: #f8fafc;
 }
 

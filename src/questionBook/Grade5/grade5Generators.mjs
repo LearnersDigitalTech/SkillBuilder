@@ -1015,7 +1015,8 @@ export const generateNumberPattern = () => {
         answer: answer,
         topic: "Pattern Recognition",
         instructions: instructions, // Dynamic instructions
-        format: "text"
+        format: "text",
+        keypadMode: "multiplication"
     };
 };
 
