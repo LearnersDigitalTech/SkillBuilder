@@ -6,20 +6,39 @@ import Navigation from "@/components/Navigation/Navigation.component";
 import Footer from "@/components/Footer/Footer.component";
 import PhoneNumberDialog from "@/components/Auth/PhoneNumberDialog";
 import { CircularProgress, Button, FormControl, InputLabel, Select, MenuItem, TextField, Dialog, DialogTitle, DialogContent, Card, CardContent, Tabs, Tab } from "@mui/material";
-import { User, LogOut, BookOpen, Clock, Award, ChevronRight, Edit2, GraduationCap, Zap } from "lucide-react";
+import { User, LogOut, BookOpen, Clock, Award, ChevronRight, Edit2, GraduationCap, Zap, Plus as PlusIcon, Users, X, Flame, Target, TrendingUp, Globe, Lightbulb } from "lucide-react";
 import { ref, get, set } from "firebase/database";
 import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler";
 import Styles from "../../app/dashboard/Dashboard.module.css";
 import { QuizSessionContext } from "../../app/context/QuizSessionContext";
+import ProgressChart from "./ProgressChart";
 
 const DashboardClient = () => {
     const { user, userData, setUserData, logout, loading, refreshUserData } = useAuth();
     const router = useRouter();
     const [quizContext, setQuizContext] = useContext(QuizSessionContext);
     const [activeChildId, setActiveChildId] = useState(null);
+    const [showProfileList, setShowProfileList] = useState(false); // Toggle for Profile/Stats view
+    const profileCardRef = React.useRef(null); // Ref for click outside logic
+
+    // Close profile list when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (profileCardRef.current && !profileCardRef.current.contains(event.target)) {
+                setShowProfileList(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
     const [reports, setReports] = useState(null);
     const [fetchingReports, setFetchingReports] = useState(false);
     const [reportsCache, setReportsCache] = useState({});
+
+
+
 
     // Phone number dialog state
     const [showPhoneDialog, setShowPhoneDialog] = useState(false);
@@ -33,6 +52,8 @@ const DashboardClient = () => {
     });
 
     const [activeTab, setActiveTab] = useState(0);
+    const [showAllAssessments, setShowAllAssessments] = useState(false);
+    const [showAllRapidMath, setShowAllRapidMath] = useState(false);
 
     const handleTabChange = (event, newValue) => {
         setActiveTab(newValue);
@@ -424,7 +445,6 @@ const DashboardClient = () => {
         setQuizContext({ userDetails, questionPaper: null });
         router.push(type === 'RAPID_MATH' ? "/rapid-math" : "/quiz");
     };
-
     return (
         <div className={Styles.pageWrapper}>
             <Navigation />
@@ -437,96 +457,142 @@ const DashboardClient = () => {
             />
 
             <div className={Styles.dashboardContainer}>
-                {/* Profile Section */}
-                {/* Profile Section */}
-                <section className={Styles.profileSection}>
-                    <div className={Styles.profileCardHeader}>
-                        <div className={Styles.profileCover}></div>
-                        <div className={Styles.avatarWrapper}>
-                            <div className={Styles.avatar}>
-                                <User size={48} color="white" />
-                            </div>
-                        </div>
-                        <div className={Styles.profileInfo}>
-                            <h1>{activeChild?.name || "Student"}</h1>
-                            <div className={Styles.gradeTag}>
-                                <GraduationCap size={14} />
-                                <span>{activeChild?.grade || "Grade N/A"}</span>
-                            </div>
-                        </div>
-                    </div>
+                {/* Profile Section - Sticky & Reorganized */}
+                <section ref={profileCardRef} className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 mb-6 relative overflow-hidden flex flex-col transition-all duration-300 md:sticky md:top-6 md:self-start z-10">
+                    <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-10 pointer-events-none" />
 
-                    <div className={Styles.profileBody}>
-                        {children && (
-                            <div className={Styles.controlPanel}>
-                                <FormControl size="small" fullWidth className={Styles.childSelector}>
-                                    <InputLabel>Switch Profile</InputLabel>
-                                    <Select
-                                        value={activeChildId || ""}
-                                        label="Switch Profile"
-                                        onChange={handleChildChange}
-                                    >
-                                        {Object.entries(children).map(([id, child]) => (
-                                            <MenuItem key={id} value={id}>
-                                                {child.name} ({child.grade})
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
+                    <div className="relative z-10 flex-1 flex flex-col h-full">
+                        {/* --- ACTIVE PROFILE HEADER (Always Visible) --- */}
+                        {children && activeChildId && children[activeChildId] && (
+                            <div className="flex gap-4 mb-2 px-2">
+                                {/* Avatar */}
+                                <div className="relative group cursor-pointer shrink-0" onClick={handleEditChild}>
+                                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg shadow-blue-200 dark:shadow-blue-900 ring-4 ring-white dark:ring-slate-800 overflow-hidden transform transition-transform group-hover:scale-105">
+                                        {children[activeChildId].imageUrl ? (
+                                            <img src={children[activeChildId].imageUrl} alt={children[activeChildId].name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            children[activeChildId].name.charAt(0).toUpperCase()
+                                        )}
+                                    </div>
+                                    <div className="absolute bottom-1 right-0 bg-white dark:bg-slate-700 p-1 rounded-full shadow-md border border-slate-100 dark:border-slate-600">
+                                        <div className="bg-emerald-500 w-3 h-3 rounded-full animate-pulse ring-2 ring-white dark:ring-slate-700" />
+                                    </div>
+                                </div>
 
-                                <div className={Styles.actionButtonsRow}>
-                                    <Button
-                                        variant="outlined"
-                                        onClick={handleEditChild}
-                                        disabled={!activeChildId}
-                                        startIcon={<Edit2 size={16} />}
-                                        fullWidth
-                                        className={Styles.secondaryActionBtn}
-                                    >
-                                        Edit
-                                    </Button>
-                                    <Button
-                                        variant="contained"
-                                        onClick={handleOpenAddChild}
-                                        fullWidth
-                                        className={Styles.primaryActionBtn}
-                                    >
-                                        Add Child
-                                    </Button>
+                                {/* Info & Controls */}
+                                <div className="flex-1 flex flex-col justify-center">
+                                    <h3 className="text-2xl font-bold text-slate-800 dark:text-white leading-tight mb-1 tracking-tight">
+                                        {children[activeChildId].name.split(' ')[0]}
+                                    </h3>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[10px] font-bold uppercase tracking-wider rounded-md border border-blue-100 dark:border-blue-800">
+                                            {children[activeChildId].grade}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         )}
 
-                        <div className={Styles.statsGrid}>
-                            <div className={Styles.statCard}>
-                                <div className={`${Styles.statIconBox} ${Styles.blueIcon}`}>
-                                    <BookOpen size={20} />
+                        {/* --- DYNAMIC CONTENT (Stats OR List) --- */}
+                        <div className="relative pt-6 min-h-[180px] flex-1">
+                            {!showProfileList ? (
+                                /* SCENARIO 1: MAGIC BADGES (Enlarged) */
+                                <div className="animate-in fade-in zoom-in-95 duration-300 h-full flex flex-col">
+
+
+
+
+                                    {/* TAKE TEST BUTTON */}
+                                    <button
+                                        onClick={() => handleStartAssessment('ASSESSMENT', 0)}
+                                        className="mt-3 w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-md hover:shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all flex items-center justify-center gap-2 group shrink-0"
+                                    >
+                                        <div className="bg-white/20 p-1 rounded-full group-hover:scale-110 transition-transform">
+                                            <PlusIcon size={16} className="text-white" />
+                                        </div>
+                                        Take New Test
+                                    </button>
+
+                                    {/* CHILD MANAGEMENT BUTTONS */}
+                                    <div className="grid grid-cols-2 gap-2 mt-3">
+                                        <button
+                                            onClick={() => setShowProfileList(!showProfileList)}
+                                            className="py-2 px-3 rounded-lg bg-slate-100 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600 transition-all flex items-center justify-center gap-2 text-sm font-semibold group"
+                                        >
+                                            <Users size={16} className="group-hover:scale-110 transition-transform" />
+                                            Switch Child
+                                        </button>
+                                        <button
+                                            onClick={handleOpenAddChild}
+                                            className="py-2 px-3 rounded-lg bg-slate-100 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600 transition-all flex items-center justify-center gap-2 text-sm font-semibold group"
+                                        >
+                                            <PlusIcon size={16} className="group-hover:scale-110 transition-transform" />
+                                            Add Child
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className={Styles.statInfo}>
-                                    <p className={Styles.statLabel}>Status</p>
-                                    <h3 className={Styles.statValue}>{reports ? "Active" : "New"}</h3>
+                            ) : (
+                                /* SCENARIO 2: PROFILE LIST (Optimized) */
+                                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 h-full flex flex-col">
+                                    <div className="flex items-center justify-between mb-4 px-1">
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Select Learner</p>
+                                    </div>
+
+                                    <div className="max-h-[350px] overflow-y-auto pr-1 custom-scrollbar flex flex-col gap-2 flex-1">
+                                        <style jsx global>{`
+                                            .custom-scrollbar::-webkit-scrollbar { width: 3px; }
+                                            .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                                            .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+                                        `}</style>
+
+                                        {/* 1. Add New Learner */}
+                                        <button
+                                            onClick={handleOpenAddChild}
+                                            className="w-full p-3 rounded-xl border-2 border-dashed border-blue-200 dark:border-blue-800/50 bg-blue-50/50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 hover:bg-blue-50 hover:border-blue-400 flex items-center justify-center gap-2 text-xs font-bold transition-all shadow-sm group mb-1 shrink-0"
+                                        >
+                                            <div className="bg-blue-100 dark:bg-blue-900 p-0.5 rounded-full group-hover:scale-110 transition-transform">
+                                                <PlusIcon size={14} />
+                                            </div>
+                                            <span className="text-sm">Add New Learner</span>
+                                        </button>
+
+                                        {/* 2. Existing Profiles */}
+                                        {children && Object.entries(children)
+                                            .sort(([, a], [, b]) => a.name.localeCompare(b.name))
+                                            .filter(([id]) => id !== activeChildId)
+                                            .map(([id, child]) => (
+                                                <div
+                                                    key={id}
+                                                    onClick={() => {
+                                                        handleChildChange({ target: { value: id } });
+                                                        setShowProfileList(false);
+                                                    }}
+                                                    className="w-full p-2.5 rounded-xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-300 hover:shadow-md hover:translate-x-1 cursor-pointer flex items-center gap-3 transition-all duration-200 group shrink-0"
+                                                >
+                                                    <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 font-bold text-sm group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors shrink-0">
+                                                        {child.name.charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-bold text-slate-700 dark:text-slate-300 leading-none mb-1 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">{child.name}</p>
+                                                        <p className="text-[10px] text-slate-400 font-medium">{child.grade}</p>
+                                                    </div>
+                                                    <ChevronRight size={14} className="text-slate-300 group-hover:text-blue-400 transition-colors shrink-0" />
+                                                </div>
+                                            ))
+                                        }
+                                    </div>
                                 </div>
-                            </div>
-                            <div className={Styles.statCard}>
-                                <div className={`${Styles.statIconBox} ${Styles.orangeIcon}`}>
-                                    <Clock size={20} />
-                                </div>
-                                <div className={Styles.statInfo}>
-                                    <p className={Styles.statLabel}>Last Active</p>
-                                    <h3 className={Styles.statValue}>{new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</h3>
-                                </div>
-                            </div>
+                            )}
                         </div>
 
-                        <Button
-                            variant="text"
-                            color="error"
-                            startIcon={<LogOut size={16} />}
+                        {/* Sign Out - Footer (Grey to Red) */}
+                        <button
                             onClick={handleLogout}
-                            className={Styles.logoutButtonText}
+                            className="w-full mt-6 py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-700/50 text-slate-500 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 border border-transparent hover:border-red-100 dark:hover:border-red-900/30 transition-all duration-200 text-xs font-bold flex items-center justify-center gap-2 group"
                         >
+                            <LogOut size={14} className="group-hover:stroke-red-500 transition-colors" />
                             Sign Out
-                        </Button>
+                        </button>
                     </div>
                 </section>
 
@@ -586,128 +652,156 @@ const DashboardClient = () => {
                                     }
                                 });
 
+                                const handleAssessmentClick = (data) => {
+                                    if (data && data.id) {
+                                        router.push(`/quiz/quiz-result?reportId=${data.id}`);
+                                    }
+                                };
+
+                                const handleRapidMathClick = (data) => {
+                                    if (data && data.id) {
+                                        router.push(`/rapid-math/test/summary?reportId=${data.id}`);
+                                    }
+                                };
+
                                 return (
-                                    <>
-                                        <div className={Styles.tabsContainer}>
+                                    <div className="animate-fade-in">
+                                        {/* Report Tabs - Modern Style */}
+                                        <div className="mb-6 border-b border-slate-200 dark:border-slate-700">
                                             <Tabs
                                                 value={activeTab}
                                                 onChange={handleTabChange}
                                                 aria-label="report tabs"
-                                                className={Styles.customTabs}
-                                                TabIndicatorProps={{ style: { backgroundColor: '#2563eb', height: 3, borderRadius: '3px 3px 0 0' } }}
+                                                sx={{
+                                                    '& .MuiTab-root': {
+                                                        textTransform: 'none',
+                                                        fontSize: '1rem',
+                                                        fontWeight: 600,
+                                                        color: '#64748b',
+                                                        minHeight: '48px',
+                                                        '&.Mui-selected': { color: '#2563eb' }
+                                                    },
+                                                    '& .MuiTabs-indicator': { backgroundColor: '#2563eb', height: 3, borderRadius: '3px 3px 0 0' }
+                                                }}
                                             >
-                                                <Tab label="Skill Assessments" className={Styles.customTab} />
-                                                <Tab label="Rapid Math" className={Styles.customTab} />
+                                                <Tab label="Skill Assessments" />
+                                                <Tab label="Rapid Math" />
                                             </Tabs>
                                         </div>
 
-                                        <div role="tabpanel" hidden={activeTab !== 0}>
-                                            {activeTab === 0 && (
-                                                <>
-                                                    {assessmentReports.length > 0 ? (
-                                                        <div className={Styles.reportsList}>
-                                                            {assessmentReports.map((report, index) => (
-                                                                <Card key={report.id || index} className={Styles.reportCard}>
-                                                                    <CardContent className={Styles.reportContent}>
-                                                                        <div className={Styles.reportInfo}>
-                                                                            <div className={Styles.reportIcon}>
-                                                                                <Award size={24} />
-                                                                            </div>
-                                                                            <div>
-                                                                                <h3>Math Skill Proficiency Test {assessmentReports.length - index}</h3>
-                                                                                <p className={Styles.reportDate}>
-                                                                                    {new Date(report.timestamp).toLocaleDateString()} • {new Date(report.timestamp).toLocaleTimeString()}
-                                                                                </p>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className={Styles.reportScore}>
-                                                                            <div className={Styles.scoreBadge}>
-                                                                                {report.summary.totalQuestions > 0
-                                                                                    ? Math.round(report.summary.accuracyPercent)
-                                                                                    : 0}%
-                                                                            </div>
-                                                                            <Button
-                                                                                endIcon={<ChevronRight />}
-                                                                                onClick={() => router.push(`/quiz/quiz-result?reportId=${report.id}`)}
-                                                                            >
-                                                                                View Report
-                                                                            </Button>
-                                                                        </div>
-                                                                    </CardContent>
-                                                                </Card>
-                                                            ))}
-                                                        </div>
-                                                    ) : (
-                                                        <div className={Styles.emptyState}>
-                                                            <img src="/empty-state.svg" alt="No assessments" className={Styles.emptyImage} />
-                                                            <p>You haven't taken any assessments yet.</p>
-                                                            <Button
-                                                                variant="contained"
-                                                                className={Styles.startBtn}
-                                                                onClick={() => router.push("/quiz")}
-                                                            >
-                                                                Start Assessment
-                                                            </Button>
-                                                        </div>
-                                                    )}
-                                                </>
-                                            )}
-                                        </div>
+                                        {/* CONTENT AREA - SIDE BY SIDE LAYOUT */}
+                                        {/* Grid: 2 Cols for Chart (66%), 1 Col for History (33%) */}
+                                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
-                                        <div role="tabpanel" hidden={activeTab !== 1}>
-                                            {activeTab === 1 && (
-                                                <>
-                                                    {rapidMathReports.length > 0 ? (
-                                                        <div className={Styles.reportsList}>
-                                                            {rapidMathReports.map((report, index) => (
-                                                                <Card key={report.id || index} className={Styles.reportCard}>
-                                                                    <CardContent className={Styles.reportContent}>
-                                                                        <div className={Styles.reportInfo}>
-                                                                            <div className={`${Styles.reportIcon} ${Styles.rapidIcon}`}>
-                                                                                <Zap size={24} />
+                                            {/* LEFT COLUMN: CHART */}
+                                            <div className="lg:col-span-2">
+                                                {activeTab === 0 && assessmentReports.length > 0 && (
+                                                    <ProgressChart
+                                                        data={assessmentReports}
+                                                        type="ASSESSMENT"
+                                                        onPointClick={handleAssessmentClick}
+                                                    />
+                                                )}
+                                                {activeTab === 1 && rapidMathReports.length > 0 && (
+                                                    <ProgressChart
+                                                        data={rapidMathReports}
+                                                        type="RAPID_MATH"
+                                                        onPointClick={handleRapidMathClick}
+                                                    />
+                                                )}
+
+                                                {/* Empty States for Chart Area */}
+                                                {activeTab === 0 && assessmentReports.length === 0 && (
+                                                    <div className={Styles.emptyState}>
+                                                        <img src="/empty-state.svg" alt="No assessments" className={Styles.emptyImage} />
+                                                        <p>You haven't taken any assessments yet.</p>
+                                                        <Button
+                                                            variant="contained"
+                                                            className={Styles.startBtn}
+                                                            onClick={() => router.push("/quiz")}
+                                                        >
+                                                            Start Assessment
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                                {activeTab === 1 && rapidMathReports.length === 0 && (
+                                                    <div className={Styles.emptyState}>
+                                                        <img src="/empty-state.svg" alt="No rapid math" className={Styles.emptyImage} />
+                                                        <p>No Rapid Math challenges yet.</p>
+                                                        <Button
+                                                            variant="contained"
+                                                            className={Styles.startBtn}
+                                                            onClick={() => router.push("/rapid-math")}
+                                                        >
+                                                            Start Challenge
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* RIGHT COLUMN: HISTORY LIST */}
+                                            {/* Scrollable Container to match Chart Height approx 440px */}
+                                            <div className="lg:col-span-1">
+                                                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col h-[440px]">
+
+                                                    <div className="p-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex justify-between items-center">
+                                                        <h3 className="font-bold text-slate-800 dark:text-slate-200">Recent History</h3>
+                                                        {/* View All Toggle */}
+                                                        {(activeTab === 0 ? assessmentReports : rapidMathReports).length > 5 && (
+                                                            <button
+                                                                onClick={() => activeTab === 0 ? setShowAllAssessments(!showAllAssessments) : setShowAllRapidMath(!showAllRapidMath)}
+                                                                className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+                                                            >
+                                                                {(activeTab === 0 ? showAllAssessments : showAllRapidMath) ? "Collapse" : "View All"}
+                                                            </button>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="overflow-y-auto flex-1 p-2 space-y-2">
+                                                        {(activeTab === 0 ? assessmentReports : rapidMathReports).length > 0 ? (
+                                                            (activeTab === 0 ? assessmentReports : rapidMathReports)
+                                                                .slice(0, (activeTab === 0 ? showAllAssessments : showAllRapidMath) ? undefined : 20) // Show more by default in scroll view
+                                                                .map((report, index) => (
+                                                                    <div
+                                                                        key={report.id || index}
+                                                                        className="group flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 border border-transparent hover:border-slate-200 transition-all cursor-pointer"
+                                                                        onClick={() => activeTab === 0 ? router.push(`/quiz/quiz-result?reportId=${report.id}`) : router.push(`/rapid-math/test/summary?reportId=${report.id}`)}
+                                                                    >
+                                                                        <div className="flex items-center gap-3">
+                                                                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${activeTab === 0 ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600'} group-hover:scale-105 transition-transform`}>
+                                                                                {activeTab === 0 ? <Award size={20} /> : <Zap size={20} />}
                                                                             </div>
                                                                             <div>
-                                                                                <h3>Rapid Math Challenge</h3>
-                                                                                <p className={Styles.reportDate}>
-                                                                                    {new Date(report.timestamp).toLocaleDateString()} • {new Date(report.timestamp).toLocaleTimeString()}
+                                                                                <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 line-clamp-1">
+                                                                                    {activeTab === 0 ? `Proficiency Test ${assessmentReports.length - index}` : "Rapid Math"}
+                                                                                </h4>
+                                                                                <p className="text-[11px] font-medium text-slate-500">
+                                                                                    {new Date(report.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} • {new Date(report.timestamp).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
                                                                                 </p>
                                                                             </div>
                                                                         </div>
-                                                                        <div className={Styles.reportScore}>
-                                                                            <div className={`${Styles.scoreBadge} ${Styles.rapidBadge}`}>
-                                                                                {report.summary.accuracyPercent}% Score
+
+                                                                        <div className="text-right">
+                                                                            <div className={`text-sm font-bold ${activeTab === 0 ? 'text-blue-600' : 'text-amber-600'}`}>
+                                                                                {Math.round(report.summary.accuracyPercent)}%
                                                                             </div>
-                                                                            <Button
-                                                                                endIcon={<ChevronRight />}
-                                                                                onClick={() => router.push(`/rapid-math/test/summary?reportId=${report.id}`)}
-                                                                            >
-                                                                                View Report
-                                                                            </Button>
                                                                         </div>
-                                                                    </CardContent>
-                                                                </Card>
-                                                            ))}
-                                                        </div>
-                                                    ) : (
-                                                        <div className={Styles.emptyState}>
-                                                            <img src="/empty-state.svg" alt="No rapid math" className={Styles.emptyImage} />
-                                                            <p>No Rapid Math challenges yet.</p>
-                                                            <Button
-                                                                variant="contained"
-                                                                className={Styles.startBtn}
-                                                                onClick={() => router.push("/rapid-math")}
-                                                            >
-                                                                Start Challenge
-                                                            </Button>
-                                                        </div>
-                                                    )}
-                                                </>
-                                            )}
+                                                                    </div>
+                                                                ))
+                                                        ) : (
+                                                            <div className="flex flex-col items-center justify-center h-full text-slate-400 p-8 text-center opacity-60">
+                                                                <div className="mb-2"><Clock size={32} /></div>
+                                                                <span className="text-sm">No recent activity</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </>
+                                    </div>
                                 );
                             })()}
-                        </div>
+                        </div >
                     ) : (
                         <div className={Styles.emptyState}>
                             <img src="/empty-state.svg" alt="No assessments" className={Styles.emptyImage} />

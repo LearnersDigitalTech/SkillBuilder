@@ -2,7 +2,7 @@
 import Navigation from "@/components/Navigation/Navigation.component";
 import Styles from "../../app/page.module.css";
 import { Button, CircularProgress } from "@mui/material";
-import { Award, Clock, Contact, ArrowRight, Target } from "lucide-react";
+import { Award, Clock, Contact, ArrowRight, Target, Coins, Ticket, School, Medal } from "lucide-react";
 import dynamic from "next/dynamic";
 // const LandingIllustration = dynamic(() => import("@/components/LottieAnimations/Landing/Landing.component"), { ssr: false });
 import SampleDashboard from "@/components/SampleDashboard/SampleDashboard.component";
@@ -12,6 +12,7 @@ import { useContext, useState } from "react";
 import { QuizSessionContext } from "../../app/context/QuizSessionContext";
 import { toast } from "react-toastify";
 import SuccessStories from "@/components/SuccessStories/SuccessStories.component";
+import MathClub from "@/components/Home/MathClub.component";
 import AuthModal from "@/components/Auth/AuthModal.component";
 import { useAuth } from "@/context/AuthContext";
 import CustomModal from "@/components/CustomModal/CustomModal.component";
@@ -186,7 +187,7 @@ const HomeContent = () => {
                                 }
                             }}
                         >
-                            Take Skill Assessment
+                            Start Assessment
                         </Button>
                     </div>
 
@@ -212,36 +213,73 @@ const HomeContent = () => {
                     <img
                         src="/HeroIllustration.gif"
                         alt="Landing Illustration"
-                        style={{ width: '90%', height: 'auto' }}
+                        style={{ width: '90%', height: 'auto', mixBlendMode: 'multiply', filter: 'brightness(1.05)' }}
                     />
                 </div>
             </div>
 
             <SuccessStories />
-            <div className={Styles.whyChooseUsContainer}>
-                <div>
-                    <Target size={40} />
-                    <h4>Personalized Assessment</h4>
-                    <p>Adaptive questions tailored to your child's math skills and grade level.</p>
-                </div>
+            <MathClub onStart={handleStartAssessment} />
+            {/* <div className={Styles.whyChooseUsContainer}>
                 <div>
                     <Award size={40} />
-                    <h4>Detailed Math Reports</h4>
-                    <p>In-depth analysis highlighting strengths and areas to improve.</p>
+                    <div>
+                        <h4>Official Certification 🏆</h4>
+                        <p>Earn a verifiable certificate of mastery to acknowledge your mathematical achievement.</p>
+                    </div>
+                </div>
+                <div>
+                    <Target size={40} />
+                    <div>
+                        <h4>State-Level Ranking 📊</h4>
+                        <p>Compete with peers across the state and see exactly where you stand on the leaderboard.</p>
+                    </div>
                 </div>
                 <div>
                     <Clock size={40} />
-                    <h4>Quick & Efficient</h4>
-                    <p>Complete the math assessment in just 5 minutes with instant feedback.</p>
+                    <div>
+                        <h4>Adaptive 30-Min Test 🎯</h4>
+                        <p>A smart, stress-free assessment that adapts to your level. No preparation required.</p>
+                    </div>
                 </div>
                 <div>
                     <Contact size={40} />
-                    <h4>Parent Dashboard</h4>
-                    <p>Monitor your child's progress and get personalized recommendations.</p>
+                    <div>
+                        <h4>In-Depth Skill Report 📋</h4>
+                        <p>Get a significant topic-wise breakdown of your logic, arithmetic, and geometry skills instantly.</p>
+                    </div>
                 </div>
-            </div>
+                <div>
+                    <Coins size={40} />
+                    <div>
+                        <h4>Cash Rewards 💰</h4>
+                        <p>Top rankers in each grade win exciting cash scholarships to support their academic journey.</p>
+                    </div>
+                </div>
+                <div>
+                    <Ticket size={40} />
+                    <div>
+                        <h4>Grand Finale Invite 🎟️</h4>
+                        <p>Qualify for the exclusive award ceremony at Learners Global School with industry leaders.</p>
+                    </div>
+                </div>
+                <div>
+                    <School size={40} />
+                    <div>
+                        <h4>School Championship 🏫</h4>
+                        <p>Win points for your school's championship tally. Be the pride of your institution.</p>
+                    </div>
+                </div>
+                <div>
+                    <Medal size={40} />
+                    <div>
+                        <h4>Merit Medals 🥇</h4>
+                        <p>Gold, Silver, and Bronze medals for district toppers ensuring your hard work is honored.</p>
+                    </div>
+                </div>
+            </div> */}
 
-            <div className={Styles.empoweringParentsContainer}>
+            {/* <div className={Styles.empoweringParentsContainer}>
                 <SampleDashboard />
                 <div className={Styles.empoweringParentsContent}>
                     <h2 className={Styles.empoweringParentsTitle}>Empowering Parents with Actionable Insights</h2>
@@ -265,7 +303,7 @@ const HomeContent = () => {
                     </ul>
                 </div>
 
-            </div>
+            </div> */}
 
             <div className={Styles.poweredByContainer}>
                 <div>

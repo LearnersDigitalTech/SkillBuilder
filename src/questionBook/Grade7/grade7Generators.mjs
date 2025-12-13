@@ -179,7 +179,8 @@ export const generateExponentLaws = (allowedTypes = [0, 1, 2, 3]) => {
         wrong2 = `$${base} \\times ${base2}^{${p1}}$`;
         wrong3 = `$${base + base2}^{${p1}}$`;
     } else if (typeIdx === 5) { // Power of Quotient: (a/b)^m = a^m / b^m
-        const base2 = getRandomInt(2, 5);
+        let base2 = getRandomInt(2, 5);
+        while (base2 === base) base2 = getRandomInt(2, 5); // Ensure distinct bases
         expr = `$(\\frac{${base}}{${base2}})^{${p1}}$`;
         ans = `$\\frac{${base}^{${p1}}}{${base2}^{${p1}}}$`;
         wrong1 = `$\\frac{${base}^{${p1}}}{${base2}}$`;
@@ -300,7 +301,6 @@ export const generateBODMAS = () => {
 
     return {
         type: "tableInput",
-        question: "Solve using BODMAS rules:",
         topic: "BODMAS",
         answer: JSON.stringify(answerObj),
         rows: rows
@@ -391,7 +391,6 @@ export const generatePerimeterAndArea = () => {
     return {
         type: "tableInput",
         variant: "double-input",
-        question: "Find the Perimeter and Area for the following shapes:",
         topic: "Perimeter and Area",
         headers: ["Shape", "Perimeter", "Area"], // Custom headers
         answer: JSON.stringify(answerObj),
@@ -729,9 +728,9 @@ export const generateGrade7Algebra = () => {
         const isCoeff = type ? type === "Coefficient" : Math.random() > 0.5;
 
         if (isCoeff) {
-            return { q: `Coeff of $${v}$ in $${c}${v} + ${k}$`, a: String(c) };
+            return { q: `What is the Coefficient of $${v}$ in $${c}${v} + ${k}$`, a: String(c) };
         } else {
-            return { q: `Constant in $${c}${v} + ${k}$`, a: String(k) };
+            return { q: `What is the Constant in $${c}${v} + ${k}$`, a: String(k) };
         }
     };
 
@@ -998,7 +997,6 @@ export const generateDataHandling = () => {
 
     return {
         type: "tableInput",
-        question: "Solve the following data handling problems:",
         rows: subQuestions,
         headers: ["Problem", "Answer"],
         answer: JSON.stringify(answerObj),

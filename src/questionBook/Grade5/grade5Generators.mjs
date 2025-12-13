@@ -545,7 +545,7 @@ export const generateUnitConversion = () => {
 
 export const generateTimeElapsed = () => {
     const startHour = getRandomInt(1, 10);
-    const duration = getRandomInt(1, 5);
+    const duration = getRandomInt(2, 3);
     const endHour = startHour + duration;
 
     const question = `If a movie starts at ${startHour}:00 PM and lasts for ${duration} hours, when does it end?`;
@@ -1015,7 +1015,8 @@ export const generateNumberPattern = () => {
         answer: answer,
         topic: "Pattern Recognition",
         instructions: instructions, // Dynamic instructions
-        format: "text"
+        format: "text",
+        keypadMode: "multiplication"
     };
 };
 
