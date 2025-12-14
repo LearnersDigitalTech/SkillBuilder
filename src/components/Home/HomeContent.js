@@ -399,48 +399,23 @@ const HomeContent = () => {
                 onClose={() => setGradeModalOpen(false)}
                 title="Select Your Grade"
                 content={
-                    <div style={{ padding: '16px' }}>
-                        <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '24px' }}>
+                    <div style={{ padding: '0 1rem 1rem' }}>
+                        <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '16px' }}>
                             Choose your grade level to start practicing
                         </p>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                        <div className={Styles.gradeSelectionGrid}>
                             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((grade) => {
                                 const isAvailable = grade >= 1 && grade <= 10;
                                 return (
-                                    <Button
+                                    <button
                                         key={grade}
-                                        variant={isAvailable ? "contained" : "outlined"}
-                                        onClick={() => handleGradeSelect(grade)}
-                                        sx={{
-                                            padding: '20px',
-                                            fontSize: '1.25rem',
-                                            fontWeight: '700',
-                                            borderRadius: '16px',
-                                            textTransform: 'none',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            gap: '4px',
-                                            borderColor: isAvailable ? 'transparent' : '#e2e8f0',
-                                            backgroundColor: isAvailable ? '#3c91f3' : 'transparent',
-                                            color: isAvailable ? 'white' : '#64748b',
-                                            boxShadow: isAvailable ? '0 4px 12px rgba(60, 145, 243, 0.3)' : 'none',
-                                            opacity: isAvailable ? 1 : 0.7,
-                                            '&:hover': {
-                                                borderColor: isAvailable ? 'transparent' : '#cbd5e1',
-                                                backgroundColor: isAvailable ? '#2563eb' : '#f8fafc',
-                                                transform: 'translateY(-2px)'
-                                            },
-                                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
-                                        }}
+                                        className={`${Styles.gradeSelectionButton} ${!isAvailable ? Styles.gradeSelectionButtonDisabled : ''}`}
+                                        onClick={() => isAvailable && handleGradeSelect(grade)}
+                                        disabled={!isAvailable}
                                     >
-                                        <span>Grade {grade}</span>
-                                        {!isAvailable && (
-                                            <span style={{ fontSize: '0.75rem', fontWeight: '500', opacity: 0.7 }}>Coming Soon</span>
-                                        )}
-                                        {isAvailable && (
-                                            <span style={{ fontSize: '0.75rem', fontWeight: '500', opacity: 0.9 }}>Available Now</span>
-                                        )}
-                                    </Button>
+                                        <span className={Styles.gradeSelectionNumber}>{grade}</span>
+                                        <span className={Styles.gradeSelectionLabel}>Grade</span>
+                                    </button>
                                 )
                             })}
                         </div>

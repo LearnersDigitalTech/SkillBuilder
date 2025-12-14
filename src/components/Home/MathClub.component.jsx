@@ -23,7 +23,7 @@ const MathClub = ({ onStart }) => {
                     className={Styles.ctaButton}
                     onClick={onStart}
                 >
-                    Start Practicing <ArrowRight size={20} />
+                    Start Practicing <ArrowRight size={25} />
                 </button>
             </div>
         </section>

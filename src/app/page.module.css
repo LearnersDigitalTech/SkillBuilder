@@ -1262,3 +1262,91 @@
         max-height: 80vh;
     }
 }
+
+/* Grade Selection Modal Standardized Styles */
+.gradeSelectionGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+    padding: 0.5rem 0;
+    margin-top: 1rem;
+}
+
+.gradeSelectionButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem 0.5rem;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    color: #475569;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.gradeSelectionButton:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    color: #1d4ed8;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1), 0 2px 4px -1px rgba(59, 130, 246, 0.06);
+}
+
+.gradeSelectionNumber {
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+    color: inherit;
+}
+
+.gradeSelectionLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    transition: color 0.2s;
+}
+
+.gradeSelectionButton:hover .gradeSelectionLabel {
+    color: #60a5fa;
+}
+
+.gradeSelectionButtonDisabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #f8fafc;
+    border-color: #f1f5f9;
+}
+
+.gradeSelectionButtonDisabled:hover {
+    transform: none;
+    border-color: #f1f5f9;
+    background: #f8fafc;
+    box-shadow: none;
+    color: #94a3b8;
+}
+
+@media (max-width: 640px) {
+    .gradeSelectionGrid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+    }
+
+    .gradeSelectionNumber {
+        font-size: 1.5rem;
+    }
+
+    .gradeSelectionButton {
+        padding: 1rem 0.5rem;
+    }
+}
