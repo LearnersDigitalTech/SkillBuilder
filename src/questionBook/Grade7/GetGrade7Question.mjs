@@ -86,4 +86,50 @@ const Grade7Questions = {
 
 };
 
+
+export const Grade7GeneratorMap = {
+    // Grade 10 Imports
+    "Number Sense / Natural & Whole": generateNaturalWholeNumbers,
+    "Integers / Mixed Operations": generateIntegersG10,
+    "Fractions / Mixed Operations": generateFractionsG10,
+    "Decimals / Mixed Operations": generateDecimalsG10,
+    "Number Sense / LCM": generateLCMG10,
+    "Number Sense / HCF": generateHCF,
+    "Ratio and Proportion": generateRatioProportion,
+    "BODMAS / Complex": generateBODMASG10,
+    "Geometry / Perimeter": generatePerimeter,
+
+    // Grade 7 Local
+    "Integers / Add": generateIntegerOps,
+    "Integers / Subtract": generateIntegerOps,
+    "Integers / Multiply": generateIntegerOps,
+    "Integers / Divide": generateIntegerOps,
+    "Rational Numbers / Operations": generateRationalOps,
+    "Exponents / Product Law": () => generateExponentLaws([0]),
+    "Exponents / Quotient Law": () => generateExponentLaws([1]),
+    "Exponents / Power of Power": () => generateExponentLaws([2]),
+    "Exponents / Zero Exponent": () => generateExponentLaws([3]),
+    "Exponents / Power of Product": () => generateExponentLaws([4]),
+    "Exponents / Power of Quotient": () => generateExponentLaws([5]),
+    "Exponents / Negative Exponent": () => generateExponentLaws([6]),
+    "Exponents / Standard Form": generateStandardForm,
+    "BODMAS / Simple": generateBODMAS, // Local one
+    "Mensuration / Perimeter & Area": generatePerimeterAndArea,
+    "Commercial Math / Basics": generateCommercialMath,
+    "Commercial Math / Percentage": generatePercentage,
+    "Commercial Math / Profit & Loss": generateProfitLoss,
+    "Commercial Math / Simple Interest": generateSimpleInterest,
+    "Algebra / Basics": generateAlgebraTerms,
+    "Algebra / Linear Equations": generateLinearEquation,
+    "Algebra / Word Problems": generateAlgebraWordProblem,
+    "Algebra / Mixed Problems": generateGrade7Algebra,
+    "Algebra / Word Problems Table": generateAlgebraWordProblemTable,
+    "Geometry / Lines and Angles": generateLinesAndAngles,
+    "Geometry / Triangles": generateTrianglesProperties,
+    "Geometry / Solid Shapes": generateSolidShapesProperties,
+    "Data Handling / Basics": generateDataHandling,
+    "Data Handling / Bar Graph": generateBarGraph
+};
+
 export default Grade7Questions;
+
