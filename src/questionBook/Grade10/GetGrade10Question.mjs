@@ -72,32 +72,75 @@ const Grade10Questions = {
 
 export const Grade10GeneratorMap = {
     "Number Sense / Natural & Whole": generateNaturalWholeNumbers,
+    "Fundamental Operations on Natural and Whole Numbers": generateNaturalWholeNumbers,
+
     "Number Sense / Integers": generateIntegers,
+    "Fundamental Operations On Integers": generateIntegers,
+
     "Number Sense / Fractions": generateFractions,
+    "Fractions": generateFractions,
+
     "Number Sense / Decimals": generateDecimals,
+    "Fundamental operations on decimals": generateDecimals,
+
     "Number Sense / LCM": generateLCM,
+    "Least Common Multiple": generateLCM,
+
     "Number Sense / HCF": generateHCF,
+    "Highest Common Factor": generateHCF,
+
     "Arithmetic / Ratio & Proportion": generateRatioProportion,
+    "Ratio and Proportion": generateRatioProportion,
+
     "Arithmetic / Clocks": generateClocks,
+    // "Clocks": generateClocks, // topic string not verified but adding safe mapping if needed later
+
     "Number Sense / Square Roots": generateSquareRoots,
+    "Square and Square Roots": generateSquareRoots,
+
     "Number Sense / Cube Roots": generateCubeRoots,
+    "Cube and Cube Roots": generateCubeRoots,
+
     "Number Sense / Exponents": generateExponentsNegative,
+    "Laws of Exponents": generateExponentsNegative,
+
     "Arithmetic / BODMAS": generateBODMAS,
+    "BODMAS": generateBODMAS,
+
     "Algebra / Addition & Subtraction": generateAlgebraicAdditionSubtraction,
+    "Algebraic Addition": generateAlgebraicAdditionSubtraction,
+
     "Algebra / Multiplication": generateAlgebraicMultiplication,
+    "Algebraic Multiplication": generateAlgebraicMultiplication,
+
     "Algebra / Division": generateAlgebraicDivision,
+    "Algebraic Division": generateAlgebraicDivision,
+
     "Algebra / Linear Equations": generateLinearEquationOneVar,
+    "Linear Equations in one Variable": generateLinearEquationOneVar,
+
     "Algebra / Simultaneous Equations": generateSimultaneousEquations,
+    "Simultaneous Equations": generateSimultaneousEquations,
+
     "Algebra / Quadratic Equations": generateQuadraticEquation,
+    "Quadratic Equations": generateQuadraticEquation,
+
     "Algebra / Word Problems (Age)": generateAgeProblem,
     "Algebra / Word Problems (Quadratic)": generateNumberSquareProblem,
+
     "Mensuration / Perimeter": generatePerimeter,
+    // "Perimeter": generatePerimeter, // topic in generator check?
+
     "Mensuration / Area": generateArea,
+    // "Area": generateArea,
+
     "Coordinate Geometry / Quadrants": generateCartesianPoint,
     "Coordinate Geometry / Distance Formula": generateCoordinateGeometry,
     "Coordinate Geometry / Section Formula": generateSectionFormula,
+
     "Trigonometry / Ratios": generateTrigonometry,
     "Trigonometry / Standard Angles": generateTrigRatios,
+
     "Geometry / Pythagoras Theorem": generatePythagoras,
     "Probability / True/False": generateProbability,
     "Probability / Dice": generateDiceProbability

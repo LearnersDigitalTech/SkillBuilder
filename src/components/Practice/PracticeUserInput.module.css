@@ -102,6 +102,8 @@
     line-height: 1.5;
     animation: fadeIn 0.5s ease;
     backdrop-filter: blur(4px);
+    z-index: 10;
+    position: relative;
 }
 
 @keyframes fadeIn {
@@ -349,7 +351,8 @@
         display: block;
         box-shadow: none;
         overflow-y: auto;
-        padding-bottom: 80px;
+        padding-bottom: 120px;
+        /* Increased padding to prevent footer overlap */
     }
 
     .questionColumn,
@@ -367,7 +370,8 @@
         background: white;
         padding: 1rem;
         border-top: 1px solid #e5e7eb;
-        z-index: 100;
+        z-index: 1000;
+        /* Ensure footer is on top of content if scrolling */
         justify-content: center;
     }
 
