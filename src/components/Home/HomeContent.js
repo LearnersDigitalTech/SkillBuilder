@@ -25,6 +25,26 @@ const HomeContent = () => {
     const { user, userData } = useAuth();
     const [authModalOpen, setAuthModalOpen] = useState(false);
     const [alreadyAttemptedModalOpen, setAlreadyAttemptedModalOpen] = useState(false);
+    const [gradeModalOpen, setGradeModalOpen] = useState(false);
+
+    const handlePracticeClick = () => {
+        setGradeModalOpen(true);
+    };
+
+    const handleGradeSelect = (grade) => {
+        setGradeModalOpen(false);
+        if (grade === 1) {
+            router.push(`/practice?grade=${grade}`);
+        } else {
+            // For now, only Grade 1 is linked as per instructions.
+            // But let's allow navigation to practice page for all, maybe reusing Grade 1 content as placeholder 
+            // OR just standard "Coming Soon". 
+            // User said: "link the practice mode for the first grade... change the route links as well accordingly".
+            // Assuming other grades might not have content yet.
+            // I'll route them all to practice but pass the grade. PracticeClient can handle fallback/loading.
+            router.push(`/practice?grade=${grade}`);
+        }
+    };
 
     const handleStartAssessment = async () => {
         // Check for local session first
@@ -213,13 +233,13 @@ const HomeContent = () => {
                     <img
                         src="/HeroIllustration.gif"
                         alt="Landing Illustration"
-                        style={{ width: '95%', height: 'auto', mixBlendMode: 'multiply', filter: 'brightness(1.05)' }}
+                        style={{ width: '90%', height: 'auto', mixBlendMode: 'multiply', filter: 'brightness(1.05)' }}
                     />
                 </div>
             </div>
 
             <SuccessStories />
-            <MathClub onStart={handleStartAssessment} />
+            <MathClub onStart={handlePracticeClick} />
             {/* <div className={Styles.whyChooseUsContainer}>
                 <div>
                     <Award size={40} />
@@ -373,6 +393,35 @@ const HomeContent = () => {
                 }
             >
             </CustomModal>
+
+            <CustomModal
+                open={gradeModalOpen}
+                onClose={() => setGradeModalOpen(false)}
+                title="Select Your Grade"
+                content={
+                    <div style={{ padding: '0 1rem 1rem' }}>
+                        <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '16px' }}>
+                            Choose your grade level to start practicing
+                        </p>
+                        <div className={Styles.gradeSelectionGrid}>
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((grade) => {
+                                const isAvailable = grade >= 1 && grade <= 10;
+                                return (
+                                    <button
+                                        key={grade}
+                                        className={`${Styles.gradeSelectionButton} ${!isAvailable ? Styles.gradeSelectionButtonDisabled : ''}`}
+                                        onClick={() => isAvailable && handleGradeSelect(grade)}
+                                        disabled={!isAvailable}
+                                    >
+                                        <span className={Styles.gradeSelectionNumber}>{grade}</span>
+                                        <span className={Styles.gradeSelectionLabel}>Grade</span>
+                                    </button>
+                                )
+                            })}
+                        </div>
+                    </div>
+                }
+            />
         </div>
     );
 }

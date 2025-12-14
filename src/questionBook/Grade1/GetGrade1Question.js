@@ -20,7 +20,10 @@ import {
     generatePatterns,
     generateBeforeAfter,
     generateBetweenNumber,
-    generateSequencePattern
+    generateSequencePattern,
+    generateTally,
+    generatePictureGraph,
+    generateLengthComparison
 } from './grade1Generators.js';
 
 const generate = (generator, count = 10) => {
@@ -53,6 +56,52 @@ const Grade1Questions = {
     q23: generate(generateDaysOfWeek),
     q24: generate(generatePatterns),
     q25: generate(generateSequencePattern)
+};
+
+
+export const Grade1GeneratorMap = {
+    // Number Sense
+    "Number Sense / Counting Objects": generateCountingObjects,
+    "Number Sense / Place Value": generatePlaceValue,
+    "Number Sense / Even & Odd": generateEvenOdd,
+    "Number Sense / Before & After": generateBeforeAfter,
+    "Number Sense / Between": generateBetweenNumber,
+    "Number Sense / Counting Forwards": generateCountForward, // Added for helper override
+    "Number Sense / Counting Backwards": generateCountBackward, // Added for helper override
+    "Number Sense / Skip Counting": generateSkipCounting, // Added for helper override
+    "Number Sense / Comparison": generateComparison,
+
+    // Addition
+    "Addition / Basics": generateAdditionObjects,
+    "Addition / Word Problems": generateAdditionWordProblems,
+
+    // Subtraction
+    "Subtraction / Basics": generateSubtractionObjects,
+    "Subtraction / Word Problems": generateSubtractionWordProblems,
+
+    // Geometry
+    "Geometry / Shapes": generateIdentifyShapes,
+    "Geometry / Spatial": generateSpatial,
+
+    // Measurement
+    "Measurement / Length": generateLengthComparison,
+    "Measurement / Weight": generateWeightComparison,
+    "Measurement / Capacity": generateCapacityComparison,
+
+    // Time
+    "Time / Basics": generateTimeBasics,
+    "Time / Days of Week": generateDaysOfWeek,
+
+    // Money
+    "Money / Basics": generateMoneyCounting,
+
+    // Patterns
+    "Patterns / Basics": generatePatterns,
+    "Patterns / Sequences": generateSequencePattern,
+
+    // Data Handling
+    "Data Handling / Tally": generateTally,
+    "Data Handling / Picture Graph": generatePictureGraph
 };
 
 export default Grade1Questions;

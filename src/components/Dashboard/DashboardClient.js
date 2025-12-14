@@ -642,7 +642,7 @@ const DashboardClient = () => {
 
                 {/* Reports Section */}
                 <section className={Styles.reportsSection}>
-                    <h2>Assessment History</h2>
+                    <h2><strong>Dashboard</strong></h2>
 
                     {fetchingReports && !reports ? (
                         <div className={Styles.loader}>
@@ -789,7 +789,7 @@ const DashboardClient = () => {
                                                 <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col h-[440px]">
 
                                                     <div className="p-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex justify-between items-center">
-                                                        <h3 className="font-bold text-slate-800 dark:text-slate-200">Recent History</h3>
+                                                        <h3 className="font-bold text-slate-800 dark:text-slate-200">Assessment History</h3>
                                                         {/* View All Toggle */}
                                                         {(activeTab === 0 ? assessmentReports : rapidMathReports).length > 5 && (
                                                             <button

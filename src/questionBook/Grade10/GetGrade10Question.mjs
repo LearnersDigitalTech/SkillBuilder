@@ -69,4 +69,39 @@ const Grade10Questions = {
     q30: generate(generateNumberSquareProblem)
 };
 
+
+export const Grade10GeneratorMap = {
+    "Number Sense / Natural & Whole": generateNaturalWholeNumbers,
+    "Number Sense / Integers": generateIntegers,
+    "Number Sense / Fractions": generateFractions,
+    "Number Sense / Decimals": generateDecimals,
+    "Number Sense / LCM": generateLCM,
+    "Number Sense / HCF": generateHCF,
+    "Arithmetic / Ratio & Proportion": generateRatioProportion,
+    "Arithmetic / Clocks": generateClocks,
+    "Number Sense / Square Roots": generateSquareRoots,
+    "Number Sense / Cube Roots": generateCubeRoots,
+    "Number Sense / Exponents": generateExponentsNegative,
+    "Arithmetic / BODMAS": generateBODMAS,
+    "Algebra / Addition & Subtraction": generateAlgebraicAdditionSubtraction,
+    "Algebra / Multiplication": generateAlgebraicMultiplication,
+    "Algebra / Division": generateAlgebraicDivision,
+    "Algebra / Linear Equations": generateLinearEquationOneVar,
+    "Algebra / Simultaneous Equations": generateSimultaneousEquations,
+    "Algebra / Quadratic Equations": generateQuadraticEquation,
+    "Algebra / Word Problems (Age)": generateAgeProblem,
+    "Algebra / Word Problems (Quadratic)": generateNumberSquareProblem,
+    "Mensuration / Perimeter": generatePerimeter,
+    "Mensuration / Area": generateArea,
+    "Coordinate Geometry / Quadrants": generateCartesianPoint,
+    "Coordinate Geometry / Distance Formula": generateCoordinateGeometry,
+    "Coordinate Geometry / Section Formula": generateSectionFormula,
+    "Trigonometry / Ratios": generateTrigonometry,
+    "Trigonometry / Standard Angles": generateTrigRatios,
+    "Geometry / Pythagoras Theorem": generatePythagoras,
+    "Probability / True/False": generateProbability,
+    "Probability / Dice": generateDiceProbability
+};
+
 export default Grade10Questions;
+

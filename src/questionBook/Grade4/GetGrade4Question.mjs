@@ -77,4 +77,28 @@ const Grade4Questions = {
     // q30: generate(generateAddition4Digit)
 };
 
+
+export const Grade4GeneratorMap = {
+    "Number Sense / Place Value": () => Math.random() > 0.5 ? generatePlaceValue5Digit() : generatePlaceValue5DigitVisual(),
+    "Number Sense / Expanded Form": generateExpandedForm,
+    "Addition / With Carry": () => Math.random() > 0.5 ? generateAddition4Digit() : generateAddition4DigitAppliactionLevel(),
+    "Subtraction / With Borrow": () => Math.random() > 0.5 ? generateSubtraction4Digit() : generateSubtraction4DigitAppliactionLevel(),
+    "Number Sense / Multiplication": generateMultiplication,
+    "Multiplication / 2-digit × 2-digit": generateMultiplicationApplicationLevel,
+    "Number Sense / Division": generateDivision,
+    "Division / 3-digit ÷ 1-digit": generateDivisionApplicationLevel,
+    "Number Sense / Estimation": generateEstimation,
+    "Number Sense / LCM": generateLCM,
+    "Fractions / Types": () => Math.random() > 0.5 ? generateProperImproperFractions() : generateMixedUnitFractions(),
+    "Fractions / Operations": generateFractionOperations,
+    "Geometry / Angles": generateAngles,
+    "Geometry / Triangles": generateTriangles,
+    "Measurement / Area": generateAreaShape,
+    "Measurement / Perimeter": generatePerimeterShape,
+    "Measurement / Conversion": () => Math.random() > 0.5 ? generateMeasurementConversion() : generateMeasurementConversionApplicationLevel(),
+    "Data Handling / Bar Graph": generateBarGraph,
+    "Patterns / Number Patterns": generateSimpleGrade4Pattern
+};
+
 export default Grade4Questions;
+

@@ -112,4 +112,53 @@ const Grade8Questions = {
     // q29: generate(generateBarGraph),                       // Grade 7 Q20
 };
 
+
+export const Grade8GeneratorMap = {
+    // Grade 10 Imports
+    "Number Sense / Natural & Whole": generateNaturalWholeNumbers,
+    "Integers / Mixed Operations": generateIntegersG10,
+    "Fractions / Mixed Operations": generateFractionsG10,
+    "Decimals / Mixed Operations": generateDecimalsG10,
+    "Number Sense / LCM": generateLCMG10,
+    "Number Sense / HCF": generateHCF,
+    "Ratio and Proportion / Basics": generateRatioProportion,
+    "BODMAS / Complex": generateBODMASG10,
+
+    // Grade 7 Imports
+    "Geometry / Perimeter & Area": generatePerimeterAndArea,
+    "Lines and Angles": generateLinesAndAngles,
+    "Triangles": generateTrianglesProperties,
+    "Solid Shapes / Basics": generateSolidShapesProperties,
+    "Data Handling / Basics": generateDataHandlingG7,
+    "Data Handling / Bar Graph": generateBarGraph,
+
+    // Grade 8 Local
+    "Rational Numbers / Properties": generateRationalNumbers,
+    "Linear Equations / Equations": generateLinearEquationsGrade8,
+    "Linear Equations / Word Problems": generateWordProblemsLinearEq,
+    "Quadrilaterals / Angles": generateQuadrilateralsGrade8,
+    "Quadrilaterals / Properties": generateQuadrilateralPropertiesAdvanced,
+    "Practical Geometry / Properties": generatePracticalGeometryGrade8,
+    "Data Handling / Statistics": generateDataHandling,
+    "Data Handling / Pie Charts": generateDataInterpretationAdvanced,
+    "Squares and Square Roots": generateSquaresCubes,
+    "Cubes and Cube Roots": generateCubesRoots,
+    "Comparing Quantities / Mixed": generateComparingQuantities,
+    "Comparing Quantities / Percentage": generatePercentage,
+    "Comparing Quantities / Commercial": generateCommercialMath,
+    "Comparing Quantities / Interest": generateSimpleInterestGrade8,
+    "Algebra / Expressions": generateAlgebraExpressions,
+    "Algebra / Identities": generateAlgebraIdentities,
+    "Factorisation": generateFactorisation,
+    "Visualising Solid Shapes / Euler": generateVisualizingSolidShapes,
+    "Mensuration / 2D Area": generateMensurationGrade8,
+    "Mensuration / 3D Volume & SA": generateMensuration3D,
+    "Exponents & Powers": generateExponentsGrade8,
+    "Direct and Inverse Proportions": generateDirectInverseVariation,
+    "Introduction to Graphs / Points": generateGraphs,
+    "Introduction to Graphs / Linear": generateGraphInterpretation,
+    "Playing with Numbers": generatePlayingWithNumbers
+};
+
 export default Grade8Questions;
+

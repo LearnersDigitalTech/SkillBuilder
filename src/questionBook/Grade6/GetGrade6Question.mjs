@@ -85,4 +85,50 @@ const Grade6Questions = {
     // q22: generate(generateTriangleType),
 };
 
+
+export const Grade6GeneratorMap = {
+    // Grade 10 Imports
+    "Fundamental Operations on Natural and Whole Numbers": generateNaturalWholeNumbers,
+    "Fundamental Operations On Integers": generateIntegersG10,
+    "Fractions": generateFractionsG10,
+    "Fundamental operations on decimals": generateDecimalsG10,
+    "Least Common Multiple": generateLCMG10,
+    "Highest Common Factor": generateHCF,
+    "Ratio and Proportion": generateRatioProportion,
+    "BODMAS": generateBODMAS,
+    "Perimeter of Plane Figures": generatePerimeter,
+
+    // Grade 6 Local
+    "Integers / Understanding": generateIntegerUnderstanding,
+    "Integers / Add": generateIntegerOps,
+    "Integers / Subtract": generateIntegerOps,
+    "Integers / Multiply": generateIntegerOps,
+    "Integers / Divide": generateIntegerOps,
+    "Whole Numbers / Properties": generateWholeNumberProperties,
+    "Whole Numbers / Patterns": generateWholeNumberPattern,
+    "Fractions / Add": generateFractionOps,
+    "Fractions / Subtract": generateFractionOps,
+    "Fractions / Multiply": generateFractionOps,
+    "Fractions / Divide": generateFractionOps,
+    "Decimals / Conversion": generateDecimalConversion,
+    "Ratio / Simplify": generateRatio,
+    "Proportion / Missing Term": generateProportion,
+    "Algebra / Expressions": generateAlgebraExpression,
+    "Algebra / Equations": generateSimpleEquation,
+    "Geometry / Polygons": generatePolygonSides,
+    "Geometry / Triangles": generateTriangleType,
+    "Mensuration / Area": generateAreaRect,
+    "Mensuration / Perimeter": generatePerimeterRect,
+    "Data Handling / Mean": generateDataInterpretation,
+    "Data Handling / Median": generateDataInterpretation,
+    "Data Handling / Mode": generateDataInterpretation,
+    "Number Theory / Prime": generatePrimeComposite,
+    "Number Theory / Factor Tree": generateFactorTree,
+    "Symmetry / Alphabet": generateAlphabetSymmetry,
+    "Number Sense / Number Play": generateNumberPlay,
+    "Number Sense / Number Pattern": generateNumberPattern,
+    "Arithmetic / AddSub Multiple": generateAddSubMultipleSelect
+};
+
 export default Grade6Questions;
+
