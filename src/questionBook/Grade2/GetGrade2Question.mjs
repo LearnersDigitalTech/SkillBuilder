@@ -71,4 +71,55 @@ const Grade2Questions = {
     q30: generate(generateMissingNumbers)
 };
 
+
+export const Grade2GeneratorMap = {
+    // Number Sense
+    "Number Sense / Counting": generateCounting,
+    "Number Sense / Place Value": generatePlaceValue,
+    "Number Sense / Value": generateValue,
+    "Number Sense / Expanded Form": generateExpandedForm,
+    "Number Sense / Comparison": generateComparison,
+    "Number Sense / Ordering": generateAscendingDescending,
+    "Number Sense / Number Names": generateNumberNames,
+    "Number Sense / Skip Counting": generateSkipCounting,
+    "Number Sense / Even & Odd": generateEvenOdd,
+
+    // Addition
+    "Addition / Without Carry": generateAddNoCarry,
+    "Addition / With Carry": generateAddWithCarry,
+    "Addition / Word Problems": generateAddWordProblems,
+
+    // Subtraction
+    "Subtraction / Without Borrow": generateSubNoBorrow,
+    "Subtraction / With Borrow": generateSubWithBorrow,
+    "Subtraction / Word Problems": generateSubWordProblems,
+
+    // Multiplication
+    "Multiplication / Repeated Addition": generateRepeatedAddition,
+    "Multiplication / Tables": generateTables,
+
+    // Money
+    "Money / Basics": generateIdentifyMoney,
+    "Money / Addition": generateAddMoney,
+    "Money / Subtraction": generateSubMoney,
+
+    // Measurement
+    "Measurement / Length": generateLength,
+    "Measurement / Weight": generateWeight,
+    "Measurement / Capacity": generateCapacity,
+    "Measurement / Time": generateTime,
+
+    // Geometry
+    "Geometry / Shapes": generateIdentifyShapes,
+    "Geometry / Patterns": generatePatterns,
+
+    // Data Handling
+    "Data Handling / Tally": generateTally,
+    "Data Handling / Pictograph": generatePictograph,
+
+    // Logical
+    "Logical / Sequences": generateSequences,
+    "Logical / Missing Numbers": generateMissingNumbers
+};
+
 export default Grade2Questions;

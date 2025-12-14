@@ -5,6 +5,7 @@ import { Button, Input } from "@mui/material";
 import { ArrowRight, Check, RefreshCcw } from "lucide-react";
 import MathRenderer from "@/components/MathRenderer/MathRenderer.component";
 import { getHint } from "./hintHelper";
+import { validateFractionValue } from "./fractionValidator";
 
 const PracticeUserInput = ({ onNext, question, topic, answer, activeQuestionIndex, grade, image, keypadMode, onCorrect, onRepeat, onWrong }) => {
     const [inputValue, setInputValue] = useState("");
@@ -51,7 +52,16 @@ const PracticeUserInput = ({ onNext, question, topic, answer, activeQuestionInde
         const correctValue = String(answer).trim();
         const checkValue = String(val).trim();
 
-        // 1. Exact Match -> Correct
+        // 1. Math Value Check (Fractions/Decimals with tolerance)
+        if (validateFractionValue(checkValue, correctValue)) {
+            setInputValue(val);
+            setIsCorrect(true);
+            setShowHint(false);
+            if (onCorrect) onCorrect();
+            return;
+        }
+
+        // 2. Exact Match (Backup for text, in case math validator fails/returns false but strings match)
         if (checkValue === correctValue) {
             setInputValue(val);
             setIsCorrect(true);
@@ -60,26 +70,15 @@ const PracticeUserInput = ({ onNext, question, topic, answer, activeQuestionInde
             return;
         }
 
-        // 2. Partial Match (Prefix) -> Allow typing
+        // 3. Partial Match (Prefix) -> Allow typing
         if (correctValue.startsWith(checkValue)) {
             setInputValue(val);
             return;
         }
 
-        // 3. Incorrect (Not a prefix) -> Error Flow
+        // 4. Incorrect (Not a prefix) -> Error Flow
         setInputValue(val);
         setIsCorrect(false);
-
-        // New Logic: Attempts
-        // If this is the FIRST incorrect char typed? 
-        // Or do we count "Incorrect attempts" as pressing enter? 
-        // But we have auto-validation. Every wrong keystroke is an attempt?
-        // That seems harsh. "2nd attempt" usually implies "Try again".
-        // With auto-validation: 
-        // User types '4'. '4' is not start of '5'. So error.
-        // Is this Attempt 1? Yes.
-        // User clears (auto) and types '3'. Error. Attempt 2.
-        // Logic seems sound.
 
         const nextAttempts = attempts + 1;
         setAttempts(nextAttempts); // 1 or 2
@@ -100,10 +99,8 @@ const PracticeUserInput = ({ onNext, question, topic, answer, activeQuestionInde
                 // Attempt 2 Failure
                 // Show Answer
                 setShowAnswer(true);
-                setInputValue(val); // Keep wrong value? Or clear? User said "Clear the answer" previously, but now "If 2nd attempt entered incorrectly, answer pops up... disable option to key in".
-                // Might look better to show the wrong val in red, then reveal answer below.
+                setInputValue(val);
                 setWaitingForHint(false);
-                // Input remains disabled via `showAnswer` check in handlers
             }
         }, 1500);
     };
@@ -215,14 +212,6 @@ const PracticeUserInput = ({ onNext, question, topic, answer, activeQuestionInde
                             Next Question
                         </Button>
                     )}
-
-                    {/* Hide Repeat button here if we moved it to the hint box area. 
-                        User said: "Underneath the place where you display the answer, i want the reapeat button to show up prominently"
-                        So I moved it inside {showAnswer && ...}.
-                        Do we still show it here? Probably not needed if shown prominently there.
-                        Or maybe keep it for consistency?
-                        Let's hide it from here if showAnswer is true, to avoid duplication.
-                    */}
                 </div>
             </div>
         </div>

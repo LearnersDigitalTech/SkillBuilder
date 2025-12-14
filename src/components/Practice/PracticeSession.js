@@ -1,41 +1,40 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Styles from "./Grade1PracticeClient.module.css";
+// import Styles from "./Grade1PracticeClient.module.css"; // We need to handle styles. Can re-use existing or genericize.
+// Let's assume we rename Grade1PracticeClient.module.css to PracticeSession.module.css or similar? 
+// For now, I'll copy the styles too or point to the old one if I don't delete it yet?
+// Planner said delete Grade1 dir. So I should move the CSS too.
+import Styles from "./PracticeSession.module.css";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import PracticeMCQ from "../PracticeMCQ.component";
-import PracticeUserInput from "../PracticeUserInput.component";
-import GetGrade1Question from "@/questionBook/Grade1/GetGrade1Question";
+import PracticeMCQ from "./PracticeMCQ.component";
+import PracticeUserInput from "./PracticeUserInput.component";
+import PracticeTableInput from "./PracticeTableInput.component";
 import LoadingScreen from "@/components/LoadingScreen/LoadingScreen.component";
-import getRandomInt from "../../../app/workload/GetRandomInt";
-import QuestionPalette from "../../QuestionPalette/QuestionPalette.component";
+// import getRandomInt from "../../app/workload/GetRandomInt"; // relative from src/components/Practice
+import getRandomInt from "@/app/workload/GetRandomInt"; // Use alias for safety
+import QuestionPalette from "../QuestionPalette/QuestionPalette.component";
 import { regenerateQuestion } from "./PracticeGeneratorHelper";
-import motivationData from "../../Quiz/Assets/motivation.json";
+import motivationData from "../Quiz/Assets/motivation.json";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const Grade1PracticeClient = ({ grade = "Grade 1" }) => {
+const PracticeSession = ({
+    initialQuestions = [],
+    generatorMap,
+    gradeTitle = "Practice"
+}) => {
     const router = useRouter();
-    const [questions, setQuestions] = useState([]); // Array of question objects
+    const [questions, setQuestions] = useState([]);
     const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Generate Grade 1 questions
-        const gradeQuestionPaper = { ...GetGrade1Question };
-        const generatedPaper = [];
-        let qIndex = 1;
-        while (gradeQuestionPaper[`q${qIndex}`]) {
-            const qs = gradeQuestionPaper[`q${qIndex}`];
-            if (qs && qs.length > 0) {
-                const randomInt = getRandomInt(0, qs.length - 1);
-                generatedPaper.push({ ...qs[randomInt], userAnswer: null }); // Add userAnswer field
-            }
-            qIndex++;
+        if (initialQuestions && initialQuestions.length > 0) {
+            setQuestions(initialQuestions);
+            setLoading(false);
         }
-        setQuestions(generatedPaper);
-        setLoading(false);
-    }, []);
+    }, [initialQuestions]);
 
     const handleNext = () => {
         if (activeQuestionIndex < questions.length - 1) {
@@ -52,7 +51,7 @@ const Grade1PracticeClient = ({ grade = "Grade 1" }) => {
     const handleCorrectAnswer = (index) => {
         // Mark as answered
         const updatedQuestions = [...questions];
-        updatedQuestions[index].userAnswer = "correct"; // Just a flag for Palette
+        updatedQuestions[index].userAnswer = "correct";
         setQuestions(updatedQuestions);
 
         // Show Motivation
@@ -85,14 +84,15 @@ const Grade1PracticeClient = ({ grade = "Grade 1" }) => {
     const handleRepeat = (index) => {
         // Regenerate question at this index
         const currentQ = questions[index];
-        const newQ = regenerateQuestion(currentQ);
+        // Pass generatorMap to the helper
+        const newQ = regenerateQuestion(currentQ, generatorMap);
 
         if (newQ) {
             const updatedQuestions = [...questions];
             updatedQuestions[index] = { ...newQ, userAnswer: null }; // Reset answer
             setQuestions(updatedQuestions);
         } else {
-            // Fallback if no generator found
+            console.warn("Could not regenerate question", currentQ);
             toast.error("Could not regenerate this question.");
         }
     };
@@ -102,7 +102,7 @@ const Grade1PracticeClient = ({ grade = "Grade 1" }) => {
     };
 
     if (loading) {
-        return <LoadingScreen title="Loading Practice Mode" />;
+        return <LoadingScreen title={`Loading ${gradeTitle} Mode`} />;
     }
 
     if (questions.length === 0) {
@@ -118,7 +118,7 @@ const Grade1PracticeClient = ({ grade = "Grade 1" }) => {
                 {/* Sidebar Palette */}
                 <div className={Styles.paletteColumn}>
                     <div className={Styles.sidebarHeader}>
-                        <h2>{grade} Practice</h2>
+                        <h2>{gradeTitle}</h2>
                     </div>
                     <QuestionPalette
                         questions={questions}
@@ -139,7 +139,6 @@ const Grade1PracticeClient = ({ grade = "Grade 1" }) => {
                 {/* Question Area */}
                 <div className={Styles.contentArea}>
 
-                    {/* Mobile Header for Exit? Or rely on Sidebar drawer? */}
                     <div className={Styles.mobileHeader}>
                         <button onClick={handleExit} className={Styles.backButton}>
                             <ArrowLeft size={24} />
@@ -150,7 +149,7 @@ const Grade1PracticeClient = ({ grade = "Grade 1" }) => {
 
                     {currentQuestion.type === "mcq" && (
                         <PracticeMCQ
-                            key={`${activeQuestionIndex}-${currentQuestion.question}`} // Key change resets component state
+                            key={`${activeQuestionIndex}-${currentQuestion.question}`}
                             activeQuestionIndex={activeQuestionIndex}
                             question={currentQuestion.question}
                             topic={currentQuestion.topic}
@@ -171,8 +170,23 @@ const Grade1PracticeClient = ({ grade = "Grade 1" }) => {
                             topic={currentQuestion.topic}
                             answer={currentQuestion.answer}
                             image={currentQuestion.image}
-                            grade={grade}
+                            grade={gradeTitle} // Pass title or raw grade number? Component might use it for keypad?
                             keypadMode={currentQuestion.keypadMode}
+                            onNext={handleNext}
+                            onCorrect={() => handleCorrectAnswer(activeQuestionIndex)}
+                            onWrong={handleWrongAnswer}
+                            onRepeat={() => handleRepeat(activeQuestionIndex)}
+                        />
+                    )}
+                    {currentQuestion.type === "tableInput" && (
+                        <PracticeTableInput
+                            key={`${activeQuestionIndex}-${currentQuestion.topic}`}
+                            activeQuestionIndex={activeQuestionIndex}
+                            question={currentQuestion.question}
+                            topic={currentQuestion.topic}
+                            rows={currentQuestion.rows}
+                            variant={currentQuestion.variant}
+                            answer={currentQuestion.answer}
                             onNext={handleNext}
                             onCorrect={() => handleCorrectAnswer(activeQuestionIndex)}
                             onWrong={handleWrongAnswer}
@@ -185,4 +199,4 @@ const Grade1PracticeClient = ({ grade = "Grade 1" }) => {
     );
 };
 
-export default Grade1PracticeClient;
+export default PracticeSession;

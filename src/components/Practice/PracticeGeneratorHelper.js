@@ -1,112 +1,59 @@
-import {
-    generateCountForward,
-    generateCountBackward,
-    generateCountingObjects,
-    generateSkipCounting,
-    generatePlaceValue,
-    generateComparison,
-    generateEvenOdd,
-    generateAdditionObjects,
-    generateAdditionWordProblems,
-    generateSubtractionObjects,
-    generateSubtractionWordProblems,
-    generateIdentifyShapes,
-    generateSpatial,
-    generateWeightComparison,
-    generateCapacityComparison,
-    generateTimeBasics,
-    generateDaysOfWeek,
-    generateMoneyCounting,
-    generatePatterns,
-    generateBeforeAfter,
-    generateBetweenNumber,
-    generateSequencePattern,
-    generateTally,
-    generatePictureGraph,
-    generateLengthComparison
-} from '../../questionBook/Grade1/grade1Generators.js';
 
-// Map topics or unique IDs to generators
-const generatorMap = {
-    // Number Sense
-    "Number Sense / Counting Objects": generateCountingObjects,
-    "Number Sense / Place Value": generatePlaceValue,
-    "Number Sense / Even & Odd": generateEvenOdd,
-    "Number Sense / Before & After": generateBeforeAfter,
-    "Number Sense / Between": generateBetweenNumber,
-
-    // Addition
-    "Addition / Basics": generateAdditionObjects,
-    "Addition / Word Problems": generateAdditionWordProblems,
-
-    // Subtraction
-    "Subtraction / Basics": generateSubtractionObjects,
-    "Subtraction / Word Problems": generateSubtractionWordProblems,
-
-    // Geometry
-    "Geometry / Shapes": generateIdentifyShapes,
-    "Geometry / Spatial": generateSpatial,
-
-    // Measurement
-    "Measurement / Length": generateLengthComparison,
-    "Measurement / Weight": generateWeightComparison,
-    "Measurement / Capacity": generateCapacityComparison,
-
-    // Time
-    "Time / Basics": generateTimeBasics,
-    "Time / Days of Week": generateDaysOfWeek,
-
-    // Money
-    "Money / Basics": generateMoneyCounting,
-
-    // Patterns
-    "Patterns / Basics": generatePatterns,
-    "Patterns / Sequences": generateSequencePattern,
-
-    // Data Handling
-    "Data Handling / Tally": generateTally,
-    "Data Handling / Picture Graph": generatePictureGraph
-};
-
-export const regenerateQuestion = (currentQuestion) => {
-    if (!currentQuestion) return null;
+export const regenerateQuestion = (currentQuestion, generatorMap) => {
+    if (!currentQuestion || !generatorMap) return null;
 
     // 1. Direct topic match
     let generator = generatorMap[currentQuestion.topic];
 
     // 2. Resolve ambiguities where multiple generators share a topic
+    // Ideally this logic should also be moved out or generalized, 
+    // but for now we keep common shared logic or rely on the generatorMap to be specific enough.
 
+    // For specific Grade 1 "fixes" like Counting Backwards vs Forwards, 
+    // we can rely on the generatorMap having these specific keys if we change the topic names,
+    // OR we can pass a "resolver" function. 
+    // To keep it simple for this refactor, we will look for the specific generator in the map 
+    // using the SAME logic if the map has those "raw" functional generators available,
+    // BUT the cleaner way is to expect the 'generatorMap' to handle the mapping.
+
+    // However, the previous logic did some string matching on 'currentQuestion.question'.
+    // We will keep that logic GENERIC if possible, or assume generatorMap handles it.
+
+    // Let's assume the generatorMap passed in IS the map of "Topic Name" -> "Generator Function".
+
+    // Checking for specific overrides that were in the original file:
     // "Number Sense / Counting" -> Found in Forward and Backward
     if (currentQuestion.topic === "Number Sense / Counting") {
-        if (currentQuestion.question.toLowerCase().includes("backwards")) {
-            return generateCountBackward();
+        if (currentQuestion.question.toLowerCase().includes("backwards") && generatorMap["Number Sense / Counting Backwards"]) {
+            return generatorMap["Number Sense / Counting Backwards"]();
         }
-        return generateCountForward();
+        if (generatorMap["Number Sense / Counting Forwards"]) {
+            return generatorMap["Number Sense / Counting Forwards"]();
+        }
+        // Fallback if specific keys aren't there but the generic topic is
+        if (generator) return generator();
     }
 
     // "Number Sense / Skip Counting" -> Needs step inference
-    if (currentQuestion.topic === "Number Sense / Skip Counting") {
-        if (currentQuestion.question.includes("2s")) return generateSkipCounting(2);
-        if (currentQuestion.question.includes("5s")) return generateSkipCounting(5);
-        if (currentQuestion.question.includes("10s")) return generateSkipCounting(10);
-        // Default
-        return generateSkipCounting(2);
+    if (currentQuestion.topic === "Number Sense / Skip Counting" && generatorMap["Number Sense / Skip Counting"]) {
+        // The generator for Skip Counting likely needs arguments. 
+        // The previous implementation imported 'generateSkipCounting' directly.
+        // If generatorMap["Number Sense / Skip Counting"] is the function 'generateSkipCounting', we can call it.
+        const msg = currentQuestion.question;
+        const step = msg.includes("2s") ? 2 : msg.includes("5s") ? 5 : msg.includes("10s") ? 10 : 2;
+        return generatorMap["Number Sense / Skip Counting"](step);
     }
 
     // "Number Sense / Comparison" -> Greatest vs Smallest
-    if (currentQuestion.topic === "Number Sense / Comparison") {
-        if (currentQuestion.question.toLowerCase().includes("smallest")) {
-            return generateComparison('smallest');
-        }
-        return generateComparison('greatest');
+    if (currentQuestion.topic === "Number Sense / Comparison" && generatorMap["Number Sense / Comparison"]) {
+        const type = currentQuestion.question.toLowerCase().includes("smallest") ? 'smallest' : 'greatest';
+        return generatorMap["Number Sense / Comparison"](type);
     }
 
     if (generator) {
         return generator();
     }
 
-    // Checking if I missed any:
-    // "Ordering / Before" etc were in old map but seem to be covered by "Number Sense / Before & After" in actual generators.
-
     return null;
 };
+

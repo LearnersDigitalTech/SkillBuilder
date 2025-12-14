@@ -405,7 +405,7 @@ const HomeContent = () => {
                         </p>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((grade) => {
-                                const isAvailable = grade === 1;
+                                const isAvailable = grade >= 1 && grade <= 10;
                                 return (
                                     <Button
                                         key={grade}

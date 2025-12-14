@@ -101,4 +101,39 @@ const Grade9Questions = {
 };
 
 
+
+export const Grade9GeneratorMap = {
+    // Grade 10 Imports
+    "Number System / Natural & Whole": generateNaturalWholeNumbers,
+    "Number System / Integers": generateIntegersG10,
+    "Number System / Rational": generateFractionsG10,
+    "Number System / Decimals": generateDecimalsG10,
+    "Number System / LCM": generateLCMG10,
+    "Number System / HCF": generateHCF,
+    "Arithmetic / Ratio & Proportion": generateRatioProportion,
+
+    // Grade 7 Imports
+    "Mensuration / Perimeter & Area (Basic)": generatePerimeterAndArea,
+
+    // Grade 9 Local & Specifics
+    "Number System / Real Numbers": generateRealNumbers,
+    "Polynomials / Basics": generatePolynomialBasics,
+    "Polynomials / Operations": generatePolynomialOperations,
+    "Polynomials / Factorization": generatePolynomialFactorization,
+    "Polynomials / Zeroes": generatePolynomialZeroes,
+    "Linear Equations / Solutions": generateLinearEquationSolutions,
+    "Linear Equations / Solving": generateLinearEquationSolving,
+    "Coordinate Geometry / Points": generateCartesianPoint,
+    "Coordinate Geometry / Formulas": generateCoordinateFormulas,
+    "Algebra / Addition & Subtraction": generateAlgebraicAdditionSubtraction,
+    "Algebra / Multiplication": generateAlgebraicMultiplication,
+    "Algebra / Division": generateAlgebraicDivision,
+    "Mensuration / Area (Advanced)": generateArea,
+    "Mensuration / Triangle Area": generateMensurationArea,
+    "Mensuration / Volume & SA": generateMensurationVolume,
+    "Statistics / Mean": generateStatistics,
+    "Probability / Simple": generateProbability
+};
+
 export default Grade9Questions;
+

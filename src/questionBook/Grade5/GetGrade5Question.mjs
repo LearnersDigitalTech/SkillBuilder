@@ -67,4 +67,38 @@ const Grade5Questions = {
     // q30: generate(generateHCF)
 };
 
+
+export const Grade5GeneratorMap = {
+    "Number Sense / Place Value": generatePlaceValueLarge,
+    "Number Sense / Expanded Form": generateExpandedForm,
+    "Number Sense / Comparison": generateCompareLarge,
+    "Operations / Addition": generateAdditionLarge,
+    "Operations / Subtraction": generateSubtractionLarge,
+    "Operations / Multiplication": generateMultiplicationLarge,
+    "Operations / Division": generateDivisionLarge,
+    "Operations / Estimation": generateEstimationOps,
+    "Fractions / Equivalent": generateEquivalentFractions,
+    "Fractions / Simplify": generateSimplifyFractions,
+    "Fractions / Mixed Addition": generateAddUnlikeFractions,
+    "Fractions / Conversion": generateMixedImproper,
+    "Decimals / Place Value": generateDecimalPlaceValue,
+    "Decimals / Operations": generateDecimalOps,
+    "Measurement / Length": generateUnitConversion,
+    "Measurement / Weight": generateUnitConversion,
+    "Measurement / Capacity": generateUnitConversion,
+    "Measurement / Time": generateTimeElapsed,
+    "Geometry / Angles": generateAngleTypes,
+    "Geometry / Area": generateAreaPerimeterShapes,
+    "Geometry / Perimeter": generateAreaPerimeterShapes,
+    "Data Handling / Pie Chart": generatePieChart,
+    "Number Theory / Factors": generateFactors,
+    "Number Theory / LCM": generateLCM,
+    "Number Theory / HCF": generateHCF,
+    "Number Theory / Factor Tree": generateFactorTree,
+    "Geometry / Symmetry": generateSymmetry,
+    "Patterns / Number Patterns": generateNumberPattern,
+    "Patterns / Picture Patterns": generatePicturePattern
+};
+
 export default Grade5Questions;
+
