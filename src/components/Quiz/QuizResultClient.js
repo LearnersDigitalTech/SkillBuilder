@@ -88,6 +88,39 @@ const formatAnswer = (answer) => {
                     if (v.num !== undefined && v.den !== undefined) {
                         return `$\\frac{${v.num}}{${v.den}}$`;
                     }
+                    // Special handling for linear equations with multiple solutions
+                    if (v.x !== undefined && v.y !== undefined && v._equation) {
+                        const { a, b, c } = v._equation;
+                        // Generate 3-4 sample solutions
+                        const solutions = [];
+
+                        // Solution 1: x = 0
+                        if (c % b === 0) {
+                            solutions.push(`(0, ${c / b})`);
+                        }
+
+                        // Solution 2: y = 0
+                        if (c % a === 0) {
+                            solutions.push(`(${c / a}, 0)`);
+                        }
+
+                        // Solution 3: Try x = 2
+                        const y_for_2 = (c - a * 2) / b;
+                        if (Number.isInteger(y_for_2)) {
+                            solutions.push(`(2, ${y_for_2})`);
+                        }
+
+                        // Solution 4: Try x = 1
+                        const y_for_1 = (c - a * 1) / b;
+                        if (Number.isInteger(y_for_1) && !solutions.includes(`(1, ${y_for_1})`)) {
+                            solutions.push(`(1, ${y_for_1})`);
+                        }
+
+                        // Return formatted string with "Possible answers include:"
+                        if (solutions.length > 0) {
+                            return `Possible answers: ${solutions.slice(0, 3).join(', ')}, etc.`;
+                        }
+                    }
                     if (v.x !== undefined && v.y !== undefined) {
                         return `(${v.x}, ${v.y})`;
                     }

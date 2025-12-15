@@ -254,17 +254,21 @@ export const generateLinearEquationSolutions = () => {
         answer: `(${x},${y})`
     }];
 
+    // Store equation coefficients for validation
+    // This allows any valid (x, y) pair to be accepted
     const answerObj = {
         0: {
             x: String(x),
-            y: String(y)
+            y: String(y),
+            // Store equation coefficients for validation
+            _equation: { a, b, c }
         }
     };
 
     return {
         type: "tableInput",
         variant: "coordinate",
-        question: "Find the values of x and y that satisfy the equation:",
+        question: `Find the values of x and y that satisfy the equation: </br> ${questionText}`,
         topic: "Linear Equations / Solutions",
         answer: JSON.stringify(answerObj),
         rows: rows
