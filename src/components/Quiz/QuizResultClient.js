@@ -720,16 +720,37 @@ const QuizResultClient = () => {
             console.log('Logo not loaded, continuing without it');
         }
 
+
         // Add title text (shifted right to accommodate logo)
         doc.setTextColor(102, 126, 234);
-        doc.setFontSize(20);
+        doc.setFontSize(22);
         doc.setFont(undefined, 'bold');
-        doc.text('Your Personalized Learning Plan', pageWidth / 2, 18, { align: 'center' });
+
+        // Capitalize name
+        const rawName = displayName || 'Student';
+        const capitalizedName = rawName.replace(/\b\w/g, c => c.toUpperCase());
+
+        // Full title string
+        const fullTitle = `${capitalizedName}'s Personalized Learning Plan`;
+
+        // Text wrapping settings
+        const textStartX = 50; // Logo ends at 44 (14+30), so 50 gives padding
+        const maxTextWidth = pageWidth - textStartX - 14; // Right margin 14
+        const splitTitle = doc.splitTextToSize(fullTitle, maxTextWidth);
+
+        // Render Title
+        let currentY = 20;
+        doc.text(splitTitle, textStartX, currentY);
+
+        // Adjust Y for subtitle based on title height
+        // splitTitle is an array of strings. Each line adds to height.
+        // Approx 10mm per line for size 22
+        currentY += (splitTitle.length * 9);
 
         doc.setFontSize(11);
         doc.setFont(undefined, 'normal');
         doc.setTextColor(100, 116, 139);
-        doc.text('Math Skill Conquest', pageWidth / 2, 28, { align: 'center' });
+        doc.text('Math Skill Builder', textStartX, currentY, { align: 'left' });
 
         // Student details
         doc.setTextColor(0, 0, 0);
