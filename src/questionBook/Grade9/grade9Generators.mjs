@@ -96,7 +96,7 @@ export const generatePolynomialBasics = () => {
         // Manually building this one for now as it involves exponents, but could extend util later if needed.
         // For now, simple coefficients check isn't the main issue here as they are rand(2,9).
         // Let's stick to the requested linear/polynomial standard forms where coeffs might be 1.
-        questionText = `Find the degree of the polynomial: $${coeffs[0]}x^{${deg}} + ${coeffs[1]}x^{${deg - 1}} + 5$`;
+        questionText = `Find the degree of the polynomial: </br> $${coeffs[0]}x^{${deg}} + ${coeffs[1]}x^{${deg - 1}} + 5$`;
         answer = String(deg);
     } else {
         const x = getRandomInt(0, 3);
@@ -247,15 +247,28 @@ export const generateLinearEquationSolutions = () => {
     const y = getRandomInt(0, 5);
     const c = a * x + b * y;
 
-    // const questionText = `$${a}x + ${b}y = ${c}$`;
     const questionText = `$${formatLinearExpression([{ coeff: a, var: 'x' }, { coeff: b, var: 'y' }])} = ${c}$`;
-    const answer = `(${x}, ${y})`;
-    const rows = [{ text: questionText, answer: answer }];
-    const answerObj = { 0: answer };
+
+    const rows = [{
+        text: questionText,
+        answer: `(${x},${y})`
+    }];
+
+    // Store equation coefficients for validation
+    // This allows any valid (x, y) pair to be accepted
+    const answerObj = {
+        0: {
+            x: String(x),
+            y: String(y),
+            // Store equation coefficients for validation
+            _equation: { a, b, c }
+        }
+    };
 
     return {
         type: "tableInput",
-        question: "Check which point is a solution to the following problem:",
+        variant: "coordinate",
+        question: `Find the values of x and y that satisfy the equation: </br> ${questionText}`,
         topic: "Linear Equations / Solutions",
         answer: JSON.stringify(answerObj),
         rows: rows
@@ -270,7 +283,7 @@ export const generateLinearEquationSolving = () => {
     const c = a * x + b * y;
 
     // const questionText = `$${a}x + ${b}y = ${c}$ if $x = ${x}$.`;
-    const questionText = `$${formatLinearExpression([{ coeff: a, var: 'x' }, { coeff: b, var: 'y' }])} = ${c}$ if $x = ${x}$.`;
+    const questionText = `Find the value of y </br>$${formatLinearExpression([{ coeff: a, var: 'x' }, { coeff: b, var: 'y' }])} = ${c}$  if $x = ${x}$`;
     const answer = String(y);
     const rows = [{ text: questionText, answer: answer }];
     const answerObj = { 0: answer };

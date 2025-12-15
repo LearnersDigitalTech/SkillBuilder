@@ -689,8 +689,13 @@ export const generateFactors = () => {
         return generateFactors();
     }
 
-    const question = `What are the factors of  $ ${num} $ `;
-    const correct = factors[getRandomInt(1, factors.length - 1)]; // avoid 1 to make it meaningful
+    // Pick a random factor (avoid 1 and the number itself to make it meaningful)
+    const meaningfulFactors = factors.filter(f => f !== 1 && f !== num);
+    const correct = meaningfulFactors.length > 0
+        ? meaningfulFactors[getRandomInt(0, meaningfulFactors.length - 1)]
+        : factors[getRandomInt(1, factors.length - 1)];
+
+    const question = `Which of these is a factor of $ ${num} $ ?`;
 
     // Generate distractors (non-factors)
     const distractors = [];
@@ -701,10 +706,19 @@ export const generateFactors = () => {
         }
     }
 
+    // Create options
+    const options = shuffleArray([
+        { value: String(correct), label: String(correct) },
+        { value: String(distractors[0]), label: String(distractors[0]) },
+        { value: String(distractors[1]), label: String(distractors[1]) },
+        { value: String(distractors[2]), label: String(distractors[2]) }
+    ]);
+
     return {
-        type: "userInput",
+        type: "mcq",
         question: question,
         topic: "Number Theory / Factors",
+        options: options,
         answer: String(correct)
     };
 };

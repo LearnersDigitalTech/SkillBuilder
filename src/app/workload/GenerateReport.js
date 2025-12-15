@@ -95,10 +95,28 @@ function analyzeResponses(responses, grade) {
                             }
                         }
                     }
-                    // 2. Complex Object Row (e.g. {perimeter:..., area:...})
+                    // 2. Complex Object Row (e.g. {perimeter:..., area:...} or {x:..., y:...})
                     else if (typeof c === 'object' && c !== null) {
                         // If user didn't answer this row at all (undefined/null), score is 0
                         if (!u || typeof u !== 'object') {
+                            continue;
+                        }
+
+                        // Special case: Linear Equation validation
+                        // Check if this is a coordinate pair with equation coefficients
+                        if (c._equation && c._equation.a !== undefined && c._equation.b !== undefined && c._equation.c !== undefined) {
+                            const { a, b, c: constant } = c._equation;
+                            const userX = parseFloat(u.x);
+                            const userY = parseFloat(u.y);
+
+                            // Check if user's (x, y) satisfies the equation: a*x + b*y = c
+                            if (!isNaN(userX) && !isNaN(userY)) {
+                                const leftSide = a * userX + b * userY;
+                                // Allow small tolerance for floating point errors
+                                if (Math.abs(leftSide - constant) < 0.0001) {
+                                    totalScoreSum += 1;
+                                }
+                            }
                             continue;
                         }
 
@@ -111,6 +129,9 @@ function analyzeResponses(responses, grade) {
 
                         let correctKeysCount = 0;
                         cKeys.forEach(key => {
+                            // Skip internal validation keys like _equation
+                            if (key.startsWith('_')) return;
+
                             // Normalize both values
                             const valC = normalizeFunc(c[key]);
                             const valU = normalizeFunc(u[key]);
@@ -175,7 +196,16 @@ function analyzeResponses(responses, grade) {
             }
         }
 
-        // Default: Ignore all whitespace for comparison to handle spacing variations (e.g. "1 x 1" vs "1x1")
+        // Default: Try numeric comparison first (handles leading zeros like "07" vs "7")
+        const givenNum = parseFloat(givenAnswer);
+        const correctNum = parseFloat(correctAnswer);
+
+        if (!isNaN(givenNum) && !isNaN(correctNum)) {
+            // Numeric comparison with small tolerance for floating point errors
+            return Math.abs(givenNum - correctNum) < 0.0001 ? 1 : 0;
+        }
+
+        // Fall back to string comparison: Ignore all whitespace for comparison to handle spacing variations (e.g. "1 x 1" vs "1x1")
         return givenAnswer.replace(/\s+/g, "") === correctAnswer.replace(/\s+/g, "") ? 1 : 0;
     };
 
