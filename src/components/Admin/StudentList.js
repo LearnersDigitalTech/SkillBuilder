@@ -53,7 +53,8 @@ import {
     BookOpen,
     Search,
     ChevronDown,
-    Clock
+    Clock,
+    History
 } from 'lucide-react';
 import MathRenderer from '@/components/MathRenderer/MathRenderer.component';
 import { jsPDF } from 'jspdf';
@@ -72,6 +73,7 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [studentToDelete, setStudentToDelete] = useState(null);
+    const [displayedReport, setDisplayedReport] = useState(null);
 
     // Derived view mode from prop
     const viewMode = assessmentType;
@@ -116,12 +118,14 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
 
     const handleView = (student) => {
         setSelectedStudent(student);
+        setDisplayedReport(student);
         setOpen(true);
     };
 
     const handleClose = () => {
         setOpen(false);
         setSelectedStudent(null);
+        setDisplayedReport(null);
     };
 
     const handleDeleteClick = (student) => {
@@ -222,12 +226,20 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
 
         // --- Design Elements ---
 
-        // 1. Page Border
-        doc.setDrawColor(0, 0, 0); // Black
-        doc.setLineWidth(3); // Thick
-        doc.rect(6, 6, pageWidth - 12, pageHeight - 12); // Outer border (Adjusted for clipping)
+        // 1. Page Border Helper
+        const drawBorder = () => {
+            // Outer Blue Border
+            doc.setDrawColor(33, 150, 243); // Blue #2196F3
+            doc.setLineWidth(1.0);
+            doc.roundedRect(6, 6, pageWidth - 12, pageHeight - 12, 3, 3, 'S');
 
-        // 2. Header Background (White)
+            // Inner Thin Gray Border
+            doc.setDrawColor(200, 200, 200);
+            doc.setLineWidth(0.5);
+            doc.roundedRect(9, 9, pageWidth - 18, pageHeight - 18, 2, 2, 'S');
+        };
+
+        drawBorder(); // Draw on first page        // 2. Header Background (White)
         doc.setFillColor(255, 255, 255);
         doc.rect(6, 6, pageWidth - 12, 40, 'F');
 
@@ -336,7 +348,106 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
             : "Final Score: Not Submitted";
         doc.text(marksText, 20, yPos);
 
-        // Chart removed from PDF by user request
+        // Show Session Summary if available
+        const summary = isRapid ? selectedStudent.rapidMath?.report?.summary : selectedStudent.summary;
+        if (summary) {
+            yPos += 10;
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text("Session Summary:", 20, yPos);
+
+            yPos += 7;
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+
+            const stats = [
+                `Correct: ${summary.correct || 0}`,
+                `Wrong: ${summary.wrong || 0}`,
+                `Skipped: ${(summary.totalQuestions || 0) - (summary.attempted || 0)}`,
+                `Time Taken: ${summary.totalTime ? Math.floor(summary.totalTime / 60) + 'm ' + (summary.totalTime % 60) + 's' : '0m 0s'}`
+            ];
+
+            let xOffset = 20;
+            stats.forEach(stat => {
+                doc.text(stat, xOffset, yPos);
+                xOffset += 40;
+            });
+        }
+
+        // Show Detailed Question Analysis
+        const questions = isRapid ? selectedStudent.rapidMath?.report?.perQuestionReport : selectedStudent.perQuestionReport;
+        if (questions && questions.length > 0) {
+            yPos += 20;
+
+            // Check if we need a new page for the header
+            if (yPos > pageHeight - 40) {
+                doc.addPage();
+                drawBorder(); // Border for new page
+                yPos = 30;
+            }
+
+            doc.setTextColor(33, 150, 243); // Blue
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "bold");
+            doc.text("DETAILED QUESTION ANALYSIS", 20, yPos);
+            doc.line(20, yPos + 2, pageWidth - 20, yPos + 2);
+            yPos += 15;
+
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(10);
+
+            questions.forEach((q, index) => {
+                // Ensure q is defined
+                if (!q) return;
+
+                // Check page break with some buffer
+                if (yPos > pageHeight - 30) {
+                    doc.addPage();
+                    drawBorder(); // Border for new page
+                    yPos = 30; // Reset to top
+                }
+
+                doc.setFont("helvetica", "bold");
+                doc.text(`Q${index + 1}:`, 20, yPos);
+
+                doc.setFont("helvetica", "normal");
+                // Safely handle question text
+                const qText = q.question || "Question text unavailable";
+                const splitTitle = doc.splitTextToSize(qText, pageWidth - 50);
+                doc.text(splitTitle, 30, yPos);
+
+                // Advance yPos based on text height (approx 5 per line)
+                yPos += (splitTitle.length * 5) + 5;
+
+                // User Answer & Status
+                doc.setFont("helvetica", "bold");
+                const isCorrect = q.isCorrect;
+
+                if (isCorrect) doc.setTextColor(0, 128, 0); // Green
+                else doc.setTextColor(255, 0, 0); // Red
+
+                doc.text(isCorrect ? "Ans: Correct" : "Ans: Incorrect", 30, yPos);
+
+                // Show values
+                doc.setTextColor(0, 0, 0);
+                doc.setFont("helvetica", "normal");
+
+                const userAnswer = q.userAnswer !== undefined && q.userAnswer !== null ? String(q.userAnswer) : 'Skipped';
+                // Only show intended answer if we have it and the user was wrong
+                if (!isCorrect) {
+                    doc.text(` | Yours: ${userAnswer}`, 60, yPos);
+                    if (q.answer) {
+                        doc.text(` | Correct: ${q.answer}`, 100, yPos);
+                    }
+                } else {
+                    doc.text(` | Yours: ${userAnswer}`, 60, yPos);
+                }
+
+                yPos += 10;
+                doc.setDrawColor(240, 240, 240);
+                doc.line(20, yPos - 5, pageWidth - 20, yPos - 5); // Light divider
+            });
+        }
 
         // --- Footer ---
         const footerY = pageHeight - 15;
@@ -360,7 +471,7 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
         ];
     };
 
-    const COLORS = ['#00C49F', '#FF8042'];
+    const COLORS = ['#00C49F', '#edf2f7'];
 
     return (
         <Box>
@@ -486,6 +597,7 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
                             {viewMode === 'standard' && <TableCell sx={{ fontWeight: 'bold' }}>Phone Number</TableCell>}
 
                             <TableCell sx={{ fontWeight: 'bold' }}>Email</TableCell>
+                            {viewMode === 'standard' && <TableCell sx={{ fontWeight: 'bold' }}>Attempted No</TableCell>}
                             <TableCell sx={{ fontWeight: 'bold' }}>{viewMode === 'standard' ? 'Latest Marks' : 'Rapid Math Score'}</TableCell>
                             {viewMode === 'rapid' && <TableCell sx={{ fontWeight: 'bold' }}>Time Taken</TableCell>}
                             {viewMode === 'rapid' && <TableCell sx={{ fontWeight: 'bold' }}>Total Ques.</TableCell>}
@@ -513,6 +625,7 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
                                         {viewMode === 'standard' && <TableCell>{student.phoneNumber}</TableCell>}
 
                                         <TableCell>{student.email || 'N/A'}</TableCell>
+                                        {viewMode === 'standard' && <TableCell>{student.attemptCount || 0}</TableCell>}
                                         <TableCell>
                                             {(marks !== null && marks !== undefined) ? `${marks}%` : 'N/A'}
                                         </TableCell>
@@ -571,7 +684,7 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
             <Dialog
                 open={open}
                 onClose={handleClose}
-                maxWidth="md"
+                maxWidth="lg"
                 fullWidth
                 PaperProps={{
                     sx: {
@@ -609,17 +722,17 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
                 </Box>
 
                 <DialogContent sx={{ p: 4, bgcolor: '#f8f9fa' }}>
-                    {selectedStudent && (
+                    {selectedStudent && displayedReport && (
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                             {/* Row 1: Profile & Pie Chart */}
-                            <Grid container spacing={4}>
-                                <Grid item xs={12} md={6}>
-                                    <Paper elevation={0} sx={{ p: 3, borderRadius: 2, height: '100%', border: '1px solid #e0e0e0' }}>
+                            <Box sx={{ display: 'flex', gap: 3, alignItems: 'start' }}>
+                                <Box sx={{ flex: 1, minWidth: '300px' }}>
+                                    <Paper elevation={0} sx={{ p: 2, borderRadius: 2, border: '1px solid #e0e0e0' }}>
                                         <Typography variant="h6" gutterBottom fontWeight="bold" color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                             <User size={20} /> Personal Details
                                         </Typography>
-                                        <Divider sx={{ mb: 2 }} />
-                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                                        <Divider sx={{ mb: 1 }} />
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                                             <Box display="flex" alignItems="center" gap={2}>
                                                 <Phone size={20} color="#666" />
                                                 <Box>
@@ -644,137 +757,204 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
                                                 </Box>
                                             </Box>
                                         </Box>
+
+                                        {/* Test History Section */}
                                     </Paper>
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <Paper elevation={0} sx={{ p: 3, borderRadius: 2, height: '100%', border: '1px solid #e0e0e0' }}>
-                                        <Typography variant="h6" gutterBottom fontWeight="bold" color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <Award size={20} /> Performance Overview
-                                        </Typography>
-                                        <Divider sx={{ mb: 2 }} />
-                                        {(() => {
-                                            const marks = viewMode === 'rapid' ? selectedStudent.rapidMath?.marks : selectedStudent.marks;
-                                            if (marks !== null && marks !== undefined) {
-                                                return (
-                                                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                        <Box ref={chartRef} key={`chart-${selectedStudent.id}-${marks}`} sx={{ width: '100%', maxWidth: 300, height: 200, position: 'relative' }}>
-                                                            <ResponsiveContainer width="100%" height="100%">
-                                                                <PieChart>
-                                                                    <Pie data={getChartData(selectedStudent)} cx="50%" cy="50%" innerRadius={60} outerRadius={80} fill="#8884d8" paddingAngle={5} dataKey="value" stroke="none">
-                                                                        {getChartData(selectedStudent).map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
-                                                                    </Pie>
-                                                                    <RechartsTooltip />
-                                                                    <Legend verticalAlign="bottom" height={36} />
-                                                                </PieChart>
-                                                            </ResponsiveContainer>
-                                                            <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -65%)', textAlign: 'center' }}>
-                                                                <Typography variant="h4" fontWeight="bold">{marks}%</Typography>
-                                                                <Typography variant="caption">Score</Typography>
-                                                            </Box>
-                                                        </Box>
-                                                        <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1, bgcolor: marks >= 40 ? '#e8f5e9' : '#ffebee', p: 1, px: 2, borderRadius: 10 }}>
-                                                            {marks >= 40 ? <CheckCircle size={18} color="green" /> : <XCircle size={18} color="red" />}
-                                                            <Typography variant="subtitle2" color={marks >= 40 ? "success.main" : "error.main"} fontWeight="bold">
-                                                                Result: {marks >= 40 ? "PASSED" : "FAILED"}
-                                                            </Typography>
-                                                        </Box>
+                                </Box>
+                                <Box sx={{ flex: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
 
-                                                        {/* Summary Stats Grid */}
-                                                        {(() => {
-                                                            const currentSummary = viewMode === 'rapid'
-                                                                ? selectedStudent.rapidMath?.report?.summary
-                                                                : selectedStudent.summary;
+                                    {/* Test History in separate card */}
+                                    {selectedStudent.history && selectedStudent.history.length > 0 && (
+                                        <Paper elevation={0} sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0' }}>
+                                            <Typography variant="h6" gutterBottom fontWeight="bold" color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                <History size={20} /> Test History
+                                            </Typography>
+                                            <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 2, maxHeight: 200, overflow: 'auto' }}>
+                                                <Table stickyHeader size="small">
+                                                    <TableHead>
+                                                        <TableRow sx={{ bgcolor: '#f1f5f9' }}>
+                                                            <TableCell sx={{ fontWeight: 'bold' }}>Attempt Date</TableCell>
+                                                            <TableCell sx={{ fontWeight: 'bold' }}>Score / Marks</TableCell>
+                                                            <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
+                                                            <TableCell align="right" sx={{ fontWeight: 'bold' }}>Action</TableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {selectedStudent.history.map((hist, idx) => (
+                                                            <TableRow
+                                                                key={idx}
+                                                                hover
+                                                                selected={displayedReport?.date === hist.date}
+                                                                onClick={() => setDisplayedReport(hist)}
+                                                                sx={{
+                                                                    cursor: 'pointer',
+                                                                    '&.Mui-selected': { bgcolor: '#e0f2fe !important' } // Highlight selected
+                                                                }}
+                                                            >
+                                                                <TableCell>{new Date(hist.date).toLocaleString()}</TableCell>
+                                                                <TableCell>
+                                                                    {hist.marks}%
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    <Chip
+                                                                        label={hist.marks >= 40 ? "Passed" : "Failed"}
+                                                                        color={hist.marks >= 40 ? "success" : "error"}
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell align="right">
+                                                                    {displayedReport?.date === hist.date ? (
+                                                                        <Chip label="Viewing" size="small" color="primary" />
+                                                                    ) : (
+                                                                        <Button size="small" variant="text" startIcon={<Eye size={16} />}>View</Button>
+                                                                    )}
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))}
+                                                    </TableBody>
+                                                </Table>
+                                            </TableContainer>
+                                        </Paper>
+                                    )}
 
-                                                            if (currentSummary) {
-                                                                return (
-                                                                    <Box sx={{ width: '100%', mt: 3, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-                                                                        <Box sx={{ p: 1.5, bgcolor: '#f0fdf4', borderRadius: 2, border: '1px solid #bbf7d0', textAlign: 'center' }}>
-                                                                            <Typography variant="h6" color="success.main" fontWeight="bold">{currentSummary.correct || 0}</Typography>
-                                                                            <Typography variant="caption" color="text.secondary">Correct</Typography>
-                                                                        </Box>
-                                                                        <Box sx={{ p: 1.5, bgcolor: '#fef2f2', borderRadius: 2, border: '1px solid #fecaca', textAlign: 'center' }}>
-                                                                            <Typography variant="h6" color="error.main" fontWeight="bold">{currentSummary.wrong || 0}</Typography>
-                                                                            <Typography variant="caption" color="text.secondary">Wrong</Typography>
-                                                                        </Box>
-                                                                        <Box sx={{ p: 1.5, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                                                                            <Typography variant="h6" color="text.secondary" fontWeight="bold">{(currentSummary.totalQuestions || 0) - (currentSummary.attempted || 0)}</Typography>
-                                                                            <Typography variant="caption" color="text.secondary">Skipped</Typography>
-                                                                        </Box>
-                                                                        <Box sx={{ p: 1.5, bgcolor: '#eff6ff', borderRadius: 2, border: '1px solid #bfdbfe', textAlign: 'center' }}>
-                                                                            <Typography variant="h6" color="primary.main" fontWeight="bold">
-                                                                                {currentSummary.totalTime ? `${Math.floor(currentSummary.totalTime / 60)}m ${currentSummary.totalTime % 60}s` : '0m 0s'}
-                                                                            </Typography>
-                                                                            <Typography variant="caption" color="text.secondary">Time Taken</Typography>
-                                                                        </Box>
-                                                                    </Box>
-                                                                );
-                                                            }
-                                                            return null;
-                                                        })()}
 
-                                                        {/* Feedback Section - Specific to report type */}
-                                                        <Box sx={{ mt: 3, width: '100%', p: 2, bgcolor: '#f8f9fa', borderRadius: 2, border: '1px solid #e0e0e0', textAlign: 'left' }}>
-                                                            <Typography variant="subtitle2" color="text.secondary" gutterBottom fontWeight="bold">
-                                                                Detailed Feedback
-                                                            </Typography>
+                                </Box>
+                            </Box>
 
-                                                            {viewMode === 'standard' ? (
-                                                                selectedStudent.topicFeedback ? (
-                                                                    Object.entries(selectedStudent.topicFeedback).map(([topic, data]) => (
-                                                                        <Box key={topic} sx={{ mb: 2, p: 1.5, bgcolor: 'white', borderRadius: 1, border: '1px solid #eee' }}>
-                                                                            <Typography variant="subtitle2" fontWeight="bold" gutterBottom color="primary">
-                                                                                {topic}
-                                                                            </Typography>
+                            {/* Row 2: Performance Overview (Full Width) */}
+                            <Paper elevation={0} sx={{ p: 3, borderRadius: 2, border: '1px solid #e0e0e0' }}>
+                                <Typography variant="h6" gutterBottom fontWeight="bold" color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Award size={20} /> Performance Overview
+                                </Typography>
+                                <Divider sx={{ mb: 2 }} />
+                                {(() => {
+                                    const marks = viewMode === 'rapid' ? displayedReport.rapidMath?.marks : displayedReport.marks;
+                                    if (marks !== null && marks !== undefined) {
+                                        return (
+                                            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: 'center', gap: 4, mt: 1 }}>
+                                                {/* Chart Section - Guaranteed Full Circle */}
+                                                <Box sx={{ width: { xs: '100%', md: 350 }, height: 320, position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
+                                                        <ResponsiveContainer width="100%" height="100%">
+                                                            <PieChart>
+                                                                <Pie
+                                                                    data={getChartData(displayedReport)}
+                                                                    cx="50%"
+                                                                    cy="50%"
+                                                                    innerRadius={85}
+                                                                    outerRadius={115}
+                                                                    startAngle={90}
+                                                                    endAngle={-270}
+                                                                    paddingAngle={4}
+                                                                    dataKey="value"
+                                                                    stroke="none"
+                                                                >
+                                                                    {getChartData(displayedReport).map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                                                                </Pie>
+                                                                <RechartsTooltip />
+                                                            </PieChart>
+                                                        </ResponsiveContainer>
 
-                                                                            <Box sx={{ mb: 1 }}>
-                                                                                <Typography variant="caption" color="success.main" fontWeight="bold" display="block">
-                                                                                    What went well:
-                                                                                </Typography>
-                                                                                <Typography variant="body2" color="text.secondary">
-                                                                                    {data.positiveFeedback}
-                                                                                </Typography>
-                                                                            </Box>
-
-                                                                            <Box>
-                                                                                <Typography variant="caption" color="error.main" fontWeight="bold" display="block">
-                                                                                    Needs Improvement:
-                                                                                </Typography>
-                                                                                <Typography variant="body2" color="text.secondary">
-                                                                                    {data.improvementFeedback}
-                                                                                </Typography>
-                                                                            </Box>
-                                                                        </Box>
-                                                                    ))
-                                                                ) : (
-                                                                    <Typography variant="body2" color="text.primary" sx={{ fontStyle: 'italic' }}>
-                                                                        "{selectedStudent.feedback}"
-                                                                    </Typography>
-                                                                )
-                                                            ) : (
-                                                                // Rapid Math Feedback (Usually simpler)
-                                                                <Typography variant="body2" color="text.primary">
-                                                                    Rapid Math Challenge completed with {selectedStudent.rapidMath?.marks}% accuracy.
-                                                                </Typography>
-                                                            )}
+                                                        {/* Center Label */}
+                                                        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', pointerEvents: 'none' }}>
+                                                            <Typography variant="h3" fontWeight="800" color="text.primary">{marks}%</Typography>
+                                                            <Typography variant="body2" color="text.secondary" fontWeight="600" sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>Score</Typography>
                                                         </Box>
                                                     </Box>
-                                                );
-                                            }
-                                            return <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>No Data</Box>
-                                        })()}
-                                    </Paper>
-                                </Grid>
-                            </Grid>
+
+                                                    {/* Pass/Fail Badge - Positioned below chart */}
+                                                    <Box sx={{ mt: -4, zIndex: 1, bgcolor: marks >= 40 ? '#ecfdf5' : '#fef2f2', border: `1px solid ${marks >= 40 ? '#bbf7d0' : '#fecaca'}`, px: 3, py: 0.5, borderRadius: 20, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                        {marks >= 40 ? <CheckCircle size={18} color="#16a34a" /> : <XCircle size={18} color="#dc2626" />}
+                                                        <Typography variant="button" fontWeight="800" color={marks >= 40 ? "#15803d" : "#b91c1c"}>
+                                                            {marks >= 40 ? "PASSED" : "FAILED"}
+                                                        </Typography>
+                                                    </Box>
+                                                </Box>
+
+                                                {/* Stats Section - Clean 2x2 Grid */}
+                                                <Box sx={{ flex: 1, width: '100%' }}>
+                                                    <Typography variant="h6" fontWeight="700" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                        <History size={20} /> Session Summary
+                                                    </Typography>
+
+                                                    {(() => {
+                                                        const currentSummary = viewMode === 'rapid'
+                                                            ? displayedReport.rapidMath?.report?.summary
+                                                            : displayedReport.summary;
+
+                                                        if (currentSummary) {
+                                                            return (
+                                                                <Grid container spacing={2}>
+                                                                    <Grid item xs={6} sm={6}>
+                                                                        <Paper elevation={0} sx={{ p: 2, bgcolor: '#fff', border: '1px solid #e2e8f0', borderRadius: 3, display: 'flex', alignItems: 'center', gap: 2, transition: 'all 0.2s', '&:hover': { transform: 'translateY(-2px)', borderColor: '#bbf7d0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)' } }}>
+                                                                            <Box sx={{ width: 48, height: 48, borderRadius: '50%', bgcolor: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                                <CheckCircle size={24} />
+                                                                            </Box>
+                                                                            <Box>
+                                                                                <Typography variant="h4" fontWeight="800" color="text.primary">{currentSummary.correct || 0}</Typography>
+                                                                                <Typography variant="body2" color="text.secondary" fontWeight="600">Correct</Typography>
+                                                                            </Box>
+                                                                        </Paper>
+                                                                    </Grid>
+                                                                    <Grid item xs={6} sm={6}>
+                                                                        <Paper elevation={0} sx={{ p: 2, bgcolor: '#fff', border: '1px solid #e2e8f0', borderRadius: 3, display: 'flex', alignItems: 'center', gap: 2, transition: 'all 0.2s', '&:hover': { transform: 'translateY(-2px)', borderColor: '#fecaca', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)' } }}>
+                                                                            <Box sx={{ width: 48, height: 48, borderRadius: '50%', bgcolor: '#fee2e2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                                <XCircle size={24} />
+                                                                            </Box>
+                                                                            <Box>
+                                                                                <Typography variant="h4" fontWeight="800" color="text.primary">{currentSummary.wrong || 0}</Typography>
+                                                                                <Typography variant="body2" color="text.secondary" fontWeight="600">Wrong</Typography>
+                                                                            </Box>
+                                                                        </Paper>
+                                                                    </Grid>
+                                                                    <Grid item xs={6} sm={6}>
+                                                                        <Paper elevation={0} sx={{ p: 2, bgcolor: '#fff', border: '1px solid #e2e8f0', borderRadius: 3, display: 'flex', alignItems: 'center', gap: 2, transition: 'all 0.2s', '&:hover': { transform: 'translateY(-2px)', borderColor: '#cbd5e1', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)' } }}>
+                                                                            <Box sx={{ width: 48, height: 48, borderRadius: '50%', bgcolor: '#f1f5f9', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                                <AlertCircle size={24} />
+                                                                            </Box>
+                                                                            <Box>
+                                                                                <Typography variant="h4" fontWeight="800" color="text.primary">{(currentSummary.totalQuestions || 0) - (currentSummary.attempted || 0)}</Typography>
+                                                                                <Typography variant="body2" color="text.secondary" fontWeight="600">Skipped</Typography>
+                                                                            </Box>
+                                                                        </Paper>
+                                                                    </Grid>
+                                                                    <Grid item xs={6} sm={6}>
+                                                                        <Paper elevation={0} sx={{ p: 2, bgcolor: '#fff', border: '1px solid #e2e8f0', borderRadius: 3, display: 'flex', alignItems: 'center', gap: 2, transition: 'all 0.2s', '&:hover': { transform: 'translateY(-2px)', borderColor: '#bfdbfe', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)' } }}>
+                                                                            <Box sx={{ width: 48, height: 48, borderRadius: '50%', bgcolor: '#dbeafe', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                                <Clock size={24} />
+                                                                            </Box>
+                                                                            <Box>
+                                                                                <Typography variant="body1" fontWeight="800" color="text.primary" sx={{ fontSize: '1.25rem' }}>
+                                                                                    {currentSummary.totalTime ? `${Math.floor(currentSummary.totalTime / 60)}m ${currentSummary.totalTime % 60}s` : '0m 0s'}
+                                                                                </Typography>
+                                                                                <Typography variant="body2" color="text.secondary" fontWeight="600">Time Taken</Typography>
+                                                                            </Box>
+                                                                        </Paper>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            );
+                                                        }
+                                                        return null;
+                                                    })()}
+                                                </Box>
+                                            </Box>
+
+                                        );
+                                    }
+                                    return <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>No Data</Box>
+                                })()}
+                            </Paper>
 
                             {/* Row 2: Detailed Analysis */}
-                            {selectedStudent.perQuestionReport && selectedStudent.perQuestionReport.length > 0 && (
+                            {displayedReport.perQuestionReport && displayedReport.perQuestionReport.length > 0 && (
                                 <Box>
                                     <Typography variant="h6" fontWeight="bold" gutterBottom color="primary">
                                         <BookOpen size={20} style={{ marginRight: 8, verticalAlign: 'middle' }} />
                                         Detailed Question Analysis
                                     </Typography>
                                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                        {selectedStudent.perQuestionReport.map((q, idx) => (
+                                        {displayedReport.perQuestionReport.map((q, idx) => (
                                             <Accordion key={idx} variant="outlined" sx={{ borderRadius: 2, bgcolor: 'white', '&:before': { display: 'none' } }}>
                                                 <AccordionSummary expandIcon={<ChevronDown />}>
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
@@ -831,8 +1011,8 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
                                     <Paper elevation={0} sx={{ p: 3, borderRadius: 2, height: '100%', border: '1px solid #e0e0e0' }}>
                                         <Typography variant="h6" gutterBottom fontWeight="bold" color="primary">Topic Feedback</Typography>
                                         <Divider sx={{ mb: 2 }} />
-                                        {selectedStudent.topicFeedback ? (
-                                            Object.entries(selectedStudent.topicFeedback).map(([topic, data]) => (
+                                        {displayedReport.topicFeedback ? (
+                                            Object.entries(displayedReport.topicFeedback).map(([topic, data]) => (
                                                 <Box key={topic} sx={{ mb: 2, p: 1.5, bgcolor: '#f8fafc', borderRadius: 2 }}>
                                                     <Typography variant="subtitle2" fontWeight="bold" color="primary">{topic}</Typography>
                                                     <Typography variant="caption" color="success.main" display="block">Good: {data.positiveFeedback}</Typography>
@@ -840,7 +1020,7 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
                                                 </Box>
                                             ))
                                         ) : (
-                                            <Typography variant="body2">{selectedStudent.feedback}</Typography>
+                                            <Typography variant="body2">{displayedReport.feedback}</Typography>
                                         )}
                                     </Paper>
                                 </Grid>
@@ -848,9 +1028,9 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
                                     <Paper elevation={0} sx={{ p: 3, borderRadius: 2, height: '100%', border: '1px solid #e0e0e0' }}>
                                         <Typography variant="h6" gutterBottom fontWeight="bold" color="primary">Learning Plan</Typography>
                                         <Divider sx={{ mb: 2 }} />
-                                        {selectedStudent.learningPlan && selectedStudent.learningPlan.length > 0 ? (
+                                        {displayedReport.learningPlan && displayedReport.learningPlan.length > 0 ? (
                                             <Box>
-                                                {selectedStudent.learningPlan.map((day, idx) => (
+                                                {displayedReport.learningPlan.map((day, idx) => (
                                                     <Box key={idx} sx={{ mb: 1.5, p: 1.5, bgcolor: '#fffbeb', borderRadius: 2, border: '1px solid #fcd34d' }}>
                                                         <Typography variant="subtitle2" fontWeight="bold" color="orange">Day {day.day}: {day.skillCategory}</Typography>
                                                         <Typography variant="body2" sx={{ mt: 0.5 }}>{day.selfLearn}</Typography>
@@ -917,7 +1097,7 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
                     <Button onClick={handleConfirmDelete} color="error" variant="contained">Delete</Button>
                 </DialogActions>
             </Dialog>
-        </Box>
+        </Box >
     );
 };
 
