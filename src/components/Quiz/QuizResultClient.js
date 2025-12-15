@@ -198,11 +198,15 @@ const QuizResultClient = () => {
                     try {
                         // Normalize phone number (last 10 digits)
                         const normalizedPhone = phoneParam.replace(/\D/g, '').slice(-10);
-                        console.log('📱 Normalized phone:', normalizedPhone);
+                        const parentKey = searchParams.get("parentKey");
 
-                        // Fetch reports for this phone number
-                        const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${normalizedPhone}`);
-                        console.log('🔥 Firebase path:', `NMD_2025/Reports/${normalizedPhone}`);
+                        console.log('📱 Normalized phone:', normalizedPhone);
+                        if (parentKey) console.log('🔑 Using provided Parent Key:', parentKey);
+
+                        // Fetch reports for this phone number (use parentKey if available, else fallback to normalized)
+                        const dbKey = parentKey || normalizedPhone;
+                        const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${dbKey}`);
+                        console.log('🔥 Firebase path:', `NMD_2025/Reports/${dbKey}`);
                         const snapshot = await get(reportRef);
 
                         if (!snapshot.exists()) {
@@ -222,13 +226,13 @@ const QuizResultClient = () => {
                                 // Check if it's a single report or multiple reports
                                 if (childReports.summary) {
                                     console.log('✅ Found single report with summary');
-                                    allReports.push(childReports);
+                                    allReports.push({ ...childReports, reportId: childId });
                                 } else {
                                     // Multiple reports - get all
                                     console.log('📚 Found multiple reports, extracting...');
-                                    Object.values(childReports).forEach(report => {
+                                    Object.entries(childReports).forEach(([reportId, report]) => {
                                         if (report && typeof report === 'object' && report.summary) {
-                                            allReports.push(report);
+                                            allReports.push({ ...report, reportId });
                                         }
                                     });
                                 }
@@ -241,8 +245,18 @@ const QuizResultClient = () => {
                         allReports.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
                         if (allReports.length > 0) {
-                            const latestReport = allReports[0];
-                            console.log('🎯 Latest report:', latestReport);
+                            let latestReport = allReports[0];
+
+                            // If reportId is provided, find that specific report
+                            if (reportId) {
+                                const specificReport = allReports.find(r => r.reportId === reportId || r.timestamp?.toString() === reportId); // Handle possible ID formats
+                                if (specificReport) {
+                                    latestReport = specificReport;
+                                    console.log('🎯 Found specific report by ID:', latestReport);
+                                }
+                            }
+
+                            console.log('🎯 Final report to show:', latestReport);
 
                             // Handle both old and new format
                             let topicFeedback = latestReport.topicFeedback;
@@ -753,16 +767,37 @@ const QuizResultClient = () => {
             console.log('Logo not loaded, continuing without it');
         }
 
+
         // Add title text (shifted right to accommodate logo)
         doc.setTextColor(102, 126, 234);
-        doc.setFontSize(20);
+        doc.setFontSize(22);
         doc.setFont(undefined, 'bold');
-        doc.text('Your Personalized Learning Plan', pageWidth / 2, 18, { align: 'center' });
+
+        // Capitalize name
+        const rawName = displayName || 'Student';
+        const capitalizedName = rawName.replace(/\b\w/g, c => c.toUpperCase());
+
+        // Full title string
+        const fullTitle = `${capitalizedName}'s Personalized Learning Plan`;
+
+        // Text wrapping settings
+        const textStartX = 50; // Logo ends at 44 (14+30), so 50 gives padding
+        const maxTextWidth = pageWidth - textStartX - 14; // Right margin 14
+        const splitTitle = doc.splitTextToSize(fullTitle, maxTextWidth);
+
+        // Render Title
+        let currentY = 20;
+        doc.text(splitTitle, textStartX, currentY);
+
+        // Adjust Y for subtitle based on title height
+        // splitTitle is an array of strings. Each line adds to height.
+        // Approx 10mm per line for size 22
+        currentY += (splitTitle.length * 9);
 
         doc.setFontSize(11);
         doc.setFont(undefined, 'normal');
         doc.setTextColor(100, 116, 139);
-        doc.text('Math Skill Conquest', pageWidth / 2, 28, { align: 'center' });
+        doc.text('Math Skill Builder', textStartX, currentY, { align: 'left' });
 
         // Student details
         doc.setTextColor(0, 0, 0);
@@ -776,7 +811,7 @@ const QuizResultClient = () => {
         doc.setFont(undefined, 'normal');
         doc.text(`Name: ${displayName || 'Student'}`, 14, yPos);
         yPos += 6;
-        doc.text(`Grade: ${displayGrade || 'N/A'}`, 14, yPos);
+        doc.text(`${displayGrade}`, 14, yPos);
         yPos += 6;
         doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, yPos);
         yPos += 12;
@@ -1076,8 +1111,8 @@ const QuizResultClient = () => {
                     <div style={{
                         maxWidth: '1200px',
                         margin: '0 auto',
-                        padding: '1rem 1.5rem 0',
-                        marginBottom: '-1rem'
+                        padding: '1rem 1.5rem',
+                        marginBottom: '1rem'
                     }}>
                         <Button
                             variant="outlined"
@@ -1308,9 +1343,15 @@ const QuizResultClient = () => {
                         </>
                     ) : (
                         <div className={Styles.learningCard}>
-                            <p className={Styles.learningIntro}>
-                                🎉 Excellent work! You didn't make any mistakes. Keep practicing to maintain your skills!
-                            </p>
+                            {summary.accuracyPercent === 100 ? (
+                                <p className={Styles.learningIntro}>
+                                    🎉 Excellent work! You didn't make any mistakes. Keep practicing to maintain your skills!
+                                </p>
+                            ) : (
+                                <p className={Styles.learningIntro}>
+                                    Keep practicing! Complete more questions to generate a personalized learning plan.
+                                </p>
+                            )}
                         </div>
                     )}
 
