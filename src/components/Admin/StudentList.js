@@ -1,4 +1,6 @@
+"use client";
 import React, { useState, useMemo, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import {
     Table,
     TableBody,
@@ -61,6 +63,7 @@ import * as XLSX from 'xlsx';
 
 const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
     const theme = useTheme();
+    const router = useRouter();
     const chartRef = useRef(null);
     const [selectedGrade, setSelectedGrade] = useState('All');
     const [minScore, setMinScore] = useState(0);
@@ -105,6 +108,9 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
             const searchMatch = !searchTerm || nameMatch || phoneMatch || emailMatch;
 
             return gradeMatch && scoreMatch && searchMatch;
+        }).sort((a, b) => {
+            const getDate = (s) => (viewMode === 'rapid' ? (s.rapidMath?.date || 0) : (s.date || 0));
+            return new Date(getDate(b)) - new Date(getDate(a));
         });
     }, [students, selectedGrade, minScore, viewMode, searchTerm]);
 
@@ -143,9 +149,11 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
         }
 
         // Navigate to quiz result page with admin view flag
-        // The quiz result page will load the report based on the user's phone number
+        // The quiz result page will load the report based on the user's phone number and specific report ID
         const phoneNumber = selectedStudent.phoneNumber || selectedStudent.id;
-        window.location.href = `/quiz/quiz-result?phone=${phoneNumber}&adminView=true`;
+        const reportIdParam = selectedStudent.reportId ? `&reportId=${selectedStudent.reportId}` : '';
+        const parentKeyParam = selectedStudent.reportParentKey ? `&parentKey=${selectedStudent.reportParentKey}` : '';
+        router.push(`/quiz/quiz-result?phone=${encodeURIComponent(phoneNumber)}&adminView=true${reportIdParam}${parentKeyParam}`);
     };
 
     const handleExportExcel = () => {
@@ -156,21 +164,21 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
                     Grade: student.grade,
                     PhoneNumber: student.phoneNumber,
                     Email: student.email || 'N/A',
-                    Marks: (student.marks !== null && student.marks !== undefined) ? `${student.marks}%` : 'Not Attempted',
+                    Marks: (student.marks !== null && student.marks !== undefined) ? `${student.marks}%` : 'Not Submitted',
                     DateJoined: student.date ? new Date(student.date).toLocaleDateString() : 'N/A',
                     Status: (student.marks !== null && student.marks !== undefined)
                         ? (student.marks >= 40 ? "PASSED" : "FAILED")
-                        : "NOT ATTEMPTED"
+                        : "NOT SUBMITTED"
                 };
             } else {
                 return {
                     Name: student.name,
                     Email: student.email || 'N/A',
-                    RapidMathScore: (student.rapidMath?.marks !== undefined) ? `${student.rapidMath.marks}%` : 'Not Attempted',
+                    RapidMathScore: (student.rapidMath?.marks !== undefined) ? `${student.rapidMath.marks}%` : 'Not Submitted',
                     TimeTaken: student.rapidMath?.timeTaken ? `${Math.floor(student.rapidMath.timeTaken / 60)}m ${student.rapidMath.timeTaken % 60}s` : 'N/A',
                     TotalQuestions: student.rapidMath?.totalQuestions || 'N/A',
                     Date: student.rapidMath?.date ? new Date(student.rapidMath.date).toLocaleDateString() : 'N/A',
-                    Status: (student.rapidMath?.marks !== undefined) ? "COMPLETED" : "NOT ATTEMPTED"
+                    Status: (student.rapidMath?.marks !== undefined) ? "COMPLETED" : "NOT SUBMITTED"
                 };
             }
         });
@@ -297,7 +305,7 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
         // Status Badge (Text representation)
         const status = (marks !== null && marks !== undefined)
             ? (marks >= 40 ? "PASSED" : "FAILED") // Or logic for Rapid Math?
-            : "NOT ATTEMPTED";
+            : "NOT SUBMITTED";
 
         if (!isRapid) {
             doc.setFont("helvetica", "bold");
@@ -325,7 +333,7 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
         doc.setFont("helvetica", "bold");
         const marksText = (marks !== null && marks !== undefined)
             ? `Final Score: ${marks}%`
-            : "Final Score: Not Attempted";
+            : "Final Score: Not Submitted";
         doc.text(marksText, 20, yPos);
 
         // Chart removed from PDF by user request
@@ -532,7 +540,7 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
                                                     variant="outlined"
                                                 />
                                             ) : (
-                                                <Chip label="Not Attempted" size="small" />
+                                                <Chip label="Not Submitted" size="small" />
                                             )}
                                         </TableCell>
                                         <TableCell>
@@ -797,7 +805,7 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
                                                             <Typography variant="subtitle2" color="text.secondary">Your Answer:</Typography>
                                                             <Box sx={{ p: 1.5, bgcolor: q.isCorrect ? '#f0fdf4' : '#fef2f2', borderRadius: 1, border: '1px solid', borderColor: q.isCorrect ? '#bbf7d0' : '#fecaca', minHeight: 40 }}>
                                                                 <Typography color={q.isCorrect ? "success.main" : "error.main"} fontWeight="500">
-                                                                    {q.type === 'factorTree' ? 'Factor Tree Interaction' : (q.userAnswer || 'Not Attempted')}
+                                                                    {q.type === 'factorTree' ? 'Factor Tree Interaction' : (q.userAnswer || 'Not Submitted')}
                                                                 </Typography>
                                                             </Box>
                                                         </Grid>

@@ -24,7 +24,7 @@ export const MarksBarChart = ({ data }) => (
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={data}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} angle={-30} textAnchor="end" interval={0} height={60} />
                         <YAxis axisLine={false} tickLine={false} />
                         <Tooltip
                             cursor={{ fill: 'transparent' }}

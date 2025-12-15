@@ -77,7 +77,7 @@ const DashboardContent = ({ logoutAction }) => {
 
                                     // Determine if it's a single report or a map of reports
                                     if (childReports.timestamp) {
-                                        allReports = [childReports];
+                                        allReports = [{ ...childReports, reportId: childId }]; // Use childId as reportId for legacy single reports
                                     } else {
                                         // Helper to extract timestamp from Firebase Push ID
                                         const getTimestampFromId = (id) => {
@@ -104,7 +104,7 @@ const DashboardContent = ({ logoutAction }) => {
                                                     }
                                                 }
                                             }
-                                            return { ...val, timestamp: ts || 0 };
+                                            return { ...val, timestamp: ts || 0, reportId: key };
                                         }).filter(Boolean);
                                     }
 
@@ -194,10 +194,12 @@ const DashboardContent = ({ logoutAction }) => {
                                             name: child.name,
                                             grade: child.grade,
                                             phoneNumber: user.parentPhone || phoneKey, // Fallback to key if parentPhone missing
-                                            email: child.email,
+                                            email: child.email || user.parentEmail,
                                             marks: latestMarks,
                                             date: latestDate,
                                             id: phoneKey, // Add ID for deletion
+                                            reportParentKey: reportKey, // Add correct parent key for Reports path
+                                            reportId: latest.reportId, // Add specific report ID
                                             feedback: latest.generalFeedback || "No feedback available",
                                             topicFeedback: latest.topicFeedback || null,
                                             summary: fullSummary || {},
@@ -222,10 +224,11 @@ const DashboardContent = ({ logoutAction }) => {
                                             name: child.name,
                                             grade: child.grade,
                                             phoneNumber: user.parentPhone || phoneKey,
-                                            email: child.email,
+                                            email: child.email || user.parentEmail,
                                             marks: null,
                                             date: null,
                                             id: phoneKey,
+                                            reportParentKey: reportKey,
                                             feedback: "No feedback available",
                                             topicFeedback: null,
                                             rapidMath: null
@@ -237,7 +240,7 @@ const DashboardContent = ({ logoutAction }) => {
                                         name: child.name,
                                         grade: child.grade,
                                         phoneNumber: user.parentPhone || phoneKey,
-                                        email: child.email,
+                                        email: child.email || user.parentEmail,
                                         marks: null,
                                         date: null,
                                         id: phoneKey,
@@ -257,13 +260,14 @@ const DashboardContent = ({ logoutAction }) => {
                 }
 
                 // Process Chart Data
-                const marksData = Object.entries(gradeMarks).map(([grade, data]) => ({
-                    name: grade,
-                    avg: Math.round(data.total / data.count)
-                })).sort((a, b) => {
-                    const numA = parseInt(a.name.replace(/\D/g, '')) || 0;
-                    const numB = parseInt(b.name.replace(/\D/g, '')) || 0;
-                    return numA - numB;
+                // Process Chart Data
+                const allGrades = Array.from({ length: 10 }, (_, i) => `Grade ${i + 1}`);
+                const marksData = allGrades.map(grade => {
+                    const data = gradeMarks[grade];
+                    return {
+                        name: grade,
+                        avg: data ? Math.round(data.total / data.count) : 0
+                    };
                 });
 
                 setRawStudentDates(allDates);

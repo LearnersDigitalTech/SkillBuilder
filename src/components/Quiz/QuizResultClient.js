@@ -165,11 +165,15 @@ const QuizResultClient = () => {
                     try {
                         // Normalize phone number (last 10 digits)
                         const normalizedPhone = phoneParam.replace(/\D/g, '').slice(-10);
-                        console.log('📱 Normalized phone:', normalizedPhone);
+                        const parentKey = searchParams.get("parentKey");
 
-                        // Fetch reports for this phone number
-                        const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${normalizedPhone}`);
-                        console.log('🔥 Firebase path:', `NMD_2025/Reports/${normalizedPhone}`);
+                        console.log('📱 Normalized phone:', normalizedPhone);
+                        if (parentKey) console.log('🔑 Using provided Parent Key:', parentKey);
+
+                        // Fetch reports for this phone number (use parentKey if available, else fallback to normalized)
+                        const dbKey = parentKey || normalizedPhone;
+                        const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${dbKey}`);
+                        console.log('🔥 Firebase path:', `NMD_2025/Reports/${dbKey}`);
                         const snapshot = await get(reportRef);
 
                         if (!snapshot.exists()) {
@@ -189,13 +193,13 @@ const QuizResultClient = () => {
                                 // Check if it's a single report or multiple reports
                                 if (childReports.summary) {
                                     console.log('✅ Found single report with summary');
-                                    allReports.push(childReports);
+                                    allReports.push({ ...childReports, reportId: childId });
                                 } else {
                                     // Multiple reports - get all
                                     console.log('📚 Found multiple reports, extracting...');
-                                    Object.values(childReports).forEach(report => {
+                                    Object.entries(childReports).forEach(([reportId, report]) => {
                                         if (report && typeof report === 'object' && report.summary) {
-                                            allReports.push(report);
+                                            allReports.push({ ...report, reportId });
                                         }
                                     });
                                 }
@@ -208,8 +212,18 @@ const QuizResultClient = () => {
                         allReports.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
                         if (allReports.length > 0) {
-                            const latestReport = allReports[0];
-                            console.log('🎯 Latest report:', latestReport);
+                            let latestReport = allReports[0];
+
+                            // If reportId is provided, find that specific report
+                            if (reportId) {
+                                const specificReport = allReports.find(r => r.reportId === reportId || r.timestamp?.toString() === reportId); // Handle possible ID formats
+                                if (specificReport) {
+                                    latestReport = specificReport;
+                                    console.log('🎯 Found specific report by ID:', latestReport);
+                                }
+                            }
+
+                            console.log('🎯 Final report to show:', latestReport);
 
                             // Handle both old and new format
                             let topicFeedback = latestReport.topicFeedback;
@@ -1043,8 +1057,8 @@ const QuizResultClient = () => {
                     <div style={{
                         maxWidth: '1200px',
                         margin: '0 auto',
-                        padding: '1rem 1.5rem 0',
-                        marginBottom: '-1rem'
+                        padding: '1rem 1.5rem',
+                        marginBottom: '1rem'
                     }}>
                         <Button
                             variant="outlined"
@@ -1275,9 +1289,15 @@ const QuizResultClient = () => {
                         </>
                     ) : (
                         <div className={Styles.learningCard}>
-                            <p className={Styles.learningIntro}>
-                                🎉 Excellent work! You didn't make any mistakes. Keep practicing to maintain your skills!
-                            </p>
+                            {summary.accuracyPercent === 100 ? (
+                                <p className={Styles.learningIntro}>
+                                    🎉 Excellent work! You didn't make any mistakes. Keep practicing to maintain your skills!
+                                </p>
+                            ) : (
+                                <p className={Styles.learningIntro}>
+                                    Keep practicing! Complete more questions to generate a personalized learning plan.
+                                </p>
+                            )}
                         </div>
                     )}
 
