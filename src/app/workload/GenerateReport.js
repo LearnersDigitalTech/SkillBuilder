@@ -175,7 +175,16 @@ function analyzeResponses(responses, grade) {
             }
         }
 
-        // Default: Ignore all whitespace for comparison to handle spacing variations (e.g. "1 x 1" vs "1x1")
+        // Default: Try numeric comparison first (handles leading zeros like "07" vs "7")
+        const givenNum = parseFloat(givenAnswer);
+        const correctNum = parseFloat(correctAnswer);
+
+        if (!isNaN(givenNum) && !isNaN(correctNum)) {
+            // Numeric comparison with small tolerance for floating point errors
+            return Math.abs(givenNum - correctNum) < 0.0001 ? 1 : 0;
+        }
+
+        // Fall back to string comparison: Ignore all whitespace for comparison to handle spacing variations (e.g. "1 x 1" vs "1x1")
         return givenAnswer.replace(/\s+/g, "") === correctAnswer.replace(/\s+/g, "") ? 1 : 0;
     };
 

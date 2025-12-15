@@ -26,7 +26,8 @@ import {
     generateIdentifyMoney,
     generateMoneyOperations,
     generateTally,
-    generateNumberPattern
+    generateNumberPattern,
+    generateShapeComposition
 } from './grade3Generators.mjs';
 
 const generate = (generator, count = 10) => {
@@ -63,20 +64,7 @@ const Grade3Questions = {
     q24: generate(generateMoneyOperations),
     q25: generate(generateTally),
     q26: generate(generateNumberPattern),
-
-    // Fill remaining slots with mixed topics if needed or reuse existing
-    // q19: generate(generateAddition),
-    // q20: generate(generateSubtraction),
-    // q21: generate(generateMultiplication),
-    // q22: generate(generateDivision),
-    // q23: generate(generateMissingNumber),
-    // q24: generate(generateMixedOperations),
-    // q25: generate(generateFractions),
-    // q26: generate(generateCompareFractions),
-    // q27: generate(generateShapes),
-    // q28: generate(generateSymmetry),
-    // q29: generate(generateLengthConversion),
-    // q30: generate(generateWeightConversion)
+    q27: generate(generateShapeComposition)
 };
 
 
@@ -115,6 +103,7 @@ export const Grade3GeneratorMap = {
 
     "Geometry / 3D Shapes": generateShapes,
     "Geometry / Symmetry": generateSymmetry,
+    "Geometry / Shape Recognition": generateShapeComposition,
 
     "Measurement / Length": generateLengthConversion,
     "Measurement / Weight": generateWeightConversion,
