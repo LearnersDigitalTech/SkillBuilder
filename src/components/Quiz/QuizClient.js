@@ -111,7 +111,7 @@ const QuizClient = () => {
 
                 try {
                     const userKey = getUserDatabaseKey(user);
-                    const childId = quizContext.userDetails.activeChildId || quizContext.userDetails.childId || "default";
+                    const childId = quizContext.userDetails?.activeChildId || quizContext.userDetails?.childId || "default";
                     const finalUserKey = userKey.replace('.', '_');
                     const reportsRef = ref(firebaseDatabase, `NMD_2025/Reports/${finalUserKey}/${childId}`);
 

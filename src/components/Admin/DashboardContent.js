@@ -68,6 +68,7 @@ const DashboardContent = ({ logoutAction }) => {
                                 let latestMarks = null;
                                 let latestDate = null;
                                 let latest = {}; // Default empty object
+                                let processedHistory = [];
 
                                 // Find reports for this child using normalized key
                                 const reportKey = normalizedReports[normalizedPhoneKey];
@@ -77,7 +78,7 @@ const DashboardContent = ({ logoutAction }) => {
 
                                     // Determine if it's a single report or a map of reports
                                     if (childReports.timestamp) {
-                                        allReports = [childReports];
+                                        allReports = [{ ...childReports, reportId: childId }]; // Use childId as reportId for legacy single reports
                                     } else {
                                         // Helper to extract timestamp from Firebase Push ID
                                         const getTimestampFromId = (id) => {
@@ -104,7 +105,7 @@ const DashboardContent = ({ logoutAction }) => {
                                                     }
                                                 }
                                             }
-                                            return { ...val, timestamp: ts || 0 };
+                                            return { ...val, timestamp: ts || 0, reportId: key };
                                         }).filter(Boolean);
                                     }
 
@@ -120,66 +121,68 @@ const DashboardContent = ({ logoutAction }) => {
 
                                         // --- PROCESS STANDARD REPORTS ---
                                         if (standardReports.length > 0) {
-                                            latest = standardReports[0];
-
-                                            // Handle stringified feedback for latest report
-                                            if (typeof latest.generalFeedbackStringified === 'string') {
-                                                try {
-                                                    const parsed = JSON.parse(latest.generalFeedbackStringified);
-                                                    latest = { ...latest, ...parsed };
-                                                } catch (e) {
-                                                    console.error("Error parsing feedback:", e);
+                                            processedHistory = standardReports.map(rawRep => {
+                                                let rep = { ...rawRep };
+                                                if (typeof rep.generalFeedbackStringified === 'string') {
+                                                    try {
+                                                        const parsed = JSON.parse(rep.generalFeedbackStringified);
+                                                        rep = { ...rep, ...parsed };
+                                                    } catch (e) {
+                                                        console.error("Error parsing feedback:", e);
+                                                    }
                                                 }
-                                            }
 
-                                            // Calculate marks for latest report
-                                            let accuracy = 0;
-                                            // Handle both new 'summary' format and old 'perQuestionReport' format
-                                            fullSummary = latest.summary || null;
+                                                let summary = rep.summary || null;
+                                                let accuracy = 0;
 
-                                            if (latest.summary && latest.summary.accuracyPercent !== undefined) {
-                                                accuracy = latest.summary.accuracyPercent;
-                                            } else if (latest.perQuestionReport && Array.isArray(latest.perQuestionReport)) {
-                                                const total = latest.perQuestionReport.length;
-                                                const correct = latest.perQuestionReport.filter(q => q.isCorrect).length;
-                                                // Estimate attempted/wrong/time if summary missing
-                                                const attempted = latest.perQuestionReport.filter(q => q.userAnswer !== null && q.userAnswer !== undefined && q.userAnswer !== "").length;
-                                                const wrong = latest.perQuestionReport.filter(q => !q.isCorrect && (q.userAnswer !== null && q.userAnswer !== undefined && q.userAnswer !== "")).length;
-                                                const totalTime = latest.perQuestionReport.reduce((acc, q) => acc + (q.timeTaken || 0), 0);
-
-                                                accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
-                                                fullSummary = {
-                                                    totalQuestions: total,
-                                                    correct,
-                                                    wrong,
-                                                    attempted,
-                                                    totalTime,
-                                                    accuracyPercent: accuracy
-                                                };
-                                            }
-
-                                            latestMarks = accuracy;
-                                            latestDate = latest.timestamp;
-
-                                            // Aggregate Stats (Only for Standard Reports as per current logic)
-                                            reportCount += standardReports.length;
-                                            standardReports.forEach(rep => {
-                                                let repAccuracy = 0;
-                                                if (rep.summary && rep.summary.accuracyPercent !== undefined) {
-                                                    repAccuracy = rep.summary.accuracyPercent;
+                                                if (summary && summary.accuracyPercent !== undefined) {
+                                                    accuracy = summary.accuracyPercent;
                                                 } else if (rep.perQuestionReport && Array.isArray(rep.perQuestionReport)) {
                                                     const total = rep.perQuestionReport.length;
                                                     const correct = rep.perQuestionReport.filter(q => q.isCorrect).length;
-                                                    repAccuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+                                                    const attempted = rep.perQuestionReport.filter(q => q.userAnswer !== null && q.userAnswer !== undefined && q.userAnswer !== "").length;
+                                                    const wrong = rep.perQuestionReport.filter(q => !q.isCorrect && (q.userAnswer !== null && q.userAnswer !== undefined && q.userAnswer !== "")).length;
+                                                    const totalTime = rep.perQuestionReport.reduce((acc, q) => acc + (q.timeTaken || 0), 0);
+
+                                                    accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+                                                    summary = {
+                                                        totalQuestions: total,
+                                                        correct,
+                                                        wrong,
+                                                        attempted,
+                                                        totalTime,
+                                                        accuracyPercent: accuracy
+                                                    };
                                                 }
 
-                                                if (repAccuracy >= 40) passedCount++;
-                                                if (repAccuracy === 100) perfectScoreCount++;
+                                                return {
+                                                    ...rep,
+                                                    summary,
+                                                    marks: accuracy,
+                                                    date: rep.timestamp,
+                                                    feedback: rep.generalFeedback || "No feedback available",
+                                                    topicFeedback: rep.topicFeedback || null,
+                                                    perQuestionReport: rep.perQuestionReport || [],
+                                                    learningPlan: rep.learningPlan || [],
+                                                    learningPlanSummary: rep.learningPlanSummary || ""
+                                                };
+                                            });
+
+                                            latest = processedHistory[0];
+                                            latestMarks = latest.marks;
+                                            latestDate = latest.date;
+                                            fullSummary = latest.summary;
+
+                                            // Aggregate Stats
+                                            reportCount += processedHistory.length;
+                                            processedHistory.forEach(rep => {
+                                                if (rep.marks >= 40) passedCount++;
+                                                if (rep.marks === 100) perfectScoreCount++;
 
                                                 // Aggregate for Marks Chart
                                                 const grade = child.grade || "Unknown";
                                                 if (!gradeMarks[grade]) gradeMarks[grade] = { total: 0, count: 0 };
-                                                gradeMarks[grade].total += repAccuracy;
+                                                gradeMarks[grade].total += rep.marks;
                                                 gradeMarks[grade].count++;
                                             });
                                         }
@@ -194,16 +197,20 @@ const DashboardContent = ({ logoutAction }) => {
                                             name: child.name,
                                             grade: child.grade,
                                             phoneNumber: user.parentPhone || phoneKey, // Fallback to key if parentPhone missing
-                                            email: child.email,
+                                            email: child.email || user.parentEmail,
                                             marks: latestMarks,
                                             date: latestDate,
                                             id: phoneKey, // Add ID for deletion
+                                            reportParentKey: reportKey, // Add correct parent key for Reports path
+                                            reportId: latest.reportId, // Add specific report ID
                                             feedback: latest.generalFeedback || "No feedback available",
                                             topicFeedback: latest.topicFeedback || null,
                                             summary: fullSummary || {},
                                             perQuestionReport: latest.perQuestionReport || [],
                                             learningPlan: latest.learningPlan || [],
                                             learningPlanSummary: latest.learningPlanSummary || "",
+                                            attemptCount: processedHistory.length,
+                                            history: processedHistory,
                                             rapidMath: latestRapid ? {
                                                 marks: latestRapid.summary?.accuracyPercent || 0,
                                                 date: latestRapid.timestamp,
@@ -222,10 +229,11 @@ const DashboardContent = ({ logoutAction }) => {
                                             name: child.name,
                                             grade: child.grade,
                                             phoneNumber: user.parentPhone || phoneKey,
-                                            email: child.email,
+                                            email: child.email || user.parentEmail,
                                             marks: null,
                                             date: null,
                                             id: phoneKey,
+                                            reportParentKey: reportKey,
                                             feedback: "No feedback available",
                                             topicFeedback: null,
                                             rapidMath: null
@@ -237,7 +245,7 @@ const DashboardContent = ({ logoutAction }) => {
                                         name: child.name,
                                         grade: child.grade,
                                         phoneNumber: user.parentPhone || phoneKey,
-                                        email: child.email,
+                                        email: child.email || user.parentEmail,
                                         marks: null,
                                         date: null,
                                         id: phoneKey,
@@ -257,24 +265,89 @@ const DashboardContent = ({ logoutAction }) => {
                 }
 
                 // Process Chart Data
-                const marksData = Object.entries(gradeMarks).map(([grade, data]) => ({
-                    name: grade,
-                    avg: Math.round(data.total / data.count)
-                })).sort((a, b) => {
-                    const numA = parseInt(a.name.replace(/\D/g, '')) || 0;
-                    const numB = parseInt(b.name.replace(/\D/g, '')) || 0;
-                    return numA - numB;
+                // Process Chart Data
+                const allGrades = Array.from({ length: 10 }, (_, i) => `Grade ${i + 1}`);
+                const marksData = allGrades.map(grade => {
+                    const data = gradeMarks[grade];
+                    return {
+                        name: grade,
+                        avg: data ? Math.round(data.total / data.count) : 0
+                    };
                 });
 
                 setRawStudentDates(allDates);
 
+                // --- AGGREGATE STUDENTS BY EMAIL ---
+                // "Unique student name show in the dashboard itself"
+                // "Same name taking multiple test... show that in report"
+                const mergedStudentsMap = new Map();
+
+                students.forEach(student => {
+                    // "duplicate rows for the same name merge not same mail"
+                    const key = student.name || student.id; // Group by Name
+
+                    if (!mergedStudentsMap.has(key)) {
+                        mergedStudentsMap.set(key, { ...student });
+                    } else {
+                        const existing = mergedStudentsMap.get(key);
+
+                        // Merge history
+                        const existingHistory = existing.history || [];
+                        const newHistory = student.history || [];
+
+                        // Combine and deduplicate history based on date/timestamp
+                        const combinedHistory = [...existingHistory, ...newHistory];
+                        const uniqueHistory = [];
+                        const seen = new Set();
+
+                        // Deduplicate logic
+                        combinedHistory.forEach(h => {
+                            const id = h.reportId || (h.date + "_" + h.marks);
+                            if (!seen.has(id)) {
+                                seen.add(id);
+                                uniqueHistory.push(h);
+                            }
+                        });
+
+                        uniqueHistory.sort((a, b) => b.date - a.date);
+
+                        // Update latest details from the most recent report
+                        const latestReport = uniqueHistory.length > 0 ? uniqueHistory[0] : null;
+
+                        if (latestReport) {
+                            existing.marks = latestReport.marks;
+                            existing.date = latestReport.date;
+                            existing.summary = latestReport.summary;
+                            existing.feedback = latestReport.feedback;
+                            existing.topicFeedback = latestReport.topicFeedback;
+                            existing.perQuestionReport = latestReport.perQuestionReport;
+                            existing.learningPlan = latestReport.learningPlan;
+                            existing.learningPlanSummary = latestReport.learningPlanSummary;
+                            // Keep ID (phoneKey) of the latest report's parent or keep original? 
+                            // If we merge, we should probably keep the ID that corresponds to the displayed report for deletion purposes?
+                            // But usually ID is the student registration ID which is same for same user.
+                            // If different registration IDs but same email, we should consider them same student.
+                        }
+
+                        existing.history = uniqueHistory;
+                        existing.attemptCount = uniqueHistory.length;
+
+                        // Merge Rapid Math (keep latest)
+                        if (student.rapidMath && (!existing.rapidMath || student.rapidMath.date > existing.rapidMath.date)) {
+                            existing.rapidMath = student.rapidMath;
+                        }
+                    }
+                });
+
+                const finalStudents = Array.from(mergedStudentsMap.values());
+
                 setStats({
-                    totalStudents: studentCount,
+                    totalStudents: finalStudents.length,
                     totalPassed: passedCount,
                     totalPerfectScores: perfectScoreCount,
                     totalReports: reportCount,
                 });
-                setStudentList(students);
+                setStudentList(finalStudents);
                 setChartData(prev => ({
                     ...prev,
                     marksByGrade: marksData
