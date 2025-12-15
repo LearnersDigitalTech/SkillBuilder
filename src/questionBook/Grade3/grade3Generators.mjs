@@ -60,7 +60,7 @@ export const generateSubtraction2digit = () => {
 export const generateSubtraction3digit = () => {
     // 3-digit subtraction with borrow
     const num1 = getRandomInt(500, 999);
-    const num2 = getRandomInt(100, 499);
+    const num2 = getRandomInt(100, num1); // Ensure num2 <= num1 for positive answer
     const answer = num1 - num2;
 
     const question = `Subtract: $$ ${num1} - ${num2} = ? $$`;
@@ -756,3 +756,182 @@ export const generateNumberPattern = () => {
         answer: String(next)
     };
 };
+
+// Helper function to create shape SVG icons for MCQ options
+const createShapeIcon = (shapeName, size = 30) => {
+    let svgContent = "";
+    const half = size / 2;
+
+    switch (shapeName.toLowerCase()) {
+        case "circle":
+            svgContent = `<circle cx="${half}" cy="${half}" r="${half - 2}" fill="#3b82f6" stroke="#1e40af" stroke-width="2"/>`;
+            break;
+        case "square":
+            svgContent = `<rect x="2" y="2" width="${size - 4}" height="${size - 4}" fill="#ef4444" stroke="#991b1b" stroke-width="2"/>`;
+            break;
+        case "rectangle":
+            svgContent = `<rect x="2" y="${size * 0.25}" width="${size - 4}" height="${size * 0.5}" fill="#10b981" stroke="#065f46" stroke-width="2"/>`;
+            break;
+        case "triangle":
+            svgContent = `<polygon points="${half},2 ${size - 2},${size - 2} 2,${size - 2}" fill="#f59e0b" stroke="#92400e" stroke-width="2"/>`;
+            break;
+    }
+
+    return `data:image/svg+xml;base64,${btoa(`<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}' viewBox='0 0 ${size} ${size}'>${svgContent}</svg>`)}`;
+};
+
+export const generateShapeComposition = () => {
+    // Define different toys/objects made from shapes
+    const toys = [
+        {
+            name: "Robot",
+            shapes: ["Circle", "Rectangle", "Square"],
+            svg: (w, h) => `
+                <rect x="${w * 0.3}" y="${h * 0.15}" width="${w * 0.4}" height="${h * 0.25}" fill="#e0e0e0" stroke="#333" stroke-width="2"/>
+                <circle cx="${w * 0.4}" cy="${h * 0.23}" r="${w * 0.05}" fill="#333"/>
+                <circle cx="${w * 0.6}" cy="${h * 0.23}" r="${w * 0.05}" fill="#333"/>
+                <rect x="${w * 0.35}" y="${h * 0.45}" width="${w * 0.3}" height="${h * 0.35}" fill="#3b82f6" stroke="#1e40af" stroke-width="2"/>
+                <rect x="${w * 0.2}" y="${h * 0.5}" width="${w * 0.1}" height="${h * 0.25}" fill="#ef4444" stroke="#991b1b" stroke-width="2"/>
+                <rect x="${w * 0.7}" y="${h * 0.5}" width="${w * 0.1}" height="${h * 0.25}" fill="#ef4444" stroke="#991b1b" stroke-width="2"/>
+            `
+        },
+        {
+            name: "House",
+            shapes: ["Rectangle", "Triangle", "Square"],
+            svg: (w, h) => `
+                <polygon points="${w * 0.5},${h * 0.15} ${w * 0.15},${h * 0.45} ${w * 0.85},${h * 0.45}" fill="#ef4444" stroke="#991b1b" stroke-width="2"/>
+                <rect x="${w * 0.2}" y="${h * 0.45}" width="${w * 0.6}" height="${h * 0.4}" fill="#f59e0b" stroke="#92400e" stroke-width="2"/>
+                <rect x="${w * 0.35}" y="${h * 0.55}" width="${w * 0.15}" height="${h * 0.25}" fill="#3b82f6" stroke="#1e40af" stroke-width="2"/>
+                <rect x="${w * 0.6}" y="${h * 0.55}" width="${w * 0.12}" height="${w * 0.12}" fill="#60a5fa" stroke="#1e40af" stroke-width="2"/>
+            `
+        },
+        {
+            name: "Ice Cream Cone",
+            shapes: ["Circle", "Triangle"],
+            svg: (w, h) => `
+                <circle cx="${w * 0.5}" cy="${h * 0.25}" r="${w * 0.2}" fill="#ec4899" stroke="#be185d" stroke-width="2"/>
+                <circle cx="${w * 0.45}" cy="${h * 0.35}" r="${w * 0.15}" fill="#f472b6" stroke="#be185d" stroke-width="2"/>
+                <circle cx="${w * 0.55}" cy="${h * 0.35}" r="${w * 0.15}" fill="#f472b6" stroke="#be185d" stroke-width="2"/>
+                <polygon points="${w * 0.5},${h * 0.9} ${w * 0.25},${h * 0.45} ${w * 0.75},${h * 0.45}" fill="#f59e0b" stroke="#92400e" stroke-width="2"/>
+            `
+        },
+        {
+            name: "Car",
+            shapes: ["Rectangle", "Circle"],
+            svg: (w, h) => `
+                <rect x="${w * 0.15}" y="${h * 0.5}" width="${w * 0.7}" height="${h * 0.25}" fill="#3b82f6" stroke="#1e40af" stroke-width="2"/>
+                <rect x="${w * 0.3}" y="${h * 0.3}" width="${w * 0.4}" height="${h * 0.2}" fill="#60a5fa" stroke="#1e40af" stroke-width="2"/>
+                <circle cx="${w * 0.3}" cy="${h * 0.75}" r="${w * 0.1}" fill="#1f2937" stroke="#000" stroke-width="2"/>
+                <circle cx="${w * 0.7}" cy="${h * 0.75}" r="${w * 0.1}" fill="#1f2937" stroke="#000" stroke-width="2"/>
+            `
+        },
+        {
+            name: "Tree",
+            shapes: ["Rectangle", "Circle", "Triangle"],
+            svg: (w, h) => `
+                <rect x="${w * 0.43}" y="${h * 0.5}" width="${w * 0.14}" height="${h * 0.4}" fill="#92400e" stroke="#78350f" stroke-width="2"/>
+                <circle cx="${w * 0.5}" cy="${h * 0.3}" r="${w * 0.25}" fill="#10b981" stroke="#065f46" stroke-width="2"/>
+                <polygon points="${w * 0.5},${h * 0.15} ${w * 0.25},${h * 0.45} ${w * 0.75},${h * 0.45}" fill="#10b981" stroke="#065f46" stroke-width="2"/>
+            `
+        }
+    ];
+
+    // Select a random toy
+    const toy = toys[getRandomInt(0, toys.length - 1)];
+
+    // Generate the toy SVG
+    const width = 300;
+    const height = 300;
+    const toyImage = `data:image/svg+xml;base64,${btoa(`<svg xmlns='http://www.w3.org/2000/svg' width='${width}' height='${height}' viewBox='0 0 ${width} ${height}'>${toy.svg(width, height)}</svg>`)}`;
+
+    // Create the correct answer label with shape icons
+    const correctAnswer = toy.shapes.sort().join(" and ");
+
+    // Generate distractor options (wrong shape combinations)
+    const allShapes = ["Circle", "Square", "Rectangle", "Triangle"];
+    const wrongCombinations = [];
+
+    // Generate 3 wrong combinations with safety counter
+    let attempts = 0;
+    const maxAttempts = 50; // Prevent infinite loops
+
+    while (wrongCombinations.length < 3 && attempts < maxAttempts) {
+        attempts++;
+        const numShapes = getRandomInt(2, 3);
+        const combo = [];
+        const availableShapes = allShapes.filter(s => !toy.shapes.includes(s));
+
+        // Ensure we have shapes to work with
+        if (availableShapes.length === 0) {
+            // If no wrong shapes available, use all shapes
+            const randomShapes = [...allShapes];
+            for (let i = 0; i < numShapes && randomShapes.length > 0; i++) {
+                const idx = getRandomInt(0, randomShapes.length - 1);
+                combo.push(randomShapes[idx]);
+                randomShapes.splice(idx, 1);
+            }
+        } else if (Math.random() > 0.5 && toy.shapes.length > 0 && availableShapes.length > 0) {
+            // Mix some correct and some incorrect shapes
+            combo.push(toy.shapes[0]); // Add one correct shape
+            const wrongShape = availableShapes[getRandomInt(0, availableShapes.length - 1)];
+            combo.push(wrongShape);
+        } else {
+            // All wrong shapes
+            for (let i = 0; i < numShapes && availableShapes.length > 0; i++) {
+                const idx = getRandomInt(0, availableShapes.length - 1);
+                combo.push(availableShapes[idx]);
+                availableShapes.splice(idx, 1);
+            }
+        }
+
+        // Only add if combo is not empty
+        if (combo.length > 0) {
+            const comboStr = combo.sort().join(" and ");
+            if (comboStr !== correctAnswer && !wrongCombinations.includes(comboStr)) {
+                wrongCombinations.push(comboStr);
+            }
+        }
+    }
+
+    // Fallback: if we couldn't generate 3 unique combinations, fill with simple alternatives
+    while (wrongCombinations.length < 3) {
+        const fallbackShapes = ["Circle", "Square", "Rectangle", "Triangle"];
+        const randomCombo = [];
+        for (let i = 0; i < 2; i++) {
+            randomCombo.push(fallbackShapes[getRandomInt(0, fallbackShapes.length - 1)]);
+        }
+        const comboStr = randomCombo.sort().join(" and ");
+        if (comboStr !== correctAnswer && !wrongCombinations.includes(comboStr)) {
+            wrongCombinations.push(comboStr);
+        }
+    }
+
+    // Create MCQ options with shape icons
+    const createOptionWithIcons = (shapeList) => {
+        const shapes = shapeList.split(" and ");
+        const icons = shapes.map(s => createShapeIcon(s.trim())).join(",");
+        return {
+            value: shapeList,
+            label: shapeList,
+            // Store icons as comma-separated data URIs (can be parsed in UI if needed)
+            metadata: { icons: icons }
+        };
+    };
+
+    const options = shuffleArray([
+        createOptionWithIcons(correctAnswer),
+        createOptionWithIcons(wrongCombinations[0]),
+        createOptionWithIcons(wrongCombinations[1]),
+        createOptionWithIcons(wrongCombinations[2])
+    ]);
+
+    return {
+        type: "mcq",
+        question: `Look at this ${toy.name}. Which shapes can you see in it?`,
+        image: toyImage,
+        topic: "Geometry / Shape Recognition",
+        options: options,
+        answer: correctAnswer
+    };
+};
+
