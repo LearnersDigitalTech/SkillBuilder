@@ -764,7 +764,7 @@ const QuizResultClient = () => {
         doc.setFont(undefined, 'normal');
         doc.text(`Name: ${displayName || 'Student'}`, 14, yPos);
         yPos += 6;
-        doc.text(`Grade: ${displayGrade || 'N/A'}`, 14, yPos);
+        doc.text(`${displayGrade}`, 14, yPos);
         yPos += 6;
         doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, yPos);
         yPos += 12;
