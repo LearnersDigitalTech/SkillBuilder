@@ -50,6 +50,10 @@ const MathRenderer = ({ content, className = '' }) => {
             ...inlineMathMatches.map((m, i) => ({ ...m, placeholder: `__INLINE_MATH_${i}__` }))
         ];
 
+        // Sort matches by their position in the final tempText string
+        // This is crucial because we process them sequentially using remainingText
+        allMatches.sort((a, b) => tempText.indexOf(a.placeholder) - tempText.indexOf(b.placeholder));
+
         // Split text by all placeholders
         let remainingText = tempText;
         const segments = [];
@@ -78,8 +82,8 @@ const MathRenderer = ({ content, className = '' }) => {
             if (segment.type === 'text') {
                 // Render as HTML to preserve existing HTML tags
                 return (
-                    <span 
-                        key={`text-${index}`} 
+                    <span
+                        key={`text-${index}`}
                         dangerouslySetInnerHTML={{ __html: segment.content }}
                     />
                 );

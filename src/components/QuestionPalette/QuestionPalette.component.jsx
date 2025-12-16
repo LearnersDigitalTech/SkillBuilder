@@ -143,7 +143,7 @@ const QuestionPalette = ({
                             className={isLastQuestion ? Styles.submitButton : Styles.nextButton}
                             variant="contained"
                         >
-                            {isLastQuestion ? 'Submit' : 'Next'}
+                            {isLastQuestion ? 'Finish' : 'Next'}
                         </Button>
                     </div>
                 )}

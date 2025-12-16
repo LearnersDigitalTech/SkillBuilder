@@ -7,7 +7,7 @@ import MathRenderer from "@/components/MathRenderer/MathRenderer.component";
 import { getHint } from "./hintHelper";
 import { validateFractionValue } from "./fractionValidator";
 
-const PracticeUserInput = ({ onNext, question, topic, answer, activeQuestionIndex, grade, image, keypadMode, onCorrect, onRepeat, onWrong }) => {
+const PracticeUserInput = ({ onNext, question, topic, answer, activeQuestionIndex, grade, image, keypadMode, onCorrect, onRepeat, onWrong, isLastQuestion }) => {
     const [inputValue, setInputValue] = useState("");
     const [isCorrect, setIsCorrect] = useState(null); // true, false, or null
     const [showHint, setShowHint] = useState(false);
@@ -209,7 +209,7 @@ const PracticeUserInput = ({ onNext, question, topic, answer, activeQuestionInde
                             endIcon={<ArrowRight />}
                             className={Styles.nextButton}
                         >
-                            Next Question
+                            {isLastQuestion ? "Finish" : "Next Question"}
                         </Button>
                     )}
                 </div>

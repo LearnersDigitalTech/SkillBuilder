@@ -2,8 +2,11 @@
 import React, { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import PracticeSession from "./PracticeSession";
+import SATSession from "../SAT/SATSession";
 import LoadingScreen from "@/components/LoadingScreen/LoadingScreen.component";
 import getRandomInt from "@/app/workload/GetRandomInt";
+import SATInstructions from "../SAT/SATInstructions.component";
+import { useRouter } from "next/navigation";
 
 const GRADE_LOADERS = {
     1: () => import('@/questionBook/Grade1/GetGrade1Question'),
@@ -16,16 +19,24 @@ const GRADE_LOADERS = {
     8: () => import('@/questionBook/Grade8/GetGrade8Question.mjs'),
     9: () => import('@/questionBook/Grade9/GetGrade9Question.mjs'),
     10: () => import('@/questionBook/Grade10/GetGrade10Question.mjs'),
+    'SAT': () => import('@/questionBook/SAT/GetSATQuestion.mjs'),
 };
 
 const PracticeClientContent = () => {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const gradeParam = searchParams.get('grade');
-    const grade = gradeParam ? parseInt(gradeParam) : 1;
+    let grade = 1;
+    if (gradeParam === 'SAT') {
+        grade = 'SAT';
+    } else if (gradeParam) {
+        grade = parseInt(gradeParam);
+    }
     const [questions, setQuestions] = useState(null);
     const [generatorMap, setGeneratorMap] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [hasStartedSAT, setHasStartedSAT] = useState(false);
 
     useEffect(() => {
         const loadData = async () => {
@@ -42,7 +53,8 @@ const PracticeClientContent = () => {
             try {
                 const module = await loader();
                 const questionBook = module.default;
-                const map = module[`Grade${grade}GeneratorMap`];
+                const mapKey = grade === 'SAT' ? 'GradeSATGeneratorMap' : `Grade${grade}GeneratorMap`;
+                const map = module[mapKey];
 
                 if (!questionBook) {
                     throw new Error(`No question book found for Grade ${grade}`);
@@ -77,10 +89,15 @@ const PracticeClientContent = () => {
         loadData();
     }, [grade]);
 
+    const getTitle = (g) => {
+        if (g === 'SAT') return "SAT Practice";
+        return `Grade ${g} Practice`;
+    };
+
     if (error) {
         return (
             <div style={{ padding: '2rem', textAlign: 'center', color: 'red' }}>
-                <h2>Error Loading Grade {grade}</h2>
+                <h2>Error Loading {getTitle(grade)}</h2>
                 <p>{error}</p>
                 <button
                     onClick={() => window.location.reload()}
@@ -93,23 +110,42 @@ const PracticeClientContent = () => {
     }
 
     if (!loading && !questions) {
+        if (grade === 'SAT' && !hasStartedSAT) {
+            return (
+                <SATInstructions
+                    onStart={() => setHasStartedSAT(true)}
+                    onExit={() => router.push('/')}
+                />
+            );
+        }
+
         return (
             <div style={{ padding: '2rem', textAlign: 'center' }}>
-                <h2>Grade {grade} Practice</h2>
+                <h2>{getTitle(grade)}</h2>
                 <p>Coming Soon!</p>
             </div>
         );
     }
 
     if (loading) {
-        return <LoadingScreen title={`Loading Grade ${grade} Practice`} />;
+        return <LoadingScreen title={`Loading ${getTitle(grade)}`} />;
+    }
+
+    if (grade === 'SAT') {
+        return (
+            <SATSession
+                initialQuestions={questions}
+                generatorMap={generatorMap}
+                gradeTitle={getTitle(grade)}
+            />
+        );
     }
 
     return (
         <PracticeSession
             initialQuestions={questions}
             generatorMap={generatorMap}
-            gradeTitle={`Grade ${grade} Practice`}
+            gradeTitle={getTitle(grade)}
         />
     );
 };
