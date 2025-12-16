@@ -186,11 +186,18 @@ const TypeFactorTree = ({
 
                         const nodeClass = hasChildren ? Styles.compositeNode : Styles.primeNode;
 
+                        // Add visual indicator for user-entered values in report view
+                        const userEnteredStyle = readOnly && isInput ? {
+                            border: '2px dashed #3b82f6',
+                            backgroundColor: '#eff6ff',
+                            fontWeight: '600'
+                        } : {};
+
                         return (
                             <div
                                 key={node.id}
                                 className={`${Styles.nodeAbsolute} ${nodeClass}`}
-                                style={{ left: node._x, top: node._y }}
+                                style={{ left: node._x, top: node._y, ...userEnteredStyle }}
                             >
                                 {isInput ? (
                                     <input
@@ -201,7 +208,10 @@ const TypeFactorTree = ({
                                         onChange={(e) => handleInputChange(node.id, e.target.value)}
                                         autoComplete="off"
                                         readOnly={readOnly}
-                                        style={{ cursor: readOnly ? 'default' : 'text' }}
+                                        style={{
+                                            cursor: readOnly ? 'default' : 'text',
+                                            ...(readOnly ? { backgroundColor: 'transparent', fontWeight: '600' } : {})
+                                        }}
                                     />
                                 ) : (
                                     <span className={Styles.staticText}>{node.val}</span>

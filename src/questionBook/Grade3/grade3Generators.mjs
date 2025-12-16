@@ -452,27 +452,32 @@ export const generateDoublingQuestion = () => {
 };
 
 export const generateHalvingQuestion = () => {
-    // Generate an even random number between 2 and 100 for halving
-    const number = getRandomInt(1, 50) * 2; // Ensures even number
+    // Generate an even random number between 2 and 20 for Grade 3
+    const number = getRandomInt(1, 10) * 2; // Ensures even number (2, 4, 6, 8, 10, 12, 14, 16, 18, 20)
     const correctAnswer = number / 2;
 
     const question = `What is half of $ ${number} $`;
 
-    // Generate random incorrect answers within a range of 1-100 (but avoid the correct answer)
+    // Generate random incorrect answers within a range of 1-10 (but avoid the correct answer)
     const generateRandomIncorrectAnswer = () => {
         let randomAnswer;
         do {
-            randomAnswer = getRandomInt(1, 100);
+            randomAnswer = getRandomInt(1, 10);
         } while (randomAnswer === correctAnswer);
         return randomAnswer;
     };
 
     // Create the options with the correct answer and 3 random incorrect answers
+    // Fixed: Generate each incorrect answer once and store it
+    const wrong1 = generateRandomIncorrectAnswer();
+    const wrong2 = generateRandomIncorrectAnswer();
+    const wrong3 = generateRandomIncorrectAnswer();
+
     const options = shuffleArray([
         { value: correctAnswer, label: correctAnswer.toString() },
-        { value: generateRandomIncorrectAnswer(), label: generateRandomIncorrectAnswer().toString() },
-        { value: generateRandomIncorrectAnswer(), label: generateRandomIncorrectAnswer().toString() },
-        { value: generateRandomIncorrectAnswer(), label: generateRandomIncorrectAnswer().toString() }
+        { value: wrong1, label: wrong1.toString() },
+        { value: wrong2, label: wrong2.toString() },
+        { value: wrong3, label: wrong3.toString() }
     ]);
 
     return {
