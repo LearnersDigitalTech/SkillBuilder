@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 // Let's assume we rename Grade1PracticeClient.module.css to PracticeSession.module.css or similar? 
 // For now, I'll copy the styles too or point to the old one if I don't delete it yet?
 // Planner said delete Grade1 dir. So I should move the CSS too.
+import { useContext } from "react";
 import Styles from "./PracticeSession.module.css";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -18,6 +19,9 @@ import { regenerateQuestion } from "./PracticeGeneratorHelper";
 import motivationData from "../Quiz/Assets/motivation.json";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useAuth } from "@/context/AuthContext";
+import { QuizSessionContext } from "@/app/context/QuizSessionContext";
+import { getUserDatabaseKey } from "@/backend/firebaseHandler";
 
 const PracticeSession = ({
     initialQuestions = [],
@@ -25,6 +29,8 @@ const PracticeSession = ({
     gradeTitle = "Practice"
 }) => {
     const router = useRouter();
+    const { user, userData } = useAuth();
+    const [quizContext, setQuizContext] = useContext(QuizSessionContext);
     const [questions, setQuestions] = useState([]);
     const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -36,11 +42,84 @@ const PracticeSession = ({
         }
     }, [initialQuestions]);
 
+    const handleStartAssessment = () => {
+        // Based on DashboardClient logic
+        const effectiveUserData = userData || (typeof window !== "undefined" ? JSON.parse(window.localStorage.getItem("quizSession") || "{}")?.userDetails : null);
+
+        let userKey = null;
+        if (user) {
+            userKey = getUserDatabaseKey(user);
+        }
+        if (!userKey && effectiveUserData) {
+            userKey = effectiveUserData.userKey || effectiveUserData.phoneNumber || effectiveUserData.parentPhone || effectiveUserData.parentEmail;
+        }
+
+        if (!userKey) {
+            // If no user detected, just go to complete page or home? 
+            // Defaulting to complete page if auth fails to keep flow, or maybe login?
+            // User requested "redirect them to start take assessment flow". 
+            // If they are not logged in, they can't take assessment.
+            // Let's force /quiz which might handle auth or redirect.
+            router.push("/quiz");
+            return;
+        }
+
+        // Determine active child logic (simplified from Dashboard)
+        // We might not know the active child here easily without reading local storage similarly.
+        let activeChild = null;
+        let activeChildId = null;
+
+        if (effectiveUserData?.children) {
+            // Try to get from local storage
+            const storedChildId = typeof window !== "undefined"
+                ? window.localStorage.getItem(`activeChild_${userKey}`) || window.localStorage.getItem('lastActiveChild')
+                : null;
+
+            if (storedChildId && effectiveUserData.children[storedChildId]) {
+                activeChild = effectiveUserData.children[storedChildId];
+                activeChildId = storedChildId;
+            } else {
+                // Fallback to first
+                const firstKey = Object.keys(effectiveUserData.children)[0];
+                if (firstKey) {
+                    activeChild = effectiveUserData.children[firstKey];
+                    activeChildId = firstKey;
+                }
+            }
+        }
+
+        if (!activeChild) {
+            // Fallback if no child profile structure (e.g. old user model or direct user)
+            // We'll create a dummy wrapper or just pass userDetails if simpler.
+            // But the Quiz flow expects specific structure. 
+            // Let's assume standard flow exists. If not, normal /quiz entry point calls logic too.
+        }
+
+        // Clean previous session
+        try {
+            if (typeof window !== "undefined") {
+                window.localStorage.removeItem("quizSession");
+            }
+        } catch (e) { }
+
+        const userDetails = {
+            ...(activeChild || effectiveUserData), // Fallback to main data if no child
+            phoneNumber: userKey,
+            childId: activeChildId,
+            activeChildId: activeChildId,
+            testType: 'ASSESSMENT'
+        };
+
+        setQuizContext({ userDetails, questionPaper: null });
+        router.push("/quiz");
+    };
+
     const handleNext = () => {
         if (activeQuestionIndex < questions.length - 1) {
             setActiveQuestionIndex(prev => prev + 1);
         } else {
-            router.push('/practice/complete');
+            // Last question - Go to Home
+            router.push('/');
         }
     };
 
@@ -125,7 +204,7 @@ const PracticeSession = ({
                         activeQuestionIndex={activeQuestionIndex}
                         onSelect={handleJumpToQuestion}
                         onPrevious={() => activeQuestionIndex > 0 && setActiveQuestionIndex(activeQuestionIndex - 1)}
-                        onNext={() => activeQuestionIndex < questions.length - 1 && setActiveQuestionIndex(activeQuestionIndex + 1)}
+                        onNext={handleNext}
                         isLastQuestion={activeQuestionIndex === questions.length - 1}
                         nextDisabled={questions[activeQuestionIndex].userAnswer !== "correct"}
                     />
@@ -160,6 +239,7 @@ const PracticeSession = ({
                             onCorrect={() => handleCorrectAnswer(activeQuestionIndex)}
                             onWrong={handleWrongAnswer}
                             onRepeat={() => handleRepeat(activeQuestionIndex)}
+                            isLastQuestion={activeQuestionIndex === questions.length - 1}
                         />
                     )}
                     {currentQuestion.type === "userInput" && (
@@ -176,13 +256,14 @@ const PracticeSession = ({
                             onCorrect={() => handleCorrectAnswer(activeQuestionIndex)}
                             onWrong={handleWrongAnswer}
                             onRepeat={() => handleRepeat(activeQuestionIndex)}
+                            isLastQuestion={activeQuestionIndex === questions.length - 1}
                         />
                     )}
                     {currentQuestion.type === "tableInput" && (
                         <PracticeTableInput
                             key={`${activeQuestionIndex}-${currentQuestion.topic}`}
                             activeQuestionIndex={activeQuestionIndex}
-                            question={currentQuestion.question}
+                            question={currentQuestion}
                             topic={currentQuestion.topic}
                             rows={currentQuestion.rows}
                             variant={currentQuestion.variant}
@@ -191,6 +272,7 @@ const PracticeSession = ({
                             onCorrect={() => handleCorrectAnswer(activeQuestionIndex)}
                             onWrong={handleWrongAnswer}
                             onRepeat={() => handleRepeat(activeQuestionIndex)}
+                            isLastQuestion={activeQuestionIndex === questions.length - 1}
                         />
                     )}
                 </div>

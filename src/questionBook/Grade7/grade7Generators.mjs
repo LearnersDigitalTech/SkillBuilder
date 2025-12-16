@@ -945,7 +945,7 @@ export const generateSolidShapesProperties = () => {
         variant: "triple-input", // Custom variant we added
         question: "Observe the shapes and identify the number of Faces, Vertices, and Edges.",
         topic: "Visualizing Solid Shapes",
-        headers: ["Shape", "Faces", "Vertices", "Edges"],
+        // headers: ["Identify the shape", "Faces", "Vertices", "Edges"], // Removed - headers are hardcoded in component
         inputKeys: ["faces", "vertices", "edges"],
         answer: JSON.stringify(answerObj),
         rows: rows

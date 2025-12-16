@@ -94,7 +94,7 @@ const Grade9Questions = {
 
     // Statistics & Probability
     q22: generate(generateStatistics),
-    q23: generate(generateProbability),
+    // q23: generate(generateProbability),
 
     // Constructions (if you add generators later)
     // q24: generate(generateConstructionBasics), // keep placeholder if needed
@@ -103,17 +103,30 @@ const Grade9Questions = {
 
 
 export const Grade9GeneratorMap = {
-    // Grade 10 Imports
+    // Grade 10 Imports - with actual topic strings from generators
     "Number System / Natural & Whole": generateNaturalWholeNumbers,
+    "Fundamental Operations on Natural and Whole Numbers": generateNaturalWholeNumbers, // Actual topic
     "Number System / Integers": generateIntegersG10,
+    "Fundamental Operations On Integers": generateIntegersG10, // Actual topic
     "Number System / Rational": generateFractionsG10,
+    "Fractions": generateFractionsG10, // Actual topic
     "Number System / Decimals": generateDecimalsG10,
+    "Fundamental operations on decimals": generateDecimalsG10, // Actual topic
     "Number System / LCM": generateLCMG10,
+    "Least Common Multiple": generateLCMG10, // Actual topic
     "Number System / HCF": generateHCF,
+    "Highest Common Factor": generateHCF, // Actual topic
     "Arithmetic / Ratio & Proportion": generateRatioProportion,
+    "Ratio and Proportion": generateRatioProportion, // Actual topic
+    "Algebra / Addition & Subtraction": generateAlgebraicAdditionSubtraction,
+    "Algebra / Multiplication": generateAlgebraicMultiplication,
+    "Algebra / Division": generateAlgebraicDivision,
+    "Mensuration / Area (Advanced)": generateArea,
+    "Coordinate Geometry / Points": generateCartesianPoint,
 
     // Grade 7 Imports
     "Mensuration / Perimeter & Area (Basic)": generatePerimeterAndArea,
+    "Perimeter and Area": generatePerimeterAndArea, // Actual topic
 
     // Grade 9 Local & Specifics
     "Number System / Real Numbers": generateRealNumbers,
@@ -123,16 +136,20 @@ export const Grade9GeneratorMap = {
     "Polynomials / Zeroes": generatePolynomialZeroes,
     "Linear Equations / Solutions": generateLinearEquationSolutions,
     "Linear Equations / Solving": generateLinearEquationSolving,
-    "Coordinate Geometry / Points": generateCartesianPoint,
+    "Coordinate Geometry / Basics": generateCoordinateBasics, // Actual topic from generator
     "Coordinate Geometry / Formulas": generateCoordinateFormulas,
-    "Algebra / Addition & Subtraction": generateAlgebraicAdditionSubtraction,
-    "Algebra / Multiplication": generateAlgebraicMultiplication,
-    "Algebra / Division": generateAlgebraicDivision,
-    "Mensuration / Area (Advanced)": generateArea,
     "Mensuration / Triangle Area": generateMensurationArea,
+    "Mensuration / Area": generateMensurationArea, // Actual topic from generator  
+    "Area of Plane Figures": generateArea, // Fix Q19 Retry
     "Mensuration / Volume & SA": generateMensurationVolume,
     "Statistics / Mean": generateStatistics,
-    "Probability / Simple": generateProbability
+    "Statistics": generateStatistics, // Actual topic from generator
+    "Probability / Simple": generateProbability,
+    "Probability": generateProbability, // Actual topic from generator
+    "Locating a point in a Cartesian Plane": generateCartesianPoint, // Fix Q14 Retry
+    "Algebraic Addition": generateAlgebraicAdditionSubtraction, // Fix Q15 Retry
+    "Algebraic Multiplication": generateAlgebraicMultiplication, // Fix Q16 Retry
+    "Algebraic Division": generateAlgebraicDivision // Fix Q17 Retry
 };
 
 export default Grade9Questions;

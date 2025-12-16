@@ -17,7 +17,8 @@ const PracticeTableInput = ({
     onNext,
     onCorrect,
     onWrong,
-    onRepeat
+    onRepeat,
+    isLastQuestion
 }) => {
     const [userAnswers, setUserAnswers] = useState({}); // { rowIndex: val }
     const [rowStatus, setRowStatus] = useState({}); // { rowIndex: 'correct' | 'wrong' | null }
@@ -58,7 +59,24 @@ const PracticeTableInput = ({
 
         let isRowCorrect = false;
 
-        if (variant === 'fraction') {
+        if (variant === 'coordinate') {
+            // Validate coordinate pair (x, y) for linear equations
+            // The answer object contains: { x: "value", y: "value", _equation: { a, b, c } }
+            // We need to check if a*x + b*y = c
+            if (userVal && correctVal && correctVal._equation) {
+                const { a, b, c } = correctVal._equation;
+                const userX = parseFloat(userVal.x);
+                const userY = parseFloat(userVal.y);
+
+                // Check if inputs are valid numbers
+                if (!isNaN(userX) && !isNaN(userY)) {
+                    // Check if the equation is satisfied: ax + by = c
+                    const result = a * userX + b * userY;
+                    // Allow small floating point error
+                    isRowCorrect = Math.abs(result - c) < 0.0001;
+                }
+            }
+        } else if (variant === 'fraction') {
             isRowCorrect = validateFractionValue(userVal, correctVal);
         } else {
             // Standard validation (also try numeric validation if possible?)
@@ -110,6 +128,82 @@ const PracticeTableInput = ({
         const status = rowStatus[rowIndex];
         const isCorrect = status === 'correct';
         const isWrong = status === 'wrong';
+        const row = rows[rowIndex];
+        const correctVal = parsedAnswer[rowIndex]; // Get correct answer for this row
+
+        // Handle select/dropdown input
+        if (row.inputType === 'select') {
+            return (
+                <div className={Styles.inputWrapper}>
+                    <select
+                        className={`${Styles.selectField} ${isCorrect ? Styles.correct : ''} ${isWrong ? Styles.wrong : ''}`}
+                        value={userAnswers[rowIndex] || ""}
+                        onChange={(e) => handleInputChange(rowIndex, e.target.value)}
+                        disabled={isCorrect || showAnswer}
+                    >
+                        <option value="" disabled>Choose...</option>
+                        {row.options && row.options.map((opt) => (
+                            <option key={opt} value={opt}>
+                                {opt}
+                            </option>
+                        ))}
+                    </select>
+                    <Button
+                        onClick={() => checkRow(rowIndex)}
+                        disabled={isCorrect || showAnswer}
+                        variant="contained"
+                        size="small"
+                        className={Styles.checkBtn}
+                    >
+                        Check
+                    </Button>
+                </div>
+            );
+        }
+
+        // Handle coordinate input (x, y) pairs
+        if (variant === 'coordinate') {
+            const userAns = userAnswers[rowIndex] || {};
+            return (
+                <div className={Styles.coordinateInputWrapper}>
+                    <div className={Styles.coordinateInputContainer}>
+                        <span style={{ fontSize: '1.5rem' }}>(</span>
+                        <input
+                            className={`${Styles.inputNum} ${isCorrect ? Styles.correct : ''} ${isWrong ? Styles.wrong : ''}`}
+                            placeholder="x"
+                            style={{ width: '60px' }}
+                            value={userAns.x || ""}
+                            onChange={(e) => handleInputChange(rowIndex, e.target.value, 'x')}
+                            disabled={isCorrect || showAnswer}
+                        />
+                        <span style={{ fontSize: '1.5rem' }}>,</span>
+                        <input
+                            className={`${Styles.inputDen} ${isCorrect ? Styles.correct : ''} ${isWrong ? Styles.wrong : ''}`}
+                            placeholder="y"
+                            style={{ width: '60px' }}
+                            value={userAns.y || ""}
+                            onChange={(e) => handleInputChange(rowIndex, e.target.value, 'y')}
+                            disabled={isCorrect || showAnswer}
+                        />
+                        <span style={{ fontSize: '1.5rem' }}>)</span>
+                    </div>
+                    <Button
+                        onClick={() => checkRow(rowIndex)}
+                        disabled={isCorrect || showAnswer}
+                        variant="contained"
+                        size="small"
+                        className={Styles.checkBtn}
+                    >
+                        Check
+                    </Button>
+                    {showAnswer && correctVal && (
+                        <div className={Styles.answerReveal}>
+                            Answer: ({correctVal.x || 0}, {correctVal.y || 0})
+                        </div>
+                    )}
+                </div>
+            );
+        }
 
         if (variant === 'fraction') {
             return (
@@ -174,47 +268,252 @@ const PracticeTableInput = ({
                 <span>Topic: {topic}</span>
             </div>
 
+            {/* Render question text if present */}
+            {question?.question && (
+                <div className={Styles.questionText}>
+                    <MathRenderer content={question.question} />
+                </div>
+            )}
+
             <div className={Styles.tableContainer}>
-                {rows.map((row, idx) => (
-                    <div key={idx} className={Styles.row}>
-                        <div className={Styles.problemCol}>
-                            {/* Render Left Op Right nicely */}
-                            {variant === 'fraction' ? (
-                                <div className={Styles.fractionProblem}>
-                                    <div className={Styles.fractionStacked}>
-                                        <span>{row.left.n}</span>
-                                        <span className={Styles.bar}></span>
-                                        <span>{row.left.d}</span>
-                                    </div>
-                                    <span className={Styles.op}>{row.op}</span>
-                                    <div className={Styles.fractionStacked}>
-                                        <span>{row.right.n}</span>
-                                        <span className={Styles.bar}></span>
-                                        <span>{row.right.d}</span>
-                                    </div>
-                                    <span className={Styles.eq}>=</span>
+                {/* Header Row for Double Input (Perimeter and Area) */}
+                {variant === 'double-input' && (
+                    <div className={Styles.headerRow}>
+                        <div className={Styles.headerCell}>{(question?.headers && question.headers[0]) || 'Shape'}</div>
+                        <div className={Styles.headerCell}>{(question?.headers && question.headers[1]) || 'Field 1'}</div>
+                        <div className={Styles.headerCell}>{(question?.headers && question.headers[2]) || 'Field 2'}</div>
+                    </div>
+                )}
+
+                {/* Header Row for Triple Input (Solid Shapes) */}
+                {variant === 'triple-input' && (
+                    <div className={Styles.headerRow} style={{ gridTemplateColumns: '1.5fr 1fr 1fr 1fr' }}>
+                        <div className={Styles.headerCell}>Shape</div>
+                        <div className={Styles.headerCell}>Faces</div>
+                        <div className={Styles.headerCell}>Vertices</div>
+                        <div className={Styles.headerCell}>Edges</div>
+                    </div>
+                )}
+
+                {rows.map((row, idx) => {
+                    // Special rendering for double and triple input variants
+                    if (variant === 'double-input') {
+                        return (
+                            <div key={idx} className={Styles.doubleInputRow}>
+                                <div className={Styles.shapeCell}>
+                                    {row.text && <MathRenderer content={row.text} inline />}
+                                    {row.image && (
+                                        typeof row.image === 'string' && row.image.trim().startsWith('<svg') ?
+                                            <div style={{ marginTop: '8px' }} dangerouslySetInnerHTML={{ __html: row.image }} /> :
+                                            <img src={row.image} alt="shape" style={{ marginTop: '8px', maxWidth: '100%', maxHeight: '100px', display: 'block' }} />
+                                    )}
                                 </div>
-                            ) : (
-                                <div className={Styles.problemText}>
-                                    <MathRenderer content={String(row.left)} inline />
-                                    <span className={Styles.opMath}>{row.op}</span>
-                                    <MathRenderer content={String(row.right)} inline />
-                                    <span className={Styles.eq}>=</span>
+                                <input
+                                    className={`${Styles.inputDefault} ${rowStatus[idx] === 'correct' ? Styles.correct : ''} ${rowStatus[idx] === 'wrong' ? Styles.wrong : ''}`}
+                                    placeholder="Perimeter"
+                                    value={(userAnswers[idx] || {}).perimeter || ""}
+                                    onChange={(e) => handleInputChange(idx, e.target.value, 'perimeter')}
+                                    disabled={rowStatus[idx] === 'correct' || showAnswer}
+                                />
+                                <input
+                                    className={`${Styles.inputDefault} ${rowStatus[idx] === 'correct' ? Styles.correct : ''} ${rowStatus[idx] === 'wrong' ? Styles.wrong : ''}`}
+                                    placeholder="Area"
+                                    value={(userAnswers[idx] || {}).area || ""}
+                                    onChange={(e) => handleInputChange(idx, e.target.value, 'area')}
+                                    disabled={rowStatus[idx] === 'correct' || showAnswer}
+                                />
+                                <Button
+                                    onClick={() => checkRow(idx)}
+                                    disabled={rowStatus[idx] === 'correct' || showAnswer}
+                                    variant="contained"
+                                    size="small"
+                                    className={Styles.checkBtn}
+                                >
+                                    Check
+                                </Button>
+                                {showAnswer && (
+                                    <div className={Styles.answerReveal}>
+                                        P: {parsedAnswer[idx].perimeter}, A: {parsedAnswer[idx].area}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    }
+
+                    if (variant === 'triple-input') {
+                        return (
+                            <div key={idx} className={Styles.tripleInputRow}>
+                                <div className={Styles.shapeCell}>
+                                    {row.text && <MathRenderer content={row.text} inline />}
+                                    {row.image && (
+                                        typeof row.image === 'string' && row.image.trim().startsWith('<svg') ?
+                                            <div style={{ marginTop: '8px' }} dangerouslySetInnerHTML={{ __html: row.image }} /> :
+                                            <img src={row.image} alt="shape" style={{ marginTop: '8px', maxWidth: '100%', maxHeight: '100px', display: 'block' }} />
+                                    )}
+                                </div>
+                                <input
+                                    className={`${Styles.inputDefault} ${rowStatus[idx] === 'correct' ? Styles.correct : ''} ${rowStatus[idx] === 'wrong' ? Styles.wrong : ''}`}
+                                    placeholder={question?.placeholders?.[0] || question?.inputKeys?.[0] || 'Field 1'}
+                                    value={(userAnswers[idx] || {})[(question?.inputKeys?.[0] || 'k1')] || ""}
+                                    onChange={(e) => handleInputChange(idx, e.target.value, question?.inputKeys?.[0] || 'k1')}
+                                    disabled={rowStatus[idx] === 'correct' || showAnswer}
+                                />
+                                <input
+                                    className={`${Styles.inputDefault} ${rowStatus[idx] === 'correct' ? Styles.correct : ''} ${rowStatus[idx] === 'wrong' ? Styles.wrong : ''}`}
+                                    placeholder={question?.placeholders?.[1] || question?.inputKeys?.[1] || 'Field 2'}
+                                    value={(userAnswers[idx] || {})[(question?.inputKeys?.[1] || 'k2')] || ""}
+                                    onChange={(e) => handleInputChange(idx, e.target.value, question?.inputKeys?.[1] || 'k2')}
+                                    disabled={rowStatus[idx] === 'correct' || showAnswer}
+                                />
+                                <input
+                                    className={`${Styles.inputDefault} ${rowStatus[idx] === 'correct' ? Styles.correct : ''} ${rowStatus[idx] === 'wrong' ? Styles.wrong : ''}`}
+                                    placeholder={question?.placeholders?.[2] || question?.inputKeys?.[2] || 'Field 3'}
+                                    value={(userAnswers[idx] || {})[(question?.inputKeys?.[2] || 'k3')] || ""}
+                                    onChange={(e) => handleInputChange(idx, e.target.value, question?.inputKeys?.[2] || 'k3')}
+                                    disabled={rowStatus[idx] === 'correct' || showAnswer}
+                                />
+                                <Button
+                                    onClick={() => checkRow(idx)}
+                                    disabled={rowStatus[idx] === 'correct' || showAnswer}
+                                    variant="contained"
+                                    size="small"
+                                    className={Styles.checkBtn}
+                                >
+                                    Check
+                                </Button>
+                                {showAnswer && (
+                                    <div className={Styles.answerReveal}>
+                                        {question?.inputKeys?.[0] || 'F'}: {parsedAnswer[idx][(question?.inputKeys?.[0] || 'k1')]},
+                                        {question?.inputKeys?.[1] || 'V'}: {parsedAnswer[idx][(question?.inputKeys?.[1] || 'k2')]},
+                                        {question?.inputKeys?.[2] || 'E'}: {parsedAnswer[idx][(question?.inputKeys?.[2] || 'k3')]}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    }
+
+                    // Standard row rendering for other variants
+                    return (
+                        <div key={idx} className={Styles.row}>
+                            <div className={Styles.problemCol}>
+                                {/* Render Left Op Right nicely */}
+                                {variant === 'fraction' && row.left ? (
+                                    <div className={Styles.fractionProblem}>
+                                        <div className={Styles.fractionStacked}>
+                                            <span>{row.left.n}</span>
+                                            <span className={Styles.bar}></span>
+                                            <span>{row.left.d}</span>
+                                        </div>
+                                        <span className={Styles.op}>{row.op}</span>
+                                        <div className={Styles.fractionStacked}>
+                                            <span>{row.right.n}</span>
+                                            <span className={Styles.bar}></span>
+                                            <span>{row.right.d}</span>
+                                        </div>
+                                        <span className={Styles.eq}>=</span>
+                                    </div>
+                                ) : (variant === 'double-input' || variant === 'triple-input') ? (
+                                    <div className={Styles.shapeCell}>
+                                        {row.text && <MathRenderer content={row.text} inline />}
+                                        {row.image && (
+                                            typeof row.image === 'string' && row.image.trim().startsWith('<svg') ?
+                                                <div style={{ marginTop: '8px' }} dangerouslySetInnerHTML={{ __html: row.image }} /> :
+                                                <img src={row.image} alt="shape" style={{ marginTop: '8px', maxWidth: '100%', maxHeight: '100px', display: 'block' }} />
+                                        )}
+                                    </div>
+                                ) : row.text ? (
+                                    <div className={Styles.problemText}>
+                                        <MathRenderer content={row.text} inline />
+                                    </div>
+                                ) : (
+                                    <div className={Styles.problemText}>
+                                        <MathRenderer content={String(row.left)} inline />
+                                        <span className={Styles.opMath}>{row.op}</span>
+                                        <MathRenderer content={String(row.right)} inline />
+                                        <span className={Styles.eq}>=</span>
+                                    </div>
+                                )}
+                            </div>
+                            <div className={Styles.inputCol}>
+                                {variant === 'triple-input' ? (
+                                    <>
+                                        <div className={Styles.tripleInputWrapper}>
+                                            <input
+                                                className={`${Styles.inputDefault} ${rowStatus[idx] === 'correct' ? Styles.correct : ''} ${rowStatus[idx] === 'wrong' ? Styles.wrong : ''}`}
+                                                placeholder={question?.placeholders?.[0] || question?.inputKeys?.[0] || 'Field 1'}
+                                                value={(userAnswers[idx] || {})[(question?.inputKeys?.[0] || 'k1')] || ""}
+                                                onChange={(e) => handleInputChange(idx, e.target.value, question?.inputKeys?.[0] || 'k1')}
+                                                disabled={rowStatus[idx] === 'correct' || showAnswer}
+                                            />
+                                            <input
+                                                className={`${Styles.inputDefault} ${rowStatus[idx] === 'correct' ? Styles.correct : ''} ${rowStatus[idx] === 'wrong' ? Styles.wrong : ''}`}
+                                                placeholder={question?.placeholders?.[1] || question?.inputKeys?.[1] || 'Field 2'}
+                                                value={(userAnswers[idx] || {})[(question?.inputKeys?.[1] || 'k2')] || ""}
+                                                onChange={(e) => handleInputChange(idx, e.target.value, question?.inputKeys?.[1] || 'k2')}
+                                                disabled={rowStatus[idx] === 'correct' || showAnswer}
+                                            />
+                                            <input
+                                                className={`${Styles.inputDefault} ${rowStatus[idx] === 'correct' ? Styles.correct : ''} ${rowStatus[idx] === 'wrong' ? Styles.wrong : ''}`}
+                                                placeholder={question?.placeholders?.[2] || question?.inputKeys?.[2] || 'Field 3'}
+                                                value={(userAnswers[idx] || {})[(question?.inputKeys?.[2] || 'k3')] || ""}
+                                                onChange={(e) => handleInputChange(idx, e.target.value, question?.inputKeys?.[2] || 'k3')}
+                                                disabled={rowStatus[idx] === 'correct' || showAnswer}
+                                            />
+                                            <Button
+                                                onClick={() => checkRow(idx)}
+                                                disabled={rowStatus[idx] === 'correct' || showAnswer}
+                                                variant="contained"
+                                                size="small"
+                                                className={Styles.checkBtn}
+                                            >
+                                                Check
+                                            </Button>
+                                        </div>
+                                    </>
+                                ) : variant === 'double-input' ? (
+                                    <>
+                                        <div className={Styles.doubleInputWrapper}>
+                                            <input
+                                                className={`${Styles.inputDefault} ${rowStatus[idx] === 'correct' ? Styles.correct : ''} ${rowStatus[idx] === 'wrong' ? Styles.wrong : ''}`}
+                                                placeholder="Perimeter"
+                                                value={(userAnswers[idx] || {}).perimeter || ""}
+                                                onChange={(e) => handleInputChange(idx, e.target.value, 'perimeter')}
+                                                disabled={rowStatus[idx] === 'correct' || showAnswer}
+                                            />
+                                            <input
+                                                className={`${Styles.inputDefault} ${rowStatus[idx] === 'correct' ? Styles.correct : ''} ${rowStatus[idx] === 'wrong' ? Styles.wrong : ''}`}
+                                                placeholder="Area"
+                                                value={(userAnswers[idx] || {}).area || ""}
+                                                onChange={(e) => handleInputChange(idx, e.target.value, 'area')}
+                                                disabled={rowStatus[idx] === 'correct' || showAnswer}
+                                            />
+                                            <Button
+                                                onClick={() => checkRow(idx)}
+                                                disabled={rowStatus[idx] === 'correct' || showAnswer}
+                                                variant="contained"
+                                                size="small"
+                                                className={Styles.checkBtn}
+                                            >
+                                                Check
+                                            </Button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    renderInput(idx)
+                                )}
+                            </div>
+                            {showAnswer && variant !== 'coordinate' && (
+                                <div className={Styles.answerReveal}>
+                                    Ans: {variant === 'fraction'
+                                        ? `${parsedAnswer[idx].num}/${parsedAnswer[idx].den}`
+                                        : variant === 'double-input'
+                                            ? `P: ${parsedAnswer[idx].perimeter}, A: ${parsedAnswer[idx].area}`
+                                            : parsedAnswer[idx]}
                                 </div>
                             )}
                         </div>
-                        <div className={Styles.inputCol}>
-                            {renderInput(idx)}
-                        </div>
-                        {showAnswer && (
-                            <div className={Styles.answerReveal}>
-                                Ans: {variant === 'fraction'
-                                    ? `${parsedAnswer[idx].num}/${parsedAnswer[idx].den}`
-                                    : parsedAnswer[idx]}
-                            </div>
-                        )}
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             <div className={Styles.actions}>
@@ -225,7 +524,7 @@ const PracticeTableInput = ({
                         color="success"
                         endIcon={<ArrowRight />}
                     >
-                        Next Question
+                        {isLastQuestion ? "Finish" : "Next Question"}
                     </Button>
                 )}
                 {!isComplete && !showAnswer && (
