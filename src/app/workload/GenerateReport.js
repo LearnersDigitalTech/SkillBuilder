@@ -170,29 +170,92 @@ function analyzeResponses(responses, grade) {
             }
         }
 
-        // Special check for Factor Tree (JSON object comparison)
+        // Special check for Factor Tree - Accept multiple valid factorization paths
         if (item.type === 'factorTree') {
             try {
                 const correctObj = JSON.parse(correctAnswer);
                 const userObj = JSON.parse(givenAnswer);
 
-                const correctKeys = Object.keys(correctObj);
-                const userKeys = Object.keys(userObj);
-
-                // If number of keys differ (e.g. missing inputs), it's wrong (or partial?)
-                // Strict: must provide all answers.
-                if (correctKeys.length !== userKeys.length) return 0;
-
-                let allCorrect = true;
-                for (let key of correctKeys) {
-                    if (normalizeFunc(userObj[key]) !== normalizeFunc(correctObj[key])) {
-                        allCorrect = false;
-                        break;
+                // Get the original tree structure from the question
+                const tree = item.tree;
+                if (!tree) {
+                    // Fallback to old validation if no tree structure
+                    const correctKeys = Object.keys(correctObj);
+                    let allCorrect = true;
+                    for (let key of correctKeys) {
+                        if (normalizeFunc(userObj[key]) !== normalizeFunc(correctObj[key])) {
+                            allCorrect = false;
+                            break;
+                        }
                     }
+                    return allCorrect ? 1 : 0;
                 }
-                return allCorrect ? 1 : 0;
+
+                // Helper: Fill tree with user's answers
+                const fillTreeWithUserAnswers = (node, answers) => {
+                    const nodeCopy = { ...node };
+                    if (nodeCopy.isInput && answers[nodeCopy.id]) {
+                        nodeCopy.val = parseInt(answers[nodeCopy.id]);
+                    }
+                    if (nodeCopy.children) {
+                        nodeCopy.children = nodeCopy.children.map(child =>
+                            fillTreeWithUserAnswers(child, answers)
+                        );
+                    }
+                    return nodeCopy;
+                };
+
+                // Helper: Validate that all nodes multiply correctly
+                const validateAllNodes = (node) => {
+                    if (node.children && node.children.length > 0) {
+                        // Check if children multiply to parent
+                        const product = node.children.reduce((acc, child) => acc * child.val, 1);
+                        if (product !== node.val) return false;
+
+                        // Recursively validate children
+                        return node.children.every(child => validateAllNodes(child));
+                    }
+                    return true; // Leaf nodes are always valid
+                };
+
+                // Helper: Extract prime factors (leaf nodes)
+                const extractPrimeFactors = (node) => {
+                    const primes = [];
+                    const traverse = (n) => {
+                        if (!n.children || n.children.length === 0) {
+                            primes.push(n.val);
+                        } else {
+                            n.children.forEach(traverse);
+                        }
+                    };
+                    traverse(node);
+                    return primes.sort((a, b) => a - b);
+                };
+
+                // Helper: Compare arrays ignoring order
+                const arraysEqual = (arr1, arr2) => {
+                    if (arr1.length !== arr2.length) return false;
+                    const sorted1 = [...arr1].sort((a, b) => a - b);
+                    const sorted2 = [...arr2].sort((a, b) => a - b);
+                    return sorted1.every((val, idx) => val === sorted2[idx]);
+                };
+
+                // Build tree with user's values
+                const userTree = fillTreeWithUserAnswers(tree, userObj);
+
+                // Validate: All nodes multiply correctly
+                const nodesValid = validateAllNodes(userTree);
+                if (!nodesValid) return 0;
+
+                // Validate: Prime factorization matches
+                const userPrimes = extractPrimeFactors(userTree);
+                const correctPrimes = extractPrimeFactors(tree);
+
+                return arraysEqual(userPrimes, correctPrimes) ? 1 : 0;
+
             } catch (e) {
-                return givenAnswer.replace(/\s+/g, "") === correctAnswer.replace(/\s+/g, "") ? 1 : 0;
+                console.log("Error validating factor tree: ", e);
+                return 0;
             }
         }
 
