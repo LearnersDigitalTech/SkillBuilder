@@ -234,16 +234,25 @@ export const generateDecimals = () => {
 export const generateLCM = () => {
     const rows = [];
 
-    const a1 = getRandomInt(4, 15);
-    const b1 = getRandomInt(4, 15);
+    // Q1: 2 numbers
+    let a1 = getRandomInt(4, 15);
+    let b1 = getRandomInt(4, 15);
+    // Ensure distinct
+    while (a1 === b1) {
+        b1 = getRandomInt(4, 15);
+    }
     const val1 = lcm(a1, b1);
     rows.push({ text: `Find the LCM of $${a1}, ${b1}$`, answer: String(val1) });
 
     // Q2 removed as per request (keep 1st and 3rd)
 
-    const a3 = getRandomInt(3, 10);
-    const b3 = getRandomInt(3, 10);
-    const c3 = getRandomInt(3, 10);
+    // Q3: 3 numbers
+    const set3 = new Set();
+    while (set3.size < 3) {
+        set3.add(getRandomInt(3, 10));
+    }
+    const [a3, b3, c3] = [...set3];
+
     const val3 = lcm(a3, lcm(b3, c3));
     rows.push({ text: `Find the LCM of $${a3}, ${b3}, ${c3}$`, answer: String(val3) });
 
