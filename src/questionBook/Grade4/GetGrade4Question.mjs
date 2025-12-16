@@ -23,6 +23,7 @@ import {
     generateBarGraph,
     generateSimpleGrade4Pattern,
     generateMeasurementConversionApplicationLevel,
+    generate3DShapeIdentification,
 } from './grade4Generators.mjs';
 
 const generate = (generator, count = 10) => {
@@ -57,6 +58,7 @@ const Grade4Questions = {
     q22: generate(generateMeasurementConversionApplicationLevel),
     q23: generate(generateBarGraph),
     q24: generate(generateSimpleGrade4Pattern),
+    q25: generate(generate3DShapeIdentification),
     // q26: generate(generateSimpleGrade4Pattern),
     // Fill remaining slots
     // q15: generate(generatePlaceValue5Digit),
@@ -97,7 +99,8 @@ export const Grade4GeneratorMap = {
     "Measurement / Perimeter": generatePerimeterShape,
     "Measurement / Conversion": () => Math.random() > 0.5 ? generateMeasurementConversion() : generateMeasurementConversionApplicationLevel(),
     "Data Handling / Bar Graph": generateBarGraph,
-    "Patterns / Number Patterns": generateSimpleGrade4Pattern
+    "Patterns / Number Patterns": generateSimpleGrade4Pattern,
+    "Geometry / 3D Shapes": generate3DShapeIdentification
 };
 
 export default Grade4Questions;
