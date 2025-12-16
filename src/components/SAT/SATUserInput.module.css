@@ -28,11 +28,13 @@
 .questionHeader {
     width: 100%;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 2rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid #f1f5f9;
+    gap: 1rem;
 }
 
 .questionNumber {
@@ -44,6 +46,7 @@
     background: #0f172a;
     padding: 0.25rem 0.75rem;
     border-radius: 4px;
+    white-space: nowrap;
 }
 
 .questionMeta {
@@ -54,6 +57,7 @@
     font-weight: 600;
     color: #64748b;
     text-transform: uppercase;
+    flex-wrap: wrap;
 }
 
 .separator {

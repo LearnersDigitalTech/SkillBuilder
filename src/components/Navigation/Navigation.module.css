@@ -18,7 +18,8 @@
     width: 100%;
 }
 
-.scrolled {
+.scrolled,
+.white {
     background: rgba(255, 255, 255, 1);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);

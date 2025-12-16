@@ -1,7 +1,7 @@
 "use client";
 import { useContext, useState, useEffect } from "react";
 import Styles from "./Navigation.module.css";
-import { Play, Phone, User, Zap } from 'lucide-react'
+import { Play, Phone, User, Zap, GraduationCap } from 'lucide-react'
 import { Tooltip } from "@mui/material";
 import { useRouter } from "next/navigation";
 import AuthModal from "../Auth/AuthModal.component";
@@ -9,22 +9,21 @@ import { useAuth } from "@/context/AuthContext";
 import { QuizSessionContext } from "../../app/context/QuizSessionContext";
 import { getUserDatabaseKey, firebaseDatabase } from "@/backend/firebaseHandler";
 import { get, ref } from "firebase/database";
+import LoadingScreen from "../LoadingScreen/LoadingScreen.component";
 
-const Navigation = () => {
+const Navigation = ({ forceWhite }) => {
     const [scrolled, setScrolled] = useState(false);
     const [authModalOpen, setAuthModalOpen] = useState(false);
     const [hasSession, setHasSession] = useState(false);
+    const [isSATLoading, setIsSATLoading] = useState(false);
     const { user, userData } = useAuth();
     const router = useRouter();
-    const [quizContext, setQuizContext] = useContext(QuizSessionContext) || [null, () => { }]; // Check if context exists to avoid crash outside provider
+    const [quizContext, setQuizContext] = useContext(QuizSessionContext) || [null, () => { }];
 
     useEffect(() => {
-        // Check for active quiz session or stored child session
         const checkSession = () => {
             if (typeof window !== "undefined") {
                 const quizSession = window.localStorage.getItem("quizSession");
-                // functionality to check if user is logged in via firebase is handled by useAuth
-                // but sometimes we want to show profile if we have local user details
                 if (quizSession) {
                     try {
                         const parsed = JSON.parse(quizSession);
@@ -57,7 +56,7 @@ const Navigation = () => {
 
     return (
         <>
-            <div className={`${Styles.navigationContainer} ${scrolled ? Styles.scrolled : ''}`}>
+            <div className={`${Styles.navigationContainer} ${scrolled || forceWhite ? Styles.scrolled : ''} ${forceWhite ? Styles.white : ''}`}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                     <div className={Styles.logoContainer} onClick={() => router.push("/")}>
                         <div className={Styles.brainWrap} aria-hidden>
@@ -65,7 +64,6 @@ const Navigation = () => {
                         </div>
                         <div>
                             <h3 className={Styles.logoTitle}>Math Skill Conquest</h3>
-                            {/* <p className={Styles.logoSubtitle}>Educational Assessment</p> */}
                         </div>
                     </div>
                     <div className={Styles.navActionContainer}>
@@ -73,9 +71,7 @@ const Navigation = () => {
                             <button
                                 onClick={async () => {
                                     if (user) {
-                                        // Logic to correctly initialize session for the active child
                                         try {
-                                            // Robust user key retrieval
                                             let userKey = null;
                                             if (user) {
                                                 userKey = getUserDatabaseKey(user);
@@ -92,12 +88,10 @@ const Navigation = () => {
                                             const childKeys = children ? Object.keys(children) : [];
                                             let activeChildId = childKeys[0] || null;
 
-                                            // Prefer stored active child
                                             if (typeof window !== "undefined") {
                                                 const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
-                                                const lastActiveChild = window.localStorage.getItem('lastActiveChild'); // Fallback
+                                                const lastActiveChild = window.localStorage.getItem('lastActiveChild');
 
-                                                // Prioritize specific key, then fallback
                                                 if (storedChildId && childKeys.includes(storedChildId)) {
                                                     activeChildId = storedChildId;
                                                 } else if (lastActiveChild && childKeys.includes(lastActiveChild)) {
@@ -114,7 +108,6 @@ const Navigation = () => {
                                                     activeChildId: activeChildId,
                                                 };
 
-                                                // Reset session for this specific child
                                                 if (setQuizContext) {
                                                     setQuizContext({ userDetails, questionPaper: null });
                                                 }
@@ -122,20 +115,16 @@ const Navigation = () => {
                                                     window.localStorage.removeItem("quizSession");
                                                 }
                                             } else {
-                                                // Fallback: If we couldn't rebuild context (e.g. missing userData),
-                                                // at least ensure we don't load a STALE session for a DIFFERENT child.
                                                 if (typeof window !== "undefined" && activeChildId) {
                                                     try {
                                                         const storedSession = window.localStorage.getItem("quizSession");
                                                         if (storedSession) {
                                                             const parsed = JSON.parse(storedSession);
-                                                            // If stored session is for a different child, KILL IT.
                                                             if (parsed?.userDetails?.childId && parsed.userDetails.childId !== activeChildId) {
                                                                 window.localStorage.removeItem("quizSession");
                                                             }
                                                         }
                                                     } catch (e) {
-                                                        // On error, better to clear than show wrong data
                                                         window.localStorage.removeItem("quizSession");
                                                     }
                                                 }
@@ -165,6 +154,23 @@ const Navigation = () => {
                             </button>
                         </Tooltip>
 
+                        <Tooltip title="SAT Practice" arrow>
+                            <button
+                                onClick={() => {
+                                    if (user) {
+                                        setIsSATLoading(true);
+                                        router.push("/practice?grade=SAT");
+                                    } else {
+                                        setAuthModalOpen(true);
+                                    }
+                                }}
+                                className={`${Styles.navButton} ${Styles.outlined}`}
+                            >
+                                <GraduationCap size={16} />
+                                <span className={Styles.buttonText}>SAT</span>
+                            </button>
+                        </Tooltip>
+
                         {user || hasSession ? (
                             <Tooltip title="View Dashboard" arrow>
                                 <button onClick={() => router.push("/dashboard")} className={`${Styles.navButton} ${Styles.outlined}`}>
@@ -190,6 +196,7 @@ const Navigation = () => {
                     </div>
                 </div>
             </div>
+            {isSATLoading && <LoadingScreen title="Preparing SAT Exam" subtitle="Setting up your practice environment..." />}
             <AuthModal open={authModalOpen} onClose={() => setAuthModalOpen(false)} />
         </>
     )
