@@ -632,7 +632,7 @@ export const generateAlgebraicDivision = () => {
     // Numerator: k(ax - b) = k*a x - k*b
     const num1 = `${k1 * a1}x - ${k1 * b1}`;
     const den1 = `${a1}x - ${b1}`;
-    rows.push({ text: `Divide: $(${num1}) \\div (${den1})$`, answer: String(k1) });
+    rows.push({ text: `$(${num1}) \\div (${den1})$`, answer: String(k1) });
 
     // Q2: Quadratic / Quadratic (2 common)
     // (k(ax^2 + bx + c)) / (ax^2 + bx + c)
@@ -644,14 +644,14 @@ export const generateAlgebraicDivision = () => {
     const c3 = getRandomInt(3, 9);
     const num3 = `${k3 * c3}p^4m^2n`;
     const den3 = `${c3}p^4m^2n`;
-    rows.push({ text: `Divide: $${num3} \\div ${den3}$`, answer: String(k3) });
+    rows.push({ text: `$${num3} \\div ${den3}$`, answer: String(k3) });
 
     const answerObj = {};
     rows.forEach((r, i) => answerObj[i] = r.answer);
 
     return {
         type: 'tableInput',
-        question: 'Solve the following Algebraic Divisions:',
+        question: '',
         answer: JSON.stringify(answerObj),
         rows: rows,
         topic: 'Algebraic Division'

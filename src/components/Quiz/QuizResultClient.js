@@ -88,6 +88,39 @@ const formatAnswer = (answer) => {
                     if (v.num !== undefined && v.den !== undefined) {
                         return `$\\frac{${v.num}}{${v.den}}$`;
                     }
+                    // Special handling for linear equations with multiple solutions
+                    if (v.x !== undefined && v.y !== undefined && v._equation) {
+                        const { a, b, c } = v._equation;
+                        // Generate 3-4 sample solutions
+                        const solutions = [];
+
+                        // Solution 1: x = 0
+                        if (c % b === 0) {
+                            solutions.push(`(0, ${c / b})`);
+                        }
+
+                        // Solution 2: y = 0
+                        if (c % a === 0) {
+                            solutions.push(`(${c / a}, 0)`);
+                        }
+
+                        // Solution 3: Try x = 2
+                        const y_for_2 = (c - a * 2) / b;
+                        if (Number.isInteger(y_for_2)) {
+                            solutions.push(`(2, ${y_for_2})`);
+                        }
+
+                        // Solution 4: Try x = 1
+                        const y_for_1 = (c - a * 1) / b;
+                        if (Number.isInteger(y_for_1) && !solutions.includes(`(1, ${y_for_1})`)) {
+                            solutions.push(`(1, ${y_for_1})`);
+                        }
+
+                        // Return formatted string with "Possible answers include:"
+                        if (solutions.length > 0) {
+                            return `Possible answers: ${solutions.slice(0, 3).join(', ')}, etc.`;
+                        }
+                    }
                     if (v.x !== undefined && v.y !== undefined) {
                         return `(${v.x}, ${v.y})`;
                     }
@@ -734,16 +767,37 @@ const QuizResultClient = () => {
             console.log('Logo not loaded, continuing without it');
         }
 
+
         // Add title text (shifted right to accommodate logo)
         doc.setTextColor(102, 126, 234);
-        doc.setFontSize(20);
+        doc.setFontSize(22);
         doc.setFont(undefined, 'bold');
-        doc.text('Your Personalized Learning Plan', pageWidth / 2, 18, { align: 'center' });
+
+        // Capitalize name
+        const rawName = displayName || 'Student';
+        const capitalizedName = rawName.replace(/\b\w/g, c => c.toUpperCase());
+
+        // Full title string
+        const fullTitle = `${capitalizedName}'s Personalized Learning Plan`;
+
+        // Text wrapping settings
+        const textStartX = 50; // Logo ends at 44 (14+30), so 50 gives padding
+        const maxTextWidth = pageWidth - textStartX - 14; // Right margin 14
+        const splitTitle = doc.splitTextToSize(fullTitle, maxTextWidth);
+
+        // Render Title
+        let currentY = 20;
+        doc.text(splitTitle, textStartX, currentY);
+
+        // Adjust Y for subtitle based on title height
+        // splitTitle is an array of strings. Each line adds to height.
+        // Approx 10mm per line for size 22
+        currentY += (splitTitle.length * 9);
 
         doc.setFontSize(11);
         doc.setFont(undefined, 'normal');
         doc.setTextColor(100, 116, 139);
-        doc.text('Math Skill Conquest', pageWidth / 2, 28, { align: 'center' });
+        doc.text('Math Skill Builder', textStartX, currentY, { align: 'left' });
 
         // Student details
         doc.setTextColor(0, 0, 0);
@@ -757,7 +811,7 @@ const QuizResultClient = () => {
         doc.setFont(undefined, 'normal');
         doc.text(`Name: ${displayName || 'Student'}`, 14, yPos);
         yPos += 6;
-        doc.text(`Grade: ${displayGrade || 'N/A'}`, 14, yPos);
+        doc.text(`${displayGrade}`, 14, yPos);
         yPos += 6;
         doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, yPos);
         yPos += 12;

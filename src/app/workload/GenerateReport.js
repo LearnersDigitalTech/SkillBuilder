@@ -34,6 +34,23 @@ function analyzeResponses(responses, grade) {
 
         if (!givenAnswer) return 0;
 
+        // Helper function to calculate GCD (Greatest Common Divisor)
+        const gcd = (a, b) => {
+            a = Math.abs(a);
+            b = Math.abs(b);
+            return b === 0 ? a : gcd(b, a % b);
+        };
+
+        // Helper function to simplify fraction to lowest terms
+        const simplifyFraction = (num, den) => {
+            if (den === 0) return { num, den }; // Avoid division by zero
+            const divisor = gcd(num, den);
+            return {
+                num: num / divisor,
+                den: den / divisor
+            };
+        };
+
         // Partial marking for tableInput
         if (item.type === 'tableInput' && (item.question || item.rows)) {
             // We need to compare row by row.
@@ -67,15 +84,39 @@ function analyzeResponses(responses, grade) {
                         const cDen = parseFloat(c.den || c.d);
 
                         if (!isNaN(uNum) && !isNaN(uDen) && !isNaN(cNum) && !isNaN(cDen) && uDen !== 0 && cDen !== 0) {
-                            if (Math.abs(uNum * cDen - cNum * uDen) < 0.0001) {
+                            // Simplify both fractions to their lowest terms
+                            const userSimplified = simplifyFraction(uNum, uDen);
+                            const correctSimplified = simplifyFraction(cNum, cDen);
+
+                            // Compare simplified forms (handles both positive and negative fractions)
+                            if (Math.abs(userSimplified.num - correctSimplified.num) < 0.0001 &&
+                                Math.abs(userSimplified.den - correctSimplified.den) < 0.0001) {
                                 totalScoreSum += 1;
                             }
                         }
                     }
-                    // 2. Complex Object Row (e.g. {perimeter:..., area:...})
+                    // 2. Complex Object Row (e.g. {perimeter:..., area:...} or {x:..., y:...})
                     else if (typeof c === 'object' && c !== null) {
                         // If user didn't answer this row at all (undefined/null), score is 0
                         if (!u || typeof u !== 'object') {
+                            continue;
+                        }
+
+                        // Special case: Linear Equation validation
+                        // Check if this is a coordinate pair with equation coefficients
+                        if (c._equation && c._equation.a !== undefined && c._equation.b !== undefined && c._equation.c !== undefined) {
+                            const { a, b, c: constant } = c._equation;
+                            const userX = parseFloat(u.x);
+                            const userY = parseFloat(u.y);
+
+                            // Check if user's (x, y) satisfies the equation: a*x + b*y = c
+                            if (!isNaN(userX) && !isNaN(userY)) {
+                                const leftSide = a * userX + b * userY;
+                                // Allow small tolerance for floating point errors
+                                if (Math.abs(leftSide - constant) < 0.0001) {
+                                    totalScoreSum += 1;
+                                }
+                            }
                             continue;
                         }
 
@@ -88,6 +129,9 @@ function analyzeResponses(responses, grade) {
 
                         let correctKeysCount = 0;
                         cKeys.forEach(key => {
+                            // Skip internal validation keys like _equation
+                            if (key.startsWith('_')) return;
+
                             // Normalize both values
                             const valC = normalizeFunc(c[key]);
                             const valU = normalizeFunc(u[key]);
@@ -100,9 +144,20 @@ function analyzeResponses(responses, grade) {
                     }
                     // 3. Simple Primitive Row (String/Number)
                     else {
-                        // Strict equality for strings
-                        if (JSON.stringify(u) === JSON.stringify(c)) {
-                            totalScoreSum += 1;
+                        // Try numeric comparison first (handles decimals with trailing zeros)
+                        const uNum = parseFloat(u);
+                        const cNum = parseFloat(c);
+
+                        if (!isNaN(uNum) && !isNaN(cNum)) {
+                            // Numeric comparison with small tolerance for floating point errors
+                            if (Math.abs(uNum - cNum) < 0.0001) {
+                                totalScoreSum += 1;
+                            }
+                        } else {
+                            // Fall back to string comparison for non-numeric values
+                            if (JSON.stringify(u) === JSON.stringify(c)) {
+                                totalScoreSum += 1;
+                            }
                         }
                     }
                 }
@@ -141,7 +196,16 @@ function analyzeResponses(responses, grade) {
             }
         }
 
-        // Default: Ignore all whitespace for comparison to handle spacing variations (e.g. "1 x 1" vs "1x1")
+        // Default: Try numeric comparison first (handles leading zeros like "07" vs "7")
+        const givenNum = parseFloat(givenAnswer);
+        const correctNum = parseFloat(correctAnswer);
+
+        if (!isNaN(givenNum) && !isNaN(correctNum)) {
+            // Numeric comparison with small tolerance for floating point errors
+            return Math.abs(givenNum - correctNum) < 0.0001 ? 1 : 0;
+        }
+
+        // Fall back to string comparison: Ignore all whitespace for comparison to handle spacing variations (e.g. "1 x 1" vs "1x1")
         return givenAnswer.replace(/\s+/g, "") === correctAnswer.replace(/\s+/g, "") ? 1 : 0;
     };
 

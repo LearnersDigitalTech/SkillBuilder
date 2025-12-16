@@ -172,7 +172,7 @@ const HomeContent = () => {
                         {/* <p className={Styles.nationalMathDay}></p> */}
                         <p className={Styles.tagline}>National Mathematics Day 2025</p>
                     </div>
-                    <h1>Math Skills Proficiency Test</h1>
+                    <h1>Math Skills<br></br>Proficiency Test</h1>
                     <p className={Styles.subtitle}>Discover Your Math Mastery Level</p>
                     {/* <div className={Styles.badgesContainer}>
                         <div className={Styles.badge}>
