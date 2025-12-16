@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Sparkles, Brain, Trophy, Zap, GraduationCap, LogIn, ChevronRight, Calculator } from "lucide-react"
 
-import Navigation from "@/components/Navigation/Navigation.component"
+import Navigation from "../../components/Navigation/Navigation.component.jsx"
 import {
   Dialog,
   DialogContent,
