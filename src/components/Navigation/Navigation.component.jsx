@@ -11,7 +11,7 @@ import { getUserDatabaseKey, firebaseDatabase } from "@/backend/firebaseHandler"
 import { get, ref } from "firebase/database";
 import LoadingScreen from "../LoadingScreen/LoadingScreen.component";
 
-const Navigation = ({ forceWhite }) => {
+const Navigation = ({ forceWhite = false }) => {
     const [scrolled, setScrolled] = useState(false);
     const [authModalOpen, setAuthModalOpen] = useState(false);
     const [hasSession, setHasSession] = useState(false);
