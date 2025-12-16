@@ -550,14 +550,14 @@ export const generateComparingQuantities = () => {
     const round = (num) => Math.round(num * 100) / 100;
 
     // Row 1: Percentage Increase
-    const val = getRandomInt(100, 500);
+    const val = getRandomInt(5, 19) * 50; // 250 to 950, multiples of 50
     const pct = getRandomInt(10, 50);
     const res = round(val + (val * pct / 100));
     rows.push({ text: `Increase $${val}$ by $${pct}\\%$`, inputType: "text" });
     answerObj[0] = String(res);
 
     // Row 2: Profit/Loss
-    const cp = getRandomInt(100, 500);
+    const cp = getRandomInt(5, 19) * 50; // 250 to 950
     const profitPct = getRandomInt(10, 30);
     const profit = round((cp * profitPct) / 100);
     const sp = round(cp + profit);
@@ -565,7 +565,7 @@ export const generateComparingQuantities = () => {
     answerObj[1] = String(sp); // User enters number
 
     // Row 3: Simple Interest
-    const P = getRandomInt(100, 1000) * 10;
+    const P = getRandomInt(5, 19) * 50; // 250 to 950
     const R = getRandomInt(5, 10);
     const T = getRandomInt(2, 4);
     const SI = (P * R * T) / 100;

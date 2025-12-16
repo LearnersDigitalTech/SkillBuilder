@@ -909,12 +909,43 @@ export const generateShapeComposition = () => {
     // Create MCQ options with shape icons
     const createOptionWithIcons = (shapeList) => {
         const shapes = shapeList.split(" and ");
-        const icons = shapes.map(s => createShapeIcon(s.trim())).join(",");
+
+        // Create a combined SVG with all shapes side by side
+        const iconSize = 40;
+        const spacing = 5;
+        const totalWidth = shapes.length * iconSize + (shapes.length - 1) * spacing;
+
+        let combinedSVG = `<svg xmlns='http://www.w3.org/2000/svg' width='${totalWidth}' height='${iconSize}' viewBox='0 0 ${totalWidth} ${iconSize}'>`;
+
+        shapes.forEach((shape, index) => {
+            const xOffset = index * (iconSize + spacing);
+            const shapeName = shape.trim().toLowerCase();
+            let shapeContent = '';
+
+            const half = iconSize / 2;
+            switch (shapeName) {
+                case "circle":
+                    shapeContent = `<circle cx="${xOffset + half}" cy="${half}" r="${half - 2}" fill="#3b82f6" stroke="#1e40af" stroke-width="2"/>`;
+                    break;
+                case "square":
+                    shapeContent = `<rect x="${xOffset + 2}" y="2" width="${iconSize - 4}" height="${iconSize - 4}" fill="#ef4444" stroke="#991b1b" stroke-width="2"/>`;
+                    break;
+                case "rectangle":
+                    shapeContent = `<rect x="${xOffset + 2}" y="${iconSize * 0.25}" width="${iconSize - 4}" height="${iconSize * 0.5}" fill="#10b981" stroke="#065f46" stroke-width="2"/>`;
+                    break;
+                case "triangle":
+                    shapeContent = `<polygon points="${xOffset + half},2 ${xOffset + iconSize - 2},${iconSize - 2} ${xOffset + 2},${iconSize - 2}" fill="#f59e0b" stroke="#92400e" stroke-width="2"/>`;
+                    break;
+            }
+            combinedSVG += shapeContent;
+        });
+
+        combinedSVG += '</svg>';
+
         return {
             value: shapeList,
             label: shapeList,
-            // Store icons as comma-separated data URIs (can be parsed in UI if needed)
-            metadata: { icons: icons }
+            image: `data:image/svg+xml;base64,${btoa(combinedSVG)}`
         };
     };
 
@@ -935,3 +966,439 @@ export const generateShapeComposition = () => {
     };
 };
 
+// --- 3D Shape Matching Questions ---
+
+// Helper functions to create SVG representations of 3D shapes
+const createCylinderSVG = () => {
+    return `<svg xmlns='http://www.w3.org/2000/svg' width='150' height='200' viewBox='0 0 150 200'>
+        <ellipse cx='75' cy='40' rx='50' ry='15' fill='#FFD700' stroke='#000' stroke-width='2'/>
+        <rect x='25' y='40' width='100' height='120' fill='#FFD700' stroke='none'/>
+        <line x1='25' y1='40' x2='25' y2='160' stroke='#000' stroke-width='2'/>
+        <line x1='125' y1='40' x2='125' y2='160' stroke='#000' stroke-width='2'/>
+        <ellipse cx='75' cy='160' rx='50' ry='15' fill='#FFA500' stroke='#000' stroke-width='2'/>
+        <text x='75' y='190' text-anchor='middle' font-size='18' font-weight='bold' fill='#000'>Cylinder</text>
+    </svg>`;
+};
+
+const createSphereSVG = () => {
+    return `<svg xmlns='http://www.w3.org/2000/svg' width='150' height='200' viewBox='0 0 150 200'>
+        <circle cx='75' cy='90' r='60' fill='#FF6B6B' stroke='#000' stroke-width='2'/>
+        <ellipse cx='75' cy='90' rx='60' ry='30' fill='none' stroke='#8B0000' stroke-width='1.5' opacity='0.3'/>
+        <ellipse cx='75' cy='90' rx='30' ry='60' fill='none' stroke='#8B0000' stroke-width='1.5' opacity='0.3'/>
+        <text x='75' y='180' text-anchor='middle' font-size='18' font-weight='bold' fill='#000'>Sphere</text>
+    </svg>`;
+};
+
+const createCubeSVG = () => {
+    return `<svg xmlns='http://www.w3.org/2000/svg' width='150' height='200' viewBox='0 0 150 200'>
+        <path d='M 75 30 L 125 60 L 125 120 L 75 150 L 25 120 L 25 60 Z' fill='#4ECDC4' stroke='#000' stroke-width='2'/>
+        <path d='M 75 30 L 75 90 L 25 120 L 25 60 Z' fill='#3BA99C' stroke='#000' stroke-width='2'/>
+        <path d='M 75 30 L 125 60 L 125 120 L 75 90 Z' fill='#5FD9CF' stroke='#000' stroke-width='2'/>
+        <path d='M 75 90 L 125 120 L 75 150 L 25 120 Z' fill='#2D8B80' stroke='#000' stroke-width='2'/>
+        <text x='75' y='180' text-anchor='middle' font-size='18' font-weight='bold' fill='#000'>Cube</text>
+    </svg>`;
+};
+
+const createCuboidSVG = () => {
+    return `<svg xmlns='http://www.w3.org/2000/svg' width='150' height='200' viewBox='0 0 150 200'>
+        <path d='M 40 50 L 110 50 L 130 70 L 130 130 L 60 130 L 40 110 Z' fill='#FFE66D' stroke='#000' stroke-width='2'/>
+        <path d='M 40 50 L 40 110 L 60 130 L 60 70 Z' fill='#E6C84F' stroke='#000' stroke-width='2'/>
+        <path d='M 110 50 L 130 70 L 130 130 L 110 110 Z' fill='#FFF099' stroke='#000' stroke-width='2'/>
+        <path d='M 60 70 L 110 70 L 110 110 L 60 110 Z' fill='#FFE66D' stroke='#000' stroke-width='2'/>
+        <text x='75' y='165' text-anchor='middle' font-size='18' font-weight='bold' fill='#000'>Cuboid</text>
+    </svg>`;
+};
+
+const createConeSVG = () => {
+    return `<svg xmlns='http://www.w3.org/2000/svg' width='150' height='200' viewBox='0 0 150 200'>
+        <path d='M 75 20 L 25 140 L 125 140 Z' fill='#C77DFF' stroke='#000' stroke-width='2'/>
+        <ellipse cx='75' cy='140' rx='50' ry='15' fill='#9D4EDD' stroke='#000' stroke-width='2'/>
+        <line x1='75' y1='20' x2='75' y2='140' stroke='#7B2CBF' stroke-width='1.5' stroke-dasharray='5,3' opacity='0.5'/>
+        <text x='75' y='180' text-anchor='middle' font-size='18' font-weight='bold' fill='#000'>Cone</text>
+    </svg>`;
+};
+
+// Question 1: Cylinder Matching
+export const generateCylinderMatching = () => {
+    const correctObjects = ['Bottle', 'Chalk', 'Glue Stick', 'Pencils'];
+    const wrongObjects = [
+        'Globe', 'Ball', 'Marble',  // Sphere
+        'Dice', 'Rubik\'s Cube', 'Chalk Box',  // Cube
+        'First-Aid box', 'Book', 'Whiteboards',  // Cuboid
+        'Megaphone', 'Birthday cap', 'Funnel'  // Cone
+    ];
+
+    const correctAnswer = correctObjects[getRandomInt(0, correctObjects.length - 1)];
+    const shuffledWrong = shuffleArray([...wrongObjects]);
+    const wrongAnswers = shuffledWrong.slice(0, 3);
+
+    const options = shuffleArray([correctAnswer, ...wrongAnswers]);
+    const shapeImage = `data:image/svg+xml;base64,${btoa(createCylinderSVG())}`;
+
+    return {
+        type: "mcq",
+        question: "Which object is shaped like a Cylinder?",
+        image: shapeImage,
+        topic: "Geometry / 3D Shapes",
+        options: options,
+        answer: correctAnswer
+    };
+};
+
+// Question 2: Sphere Matching
+export const generateSphereMatching = () => {
+    const correctObjects = ['Globe', 'Ball', 'Marble', 'Paperweight'];
+    const wrongObjects = [
+        'Bottle', 'Chalk', 'Glue Stick',  // Cylinder
+        'Dice', 'Rubik\'s Cube', 'Dustbin',  // Cube
+        'First-Aid box', 'Book', 'Desks',  // Cuboid
+        'Megaphone', 'Birthday cap', 'Funnel'  // Cone
+    ];
+
+    const correctAnswer = correctObjects[getRandomInt(0, correctObjects.length - 1)];
+    const shuffledWrong = shuffleArray([...wrongObjects]);
+    const wrongAnswers = shuffledWrong.slice(0, 3);
+
+    const options = shuffleArray([correctAnswer, ...wrongAnswers]);
+    const shapeImage = `data:image/svg+xml;base64,${btoa(createSphereSVG())}`;
+
+    return {
+        type: "mcq",
+        question: "Which object is shaped like a Sphere?",
+        image: shapeImage,
+        topic: "Geometry / 3D Shapes",
+        options: options,
+        answer: correctAnswer
+    };
+};
+
+// Question 3: Cube Matching
+export const generateCubeMatching = () => {
+    const correctObjects = ['Dice', 'Rubik\'s Cube', 'Chalk Box', 'Dustbin'];
+    const wrongObjects = [
+        'Bottle', 'Chalk', 'Pencils',  // Cylinder
+        'Globe', 'Ball', 'Marble',  // Sphere
+        'First-Aid box', 'Book', 'Whiteboards',  // Cuboid
+        'Megaphone', 'Birthday cap', 'Funnel'  // Cone
+    ];
+
+    const correctAnswer = correctObjects[getRandomInt(0, correctObjects.length - 1)];
+    const shuffledWrong = shuffleArray([...wrongObjects]);
+    const wrongAnswers = shuffledWrong.slice(0, 3);
+
+    const options = shuffleArray([correctAnswer, ...wrongAnswers]);
+    const shapeImage = `data:image/svg+xml;base64,${btoa(createCubeSVG())}`;
+
+    return {
+        type: "mcq",
+        question: "Which object is shaped like a Cube?",
+        image: shapeImage,
+        topic: "Geometry / 3D Shapes",
+        options: options,
+        answer: correctAnswer
+    };
+};
+
+// Question 4: Cuboid Matching
+export const generateCuboidMatching = () => {
+    const correctObjects = ['First-Aid box', 'Book', 'Whiteboards', 'Desks'];
+    const wrongObjects = [
+        'Bottle', 'Chalk', 'Glue Stick',  // Cylinder
+        'Globe', 'Ball', 'Paperweight',  // Sphere
+        'Dice', 'Rubik\'s Cube', 'Chalk Box',  // Cube
+        'Megaphone', 'Birthday cap', 'Funnel'  // Cone
+    ];
+
+    const correctAnswer = correctObjects[getRandomInt(0, correctObjects.length - 1)];
+    const shuffledWrong = shuffleArray([...wrongObjects]);
+    const wrongAnswers = shuffledWrong.slice(0, 3);
+
+    const options = shuffleArray([correctAnswer, ...wrongAnswers]);
+    const shapeImage = `data:image/svg+xml;base64,${btoa(createCuboidSVG())}`;
+
+    return {
+        type: "mcq",
+        question: "Which object is shaped like a Cuboid?",
+        image: shapeImage,
+        topic: "Geometry / 3D Shapes",
+        options: options,
+        answer: correctAnswer
+    };
+};
+
+// Question 5: Cone Matching
+export const generateConeMatching = () => {
+    const correctObjects = ['Megaphone', 'Birthday cap', 'Funnel'];
+    const wrongObjects = [
+        'Bottle', 'Chalk', 'Pencils',  // Cylinder
+        'Globe', 'Ball', 'Marble',  // Sphere
+        'Dice', 'Rubik\'s Cube', 'Dustbin',  // Cube
+        'First-Aid box', 'Book', 'Whiteboards'  // Cuboid
+    ];
+
+    const correctAnswer = correctObjects[getRandomInt(0, correctObjects.length - 1)];
+    const shuffledWrong = shuffleArray([...wrongObjects]);
+    const wrongAnswers = shuffledWrong.slice(0, 3);
+
+    const options = shuffleArray([correctAnswer, ...wrongAnswers]);
+    const shapeImage = `data:image/svg+xml;base64,${btoa(createConeSVG())}`;
+
+    return {
+        type: "mcq",
+        question: "Which object is shaped like a Cone?",
+        image: shapeImage,
+        topic: "Geometry / 3D Shapes",
+        options: options,
+        answer: correctAnswer
+    };
+};
+
+
+// Helper function to create simple SVG icons for objects
+const createObjectIcon = (objectName) => {
+    const size = 80;
+    let svgContent = '';
+
+    switch (objectName) {
+        case 'Bottle':
+            svgContent = `
+                <rect x="30" y="15" width="20" height="10" fill="#4299e1" stroke="#2b6cb0" stroke-width="2" rx="2"/>
+                <rect x="25" y="25" width="30" height="45" fill="#63b3ed" stroke="#2b6cb0" stroke-width="2" rx="3"/>
+                <ellipse cx="40" cy="35" rx="8" ry="12" fill="#bee3f8" opacity="0.5"/>
+            `;
+            break;
+        case 'Chalk':
+            svgContent = `
+                <rect x="20" y="15" width="40" height="50" fill="#f7fafc" stroke="#cbd5e0" stroke-width="2" rx="20"/>
+                <line x1="25" y1="25" x2="55" y2="25" stroke="#e2e8f0" stroke-width="2"/>
+                <line x1="25" y1="55" x2="55" y2="55" stroke="#e2e8f0" stroke-width="2"/>
+            `;
+            break;
+        case 'Glue Stick':
+            svgContent = `
+                <rect x="25" y="10" width="30" height="15" fill="#9f7aea" stroke="#6b46c1" stroke-width="2" rx="3"/>
+                <rect x="28" y="25" width="24" height="45" fill="#d6bcfa" stroke="#6b46c1" stroke-width="2" rx="12"/>
+            `;
+            break;
+        case 'Pencils':
+            svgContent = `
+                <polygon points="40,10 45,20 35,20" fill="#f6ad55" stroke="#c05621" stroke-width="1.5"/>
+                <rect x="35" y="20" width="10" height="45" fill="#fbd38d" stroke="#c05621" stroke-width="2"/>
+                <rect x="35" y="60" width="10" height="8" fill="#fc8181" stroke="#c05621" stroke-width="1.5"/>
+            `;
+            break;
+        case 'Globe':
+            svgContent = `
+                <circle cx="40" cy="40" r="25" fill="#4299e1" stroke="#2b6cb0" stroke-width="2"/>
+                <ellipse cx="40" cy="40" rx="25" ry="12" fill="none" stroke="#2c5282" stroke-width="1.5"/>
+                <ellipse cx="40" cy="40" rx="12" ry="25" fill="none" stroke="#2c5282" stroke-width="1.5"/>
+                <line x1="40" y1="15" x2="40" y2="65" stroke="#2c5282" stroke-width="1.5"/>
+            `;
+            break;
+        case 'Ball':
+            svgContent = `
+                <circle cx="40" cy="40" r="25" fill="#fc8181" stroke="#c53030" stroke-width="2"/>
+                <path d="M 20 30 Q 40 25 60 30" fill="none" stroke="#e53e3e" stroke-width="2"/>
+                <path d="M 20 50 Q 40 55 60 50" fill="none" stroke="#e53e3e" stroke-width="2"/>
+                <circle cx="40" cy="40" r="18" fill="none" stroke="#e53e3e" stroke-width="2"/>
+            `;
+            break;
+        case 'Marble':
+            svgContent = `
+                <circle cx="40" cy="40" r="20" fill="#9f7aea" stroke="#6b46c1" stroke-width="2"/>
+                <circle cx="35" cy="35" r="8" fill="#d6bcfa" opacity="0.7"/>
+                <circle cx="32" cy="32" r="4" fill="#faf5ff"/>
+            `;
+            break;
+        case 'Paperweight':
+            svgContent = `
+                <ellipse cx="40" cy="55" rx="22" ry="8" fill="#cbd5e0" stroke="#4a5568" stroke-width="2"/>
+                <path d="M 18 55 L 30 25 L 50 25 L 62 55" fill="#e2e8f0" stroke="#4a5568" stroke-width="2"/>
+                <circle cx="40" cy="30" r="6" fill="#4299e1"/>
+            `;
+            break;
+        case 'Dice':
+            svgContent = `
+                <rect x="20" y="20" width="40" height="40" fill="#f7fafc" stroke="#2d3748" stroke-width="2" rx="4"/>
+                <circle cx="30" cy="30" r="3" fill="#2d3748"/>
+                <circle cx="50" cy="30" r="3" fill="#2d3748"/>
+                <circle cx="30" cy="50" r="3" fill="#2d3748"/>
+                <circle cx="50" cy="50" r="3" fill="#2d3748"/>
+                <circle cx="40" cy="40" r="3" fill="#2d3748"/>
+            `;
+            break;
+        case "Rubik's Cube":
+            svgContent = `
+                <rect x="15" y="25" width="15" height="15" fill="#fc8181" stroke="#2d3748" stroke-width="1.5"/>
+                <rect x="30" y="25" width="15" height="15" fill="#4299e1" stroke="#2d3748" stroke-width="1.5"/>
+                <rect x="45" y="25" width="15" height="15" fill="#48bb78" stroke="#2d3748" stroke-width="1.5"/>
+                <rect x="15" y="40" width="15" height="15" fill="#fbd38d" stroke="#2d3748" stroke-width="1.5"/>
+                <rect x="30" y="40" width="15" height="15" fill="#f7fafc" stroke="#2d3748" stroke-width="1.5"/>
+                <rect x="45" y="40" width="15" height="15" fill="#9f7aea" stroke="#2d3748" stroke-width="1.5"/>
+            `;
+            break;
+        case 'Chalk Box':
+            svgContent = `
+                <rect x="15" y="25" width="50" height="35" fill="#fbd38d" stroke="#c05621" stroke-width="2" rx="3"/>
+                <rect x="20" y="30" width="8" height="25" fill="#f7fafc" stroke="#cbd5e0" stroke-width="1.5" rx="4"/>
+                <rect x="32" y="30" width="8" height="25" fill="#fc8181" stroke="#c53030" stroke-width="1.5" rx="4"/>
+                <rect x="44" y="30" width="8" height="25" fill="#4299e1" stroke="#2b6cb0" stroke-width="1.5" rx="4"/>
+            `;
+            break;
+        case 'Dustbin':
+            svgContent = `
+                <rect x="22" y="20" width="36" height="5" fill="#4a5568" stroke="#2d3748" stroke-width="2" rx="2"/>
+                <path d="M 25 25 L 28 60 L 52 60 L 55 25" fill="#718096" stroke="#2d3748" stroke-width="2"/>
+                <line x1="35" y1="30" x2="37" y2="55" stroke="#4a5568" stroke-width="2"/>
+                <line x1="45" y1="30" x2="43" y2="55" stroke="#4a5568" stroke-width="2"/>
+            `;
+            break;
+        case 'First-Aid box':
+            svgContent = `
+                <rect x="15" y="25" width="50" height="35" fill="#f7fafc" stroke="#e53e3e" stroke-width="3" rx="4"/>
+                <rect x="37" y="30" width="6" height="25" fill="#fc8181" stroke="#c53030" stroke-width="2"/>
+                <rect x="27" y="40" width="26" height="6" fill="#fc8181" stroke="#c53030" stroke-width="2"/>
+            `;
+            break;
+        case 'Book':
+            svgContent = `
+                <rect x="20" y="20" width="40" height="50" fill="#4299e1" stroke="#2b6cb0" stroke-width="2" rx="2"/>
+                <rect x="22" y="22" width="36" height="46" fill="#63b3ed" stroke="#2b6cb0" stroke-width="1"/>
+                <line x1="25" y1="20" x2="25" y2="70" stroke="#2c5282" stroke-width="2"/>
+            `;
+            break;
+        case 'Whiteboards':
+            svgContent = `
+                <rect x="10" y="15" width="60" height="50" fill="#f7fafc" stroke="#2d3748" stroke-width="3" rx="3"/>
+                <line x1="15" y1="25" x2="45" y2="25" stroke="#4299e1" stroke-width="2"/>
+                <line x1="15" y1="35" x2="55" y2="35" stroke="#48bb78" stroke-width="2"/>
+                <circle cx="60" cy="55" r="4" fill="#fc8181"/>
+            `;
+            break;
+        case 'Desks':
+            svgContent = `
+                <rect x="15" y="20" width="50" height="8" fill="#9c4221" stroke="#7c2d12" stroke-width="2"/>
+                <rect x="18" y="28" width="6" height="35" fill="#9c4221" stroke="#7c2d12" stroke-width="2"/>
+                <rect x="56" y="28" width="6" height="35" fill="#9c4221" stroke="#7c2d12" stroke-width="2"/>
+            `;
+            break;
+        case 'Megaphone':
+            svgContent = `
+                <path d="M 20 40 L 35 30 L 35 50 Z" fill="#fbd38d" stroke="#c05621" stroke-width="2"/>
+                <path d="M 35 30 L 60 20 L 60 60 L 35 50 Z" fill="#f6ad55" stroke="#c05621" stroke-width="2"/>
+                <rect x="30" y="45" width="15" height="8" fill="#fc8181" stroke="#c05621" stroke-width="2" rx="2"/>
+            `;
+            break;
+        case 'Birthday cap':
+            svgContent = `
+                <path d="M 40 10 L 20 55 L 60 55 Z" fill="#9f7aea" stroke="#6b46c1" stroke-width="2"/>
+                <ellipse cx="40" cy="55" rx="20" ry="6" fill="#d6bcfa" stroke="#6b46c1" stroke-width="2"/>
+                <circle cx="40" cy="10" r="5" fill="#fbd38d"/>
+                <line x1="25" y1="45" x2="55" y2="45" stroke="#d6bcfa" stroke-width="2"/>
+            `;
+            break;
+        case 'Funnel':
+            svgContent = `
+                <path d="M 20 15 L 60 15 L 45 45 L 35 45 Z" fill="#e2e8f0" stroke="#4a5568" stroke-width="2"/>
+                <rect x="35" y="45" width="10" height="20" fill="#cbd5e0" stroke="#4a5568" stroke-width="2"/>
+                <ellipse cx="40" cy="15" rx="20" ry="5" fill="#f7fafc" stroke="#4a5568" stroke-width="2"/>
+            `;
+            break;
+        default:
+            svgContent = `<circle cx="40" cy="40" r="25" fill="#cbd5e0" stroke="#4a5568" stroke-width="2"/>`;
+    }
+
+    return `data:image/svg+xml;base64,${btoa(`<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}' viewBox='0 0 ${size} ${size}'>${svgContent}</svg>`)}`;
+};
+
+// Single Dynamic 3D Shape Matching Question (Randomly picks from all 5 shapes)
+export const generate3DShapeMatching = () => {
+    // Define all shapes with their properties
+    const shapes = {
+        'Cylinder': {
+            name: 'Cylinder',
+            objects: ['Bottle', 'Chalk', 'Glue Stick', 'Pencils'],
+            svg: createCylinderSVG()
+        },
+        'Sphere': {
+            name: 'Sphere',
+            objects: ['Globe', 'Ball', 'Marble', 'Paperweight'],
+            svg: createSphereSVG()
+        },
+        'Cube': {
+            name: 'Cube',
+            objects: ['Dice', 'Rubik\'s Cube', 'Chalk Box', 'Dustbin'],
+            svg: createCubeSVG()
+        },
+        'Cuboid': {
+            name: 'Cuboid',
+            objects: ['First-Aid box', 'Book', 'Whiteboards', 'Desks'],
+            svg: createCuboidSVG()
+        },
+        'Cone': {
+            name: 'Cone',
+            objects: ['Megaphone', 'Birthday cap', 'Funnel'],
+            svg: createConeSVG()
+        }
+    };
+
+    // Randomly select one shape
+    const shapeNames = Object.keys(shapes);
+    const selectedShapeName = shapeNames[getRandomInt(0, shapeNames.length - 1)];
+    const selectedShape = shapes[selectedShapeName];
+
+    // Get correct answer (one of the objects for this shape)
+    const correctAnswer = selectedShape.objects[getRandomInt(0, selectedShape.objects.length - 1)];
+
+    // Generate wrong answers from other shapes
+    const wrongObjects = [];
+    for (const shapeName of shapeNames) {
+        if (shapeName !== selectedShapeName) {
+            // Add all objects from other shapes
+            wrongObjects.push(...shapes[shapeName].objects);
+        }
+    }
+
+    // Shuffle and pick 3 wrong answers
+    const shuffledWrong = shuffleArray(wrongObjects);
+    const wrongAnswers = shuffledWrong.slice(0, 3);
+
+    // Create options with proper format AND visual icons for Grade 3 students
+    const allOptions = [
+        {
+            value: correctAnswer,
+            label: correctAnswer,
+            image: createObjectIcon(correctAnswer)
+        },
+        {
+            value: wrongAnswers[0],
+            label: wrongAnswers[0],
+            image: createObjectIcon(wrongAnswers[0])
+        },
+        {
+            value: wrongAnswers[1],
+            label: wrongAnswers[1],
+            image: createObjectIcon(wrongAnswers[1])
+        },
+        {
+            value: wrongAnswers[2],
+            label: wrongAnswers[2],
+            image: createObjectIcon(wrongAnswers[2])
+        }
+    ];
+
+    // Shuffle options
+    const options = shuffleArray(allOptions);
+
+    // Create SVG image
+    const shapeImage = `data:image/svg+xml;base64,${btoa(selectedShape.svg)}`;
+
+    return {
+        type: "mcq",
+        question: `Which object is shaped like a ${selectedShape.name}?`,
+        image: shapeImage,
+        topic: "Geometry / 3D Shapes",
+        options: options,
+        answer: correctAnswer
+    };
+};
