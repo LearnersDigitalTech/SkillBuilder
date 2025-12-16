@@ -351,7 +351,7 @@ const HomeContent = () => {
                 </a>
 
                 <a href="https://learnersdigital.com/" target="blank" className={Styles.placeContainer} >
-                    <img className={Styles.placeImage} src="/places/nesaratechpark.jpg" alt="Learners Global School and PU College" />
+                    <img className={Styles.placeImage} src="/places/GCC.png" alt="Learners Global School and PU College" />
                     <h2 className={Styles.placeTitle}>Learners Digital</h2>
                     <p className={Styles.placeDescription}>Connecting talent with global opportunities and fostering corporate partnerships for mutual growth.</p>
                     <p className={Styles.placeVisitNow}>Visit Now!</p>

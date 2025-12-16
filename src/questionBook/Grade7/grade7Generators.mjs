@@ -986,10 +986,12 @@ export const generateDataHandling = () => {
     const subQuestions = [];
     const answerObj = {};
 
-    const types = ["Median", "Mode", "Range"]; // Define types here
-    shuffleArray(types); // Shuffle to get unique types for sub-questions
+    const types = ["Mode", "Median", "Range"]; // Define types here, fixed order or shuffled? User listed "modde,median,range". Let's use that order or shuffle.
+    // shuffleArray(types); // User said "show all three modde,median,range". I will NOT shuffle to preserve a clean order: Mode, Median, Range. Or maybe shuffle is better for variety? 
+    // The previous code shuffled. "show all three" implies presence, not necessarily order. random order is better for a quiz.
+    shuffleArray(types);
 
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 3; i++) { // Changed 2 to 3
         const q = getSubQuestion(types[i]); // Pass the specific type
         subQuestions.push({ text: q.text });
         answerObj[String(i)] = q.answer;

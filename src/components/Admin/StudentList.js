@@ -147,16 +147,19 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
     };
 
     const handleViewFullReport = () => {
-        if (!selectedStudent?.marks && !selectedStudent?.rapidMath) {
+        // Use displayedReport if available (this contains the currently selected history item or the default latest report)
+        const reportData = displayedReport || selectedStudent;
+
+        if (!reportData?.marks && !reportData?.rapidMath) {
             alert('No quiz report available for this student');
             return;
         }
 
         // Navigate to quiz result page with admin view flag
         // The quiz result page will load the report based on the user's phone number and specific report ID
-        const phoneNumber = selectedStudent.phoneNumber || selectedStudent.id;
-        const reportIdParam = selectedStudent.reportId ? `&reportId=${selectedStudent.reportId}` : '';
-        const parentKeyParam = selectedStudent.reportParentKey ? `&parentKey=${selectedStudent.reportParentKey}` : '';
+        const phoneNumber = selectedStudent.phoneNumber || selectedStudent.id; // Phone number always from the student profile
+        const reportIdParam = reportData.reportId ? `&reportId=${reportData.reportId}` : '';
+        const parentKeyParam = (reportData.reportParentKey || selectedStudent.reportParentKey) ? `&parentKey=${reportData.reportParentKey || selectedStudent.reportParentKey}` : '';
         router.push(`/quiz/quiz-result?phone=${encodeURIComponent(phoneNumber)}&adminView=true${reportIdParam}${parentKeyParam}`);
     };
 
@@ -197,6 +200,9 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
     const handleDownload = async () => {
         if (!selectedStudent) return;
 
+        // Use displayedReport for the report-specific data (marks, date, etc.)
+        const reportData = displayedReport || selectedStudent;
+
         // Helper to load logo
         const loadLogo = () => new Promise(resolve => {
             const img = new Image();
@@ -217,8 +223,8 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
 
         // Determine which data to show
         const isRapid = viewMode === 'rapid';
-        const marks = isRapid ? (selectedStudent.rapidMath?.marks) : selectedStudent.marks;
-        const date = isRapid ? (selectedStudent.rapidMath?.date) : selectedStudent.date;
+        const marks = isRapid ? (reportData.rapidMath?.marks) : reportData.marks;
+        const date = isRapid ? (reportData.rapidMath?.date) : reportData.date;
 
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();
@@ -348,8 +354,9 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
             : "Final Score: Not Submitted";
         doc.text(marksText, 20, yPos);
 
+
         // Show Session Summary if available
-        const summary = isRapid ? selectedStudent.rapidMath?.report?.summary : selectedStudent.summary;
+        const summary = isRapid ? reportData.rapidMath?.report?.summary : reportData.summary;
         if (summary) {
             yPos += 10;
             doc.setFontSize(12);
@@ -374,8 +381,9 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
             });
         }
 
+
         // Show Detailed Question Analysis
-        const questions = isRapid ? selectedStudent.rapidMath?.report?.perQuestionReport : selectedStudent.perQuestionReport;
+        const questions = isRapid ? reportData.rapidMath?.report?.perQuestionReport : reportData.perQuestionReport;
         if (questions && questions.length > 0) {
             yPos += 20;
 
