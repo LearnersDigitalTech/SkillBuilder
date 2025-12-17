@@ -246,7 +246,8 @@ export const generateAdditionThenSubtraction = () => {
 export const generateSubtractionThenAddition = () => {
     // Random numbers for subtraction and addition
     const num1 = getRandomInt(5, 15);
-    const num2 = getRandomInt(2, 10);
+    // Ensure num2 is not greater than num1 to avoid negative result
+    const num2 = getRandomInt(2, num1);
     const num3 = getRandomInt(1, 5);
 
     const answer = num1 - num2 + num3;
