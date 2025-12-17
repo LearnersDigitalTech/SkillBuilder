@@ -85,14 +85,7 @@ const SATMCQ = ({ onNext, question, topic, options, image, activeQuestionIndex, 
                         size="large"
                         endIcon={<ArrowRight />}
                         className={Styles.nextButton}
-                        disabled={selectedOption === null} // Optional based on if skip is allowed via a separate button? Or allow next without selection (skip)?
-                    // User said "complete the test", usually allows skipping. But let's keep disabled to force answer OR just allow it.
-                    // Let's allow skipping by just clicking Next? 
-                    // Actually, standard UI is Next enabled always if skip allowed.
-                    // But let's stick to "Must answer" or "Skip" button. 
-                    // For simplicity, let's enable Next always? 
-                    // Let's keep it enabled.
-                    // Wait, if I enable it without selection, selectedOption is null.
+                        disabled={false}
                     >
                         {selectedOption ? "Next Question" : "Skip Question"}
                     </Button>

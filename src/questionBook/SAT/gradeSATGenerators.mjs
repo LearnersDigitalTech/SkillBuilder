@@ -75,55 +75,54 @@ export const generateQ3 = () => {
     const questionText = `The graph of the function $f$, where $y = f(x)$, models the total cost $y$, in dollars, for a certain video game system and $x$ games. What is the best interpretation of the slope of the graph in this context?`;
 
     // SVG graph generation
-    // x range 0-10, y range 0-500 approx depending on vals.
-    // Let's standardise viewbox 300x300.
+    // ViewBox: 0 0 400 350 (widened slightly for Y labels)
     // Calculate nice scale for Y axis
     const maxDataValue = initialCost + (costPerGame * 10);
-    // Find a nice step size roughly div by 10
-    // Try to find step such that 10 * step >= maxDataValue
-    let stepY = Math.ceil(maxDataValue / 10);
-    // Round stepY to nice number (10, 20, 25, 50, 100)
-    if (stepY <= 10) stepY = 10;
-    else if (stepY <= 20) stepY = 20;
-    else if (stepY <= 50) stepY = 50;
-    else {
-        // Round to nearest 50 or 100
-        stepY = Math.ceil(stepY / 50) * 50;
-    }
 
-    // Set maxY to exactly 10 steps
-    const maxY = stepY * 10;
+    // Prefer intervals of 20, 40, etc. as requested
+    let stepY = 20;
+    // If range is large, increase step size to avoid too many ticks (max ~20 ticks for readability)
+    if (maxDataValue > 400) stepY = 50;
+    if (maxDataValue > 1250) stepY = 100;
+
+    const numYSteps = Math.ceil(maxDataValue / stepY);
+    const maxY = numYSteps * stepY;
 
     // SVG Graph
-    // ViewBox: 0 0 400 350 (widened slightly for Y labels)
+    // ViewBox: 0 0 400 350
     // Origin (0,0) at SVG (60, 300)
-    // X axis length: 300 (steps of 30)
-    // Y axis length: 300 (steps of 30)
+    // X axis length: 300 (steps of 30 for 10 units)
+    // Y axis length: 300
     const startX = 60;
     const startY = 300;
-    const stepPx = 30;
+    const graphH = 300;
+    const graphW = 300;
+
+    // Generate Y grid lines separately
+    const yGrid = Array.from({ length: numYSteps + 1 }).map((_, i) => {
+        const y = startY - (i * (graphH / numYSteps));
+        const horizLine = `<line x1="${startX}" y1="${y}" x2="${startX + graphW}" y2="${y}" stroke="#f0f0f0" stroke-width="1" />`;
+        const yLabel = `<text x="${startX - 10}" y="${y + 5}" font-size="12" text-anchor="end" fill="#666">${i * stepY}</text>`;
+        return horizLine + yLabel;
+    }).join('');
+
+    // Generate X grid lines separately (0 to 10)
+    const xGrid = Array.from({ length: 11 }).map((_, i) => {
+        const x = startX + (i * (graphW / 10));
+        const vertLine = `<line x1="${x}" y1="${startY}" x2="${x}" y2="${startY - graphH}" stroke="#f0f0f0" stroke-width="1" />`;
+        const xLabel = `<text x="${x}" y="${startY + 20}" font-size="12" text-anchor="middle" fill="#666">${i}</text>`;
+        return vertLine + xLabel;
+    }).join('');
 
     const svg = `
     <svg width="100%" height="300" viewBox="0 0 400 350" style="background:#fff; border:1px solid #ccc; margin: 10px 0; font-family: sans-serif;">
        <!-- Grid & Labels -->
-       ${Array.from({ length: 11 }).map((_, i) => {
-        const y = startY - (i * stepPx);
-        const x = startX + (i * stepPx);
-
-        // Horizontal grid line (for Y value) + Y Label
-        const horizLine = `<line x1="${startX}" y1="${y}" x2="${startX + 300}" y2="${y}" stroke="#f0f0f0" stroke-width="1" />`;
-        const yLabel = `<text x="${startX - 10}" y="${y + 5}" font-size="12" text-anchor="end" fill="#666">${i * stepY}</text>`;
-
-        // Vertical grid line (for X value) + X Label
-        const vertLine = `<line x1="${x}" y1="${startY}" x2="${x}" y2="${startY - 300}" stroke="#f0f0f0" stroke-width="1" />`;
-        const xLabel = `<text x="${x}" y="${startY + 20}" font-size="12" text-anchor="middle" fill="#666">${i}</text>`;
-
-        return horizLine + vertLine + yLabel + xLabel;
-    }).join('')}
+       ${yGrid}
+       ${xGrid}
        
        <!-- Axes -->
-       <line x1="${startX}" y1="${startY}" x2="${startX + 300}" y2="${startY}" stroke="black" stroke-width="2"/>
-       <line x1="${startX}" y1="${startY}" x2="${startX}" y2="${startY - 300}" stroke="black" stroke-width="2"/>
+       <line x1="${startX}" y1="${startY}" x2="${startX + graphW}" y2="${startY}" stroke="black" stroke-width="2"/>
+       <line x1="${startX}" y1="${startY}" x2="${startX}" y2="${startY - graphH}" stroke="black" stroke-width="2"/>
        
        <!-- Axis Titles -->
        <text x="${startX - 40}" y="20" font-size="14" font-weight="bold" fill="black">y</text>
@@ -133,15 +132,12 @@ export const generateQ3 = () => {
        <!-- 
           Point 1: x=0, y=initialCost
           Point 2: x=10, y=initialCost + 10*costPerGame
-          
-          SVG Y = startY - (value / maxY) * 300
-          SVG X = startX + (value / 10) * 300   (since max X is 10 and width is 300)
        -->
        <line 
          x1="${startX}" 
-         y1="${startY - (initialCost / maxY * 300)}" 
-         x2="${startX + 300}" 
-         y2="${startY - ((initialCost + costPerGame * 10) / maxY * 300)}" 
+         y1="${startY - (initialCost / maxY * graphH)}" 
+         x2="${startX + graphW}" 
+         y2="${startY - ((initialCost + costPerGame * 10) / maxY * graphH)}" 
          stroke="#2563eb" 
          stroke-width="3" 
        />
