@@ -195,7 +195,7 @@ const HomeContent = () => {
                             endIcon={<ArrowRight />}
                             onClick={handleStartAssessment}
                             sx={{
-                                backgroundColor: '#3c91f3',
+                                background: 'linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%)', // Refined Blue Gradient
                                 color: 'white',
                                 padding: '12px 32px',
                                 fontSize: '1.1rem',
@@ -203,7 +203,8 @@ const HomeContent = () => {
                                 borderRadius: '8px',
                                 fontWeight: 600,
                                 '&:hover': {
-                                    backgroundColor: '#1a73e8'
+                                    background: 'linear-gradient(135deg, #1d4ed8 0%, #0369a1 100%)', // Darker Blue Gradient
+                                    boxShadow: '0 10px 15px -3px rgba(37, 99, 235, 0.3)'
                                 }
                             }}
                         >
@@ -372,7 +373,7 @@ const HomeContent = () => {
                 content={
                     <div className={Styles.modalRegistrationContent}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', padding: '20px' }}>
-                            <Award size={64} color="#3c91f3" />
+                            <Award size={64} color="#0ea5e9" />
                             <h2 style={{ textAlign: 'center', margin: 0 }}>Assessment Completed!</h2>
                             <p style={{ textAlign: 'center', color: '#666', margin: 0 }}>
                                 You have already taken the National Math Skills Proficiency Test.
@@ -381,9 +382,12 @@ const HomeContent = () => {
                                 variant="contained"
                                 onClick={() => router.push("/dashboard")}
                                 sx={{
-                                    backgroundColor: '#3c91f3',
+                                    background: 'linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%)',
                                     textTransform: 'none',
-                                    marginTop: '16px'
+                                    marginTop: '16px',
+                                    '&:hover': {
+                                        background: 'linear-gradient(135deg, #1d4ed8 0%, #0369a1 100%)'
+                                    }
                                 }}
                             >
                                 View Your Report
