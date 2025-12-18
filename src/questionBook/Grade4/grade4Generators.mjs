@@ -1139,102 +1139,39 @@ export const generateSimpleGrade4Pattern = () => {
 
 // --- 3D Shapes ---
 
-// Helper functions to create SVG representations of 3D shapes
-const createTriangularPrismSVG = () => {
-    return `<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'>
-        <polygon points='90,30 140,110 40,110' fill='#7FB3D5' stroke='#000' stroke-width='2'/>
-        <polygon points='110,50 160,130 60,130' fill='#5DADE2' stroke='#000' stroke-width='2'/>
-        <line x1='90' y1='30' x2='110' y2='50' stroke='#000' stroke-width='2'/>
-        <line x1='140' y1='110' x2='160' y2='130' stroke='#000' stroke-width='2'/>
-        <line x1='40' y1='110' x2='60' y2='130' stroke='#000' stroke-width='2'/>
-    </svg>`;
-};
-
-const createSquarePrismSVG = () => {
-    return `<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'>
-        <rect x='40' y='50' width='80' height='80' fill='#AED6F1' stroke='#000' stroke-width='2'/>
-        <polygon points='60,30 140,30 140,110 120,130 40,130 40,50' fill='#85C1E9' stroke='#000' stroke-width='2'/>
-        <line x1='40' y1='50' x2='60' y2='30' stroke='#000' stroke-width='2'/>
-        <line x1='120' y1='50' x2='140' y2='30' stroke='#000' stroke-width='2'/>
-        <line x1='120' y1='130' x2='140' y2='110' stroke='#000' stroke-width='2'/>
-    </svg>`;
-};
-
-const createHexagonalPrismSVG = () => {
-    return `<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'>
-        <polygon points='90,40 120,55 120,85 90,100 60,85 60,55' fill='#7FB3D5' stroke='#000' stroke-width='2'/>
-        <polygon points='110,60 140,75 140,105 110,120 80,105 80,75' fill='#5DADE2' stroke='#000' stroke-width='2'/>
-        <line x1='90' y1='40' x2='110' y2='60' stroke='#000' stroke-width='2'/>
-        <line x1='120' y1='55' x2='140' y2='75' stroke='#000' stroke-width='2'/>
-        <line x1='120' y1='85' x2='140' y2='105' stroke='#000' stroke-width='2'/>
-        <line x1='90' y1='100' x2='110' y2='120' stroke='#000' stroke-width='2'/>
-        <line x1='60' y1='85' x2='80' y2='105' stroke='#000' stroke-width='2'/>
-        <line x1='60' y1='55' x2='80' y2='75' stroke='#000' stroke-width='2'/>
-    </svg>`;
-};
-
-const createTriangularPyramidSVG = () => {
-    return `<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'>
-        <polygon points='90,30 140,120 40,120' fill='#F1948A' stroke='#000' stroke-width='2'/>
-        <polygon points='90,30 140,120 115,135' fill='#EC7063' stroke='#000' stroke-width='2'/>
-        <polygon points='90,30 40,120 65,135' fill='#E74C3C' stroke='#000' stroke-width='2'/>
-        <line x1='40' y1='120' x2='140' y2='120' stroke='#000' stroke-width='2'/>
-    </svg>`;
-};
-
-const createSquarePyramidSVG = () => {
-    return `<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'>
-        <polygon points='90,30 140,120 40,120' fill='#F8B4D9' stroke='#000' stroke-width='2'/>
-        <polygon points='90,30 140,120 130,130 50,130 40,120' fill='#F48FB1' stroke='#000' stroke-width='2'/>
-        <line x1='40' y1='120' x2='50' y2='130' stroke='#000' stroke-width='2'/>
-        <line x1='140' y1='120' x2='130' y2='130' stroke='#000' stroke-width='2'/>
-        <line x1='50' y1='130' x2='130' y2='130' stroke='#000' stroke-width='2'/>
-    </svg>`;
-};
-
-const createPentagonalPyramidSVG = () => {
-    return `<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'>
-        <polygon points='90,30 130,110 110,135 70,135 50,110' fill='#CE93D8' stroke='#000' stroke-width='2'/>
-        <polygon points='90,30 130,110 110,135' fill='#BA68C8' stroke='#000' stroke-width='2'/>
-        <polygon points='90,30 50,110 70,135' fill='#AB47BC' stroke='#000' stroke-width='2'/>
-        <line x1='50' y1='110' x2='130' y2='110' stroke='#000' stroke-width='2'/>
-        <line x1='70' y1='135' x2='110' y2='135' stroke='#000' stroke-width='2'/>
-    </svg>`;
-};
-
 // Dynamic 3D Shape Identification Question
 export const generate3DShapeIdentification = () => {
-    // Define all 3D shapes
+    // Define all 3D shapes with their image paths
     const shapes = {
         'Triangular Prism': {
             name: 'Triangular Prism',
             category: 'Prism',
-            svg: createTriangularPrismSVG()
+            imagePath: '/assets/grade4/3d_shapes/triangular_prism.png'
         },
         'Square Prism': {
             name: 'Square Prism',
             category: 'Prism',
-            svg: createSquarePrismSVG()
+            imagePath: '/assets/grade4/3d_shapes/square_prism.png'
         },
         'Hexagonal Prism': {
             name: 'Hexagonal Prism',
             category: 'Prism',
-            svg: createHexagonalPrismSVG()
+            imagePath: '/assets/grade4/3d_shapes/hexagonal_prism.png'
         },
         'Triangular Pyramid': {
             name: 'Triangular Pyramid',
             category: 'Pyramid',
-            svg: createTriangularPyramidSVG()
+            imagePath: '/assets/grade4/3d_shapes/triangular_pyramid.png'
         },
         'Square Pyramid': {
             name: 'Square Pyramid',
             category: 'Pyramid',
-            svg: createSquarePyramidSVG()
+            imagePath: '/assets/grade4/3d_shapes/square_pyramid.png'
         },
         'Pentagonal Pyramid': {
             name: 'Pentagonal Pyramid',
             category: 'Pyramid',
-            svg: createPentagonalPyramidSVG()
+            imagePath: '/assets/grade4/3d_shapes/pentagonal_pyramid.png'
         }
     };
 
@@ -1259,13 +1196,10 @@ export const generate3DShapeIdentification = () => {
     // Shuffle options
     const options = shuffleArray(allOptions);
 
-    // Create SVG image
-    const shapeImage = `data:image/svg+xml;base64,${btoa(selectedShape.svg)}`;
-
     return {
         type: "mcq",
         question: `Identify the 3D shape shown in the image:`,
-        image: shapeImage,
+        image: selectedShape.imagePath,
         topic: "Geometry / 3D Shapes",
         options: options,
         answer: selectedShapeName
