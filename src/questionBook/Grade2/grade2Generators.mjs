@@ -703,31 +703,44 @@ export const generatePatterns = () => {
 
 // --- Data Handling ---
 
+const createTallySVG = (count) => {
+  const height = 50;
+  const spacing = 20;
+  const numGroups = Math.ceil(count / 5);
+  const totalWidth = numGroups * (40 + spacing);
+
+  let svgLines = "";
+
+  for (let g = 0; g < numGroups; g++) {
+    const groupX = g * (40 + spacing);
+    const marksInGroup = Math.min(5, count - g * 5);
+
+    for (let i = 0; i < Math.min(marksInGroup, 4); i++) {
+      const x = groupX + i * 10;
+      svgLines += `<line x1="${x}" y1="5" x2="${x}" y2="45" stroke="white" stroke-width="4" stroke-linecap="round" />`;
+    }
+
+    if (marksInGroup === 5) {
+      svgLines += `<line x1="${groupX - 5}" y1="5" x2="${groupX + 35}" y2="45" stroke="white" stroke-width="4" stroke-linecap="round" />`;
+    }
+  }
+
+  return `<svg width="${totalWidth}" height="${height}" viewBox="0 0 ${totalWidth} ${height}" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; vertical-align:middle; overflow:visible;">
+      ${svgLines}
+  </svg>`;
+};
+
 export const generateTally = () => {
   const count = getRandomInt(5, 15);
   // Simple representation for tally marks as text is tricky, using simple count for now or description
-  const question = `How many tally marks represent the number ${count}?`;
+  // Switching to SVG for better rendering
 
-  // Generating simple text representation like ||||| |||||
-  const groups = Math.floor(count / 5);
-  const remainder = count % 5;
-  const tallyStr = "卌 ".repeat(groups) + "|".repeat(remainder);
-
-  const options = shuffleArray([
-    { value: tallyStr.trim(), label: tallyStr.trim() },
-    { value: "卌 ".repeat(groups + 1).trim(), label: "卌 ".repeat(groups + 1).trim() },
-    { value: "卌 ".repeat(groups > 0 ? groups - 1 : 0).trim(), label: "卌 ".repeat(groups > 0 ? groups - 1 : 0).trim() },
-    { value: (tallyStr + "|").trim(), label: (tallyStr + "|").trim() }
-  ]);
-
-  // Note: Tally marks in text are hard to render perfectly without SVG/Images. 
-  // Switching question to: "Which number does this tally show?"
-
-  const question2 = `What number does this tally show: ${tallyStr}?`;
+  const tallySVG = createTallySVG(count);
+  const question = `What number does this tally show? <br/> <div style="margin-top: 20px;">${tallySVG}</div>`;
 
   return {
     type: "userInput",
-    question: question2,
+    question: question,
     topic: "Data Handling / Tally",
     answer: String(count)
   };

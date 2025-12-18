@@ -656,10 +656,37 @@ export const generateSequencePattern = () => {
 
 // --- Data Handling ---
 
+const createTallySVG = (count) => {
+  const height = 50;
+  const spacing = 20;
+  const numGroups = Math.ceil(count / 5);
+  const totalWidth = numGroups * (40 + spacing);
+
+  let svgLines = "";
+
+  for (let g = 0; g < numGroups; g++) {
+    const groupX = g * (40 + spacing);
+    const marksInGroup = Math.min(5, count - g * 5);
+
+    for (let i = 0; i < Math.min(marksInGroup, 4); i++) {
+      const x = groupX + i * 10;
+      svgLines += `<line x1="${x}" y1="5" x2="${x}" y2="45" stroke="white" stroke-width="4" stroke-linecap="round" />`;
+    }
+
+    if (marksInGroup === 5) {
+      svgLines += `<line x1="${groupX - 5}" y1="5" x2="${groupX + 35}" y2="45" stroke="white" stroke-width="4" stroke-linecap="round" />`;
+    }
+  }
+
+  return `<svg width="${totalWidth}" height="${height}" viewBox="0 0 ${totalWidth} ${height}" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; vertical-align:middle; overflow:visible;">
+      ${svgLines}
+  </svg>`;
+};
+
 export const generateTally = () => {
   const count = getRandomInt(1, 10);
-  const tallyMark = "|";
-  const question = `Count the tally marks:</br> ${tallyMark.repeat(count)}`;
+  const tallySVG = createTallySVG(count);
+  const question = `Count the tally marks:</br> <div style="margin-top: 20px;">${tallySVG}</div>`;
 
   if (Math.random() > 0) {
     return {

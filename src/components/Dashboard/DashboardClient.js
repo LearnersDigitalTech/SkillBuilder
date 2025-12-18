@@ -90,7 +90,7 @@ const DashboardClient = () => {
 
             // IMPORTANT: Wait for userData to load before making any decision
             if (!userData) {
-                console.log("⏳ Waiting for userData to load...");
+                // console.log("⏳ Waiting for userData to load...");
                 setShowPhoneDialog(false);
                 return;
             }
@@ -102,7 +102,7 @@ const DashboardClient = () => {
                 : null;
 
             if (phoneProvided === "true") {
-                console.log("✅ Phone already provided (localStorage flag)");
+                // console.log("✅ Phone already provided (localStorage flag)");
                 setShowPhoneDialog(false);
                 return;
             }
@@ -110,20 +110,20 @@ const DashboardClient = () => {
             // Check if phone exists in database
             const hasPhoneInDB = userData.phoneNumber || userData.parentPhone;
 
-            console.log("🔍 Checking phone in database:", {
-                hasPhoneInDB,
-                phoneNumber: userData.phoneNumber,
-                parentPhone: userData.parentPhone,
-                userDataKeys: Object.keys(userData)
-            });
+            // console.log("🔍 Checking phone in database:", {
+            //     hasPhoneInDB,
+            //     phoneNumber: userData.phoneNumber,
+            //     parentPhone: userData.parentPhone,
+            //     userDataKeys: Object.keys(userData)
+            // });
 
             if (hasPhoneInDB) {
                 // Phone exists in database - don't show dialog
-                console.log("✅ Phone found in database:", hasPhoneInDB);
+                // console.log("✅ Phone found in database:", hasPhoneInDB);
                 setShowPhoneDialog(false);
             } else {
                 // Brand new user with no phone - show dialog
-                console.log("📱 Brand new user - showing phone dialog");
+                // console.log("📱 Brand new user - showing phone dialog");
                 setShowPhoneDialog(true);
             }
         }

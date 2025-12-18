@@ -265,7 +265,7 @@ const TypeTableInput = ({ onClick, onPrevious, onAnswerChange, questionPaper, ac
                                 </div>
                                 {(variant === 'double-input' || variant === 'triple-input') ? (
                                     <>
-                                        <div className={Styles.inputCell}>
+                                        <div className={Styles.inputCell} data-label={(currentQuestion.headers && currentQuestion.headers[1]) || 'Field 1'}>
                                             <input
                                                 type="text"
                                                 className={Styles.inputField}
@@ -274,7 +274,7 @@ const TypeTableInput = ({ onClick, onPrevious, onAnswerChange, questionPaper, ac
                                                 placeholder={ph1}
                                             />
                                         </div>
-                                        <div className={Styles.inputCell}>
+                                        <div className={Styles.inputCell} data-label={(currentQuestion.headers && currentQuestion.headers[2]) || 'Field 2'}>
                                             <input
                                                 type="text"
                                                 className={Styles.inputField}
@@ -284,7 +284,7 @@ const TypeTableInput = ({ onClick, onPrevious, onAnswerChange, questionPaper, ac
                                             />
                                         </div>
                                         {variant === 'triple-input' && (
-                                            <div className={Styles.inputCell}>
+                                            <div className={Styles.inputCell} data-label={(currentQuestion.headers && currentQuestion.headers[3]) || 'Field 3'}>
                                                 <input
                                                     type="text"
                                                     className={Styles.inputField}

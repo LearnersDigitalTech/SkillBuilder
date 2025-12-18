@@ -246,7 +246,8 @@ export const generateAdditionThenSubtraction = () => {
 export const generateSubtractionThenAddition = () => {
     // Random numbers for subtraction and addition
     const num1 = getRandomInt(5, 15);
-    const num2 = getRandomInt(2, 10);
+    // Ensure num2 is not greater than num1 to avoid negative result
+    const num2 = getRandomInt(2, num1);
     const num3 = getRandomInt(1, 5);
 
     const answer = num1 - num2 + num3;
@@ -725,15 +726,44 @@ export const generateMoneyOperations = () => {
 
 // --- Data Handling ---
 
-export const generateTally = () => {
-    // Count tally marks (represented as text for now, e.g., ||||)
-    const count = getRandomInt(1, 10);
-    let tally = "";
-    for (let i = 0; i < count; i++) {
-        tally += "|";
+const createTallySVG = (count) => {
+    const groupWidth = 60;
+    const height = 50; // Increased height for better visibility
+    const spacing = 20;
+    // Calculate total width based on number of groups. 
+    // Each group takes about 40px width plus spacing.
+    // We have Math.ceil(count / 5) groups.
+    const numGroups = Math.ceil(count / 5);
+    const totalWidth = numGroups * (40 + spacing);
+
+    let svgLines = "";
+
+    for (let g = 0; g < numGroups; g++) {
+        const groupX = g * (40 + spacing);
+        const marksInGroup = Math.min(5, count - g * 5);
+
+        // Draw vertical lines (up to 4)
+        for (let i = 0; i < Math.min(marksInGroup, 4); i++) {
+            const x = groupX + i * 10;
+            svgLines += `<line x1="${x}" y1="5" x2="${x}" y2="45" stroke="white" stroke-width="4" stroke-linecap="round" />`;
+        }
+
+        // Draw diagonal line for the 5th mark
+        if (marksInGroup === 5) {
+            svgLines += `<line x1="${groupX - 5}" y1="5" x2="${groupX + 35}" y2="45" stroke="white" stroke-width="4" stroke-linecap="round" />`;
+        }
     }
 
-    const question = `Count the tally marks:</br> ${tally}`;
+    return `<svg width="${totalWidth}" height="${height}" viewBox="0 0 ${totalWidth} ${height}" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; vertical-align:middle; overflow:visible;">
+        ${svgLines}
+    </svg>`;
+};
+
+export const generateTally = () => {
+    const count = getRandomInt(1, 10);
+    const tallySVG = createTallySVG(count);
+
+    const question = `Count the tally marks:</br> <div style="margin-top: 20px;">${tallySVG}</div>`;
 
     return {
         type: "userInput",

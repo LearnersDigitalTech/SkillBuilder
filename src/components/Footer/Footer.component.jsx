@@ -1,8 +1,16 @@
 "use client";
+import { useState } from "react";
 import Styles from "./Footer.module.css";
 import { Facebook, Twitter, Linkedin, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import { useRouter } from "next/navigation";
+import AuthModal from "../Auth/AuthModal.component";
+import { useAuth } from "@/context/AuthContext";
 
 const Footer = () => {
+    const router = useRouter();
+    const { user } = useAuth();
+    const [authModalOpen, setAuthModalOpen] = useState(false);
+
     return (
         <footer className={Styles.footer}>
             <div className={Styles.footerContent}>
@@ -35,9 +43,20 @@ const Footer = () => {
                 <div className={Styles.footerSection}>
                     <h4 className={Styles.footerTitle}>Quick Links</h4>
                     <ul className={Styles.footerList}>
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#assessment">Assessment</a></li>
-                        <li><a href="#features">Features</a></li>
+                        <li><a href="#" onClick={(e) => { e.preventDefault(); router.push("/"); }}>Home</a></li>
+                        <li><a href="#" onClick={(e) => { e.preventDefault(); router.push("/quiz"); }}>Take Test</a></li>
+                        <li><a href="#" onClick={(e) => { e.preventDefault(); router.push("/rapid-math"); }}>Rapid Math</a></li>
+                        {/* <li><a href="#" onClick={(e) => { e.preventDefault(); router.push("/practice"); }}>Practice Mode</a></li> */}
+                        <li><a href="#" onClick={(e) => {
+                            e.preventDefault();
+                            if (user) {
+                                router.push("/practice?grade=SAT");
+                            } else {
+                                setAuthModalOpen(true);
+                            }
+                        }}>SAT</a></li>
+                        <li><a href="#" onClick={(e) => { e.preventDefault(); setAuthModalOpen(true); }}>Sign In</a></li>
+                        <li><a href="tel:+919916933202">Reach Us</a></li>
                     </ul>
                 </div>
 
@@ -80,14 +99,15 @@ const Footer = () => {
                 <p className={Styles.copyright}>
                     © 2024 Learners Digital. All rights reserved.
                 </p>
-                <div className={Styles.footerBottomLinks}>
+                {/* <div className={Styles.footerBottomLinks}>
                     <a href="#privacy">Privacy Policy</a>
                     <span className={Styles.separator}>•</span>
                     <a href="#terms">Terms of Service</a>
                     <span className={Styles.separator}>•</span>
                     <a href="#cookies">Cookie Policy</a>
-                </div>
+                </div> */}
             </div>
+            <AuthModal open={authModalOpen} onClose={() => setAuthModalOpen(false)} />
         </footer>
     )
 }

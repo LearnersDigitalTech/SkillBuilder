@@ -607,3 +607,78 @@
     font-size: 1.1rem;
     padding: 0.5rem;
 }
+
+/* FVE Table - Triple Input with Images */
+.textCell img {
+    max-width: 120px;
+    max-height: 120px;
+    object-fit: contain;
+    margin-top: 8px;
+}
+
+.doubleInputRow {
+    min-height: 140px !important; /* Increased for images */
+}
+
+/* Mobile Responsive Styles for Triple Input */
+@media (max-width: 768px) {
+    .doubleInputRow {
+        grid-template-columns: 1fr !important;
+        min-height: auto !important;
+        gap: 8px;
+        padding: 12px;
+    }
+
+    .headerDoubleRow {
+        display: none; /* Hide headers on mobile, show in row */
+    }
+
+    .textCell {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 12px;
+        min-height: 100px;
+    }
+
+    .textCell img {
+        max-width: 100px;
+        max-height: 100px;
+        align-self: center;
+    }
+
+    .inputCell {
+        padding: 12px;
+        min-height: 50px;
+    }
+
+    .inputCell::before {
+        content: attr(data-label);
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #475569;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .inputField {
+        font-size: 1.1rem;
+        min-height: 45px;
+    }
+}
+
+@media (max-width: 480px) {
+    .textCell {
+        font-size: 1rem;
+        padding: 10px;
+    }
+
+    .textCell img {
+        max-width: 80px;
+        max-height: 80px;
+    }
+
+    .inputField {
+        font-size: 1rem;
+        min-height: 40px;
+    }
+}
