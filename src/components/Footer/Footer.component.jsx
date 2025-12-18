@@ -46,6 +46,7 @@ const Footer = () => {
                         <li><a href="#" onClick={(e) => { e.preventDefault(); router.push("/"); }}>Home</a></li>
                         <li><a href="#" onClick={(e) => { e.preventDefault(); router.push("/quiz"); }}>Take Test</a></li>
                         <li><a href="#" onClick={(e) => { e.preventDefault(); router.push("/rapid-math"); }}>Rapid Math</a></li>
+                        {/* <li><a href="#" onClick={(e) => { e.preventDefault(); router.push("/practice"); }}>Practice Mode</a></li> */}
                         <li><a href="#" onClick={(e) => {
                             e.preventDefault();
                             if (user) {
@@ -98,13 +99,13 @@ const Footer = () => {
                 <p className={Styles.copyright}>
                     © 2024 Learners Digital. All rights reserved.
                 </p>
-                <div className={Styles.footerBottomLinks}>
+                {/* <div className={Styles.footerBottomLinks}>
                     <a href="#privacy">Privacy Policy</a>
                     <span className={Styles.separator}>•</span>
                     <a href="#terms">Terms of Service</a>
                     <span className={Styles.separator}>•</span>
                     <a href="#cookies">Cookie Policy</a>
-                </div>
+                </div> */}
             </div>
             <AuthModal open={authModalOpen} onClose={() => setAuthModalOpen(false)} />
         </footer>

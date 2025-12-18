@@ -344,7 +344,7 @@ const HomeContent = () => {
                     <p className={Styles.placeVisitNow}>Visit Now!</p>
                 </a>
 
-                <a href="https://learners.co.in/" target="blank" className={Styles.placeContainer} >
+                <a href="https://learnerspuc.com/" target="blank" className={Styles.placeContainer} >
                     <img className={Styles.placeImage} src="/places/college.png" alt="Learners Global School and PU College" />
                     <h2 className={Styles.placeTitle}>Learners PU College</h2>
                     <p className={Styles.placeDescription}>Preparing students for higher education through rigorous academic programs and career-focused guidance, strengthened by integrated NEET, JEE, CET, and IIT coaching</p>
