@@ -6,7 +6,7 @@ import { ArrowRight, Check, RefreshCcw } from "lucide-react";
 import MathRenderer from "@/components/MathRenderer/MathRenderer.component";
 import { getHint } from "./hintHelper";
 
-const PracticeMCQ = ({ onNext, question, topic, options, answer, image, activeQuestionIndex, onCorrect, onRepeat, onWrong }) => {
+const PracticeMCQ = ({ onNext, question, topic, options, answer, image, activeQuestionIndex, onCorrect, onRepeat, onWrong, isLastQuestion }) => {
     const [selectedOption, setSelectedOption] = useState(null);
     const [isCorrect, setIsCorrect] = useState(null); // true, false, or null
     const [showHint, setShowHint] = useState(false);
@@ -166,7 +166,7 @@ const PracticeMCQ = ({ onNext, question, topic, options, answer, image, activeQu
                             endIcon={<ArrowRight />}
                             className={Styles.nextButton}
                         >
-                            Next Question
+                            {isLastQuestion ? "Finish" : "Next Question"}
                         </Button>
                     )}
                 </div>

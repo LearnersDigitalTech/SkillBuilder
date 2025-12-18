@@ -59,10 +59,10 @@ const Grade7Questions = {
     q19: generate(generateAlgebraWordProblemTable),
     q20: generate(generateLinesAndAngles),
     q21: generate(generateTrianglesProperties),
-    q22: generate(generateSolidShapesProperties),
-    q23: generate(generatePercentage),
-    q24: generate(generateDataHandling),
-    q25: generate(generateBarGraph),
+    // q22: generate(generateSolidShapesProperties),
+    q22: generate(generatePercentage),
+    q23: generate(generateDataHandling),
+    q24: generate(generateBarGraph),
     // Fill remaining slots to reach q30
     // q21: generate(generateIntegerOps),
     // q22: generate(generateRationalOps),
@@ -88,13 +88,19 @@ const Grade7Questions = {
 
 
 export const Grade7GeneratorMap = {
-    // Grade 10 Imports
+    // Grade 10 Imports - with actual topic strings from generators
     "Number Sense / Natural & Whole": generateNaturalWholeNumbers,
+    "Fundamental Operations on Natural and Whole Numbers": generateNaturalWholeNumbers, // Actual topic from generator
     "Integers / Mixed Operations": generateIntegersG10,
+    "Fundamental Operations On Integers": generateIntegersG10, // Actual topic from generator
     "Fractions / Mixed Operations": generateFractionsG10,
+    "Fractions": generateFractionsG10, // Actual topic from generator
     "Decimals / Mixed Operations": generateDecimalsG10,
+    "Fundamental operations on decimals": generateDecimalsG10, // Actual topic from generator
     "Number Sense / LCM": generateLCMG10,
+    "Least Common Multiple": generateLCMG10, // Actual topic from generator
     "Number Sense / HCF": generateHCF,
+    "Highest Common Factor": generateHCF, // Actual topic from generator
     "Ratio and Proportion": generateRatioProportion,
     "BODMAS / Complex": generateBODMASG10,
     "Geometry / Perimeter": generatePerimeter,
@@ -108,14 +114,22 @@ export const Grade7GeneratorMap = {
     "Exponents / Product Law": () => generateExponentLaws([0]),
     "Exponents / Quotient Law": () => generateExponentLaws([1]),
     "Exponents / Power of Power": () => generateExponentLaws([2]),
+    "Exponents / Power of a Power Law": () => generateExponentLaws([2]), // Actual topic from generator
     "Exponents / Zero Exponent": () => generateExponentLaws([3]),
+    "Exponents / Zero Exponent Law": () => generateExponentLaws([3]), // Actual topic from generator
     "Exponents / Power of Product": () => generateExponentLaws([4]),
+    "Exponents / Power of a Product Law": () => generateExponentLaws([4]), // Actual topic from generator
     "Exponents / Power of Quotient": () => generateExponentLaws([5]),
+    "Exponents / Power of a Quotient Law": () => generateExponentLaws([5]), // Actual topic from generator
     "Exponents / Negative Exponent": () => generateExponentLaws([6]),
+    "Exponents / Negative Exponent Law": () => generateExponentLaws([6]), // Actual topic from generator
     "Exponents / Standard Form": generateStandardForm,
     "BODMAS / Simple": generateBODMAS, // Local one
+    "BODMAS": generateBODMAS, // Alternate key for regeneration
     "Mensuration / Perimeter & Area": generatePerimeterAndArea,
+    "Perimeter and Area": generatePerimeterAndArea, // Alternate key for regeneration
     "Commercial Math / Basics": generateCommercialMath,
+    "Commercial Math": generateCommercialMath, // Alternate key for regeneration
     "Commercial Math / Percentage": generatePercentage,
     "Commercial Math / Profit & Loss": generateProfitLoss,
     "Commercial Math / Simple Interest": generateSimpleInterest,
@@ -123,12 +137,18 @@ export const Grade7GeneratorMap = {
     "Algebra / Linear Equations": generateLinearEquation,
     "Algebra / Word Problems": generateAlgebraWordProblem,
     "Algebra / Mixed Problems": generateGrade7Algebra,
+    "Algebra": generateGrade7Algebra, // Alternate key for regeneration
     "Algebra / Word Problems Table": generateAlgebraWordProblemTable,
     "Geometry / Lines and Angles": generateLinesAndAngles,
+    "Lines and Angles": generateLinesAndAngles, // Alternate key for regeneration
     "Geometry / Triangles": generateTrianglesProperties,
+    "Triangles and Properties": generateTrianglesProperties, // Alternate key for regeneration
     "Geometry / Solid Shapes": generateSolidShapesProperties,
+    "Visualizing Solid Shapes": generateSolidShapesProperties, // Alternate key for regeneration
     "Data Handling / Basics": generateDataHandling,
-    "Data Handling / Bar Graph": generateBarGraph
+    "Data Handling": generateDataHandling, // Alternate key for regeneration
+    "Data Handling / Bar Graph": generateBarGraph,
+    "Data Handling / Graphs": generateBarGraph // Alternate key for regeneration
 };
 
 export default Grade7Questions;
