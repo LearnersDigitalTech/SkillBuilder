@@ -960,10 +960,26 @@ export const generateTimeConversion5to10 = () => {
 // --- Data Handling ---
 
 export const generateBarGraph = () => {
-    // Interpret simple data
-    const apples = getRandomInt(10, 50);
-    const oranges = getRandomInt(10, 50);
-    const bananas = getRandomInt(10, 50);
+    // Generate values ensuring no ties
+    let apples, oranges, bananas;
+    let attempts = 0;
+    const maxAttempts = 100;
+
+    do {
+        apples = getRandomInt(10, 50);
+        oranges = getRandomInt(10, 50);
+        bananas = getRandomInt(10, 50);
+        attempts++;
+
+        // Ensure all three values are different (no ties)
+    } while ((apples === oranges || oranges === bananas || apples === bananas) && attempts < maxAttempts);
+
+    // Fallback: if still tied after max attempts, force them to be different
+    if (apples === oranges || oranges === bananas || apples === bananas) {
+        apples = 30;
+        oranges = 40;
+        bananas = 20;
+    }
 
     const maxVal = Math.max(apples, oranges, bananas);
     const yAxisMax = Math.ceil(maxVal / 10) * 10 + 10; // Round up to nearest 10, add padding
@@ -1203,5 +1219,79 @@ export const generate3DShapeIdentification = () => {
         topic: "Geometry / 3D Shapes",
         options: options,
         answer: selectedShapeName
+    };
+};
+
+// FVE (Faces, Vertices, Edges) Table Input Question
+export const generateFVETable = () => {
+    // Define all 3D shapes with their FVE properties
+    const shapes = [
+        {
+            name: 'Cube',
+            image: '/assets/grade4/FVE/cube_square_Prism.png',
+            faces: 6,
+            vertices: 8,
+            edges: 12
+        },
+        {
+            name: 'Cuboid',
+            image: '/assets/grade4/FVE/cuboid_rectangular_Prism.png',
+            faces: 6,
+            vertices: 8,
+            edges: 12
+        },
+        {
+            name: 'Triangular Pyramid',
+            image: '/assets/grade4/FVE/triangular_Pyramid .png',
+            faces: 4,
+            vertices: 4,
+            edges: 6
+        },
+        {
+            name: 'Square Pyramid',
+            image: '/assets/grade4/FVE/square_pyramid .png',
+            faces: 5,
+            vertices: 5,
+            edges: 8
+        },
+        {
+            name: 'Triangular Prism',
+            image: '/assets/grade4/FVE/triangular_Prism .png',
+            faces: 5,
+            vertices: 6,
+            edges: 9
+        }
+    ];
+
+    // Randomly select 2 shapes for Grade 4 (simpler for young students)
+    const shuffledShapes = shuffleArray([...shapes]);
+    const selectedShapes = shuffledShapes.slice(0, 2);
+
+    // Create answer object
+    const answer = {};
+    selectedShapes.forEach((shape, index) => {
+        answer[index] = {
+            faces: shape.faces,
+            vertices: shape.vertices,
+            edges: shape.edges
+        };
+    });
+
+    // Create table rows - each row has text (shape name) and image
+    const rows = selectedShapes.map((shape) => ({
+        text: shape.name,
+        image: shape.image
+    }));
+
+    return {
+        type: "tableInput",
+        variant: "triple-input",
+        question: "",
+        topic: "Geometry / 3D Shapes - Faces, Vertices, Edges",
+        headers: ["Shapes", "Number of faces (F)", "Number of vertices (V)", "Number of edges (E)"],
+        inputKeys: ["faces", "vertices", "edges"],
+        placeholders: ["", "", ""],
+        rows: rows,
+        answer: JSON.stringify(answer)
     };
 };

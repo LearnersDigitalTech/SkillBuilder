@@ -24,6 +24,7 @@ import {
     generateSimpleGrade4Pattern,
     generateMeasurementConversionApplicationLevel,
     generate3DShapeIdentification,
+    generateFVETable,
 } from './grade4Generators.mjs';
 
 const generate = (generator, count = 10) => {
@@ -52,13 +53,15 @@ const Grade4Questions = {
     // q17: generate(generateAngles),
     q18: generate(generateTriangles),
     // q19: generate(generateTriangles),
-    q19: generate(generateAreaShape),
-    q20: generate(generatePerimeterShape),
-    q21: generate(generateMeasurementConversion),
-    q22: generate(generateMeasurementConversionApplicationLevel),
-    q23: generate(generateBarGraph),
-    q24: generate(generateSimpleGrade4Pattern),
-    q25: generate(generate3DShapeIdentification),
+    q19: generate(generate3DShapeIdentification),
+    q20: generate(generateFVETable),
+    q21: generate(generateAreaShape),
+    q22: generate(generatePerimeterShape),
+    q23: generate(generateMeasurementConversion),
+    q24: generate(generateMeasurementConversionApplicationLevel),
+    q25: generate(generateBarGraph),
+    q26: generate(generateSimpleGrade4Pattern),
+
     // q26: generate(generateSimpleGrade4Pattern),
     // Fill remaining slots
     // q15: generate(generatePlaceValue5Digit),
@@ -100,7 +103,8 @@ export const Grade4GeneratorMap = {
     "Measurement / Conversion": () => Math.random() > 0.5 ? generateMeasurementConversion() : generateMeasurementConversionApplicationLevel(),
     "Data Handling / Bar Graph": generateBarGraph,
     "Patterns / Number Patterns": generateSimpleGrade4Pattern,
-    "Geometry / 3D Shapes": generate3DShapeIdentification
+    "Geometry / 3D Shapes": generate3DShapeIdentification,
+    "Geometry / 3D Shapes - FVE": generateFVETable
 };
 
 export default Grade4Questions;

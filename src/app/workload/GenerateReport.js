@@ -336,6 +336,7 @@ function analyzeResponses(responses, grade) {
             topic: topic ?? null,
             type: item.type ?? null,
             tree: item.tree ?? null,
+            rows: item.rows ?? null, // Include rows for tableInput questions with images
             correctAnswer: correctAnswer ?? null,
             userAnswer: givenAnswer || null,
             attempted: attempted ?? false,
