@@ -1136,3 +1136,72 @@ export const generateSimpleGrade4Pattern = () => {
         answer: String(next)
     };
 };
+
+// --- 3D Shapes ---
+
+// Dynamic 3D Shape Identification Question
+export const generate3DShapeIdentification = () => {
+    // Define all 3D shapes with their image paths
+    const shapes = {
+        'Triangular Prism': {
+            name: 'Triangular Prism',
+            category: 'Prism',
+            imagePath: '/assets/grade4/3d_shapes/triangular_prism.png'
+        },
+        'Square Prism': {
+            name: 'Square Prism',
+            category: 'Prism',
+            imagePath: '/assets/grade4/3d_shapes/square_prism.png'
+        },
+        'Hexagonal Prism': {
+            name: 'Hexagonal Prism',
+            category: 'Prism',
+            imagePath: '/assets/grade4/3d_shapes/hexagonal_prism.png'
+        },
+        'Triangular Pyramid': {
+            name: 'Triangular Pyramid',
+            category: 'Pyramid',
+            imagePath: '/assets/grade4/3d_shapes/triangular_pyramid.png'
+        },
+        'Square Pyramid': {
+            name: 'Square Pyramid',
+            category: 'Pyramid',
+            imagePath: '/assets/grade4/3d_shapes/square_pyramid.png'
+        },
+        'Pentagonal Pyramid': {
+            name: 'Pentagonal Pyramid',
+            category: 'Pyramid',
+            imagePath: '/assets/grade4/3d_shapes/pentagonal_pyramid.png'
+        }
+    };
+
+    // Randomly select one shape
+    const shapeNames = Object.keys(shapes);
+    const selectedShapeName = shapeNames[getRandomInt(0, shapeNames.length - 1)];
+    const selectedShape = shapes[selectedShapeName];
+
+    // Generate wrong answers from other shapes
+    const wrongShapes = shapeNames.filter(name => name !== selectedShapeName);
+    const shuffledWrong = shuffleArray(wrongShapes);
+    const wrongAnswers = shuffledWrong.slice(0, 3);
+
+    // Create options with proper format
+    const allOptions = [
+        { value: selectedShapeName, label: selectedShapeName },
+        { value: wrongAnswers[0], label: wrongAnswers[0] },
+        { value: wrongAnswers[1], label: wrongAnswers[1] },
+        { value: wrongAnswers[2], label: wrongAnswers[2] }
+    ];
+
+    // Shuffle options
+    const options = shuffleArray(allOptions);
+
+    return {
+        type: "mcq",
+        question: `Identify the 3D shape shown in the image:`,
+        image: selectedShape.imagePath,
+        topic: "Geometry / 3D Shapes",
+        options: options,
+        answer: selectedShapeName
+    };
+};
