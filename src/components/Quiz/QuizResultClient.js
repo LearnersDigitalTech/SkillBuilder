@@ -1761,6 +1761,161 @@ const QuizResultClient = () => {
                                                 </div>
                                             </div>
                                         )}
+                                        {q.type === 'tableInput' && q.rows && q.rows.length > 0 && q.rows[0].image && (
+                                            <div style={{ marginTop: '16px' }}>
+                                                {/* Desktop Table View */}
+                                                <div style={{
+                                                    display: 'none',
+                                                    '@media (min-width: 768px)': { display: 'block' }
+                                                }} className="fve-desktop-table">
+                                                    <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px', overflowX: 'auto' }}>
+                                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                            <thead>
+                                                                <tr style={{ borderBottom: '2px solid #e2e8f0' }}>
+                                                                    <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#475569' }}>Shape</th>
+                                                                    <th style={{ padding: '12px', textAlign: 'center', fontWeight: '600', color: '#475569' }}>Image</th>
+                                                                    <th style={{ padding: '12px', textAlign: 'center', fontWeight: '600', color: '#475569' }}>Faces (F)</th>
+                                                                    <th style={{ padding: '12px', textAlign: 'center', fontWeight: '600', color: '#475569' }}>Vertices (V)</th>
+                                                                    <th style={{ padding: '12px', textAlign: 'center', fontWeight: '600', color: '#475569' }}>Edges (E)</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {q.rows.map((row, idx) => {
+                                                                    const userAns = q.userAnswer ? JSON.parse(q.userAnswer)[idx] : {};
+                                                                    const correctAns = q.correctAnswer ? JSON.parse(q.correctAnswer)[idx] : {};
+                                                                    return (
+                                                                        <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                                                            <td style={{ padding: '12px', fontWeight: '500' }}>{row.text}</td>
+                                                                            <td style={{ padding: '12px', textAlign: 'center' }}>
+                                                                                <img src={row.image} alt={row.text} style={{ maxWidth: '80px', maxHeight: '80px', objectFit: 'contain' }} />
+                                                                            </td>
+                                                                            <td style={{ padding: '12px', textAlign: 'center' }}>
+                                                                                <div style={{ color: userAns?.faces == correctAns?.faces ? '#16a34a' : '#dc2626', fontWeight: '600' }}>
+                                                                                    {userAns?.faces || '-'}
+                                                                                </div>
+                                                                                <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>
+                                                                                    (Correct: {correctAns?.faces})
+                                                                                </div>
+                                                                            </td>
+                                                                            <td style={{ padding: '12px', textAlign: 'center' }}>
+                                                                                <div style={{ color: userAns?.vertices == correctAns?.vertices ? '#16a34a' : '#dc2626', fontWeight: '600' }}>
+                                                                                    {userAns?.vertices || '-'}
+                                                                                </div>
+                                                                                <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>
+                                                                                    (Correct: {correctAns?.vertices})
+                                                                                </div>
+                                                                            </td>
+                                                                            <td style={{ padding: '12px', textAlign: 'center' }}>
+                                                                                <div style={{ color: userAns?.edges == correctAns?.edges ? '#16a34a' : '#dc2626', fontWeight: '600' }}>
+                                                                                    {userAns?.edges || '-'}
+                                                                                </div>
+                                                                                <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>
+                                                                                    (Correct: {correctAns?.edges})
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    );
+                                                                })}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+
+                                                {/* Mobile Card View */}
+                                                <div style={{
+                                                    display: 'block',
+                                                    '@media (min-width: 768px)': { display: 'none' }
+                                                }} className="fve-mobile-cards">
+                                                    {q.rows.map((row, idx) => {
+                                                        const userAns = q.userAnswer ? JSON.parse(q.userAnswer)[idx] : {};
+                                                        const correctAns = q.correctAnswer ? JSON.parse(q.correctAnswer)[idx] : {};
+                                                        return (
+                                                            <div key={idx} style={{
+                                                                border: '1px solid #e2e8f0',
+                                                                borderRadius: '12px',
+                                                                padding: '16px',
+                                                                marginBottom: '12px',
+                                                                background: '#fff'
+                                                            }}>
+                                                                {/* Shape Name and Image */}
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+                                                                    <img src={row.image} alt={row.text} style={{ width: '80px', height: '80px', objectFit: 'contain', flexShrink: 0 }} />
+                                                                    <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>{row.text}</div>
+                                                                </div>
+
+                                                                {/* F, V, E Grid */}
+                                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                                                                    {/* Faces */}
+                                                                    <div style={{ textAlign: 'center' }}>
+                                                                        <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                                                            Faces (F)
+                                                                        </div>
+                                                                        <div style={{
+                                                                            fontSize: '1.5rem',
+                                                                            fontWeight: '700',
+                                                                            color: userAns?.faces == correctAns?.faces ? '#16a34a' : '#dc2626',
+                                                                            marginBottom: '4px'
+                                                                        }}>
+                                                                            {userAns?.faces || '-'}
+                                                                        </div>
+                                                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                                                                            ✓ {correctAns?.faces}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Vertices */}
+                                                                    <div style={{ textAlign: 'center' }}>
+                                                                        <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                                                            Vertices (V)
+                                                                        </div>
+                                                                        <div style={{
+                                                                            fontSize: '1.5rem',
+                                                                            fontWeight: '700',
+                                                                            color: userAns?.vertices == correctAns?.vertices ? '#16a34a' : '#dc2626',
+                                                                            marginBottom: '4px'
+                                                                        }}>
+                                                                            {userAns?.vertices || '-'}
+                                                                        </div>
+                                                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                                                                            ✓ {correctAns?.vertices}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Edges */}
+                                                                    <div style={{ textAlign: 'center' }}>
+                                                                        <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                                                            Edges (E)
+                                                                        </div>
+                                                                        <div style={{
+                                                                            fontSize: '1.5rem',
+                                                                            fontWeight: '700',
+                                                                            color: userAns?.edges == correctAns?.edges ? '#16a34a' : '#dc2626',
+                                                                            marginBottom: '4px'
+                                                                        }}>
+                                                                            {userAns?.edges || '-'}
+                                                                        </div>
+                                                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                                                                            ✓ {correctAns?.edges}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+
+                                                <style jsx>{`
+                                                    @media (min-width: 768px) {
+                                                        .fve-desktop-table { display: block !important; }
+                                                        .fve-mobile-cards { display: none !important; }
+                                                    }
+                                                    @media (max-width: 767px) {
+                                                        .fve-desktop-table { display: none !important; }
+                                                        .fve-mobile-cards { display: block !important; }
+                                                    }
+                                                `}</style>
+                                            </div>
+                                        )}
                                     </div>
                                     <div className={Styles.questionStatus}>
                                         {(() => {
