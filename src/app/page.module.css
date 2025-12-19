@@ -12,7 +12,8 @@
     gap: 2rem;
     min-height: calc(85vh - 80px);
     /* Reduced height to keep above fold */
-    background: radial-gradient(circle at 70% 50%, #ffffff 0%, #eff6ff 100%);
+    background: radial-gradient(circle at 70% 50%, #ffffff 0%, #e0f2fe 100%);
+    /* White to Pale Sky */
     position: relative;
     overflow: hidden;
 }
@@ -46,8 +47,8 @@
     line-height: 1.15;
     margin-bottom: 1rem;
     color: #1a202c;
-    background: linear-gradient(to right, #2563eb, #7c3aed);
-    /* More vibrant blue-purple */
+    background: linear-gradient(135deg, #1e40af 0%, #0ea5e9 100%);
+    /* Royal to Sky Blue */
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -70,7 +71,8 @@
 }
 
 .contentContainer button {
-    background-color: #2563eb;
+    background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+    /* Blue Gradient */
     color: white;
     padding: 1rem 2rem;
     font-size: 1.125rem;
@@ -79,10 +81,11 @@
     text-transform: none;
     box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1), 0 2px 4px -1px rgba(37, 99, 235, 0.06);
     transition: all 0.2s ease;
+    border: none;
 }
 
 .contentContainer button:hover {
-    background-color: #1d4ed8;
+    background: linear-gradient(135deg, #1d4ed8 0%, #0369a1 100%);
     transform: translateY(-2px);
     box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2), 0 4px 6px -2px rgba(37, 99, 235, 0.1);
 }
@@ -101,10 +104,11 @@
 }
 
 .listContainer li {
-    background: rgba(37, 99, 235, 0.08);
+    background: rgba(224, 242, 254, 0.5);
+    /* Pale Sky Tint */
     padding: 0.5rem 1.25rem;
     border-radius: 999px;
-    border: 1px solid rgba(37, 99, 235, 0.15);
+    border: 1px solid rgba(186, 230, 253, 0.4);
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
@@ -140,7 +144,8 @@
 .featureItem svg {
     width: 24px;
     height: 24px;
-    color: #2563eb;
+    color: #0284c7;
+    /* Bright Sky Blue */
 }
 
 .featureItem p {
@@ -162,10 +167,10 @@
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 2rem;
     margin-top: 0;
-    margin-top: 0;
     padding: 1rem 5%;
     /* Tight packing to remove gaps */
-    background-color: #f8fafc;
+    background-color: #f0f9ff;
+    /* Very Pale Blue bg */
     max-width: 1400px;
     margin-left: auto;
     margin-right: auto;
@@ -253,10 +258,10 @@
 .whyChooseUsContainer>div:hover {
     transform: translateY(-4px);
     /* Subtle lift */
-    box-shadow: 0 12px 24px -8px rgba(37, 99, 235, 0.15);
-    /* Blue-tinted shadow */
-    border-color: #2563eb;
-    /* Active Brand Color border */
+    box-shadow: 0 12px 24px -8px rgba(14, 165, 233, 0.15);
+    /* Sky Blue Shadow */
+    border-color: #0ea5e9;
+    /* Sky Blue Border */
 }
 
 /* Unified Icon Style - Compact */
@@ -331,7 +336,7 @@
     font-weight: 800;
     margin-bottom: 1.5rem;
     color: #1a202c;
-    background: linear-gradient(to right, #2563eb, #9333ea);
+    background: linear-gradient(to right, #1e40af, #0ea5e9);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -344,8 +349,9 @@
 }
 
 .poweredByContainerImage {
-    max-height: 150px;
-    scale: 2.5;
+    max-height: 300px;
+    width: auto;
+    object-fit: contain;
 }
 
 .poweredByContainer ul {
@@ -393,7 +399,7 @@
     font-weight: 800;
     margin-bottom: 1.5rem;
     color: #1a202c;
-    background: linear-gradient(to right, #2563eb, #9333ea);
+    background: linear-gradient(to right, #1e40af, #0ea5e9);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -429,7 +435,7 @@
     left: 0;
     width: 20px;
     height: 20px;
-    background: linear-gradient(135deg, #2563eb, #9333ea);
+    background: linear-gradient(135deg, #1e40af, #0ea5e9);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -653,7 +659,7 @@
     font-weight: 800;
     margin: 0 0 0.5rem 0;
     color: #1a202c;
-    background: linear-gradient(to right, #2563eb, #9333ea);
+    background: linear-gradient(to right, #1e40af, #0ea5e9);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -721,7 +727,7 @@
     font-size: 1.125rem;
     font-weight: 600;
     color: white;
-    background: linear-gradient(135deg, #2563eb, #9333ea);
+    background: linear-gradient(135deg, #2563eb, #0ea5e9);
     border: none;
     border-radius: 0.75rem;
     cursor: pointer;
@@ -786,7 +792,8 @@
 .nationalMathDay {
     font-size: 1.1rem !important;
     font-weight: 700 !important;
-    color: #dc2626 !important;
+    color: #0369a1 !important;
+    /* Deep Sky Blue */
     text-transform: uppercase !important;
     letter-spacing: 0.05em !important;
     margin-bottom: 0.5rem !important;
@@ -795,7 +802,8 @@
 .tagline {
     font-size: 1rem !important;
     font-weight: 600 !important;
-    color: #4f46e5 !important;
+    color: #0284c7 !important;
+    /* Bright Sky Blue */
     text-transform: uppercase !important;
     letter-spacing: 0.05em !important;
     margin-bottom: 0 !important;
