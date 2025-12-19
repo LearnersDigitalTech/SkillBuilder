@@ -143,7 +143,22 @@ export const Grade10GeneratorMap = {
 
     "Geometry / Pythagoras Theorem": generatePythagoras,
     "Probability / True/False": generateProbability,
-    "Probability / Dice": generateDiceProbability
+    "Probability / Dice": generateDiceProbability,
+
+    // Fixes for Regeneration (Topic String Mismatches)
+    "Perimeter of Plane Figures": generatePerimeter,
+    "Area of Plane Figures": generateArea,
+    "Locating a point in a Cartesian Plane": generateCartesianPoint,
+    "Coordinate Geometry": generateCoordinateGeometry,
+    "Section Formula": generateSectionFormula,
+    "Trigonometry": generateTrigonometry,
+    "Trigonometric Ratios of Standard angles": generateTrigRatios,
+    "Word Problems - Pythagorean Theorem": generatePythagoras,
+    "Clocks": generateClocks,
+    "Miscellaneous": generateProbability, // True/False was renamed/used as Misc
+    "Probability": generateDiceProbability, // Dice prob uses typically just "Probability"
+    "Linear Equations Word Problems": generateAgeProblem,
+    "Quadratic Equations Word Problems": generateNumberSquareProblem
 };
 
 export default Grade10Questions;
