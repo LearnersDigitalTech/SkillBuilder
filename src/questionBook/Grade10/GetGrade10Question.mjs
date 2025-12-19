@@ -17,6 +17,7 @@ import {
     generateSimultaneousEquations,
     generateQuadraticEquation,
     generatePerimeter,
+    generatePerimeterAndArea,
     generateArea,
     generateCartesianPoint,
     generateCoordinateGeometry,
@@ -54,7 +55,7 @@ const Grade10Questions = {
     q15: generate(generateLinearEquationOneVar),
     q16: generate(generateSimultaneousEquations),
     q17: generate(generateQuadraticEquation),
-    q18: generate(generatePerimeter),
+    q18: generate(generatePerimeterAndArea),
     q19: generate(generateArea),
     q20: generate(generateCartesianPoint),
     q21: generate(generateCoordinateGeometry),
@@ -128,7 +129,7 @@ export const Grade10GeneratorMap = {
     "Algebra / Word Problems (Age)": generateAgeProblem,
     "Algebra / Word Problems (Quadratic)": generateNumberSquareProblem,
 
-    "Mensuration / Perimeter": generatePerimeter,
+    "Mensuration / Perimeter": generatePerimeterAndArea,
     // "Perimeter": generatePerimeter, // topic in generator check?
 
     "Mensuration / Area": generateArea,
@@ -146,7 +147,7 @@ export const Grade10GeneratorMap = {
     "Probability / Dice": generateDiceProbability,
 
     // Fixes for Regeneration (Topic String Mismatches)
-    "Perimeter of Plane Figures": generatePerimeter,
+    "Perimeter of Plane Figures": generatePerimeterAndArea,
     "Area of Plane Figures": generateArea,
     "Locating a point in a Cartesian Plane": generateCartesianPoint,
     "Coordinate Geometry": generateCoordinateGeometry,

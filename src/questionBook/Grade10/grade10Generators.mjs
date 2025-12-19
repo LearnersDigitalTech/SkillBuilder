@@ -1461,3 +1461,89 @@ export const generateNumberSquareProblem = () => {
         topic: 'Quadratic Equations Word Problems'
     };
 };
+
+export const generatePerimeterAndArea = () => {
+    const rows = [];
+    const answerObj = {};
+    let index = 0;
+
+    // Helper to create SVGs
+    const createSvg = (content, w = 100, h = 80) => `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:auto;">${content}</svg>`;
+
+    // 1. Rectangle
+    const l = getRandomInt(4, 10);
+    const w = getRandomInt(2, l - 1);
+    const rectSvg = createSvg(`
+        <rect x="10" y="20" width="80" height="40" stroke="crimson" stroke-width="2" fill="none" />
+        <text x="50" y="15" font-size="12" text-anchor="middle" fill="black">${l} cm</text>
+        <text x="90" y="45" font-size="12" text-anchor="end" fill="black">${w} cm</text>
+    `);
+
+    rows.push({ text: `Rectangle`, image: rectSvg });
+    answerObj[index++] = { perimeter: String(2 * (l + w)), area: String(l * w) };
+
+    // 2. Square
+    const s = getRandomInt(3, 10);
+    const sqSvg = createSvg(`
+        <rect x="30" y="20" width="40" height="40" stroke="crimson" stroke-width="2" fill="none" />
+        <text x="50" y="75" font-size="12" text-anchor="middle" fill="black">${s} cm</text>
+    `);
+
+    rows.push({ text: `Square`, image: sqSvg });
+    answerObj[index++] = { perimeter: String(4 * s), area: String(s * s) };
+
+    // 3. Triangle (Right Angled for simplicity matches 3,4,5 logic)
+    // Draw right triangle
+    const triplet = shuffleArray([[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 15, 17]])[0];
+    const base = triplet[0];
+    const height = triplet[1];
+    const hyp = triplet[2];
+
+    const triSvg = createSvg(`
+        <polygon points="40,70 40,20 100,70" stroke="crimson" stroke-width="2" fill="none" />
+        <text x="35" y="45" font-size="12" text-anchor="end" fill="black">${height} cm</text>
+        <text x="70" y="85" font-size="12" text-anchor="middle" fill="black">${base} cm</text>
+        <text x="75" y="40" font-size="12" text-anchor="start" fill="black">${hyp} cm</text>
+    `, 120, 90);
+
+    rows.push({ text: `Right Triangle`, image: triSvg });
+    answerObj[index++] = { perimeter: String(base + height + hyp), area: String(0.5 * base * height) };
+
+    // 4. Parallelogram (base, side, height)
+    const pBase = getRandomInt(5, 12);
+    const pSide = getRandomInt(4, 10);
+    const pHeight = getRandomInt(2, pSide - 1);
+
+    const paraSvg = createSvg(`
+        <polygon points="20,70 40,20 90,20 70,70" stroke="crimson" stroke-width="2" fill="none" />
+        <line x1="40" y1="20" x2="40" y2="70" stroke="black" stroke-width="1" stroke-dasharray="4" />
+        <text x="45" y="85" font-size="12" text-anchor="middle" fill="black">${pBase} cm</text>
+        <rect x="40" y="60" width="10" height="10" fill="none" stroke="black" stroke-width="1" />
+        <text x="30" y="50" font-size="12" text-anchor="end" fill="black">${pHeight} cm</text> 
+        <text x="80" y="45" font-size="12" text-anchor="middle" fill="black">${pSide} cm</text>
+    `, 110, 90);
+
+    rows.push({ text: `Parallelogram`, image: paraSvg });
+    answerObj[index++] = { perimeter: String(2 * (pBase + pSide)), area: String(pBase * pHeight) };
+
+    // 5. Circle
+    const r = 7 * getRandomInt(1, 4);
+    const circSvg = createSvg(`
+        <circle cx="50" cy="40" r="30" stroke="crimson" stroke-width="2" fill="none" />
+        <line x1="50" y1="40" x2="80" y2="40" stroke="black" stroke-width="1" />
+        <text x="65" y="35" font-size="12" text-anchor="middle" fill="black">${r} cm</text>
+    `);
+
+    rows.push({ text: `Circle`, image: circSvg });
+    answerObj[index++] = { perimeter: String(2 * 22 * (r / 7)), area: String(22 * (r / 7) * r) };
+
+    return {
+        type: "tableInput",
+        variant: "double-input",
+        topic: "Perimeter and Area",
+        headers: ["Shape", "Perimeter", "Area"],
+        inputKeys: ["perimeter", "area"],
+        answer: JSON.stringify(answerObj),
+        rows: rows
+    };
+};
