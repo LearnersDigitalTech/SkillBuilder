@@ -385,14 +385,15 @@ export const generatePerimeterAndArea = () => {
         <text x="65" y="35" font-size="12" text-anchor="middle" fill="black">${r} cm</text>
     `);
 
-    rows.push({ text: `Circle ($\pi=22/7$)`, image: circSvg });
+    rows.push({ text: `Circle`, image: circSvg });
     answerObj[index++] = { perimeter: String(2 * 22 * (r / 7)), area: String(22 * (r / 7) * r) };
 
     return {
         type: "tableInput",
         variant: "double-input",
         topic: "Perimeter and Area",
-        headers: ["Shape", "Perimeter", "Area"], // Custom headers
+        headers: ["Shape", "Perimeter", "Area"], // Custom headers - images display in Shape column
+        inputKeys: ["perimeter", "area"], // Ensure UI uses correct keys for validation
         answer: JSON.stringify(answerObj),
         rows: rows
     };

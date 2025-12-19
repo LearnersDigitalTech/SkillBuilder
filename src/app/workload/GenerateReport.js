@@ -337,6 +337,8 @@ function analyzeResponses(responses, grade) {
             type: item.type ?? null,
             tree: item.tree ?? null,
             rows: item.rows ?? null, // Include rows for tableInput questions with images
+            headers: item.headers ?? null, // Include headers for dynamic table rendering
+            inputKeys: item.inputKeys ?? null, // Include inputKeys for dynamic column rendering
             correctAnswer: correctAnswer ?? null,
             userAnswer: givenAnswer || null,
             attempted: attempted ?? false,
