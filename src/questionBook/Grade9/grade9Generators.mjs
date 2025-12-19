@@ -158,12 +158,16 @@ export const generatePolynomialOperations = () => {
     const resA = isAdd ? a1 + a2 : a1 - a2;
     const resB = isAdd ? b1 + b2 : b1 - b2;
 
-    const answer = `$${resA}x ${resB >= 0 ? '+' : '-'} ${Math.abs(resB)}$`;
+    const answer = `$${formatLinearExpression([{ coeff: resA, var: 'x' }, { coeff: resB, var: '' }])}$`;
 
     // Distractors
-    const w1 = `$${resA}x ${resB >= 0 ? '-' : '+'} ${Math.abs(resB)}$`; // Flip sign of constant
-    const w2 = `$${resA + 1}x ${resB >= 0 ? '+' : '-'} ${Math.abs(resB)}$`; // Wrong coeff
-    const w3 = `$${resA}x ${resB >= 0 ? '+' : '-'} ${Math.abs(resB) + 1}$`; // Wrong constant
+    // w1: Flip sign of constant
+    const w1 = `$${formatLinearExpression([{ coeff: resA, var: 'x' }, { coeff: -resB, var: '' }])}$`;
+    // w2: Wrong coeff (resA + 1)
+    const w2 = `$${formatLinearExpression([{ coeff: resA + 1, var: 'x' }, { coeff: resB, var: '' }])}$`;
+    // w3: Wrong constant magnitude (Math.abs(resB) + 1)
+    const w3Constant = resB >= 0 ? resB + 1 : resB - 1;
+    const w3 = `$${formatLinearExpression([{ coeff: resA, var: 'x' }, { coeff: w3Constant, var: '' }])}$`;
 
     const options = shuffleArray([
         { value: answer, label: answer },
@@ -177,7 +181,7 @@ export const generatePolynomialOperations = () => {
 
     return {
         type: "mcq",
-        question: `Simplify: ${questionText}`,
+        question: `Simplify expression: ${questionText}`,
         topic: "Polynomials / Operations",
         options: uniqueOptions,
         answer: answer
