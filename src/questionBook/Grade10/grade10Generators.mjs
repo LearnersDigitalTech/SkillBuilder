@@ -628,7 +628,7 @@ export const generateLinearEquationOneVar = () => {
     const b1 = getRandomInt(10, 50);
     // make lhs = c
     const c1 = a1 * x1 + b1;
-    rows.push({ text: `Solve: $${a1}x + ${b1} = ${c1}$`, answer: String(x1) });
+    rows.push({ text: `Solve for x : $${a1}x + ${b1} = ${c1}$`, answer: String(x1) });
 
     // Q2: Structure like 2 - (3 - 4x) = 2x + 5  => a - (b - cx) = dx + e
     const x2 = getRandomInt(2, 8); // Answer
@@ -641,7 +641,7 @@ export const generateLinearEquationOneVar = () => {
     const e2 = (a2 - b2) + x2 * (c2 - d2);
 
     const rhsSign = e2 >= 0 ? '+' : '-';
-    rows.push({ text: `Solve: $${a2} - (${b2} - ${c2}x) = ${d2}x ${rhsSign} ${Math.abs(e2)}$`, answer: String(x2) });
+    rows.push({ text: `Solve for y : $${a2} - (${b2} - ${c2}y) = ${d2}y ${rhsSign} ${Math.abs(e2)}$`, answer: String(x2) });
 
     // Q3: Slightly harder? 2x = x + k
     // or variables on both sides? Image is simple 4x+48=12.
@@ -657,7 +657,6 @@ export const generateLinearEquationOneVar = () => {
 
     return {
         type: 'tableInput',
-        question: 'Find the value of x for the following equations:',
         answer: JSON.stringify(answerObj),
         rows: rows,
         topic: 'Linear Equations in one Variable'
@@ -829,7 +828,7 @@ export const generateArea = () => {
     // Use MathJax for triangle.
     const questionText = `If the area of $\\triangle ABC$ is $${area}$ sq.cm and the base measure $${b_m}$ m then find the height in cm.`;
 
-    rows.push({ text: `height =`, unit: 'cm', answer: String(h_cm) });
+    rows.push({ text: `Height =`, unit: 'cm', answer: String(h_cm) });
 
     const answerObj = { 0: String(h_cm) };
 
