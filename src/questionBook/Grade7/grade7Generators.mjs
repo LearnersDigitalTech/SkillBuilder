@@ -433,7 +433,10 @@ export const generateCommercialMath = () => {
     const T4 = getRandomInt(2, 4);
     const SI4 = (P4 * R4 * T4) / 100;
     const Amt4 = P4 + SI4;
-    rows.push({ text: `Principal = ₹${P4}, Rate = ${R4}%, Time = ${T4} yrs. Find Amount.` });
+    // rows.push({ text: `Principal = ₹${P4}, Rate = ${R4}%, Time = ${T4} yrs. Find Amount.` });
+    rows.push({
+        text: `Ravi invested ₹${P4} at ${R4}% per annum for ${T4} years on simple interest. Find the amount he will receive at the end of ${T4} years.`
+    });
     answerObj[index++] = String(Amt4);
 
     return {

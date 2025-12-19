@@ -349,8 +349,9 @@
 }
 
 .poweredByContainerImage {
-    max-height: 150px;
-    /* scale: 2.5; REMOVED */
+    max-height: 300px;
+    width: auto;
+    object-fit: contain;
 }
 
 .poweredByContainer ul {
