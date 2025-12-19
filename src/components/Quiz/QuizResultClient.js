@@ -1764,52 +1764,69 @@ const QuizResultClient = () => {
                                         {q.type === 'tableInput' && q.rows && q.rows.length > 0 && q.rows[0].image && (
                                             <div style={{ marginTop: '16px' }}>
                                                 {/* Desktop Table View */}
-                                                <div className="fve-desktop-table">
+                                                <div style={{
+                                                    display: 'none',
+                                                    '@media (min-width: 768px)': { display: 'block' }
+                                                }} className="fve-desktop-table">
                                                     <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px', overflowX: 'auto' }}>
                                                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                                             <thead>
                                                                 <tr style={{ borderBottom: '2px solid #e2e8f0' }}>
-                                                                    <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#475569' }}>Shape</th>
-                                                                    <th style={{ padding: '12px', textAlign: 'center', fontWeight: '600', color: '#475569' }}>Image</th>
-                                                                    <th style={{ padding: '12px', textAlign: 'center', fontWeight: '600', color: '#475569' }}>Faces (F)</th>
-                                                                    <th style={{ padding: '12px', textAlign: 'center', fontWeight: '600', color: '#475569' }}>Vertices (V)</th>
-                                                                    <th style={{ padding: '12px', textAlign: 'center', fontWeight: '600', color: '#475569' }}>Edges (E)</th>
+                                                                    {/* Dynamic headers from question.headers */}
+                                                                    {(q.headers || ['Shape', 'Image', 'Faces (F)', 'Vertices (V)', 'Edges (E)']).map((header, idx) => (
+                                                                        <th key={idx} style={{ padding: '12px', textAlign: idx === 0 ? 'left' : 'center', fontWeight: '600', color: '#475569' }}>
+                                                                            {header}
+                                                                        </th>
+                                                                    ))}
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
                                                                 {q.rows.map((row, idx) => {
                                                                     const userAns = q.userAnswer ? JSON.parse(q.userAnswer)[idx] : {};
                                                                     const correctAns = q.correctAnswer ? JSON.parse(q.correctAnswer)[idx] : {};
+                                                                    // Determine input keys (e.g., ['perimeter', 'area'] or ['faces', 'vertices', 'edges'])
+                                                                    const inputKeys = q.inputKeys || ['faces', 'vertices', 'edges'];
+                                                                    const headers = q.headers || ['Shape', 'Image', 'Faces (F)', 'Vertices (V)', 'Edges (E)'];
+                                                                    const hasImageColumn = headers.includes('Image');
+
                                                                     return (
                                                                         <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                                                            <td style={{ padding: '12px', fontWeight: '500' }}>{row.text}</td>
-                                                                            <td style={{ padding: '12px', textAlign: 'center' }}>
-                                                                                <img src={row.image} alt={row.text} style={{ maxWidth: '80px', maxHeight: '80px', objectFit: 'contain' }} />
+                                                                            {/* Shape column - includes image if no separate Image column */}
+                                                                            <td style={{ padding: '12px', fontWeight: '500' }}>
+                                                                                {!hasImageColumn && row.image && (
+                                                                                    <div style={{ marginBottom: '8px', textAlign: 'center' }}>
+                                                                                        {typeof row.image === 'string' && row.image.startsWith('<svg') ? (
+                                                                                            <div dangerouslySetInnerHTML={{ __html: row.image }} style={{ display: 'inline-block' }} />
+                                                                                        ) : (
+                                                                                            <img src={row.image} alt={row.text} style={{ maxWidth: '120px', maxHeight: '100px', objectFit: 'contain', display: 'block', margin: '0 auto' }} />
+                                                                                        )}
+                                                                                    </div>
+                                                                                )}
+                                                                                <div style={{ textAlign: hasImageColumn ? 'left' : 'center', fontWeight: '600' }}>{row.text}</div>
                                                                             </td>
-                                                                            <td style={{ padding: '12px', textAlign: 'center' }}>
-                                                                                <div style={{ color: userAns?.faces == correctAns?.faces ? '#16a34a' : '#dc2626', fontWeight: '600' }}>
-                                                                                    {userAns?.faces || '-'}
-                                                                                </div>
-                                                                                <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>
-                                                                                    (Correct: {correctAns?.faces})
-                                                                                </div>
-                                                                            </td>
-                                                                            <td style={{ padding: '12px', textAlign: 'center' }}>
-                                                                                <div style={{ color: userAns?.vertices == correctAns?.vertices ? '#16a34a' : '#dc2626', fontWeight: '600' }}>
-                                                                                    {userAns?.vertices || '-'}
-                                                                                </div>
-                                                                                <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>
-                                                                                    (Correct: {correctAns?.vertices})
-                                                                                </div>
-                                                                            </td>
-                                                                            <td style={{ padding: '12px', textAlign: 'center' }}>
-                                                                                <div style={{ color: userAns?.edges == correctAns?.edges ? '#16a34a' : '#dc2626', fontWeight: '600' }}>
-                                                                                    {userAns?.edges || '-'}
-                                                                                </div>
-                                                                                <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>
-                                                                                    (Correct: {correctAns?.edges})
-                                                                                </div>
-                                                                            </td>
+                                                                            {/* Separate Image column - only if headers include "Image" */}
+                                                                            {hasImageColumn && (
+                                                                                <td style={{ padding: '12px', textAlign: 'center' }}>
+                                                                                    {row.image && (
+                                                                                        typeof row.image === 'string' && row.image.startsWith('<svg') ? (
+                                                                                            <div dangerouslySetInnerHTML={{ __html: row.image }} style={{ display: 'inline-block' }} />
+                                                                                        ) : (
+                                                                                            <img src={row.image} alt={row.text} style={{ maxWidth: '80px', maxHeight: '80px', objectFit: 'contain' }} />
+                                                                                        )
+                                                                                    )}
+                                                                                </td>
+                                                                            )}
+                                                                            {/* Dynamic columns based on inputKeys */}
+                                                                            {inputKeys.map((key) => (
+                                                                                <td key={key} style={{ padding: '12px', textAlign: 'center' }}>
+                                                                                    <div style={{ color: userAns?.[key] == correctAns?.[key] ? '#16a34a' : '#dc2626', fontWeight: '600' }}>
+                                                                                        {userAns?.[key] || '-'}
+                                                                                    </div>
+                                                                                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>
+                                                                                        (Correct: {correctAns?.[key]})
+                                                                                    </div>
+                                                                                </td>
+                                                                            ))}
                                                                         </tr>
                                                                     );
                                                                 })}
@@ -1819,10 +1836,19 @@ const QuizResultClient = () => {
                                                 </div>
 
                                                 {/* Mobile Card View */}
-                                                <div className="fve-mobile-cards">
+                                                <div style={{
+                                                    display: 'block',
+                                                    '@media (min-width: 768px)': { display: 'none' }
+                                                }} className="fve-mobile-cards">
                                                     {q.rows.map((row, idx) => {
                                                         const userAns = q.userAnswer ? JSON.parse(q.userAnswer)[idx] : {};
                                                         const correctAns = q.correctAnswer ? JSON.parse(q.correctAnswer)[idx] : {};
+                                                        const inputKeys = q.inputKeys || ['faces', 'vertices', 'edges'];
+                                                        const headers = q.headers || ['Shape', 'Image', 'Faces (F)', 'Vertices (V)', 'Edges (E)'];
+                                                        const hasImageColumn = headers.includes('Image');
+                                                        // Get labels for the input fields (skip Shape, and Image if present)
+                                                        const fieldLabels = hasImageColumn ? headers.slice(2) : headers.slice(1);
+
                                                         return (
                                                             <div key={idx} style={{
                                                                 border: '1px solid #e2e8f0',
@@ -1832,66 +1858,39 @@ const QuizResultClient = () => {
                                                                 background: '#fff'
                                                             }}>
                                                                 {/* Shape Name and Image */}
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
-                                                                    <img src={row.image} alt={row.text} style={{ width: '80px', height: '80px', objectFit: 'contain', flexShrink: 0 }} />
-                                                                    <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>{row.text}</div>
+                                                                <div style={{ marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+                                                                    {row.image && (
+                                                                        <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+                                                                            {typeof row.image === 'string' && row.image.startsWith('<svg') ? (
+                                                                                <div dangerouslySetInnerHTML={{ __html: row.image }} style={{ display: 'inline-block', maxWidth: '120px', maxHeight: '100px' }} />
+                                                                            ) : (
+                                                                                <img src={row.image} alt={row.text} style={{ maxWidth: '120px', maxHeight: '100px', objectFit: 'contain', display: 'block', margin: '0 auto' }} />
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                    <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#1e293b', textAlign: 'center' }}>{row.text}</div>
                                                                 </div>
 
-                                                                {/* F, V, E Grid */}
-                                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-                                                                    {/* Faces */}
-                                                                    <div style={{ textAlign: 'center' }}>
-                                                                        <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                                                            Faces (F)
+                                                                {/* Dynamic Fields Grid */}
+                                                                <div style={{ display: 'grid', gridTemplateColumns: `repeat(${inputKeys.length}, 1fr)`, gap: '12px' }}>
+                                                                    {inputKeys.map((key, keyIdx) => (
+                                                                        <div key={key} style={{ textAlign: 'center' }}>
+                                                                            <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                                                                {fieldLabels[keyIdx] || key}
+                                                                            </div>
+                                                                            <div style={{
+                                                                                fontSize: '1.5rem',
+                                                                                fontWeight: '700',
+                                                                                color: userAns?.[key] == correctAns?.[key] ? '#16a34a' : '#dc2626',
+                                                                                marginBottom: '4px'
+                                                                            }}>
+                                                                                {userAns?.[key] || '-'}
+                                                                            </div>
+                                                                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                                                                                ✓ {correctAns?.[key]}
+                                                                            </div>
                                                                         </div>
-                                                                        <div style={{
-                                                                            fontSize: '1.5rem',
-                                                                            fontWeight: '700',
-                                                                            color: userAns?.faces == correctAns?.faces ? '#16a34a' : '#dc2626',
-                                                                            marginBottom: '4px'
-                                                                        }}>
-                                                                            {userAns?.faces || '-'}
-                                                                        </div>
-                                                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                                                                            ✓ {correctAns?.faces}
-                                                                        </div>
-                                                                    </div>
-
-                                                                    {/* Vertices */}
-                                                                    <div style={{ textAlign: 'center' }}>
-                                                                        <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                                                            Vertices (V)
-                                                                        </div>
-                                                                        <div style={{
-                                                                            fontSize: '1.5rem',
-                                                                            fontWeight: '700',
-                                                                            color: userAns?.vertices == correctAns?.vertices ? '#16a34a' : '#dc2626',
-                                                                            marginBottom: '4px'
-                                                                        }}>
-                                                                            {userAns?.vertices || '-'}
-                                                                        </div>
-                                                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                                                                            ✓ {correctAns?.vertices}
-                                                                        </div>
-                                                                    </div>
-
-                                                                    {/* Edges */}
-                                                                    <div style={{ textAlign: 'center' }}>
-                                                                        <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                                                            Edges (E)
-                                                                        </div>
-                                                                        <div style={{
-                                                                            fontSize: '1.5rem',
-                                                                            fontWeight: '700',
-                                                                            color: userAns?.edges == correctAns?.edges ? '#16a34a' : '#dc2626',
-                                                                            marginBottom: '4px'
-                                                                        }}>
-                                                                            {userAns?.edges || '-'}
-                                                                        </div>
-                                                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                                                                            ✓ {correctAns?.edges}
-                                                                        </div>
-                                                                    </div>
+                                                                    ))}
                                                                 </div>
                                                             </div>
                                                         );
