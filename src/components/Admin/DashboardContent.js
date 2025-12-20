@@ -7,6 +7,7 @@ import { firebaseDatabase } from '@/backend/firebaseHandler';
 import StatCard from './StatCard';
 import { MarksBarChart, StudentsAreaChart } from './Charts';
 import StudentList from './StudentList';
+import PuzzleManager from './PuzzleManager';
 
 const DashboardContent = ({ logoutAction }) => {
     const [view, setView] = useState('overview'); // 'overview' | 'students'
@@ -467,6 +468,14 @@ const DashboardContent = ({ logoutAction }) => {
                 >
                     Rapid Math
                 </Button>
+                <Button
+                    variant={view === 'puzzles' ? 'contained' : 'outlined'}
+                    startIcon={<FileText size={20} />}
+                    onClick={() => setView('puzzles')}
+                    sx={{ borderRadius: 2, textTransform: 'none', px: 3 }}
+                >
+                    Puzzles
+                </Button>
             </Stack>
 
             {view === 'overview' ? (
@@ -521,6 +530,8 @@ const DashboardContent = ({ logoutAction }) => {
                         </Grid>
                     </Grid>
                 </>
+            ) : view === 'puzzles' ? (
+                <PuzzleManager />
             ) : (
                 <StudentList
                     students={studentList}
