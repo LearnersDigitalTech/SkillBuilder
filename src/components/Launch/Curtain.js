@@ -13,7 +13,7 @@ const Curtain = ({ open }) => {
                 className={`relative h-full w-1/2 transition-transform duration-[2000ms] ease-[cubic-bezier(0.77,0,0.175,1)] ${open ? "-translate-x-full" : "translate-x-0"
                     }`}
                 style={{
-                    background: "linear-gradient(90deg, #300000 0%, #600000 20%, #400000 40%, #700000 60%, #400000 80%, #600000 100%)",
+                    background: "linear-gradient(90deg, #0f1035 0%, #2e2b69 20%, #1a1a4a 40%, #3e3b85 60%, #1a1a4a 80%, #2e2b69 100%)",
                     boxShadow: "10px 0 30px rgba(0,0,0,0.8), inset -5px 0 15px rgba(0,0,0,0.5)"
                 }}
             >
@@ -27,7 +27,7 @@ const Curtain = ({ open }) => {
                 className={`relative h-full w-1/2 transition-transform duration-[2000ms] ease-[cubic-bezier(0.77,0,0.175,1)] ${open ? "translate-x-full" : "translate-x-0"
                     }`}
                 style={{
-                    background: "linear-gradient(90deg, #600000 0%, #400000 20%, #700000 40%, #400000 60%, #600000 80%, #300000 100%)",
+                    background: "linear-gradient(90deg, #2e2b69 0%, #1a1a4a 20%, #3e3b85 40%, #1a1a4a 60%, #2e2b69 80%, #0f1035 100%)",
                     boxShadow: "-10px 0 30px rgba(0,0,0,0.8), inset 5px 0 15px rgba(0,0,0,0.5)"
                 }}
             >
