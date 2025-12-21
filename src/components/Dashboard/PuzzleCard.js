@@ -6,23 +6,87 @@ import { ref, get } from 'firebase/database';
 import { firebaseDatabase } from '@/backend/firebaseHandler';
 import PuzzleModal from './PuzzleModal';
 
-const PuzzleCard = ({ user }) => {
+const PuzzleCard = ({ user, activeChild, activeChildId }) => {
     const [puzzle, setPuzzle] = useState(null);
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
 
+    // Construct unique Learner ID
+    const getLearnerId = () => {
+        let baseId = user?.uid || user?.phoneNumber || 'anonymous';
+        // Sanitize baseId if it is email (replace . with _) - naive check but safe to do
+        baseId = baseId.replace(/\./g, '_');
+
+        if (activeChildId) {
+            return `${baseId}_${activeChildId}`;
+        }
+        return baseId;
+    };
+
+    const learnerId = getLearnerId();
+
     useEffect(() => {
-        const fetchPuzzle = async () => {
+        const fetchPuzzleAndStatus = async () => {
             // Get Today's Date in YYYY-MM-DD (local time)
-            const today = new Date().toISOString().split('T')[0];
+            // Using en-CA locale ensures YYYY-MM-DD format consistent with HTML date inputs
+            const today = new Date().toLocaleDateString('en-CA');
+            console.log("🧩 Fetching Puzzle for Date:", today, "LearnerID:", learnerId);
+
+            // 1. Check Completion Status First (Non-blocking)
+            try {
+                const completionRef = ref(firebaseDatabase, `NMD_2025/PuzzleCompletions/${today}/${learnerId}`);
+                const completionSnapshot = await get(completionRef);
+                if (completionSnapshot.exists() && completionSnapshot.val() === true) {
+                    setIsCompleted(true);
+                    setLoading(false);
+                    return;
+                } else {
+                    setIsCompleted(false);
+                }
+            } catch (completionError) {
+                console.warn("⚠️ Error checking completion status (ignoring to allow puzzle load):", completionError);
+                setIsCompleted(false);
+            }
 
             try {
-                // 1. Fetch Puzzle
+                // 2. Fetch Puzzles for the day
                 const puzzleRef = ref(firebaseDatabase, `NMD_2025/Puzzles/${today}`);
                 const snapshot = await get(puzzleRef);
+
                 if (snapshot.exists()) {
-                    setPuzzle({ id: today, ...snapshot.val() });
+                    const data = snapshot.val();
+                    const allPuzzles = Object.values(data);
+
+                    // 3. Identify User Grade
+                    // Check activeChild grade first, then user fallback
+                    const gradeSource = activeChild?.grade || user?.grade;
+                    let userGrade = null;
+
+                    if (gradeSource) {
+                        // Handle both number (3) and string ("Grade 3", "3rd", "Class 3") formats
+                        const gradeString = String(gradeSource);
+                        const match = gradeString.match(/\d+/);
+                        if (match) {
+                            userGrade = parseInt(match[0]);
+                        }
+                    }
+
+                    console.log("🧩 User Grade Parsed:", userGrade, "Source:", gradeSource);
+
+                    if (userGrade) {
+                        // Find puzzle that includes this grade
+                        const matchedPuzzle = allPuzzles.find(p => (p.grades || []).includes(userGrade));
+
+                        if (matchedPuzzle) {
+                            setPuzzle(matchedPuzzle);
+                        } else {
+                            // Grade specific puzzle not found
+                            setPuzzle(null);
+                        }
+                    } else {
+                        setPuzzle(null);
+                    }
                 } else {
                     setPuzzle(null); // No puzzle today
                 }
@@ -33,8 +97,13 @@ const PuzzleCard = ({ user }) => {
             }
         };
 
-        fetchPuzzle();
-    }, []);
+        fetchPuzzleAndStatus();
+    }, [user, activeChild, learnerId]);
+
+    const handlePuzzleComplete = () => {
+        setIsCompleted(true);
+        setModalOpen(false);
+    };
 
     // Check completion status (optional optimization: can check in modal too, 
     // but good to show status on card if possible. Skipping for now to keep simple, 
@@ -42,6 +111,39 @@ const PuzzleCard = ({ user }) => {
 
     if (loading) {
         return <Skeleton variant="rectangular" height={150} sx={{ borderRadius: 4 }} />;
+    }
+
+    // COMPLETED STATE
+    if (isCompleted) {
+        return (
+            <Box sx={{
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', // Emerald Gradient
+                borderRadius: 4,
+                p: 3,
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                color: 'white',
+                textAlign: 'center',
+                position: 'relative',
+                overflow: 'hidden'
+            }}>
+                <Box sx={{ position: 'absolute', right: -20, bottom: -20, opacity: 0.2 }}>
+                    <Brain size={120} />
+                </Box>
+                <Box sx={{ p: 1.5, bgcolor: 'rgba(255,255,255,0.2)', borderRadius: '50%', mb: 1.5 }}>
+                    <Brain size={28} />
+                </Box>
+                <Typography variant="h6" fontWeight="bold">
+                    Puzzle Solved!
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9, maxWidth: '90%' }}>
+                    Great job! Come back tomorrow for a new challenge.
+                </Typography>
+            </Box>
+        );
     }
 
     if (!puzzle) {
@@ -136,6 +238,8 @@ const PuzzleCard = ({ user }) => {
                 onClose={() => setModalOpen(false)}
                 puzzle={puzzle}
                 user={user}
+                learnerId={learnerId}
+                onComplete={handlePuzzleComplete}
             />
         </>
     );

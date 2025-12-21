@@ -535,7 +535,7 @@ const DashboardClient = () => {
                                     {/* PUZZLE OF THE DAY Card */}
                                     <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
                                         <div className="h-[160px] w-full">
-                                            <PuzzleCard user={user} />
+                                            <PuzzleCard user={user} activeChild={activeChild} activeChildId={activeChildId} />
                                         </div>
                                     </div>
                                 </div>

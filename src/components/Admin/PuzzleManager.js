@@ -1,8 +1,8 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, Button, MenuItem, Typography, IconButton, Grid, Paper, Stack, Chip, Divider, InputAdornment } from '@mui/material';
-import { Plus, Trash2, Save, Calendar, Check, X, MoveVertical, Image as ImageIcon } from 'lucide-react';
-import { ref, set, get } from 'firebase/database';
+import { Box, TextField, Button, MenuItem, Typography, IconButton, Paper, Stack, Chip, Divider, InputAdornment, Checkbox, FormControlLabel, Accordion, AccordionSummary, AccordionDetails, Grid } from '@mui/material';
+import { Plus, Trash2, Save, Check, MoveVertical, Image as ImageIcon, ChevronDown, Edit2, X } from 'lucide-react';
+import { ref, set, get, remove } from 'firebase/database';
 import { firebaseDatabase } from '@/backend/firebaseHandler';
 
 const PUZZLE_TYPES = [
@@ -13,67 +13,152 @@ const PUZZLE_TYPES = [
     { value: 'ORDER', label: 'Reorder / Sequence' }
 ];
 
+const ALL_GRADES = Array.from({ length: 10 }, (_, i) => i + 1); // [1, 2, ..., 10]
+
 const PuzzleManager = () => {
-    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [selectedDate, setSelectedDate] = useState(new Date().toLocaleDateString('en-CA'));
     const [loading, setLoading] = useState(false);
-    const [puzzle, setPuzzle] = useState({
+    const [dailyPuzzles, setDailyPuzzles] = useState([]); // Array of puzzle objects
+
+    // Form State
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingId, setEditingId] = useState(null); // ID if editing existing
+    const [formPuzzle, setFormPuzzle] = useState({
+        grades: [],
         type: 'MCQ',
         question: '',
         imageUrl: '',
         options: ['', '', '', ''],
-        correctAnswer: '', // For MCQ (index/value), TEXT (string)
-        pairs: [{ left: '', right: '' }, { left: '', right: '' }], // For MATCH
-        blanks: [], // For FILL_BLANK (auto-generated from question?) -> actually simpler to just have "answer" field and instructions
-        order: [] // For ORDER
+        correctAnswer: '',
+        pairs: [{ left: '', right: '' }, { left: '', right: '' }],
+        blanks: [],
+        order: []
     });
 
-    // Load existing puzzle for date
+    // Load available grades (those not assigned to other puzzles)
+    const [assignedGrades, setAssignedGrades] = useState(new Set());
+
+    // Load existing puzzles for date
     useEffect(() => {
-        const loadPuzzle = async () => {
+        const loadPuzzles = async () => {
             setLoading(true);
             try {
                 const puzzleRef = ref(firebaseDatabase, `NMD_2025/Puzzles/${selectedDate}`);
                 const snapshot = await get(puzzleRef);
                 if (snapshot.exists()) {
-                    setPuzzle({
-                        type: 'MCQ',
-                        question: '',
-                        imageUrl: '',
-                        options: ['', '', '', ''],
-                        pairs: [{ left: '', right: '' }, { left: '', right: '' }],
-                        ...snapshot.val()
-                    });
+                    const data = snapshot.val();
+                    // Convert object to array (values) or just array if stored as array? 
+                    // To be safe against map/array mismatch, we handle normalized object.
+                    // We expect a map: { "uuid1": { ... }, "uuid2": { ... } }
+                    const puzzleList = Object.values(data);
+                    setDailyPuzzles(puzzleList);
                 } else {
-                    // Reset to default
-                    setPuzzle({
-                        type: 'MCQ',
-                        question: '',
-                        imageUrl: '',
-                        options: ['', '', '', ''],
-                        correctAnswer: '',
-                        pairs: [{ left: '', right: '' }, { left: '', right: '' }],
-                        blanks: [],
-                        order: []
-                    });
+                    setDailyPuzzles([]);
                 }
+                setIsEditing(false); // Reset form mode on date change
+                setEditingId(null);
             } catch (error) {
-                console.error("Error loading puzzle:", error);
+                console.error("Error loading puzzles:", error);
             } finally {
                 setLoading(false);
             }
         };
-        loadPuzzle();
+        loadPuzzles();
     }, [selectedDate]);
 
+    // Recalculate assigned grades whenever dailyPuzzles changes
+    useEffect(() => {
+        const assigned = new Set();
+        dailyPuzzles.forEach(p => {
+            // If we are currently editing this puzzle, don't count its grades as "assigned/locked" 
+            // from the perspective of the form (handled in render logic), but for global view they are assigned.
+            if (p.id !== editingId) {
+                (p.grades || []).forEach(g => assigned.add(g));
+            }
+        });
+        setAssignedGrades(assigned);
+
+        // Auto-select available grades for new form?
+        if (!isEditing && !editingId) {
+            // Only if we haven't manually touched the form? Simple logic: if formGrades is empty, fill with available.
+            // But actually, 'useEffect' triggers on dailyPuzzles change (e.g. after save).
+            // We can handle this logic in 'resetForm'.
+        }
+    }, [dailyPuzzles, editingId]);
+
+    const resetForm = (puzzlesList = dailyPuzzles) => {
+        // Calculate currently used grades to pre-fill remaining
+        const used = new Set();
+        puzzlesList.forEach(p => (p.grades || []).forEach(g => used.add(g)));
+
+        const available = ALL_GRADES.filter(g => !used.has(g));
+
+        setFormPuzzle({
+            grades: available, // Default to all remaining grades
+            type: 'MCQ',
+            question: '',
+            imageUrl: '',
+            options: ['', '', '', ''],
+            correctAnswer: '',
+            pairs: [{ left: '', right: '' }, { left: '', right: '' }],
+            blanks: [],
+            order: []
+        });
+        setEditingId(null);
+        setIsEditing(true); // Open form for new entry logic
+    };
+
+    const handleEditClick = (puzzle) => {
+        setFormPuzzle({ ...puzzle });
+        setEditingId(puzzle.id);
+        setIsEditing(true);
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditing(false);
+        setEditingId(null);
+    };
+
     const handleSave = async () => {
+        if (formPuzzle.grades.length === 0) {
+            alert("Please select at least one grade.");
+            return;
+        }
+
         setLoading(true);
         try {
-            const puzzleRef = ref(firebaseDatabase, `NMD_2025/Puzzles/${selectedDate}`);
-            await set(puzzleRef, {
-                ...puzzle,
+            const puzzleId = editingId || `puzzle_${Date.now()}`;
+            const newPuzzleData = {
+                ...formPuzzle,
+                id: puzzleId,
                 updatedAt: new Date().toISOString()
-            });
+            };
+
+            const puzzleRef = ref(firebaseDatabase, `NMD_2025/Puzzles/${selectedDate}/${puzzleId}`);
+            await set(puzzleRef, newPuzzleData);
+
+            // Update local state optimistic
+            // (Simulate fetch)
+            const updatedPuzzles = editingId
+                ? dailyPuzzles.map(p => p.id === editingId ? newPuzzleData : p)
+                : [...dailyPuzzles, newPuzzleData];
+
+            setDailyPuzzles(updatedPuzzles);
             alert('Puzzle saved successfully!');
+
+            // Check if there are remaining grades. If so, reset form for them.
+            // Calculate assigned excluding current new one, then add new one.
+            const allAssigned = new Set();
+            updatedPuzzles.forEach(p => (p.grades || []).forEach(g => allAssigned.add(g)));
+            const hasRemaining = ALL_GRADES.some(g => !allAssigned.has(g));
+
+            if (hasRemaining) {
+                resetForm(updatedPuzzles); // Auto-open form for remaining
+            } else {
+                setIsEditing(false); // Close form if all grades covered
+                setEditingId(null);
+            }
+
         } catch (error) {
             console.error("Error saving puzzle:", error);
             alert('Failed to save puzzle.');
@@ -82,217 +167,297 @@ const PuzzleManager = () => {
         }
     };
 
+    const handleDelete = async (id) => {
+        if (!confirm("Are you sure you want to delete this puzzle?")) return;
+        setLoading(true);
+        try {
+            const puzzleRef = ref(firebaseDatabase, `NMD_2025/Puzzles/${selectedDate}/${id}`);
+            await remove(puzzleRef);
+            setDailyPuzzles(prev => prev.filter(p => p.id !== id));
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    // --- FORM HANDLERS ---
+    const handleGradeToggle = (grade) => {
+        const currentGrades = formPuzzle.grades || [];
+        if (currentGrades.includes(grade)) {
+            setFormPuzzle({ ...formPuzzle, grades: currentGrades.filter(g => g !== grade) });
+        } else {
+            setFormPuzzle({ ...formPuzzle, grades: [...currentGrades, grade].sort((a, b) => a - b) });
+        }
+    };
+
     const handleOptionChange = (idx, value) => {
-        const newOptions = [...puzzle.options];
+        const newOptions = [...formPuzzle.options];
         newOptions[idx] = value;
-        setPuzzle({ ...puzzle, options: newOptions });
+        setFormPuzzle({ ...formPuzzle, options: newOptions });
     };
-
-    const addOption = () => {
-        setPuzzle({ ...puzzle, options: [...puzzle.options, ''] });
-    };
-
-    const removeOption = (idx) => {
-        const newOptions = puzzle.options.filter((_, i) => i !== idx);
-        setPuzzle({ ...puzzle, options: newOptions });
-    };
+    const addOption = () => setFormPuzzle({ ...formPuzzle, options: [...formPuzzle.options, ''] });
+    const removeOption = (idx) => setFormPuzzle({ ...formPuzzle, options: formPuzzle.options.filter((_, i) => i !== idx) });
 
     const handlePairChange = (idx, field, value) => {
-        const newPairs = [...puzzle.pairs];
+        const newPairs = [...formPuzzle.pairs];
         newPairs[idx][field] = value;
-        setPuzzle({ ...puzzle, pairs: newPairs });
+        setFormPuzzle({ ...formPuzzle, pairs: newPairs });
     };
+    const addPair = () => setFormPuzzle({ ...formPuzzle, pairs: [...formPuzzle.pairs, { left: '', right: '' }] });
+    const removePair = (idx) => setFormPuzzle({ ...formPuzzle, pairs: formPuzzle.pairs.filter((_, i) => i !== idx) });
 
-    const addPair = () => {
-        setPuzzle({ ...puzzle, pairs: [...puzzle.pairs, { left: '', right: '' }] });
-    };
-
-    const removePair = (idx) => {
-        const newPairs = puzzle.pairs.filter((_, i) => i !== idx);
-        setPuzzle({ ...puzzle, pairs: newPairs });
-    };
 
     return (
-        <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
-            <Paper elevation={0} sx={{ p: 4, borderRadius: 4, border: '1px solid #e2e8f0' }}>
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-                    <Typography variant="h5" fontWeight="bold" color="text.primary">
-                        Puzzle of the Day Manager
-                    </Typography>
-                    <TextField
-                        type="date"
-                        size="small"
-                        value={selectedDate}
-                        onChange={(e) => setSelectedDate(e.target.value)}
-                        sx={{ width: 200 }}
-                    />
-                </Box>
+        <Box sx={{ maxWidth: 900, mx: 'auto', p: 3 }}>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+                <Typography variant="h5" fontWeight="bold" color="text.primary">
+                    Puzzle of the Day Manager
+                </Typography>
+                <TextField
+                    type="date"
+                    size="small"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    sx={{ width: 200 }}
+                />
+            </Box>
 
-                <Stack spacing={3}>
-                    {/* TYPE SELECTION */}
-                    <TextField
-                        select
-                        label="Puzzle Type"
-                        value={puzzle.type}
-                        onChange={(e) => setPuzzle({ ...puzzle, type: e.target.value })}
-                        fullWidth
-                    >
-                        {PUZZLE_TYPES.map((option) => (
-                            <MenuItem key={option.value} value={option.value}>
-                                {option.label}
-                            </MenuItem>
-                        ))}
-                    </TextField>
-
-                    {/* QUESTION & IMAGE */}
-                    <TextField
-                        label="Question / Instructions"
-                        multiline
-                        rows={3}
-                        value={puzzle.question}
-                        onChange={(e) => setPuzzle({ ...puzzle, question: e.target.value })}
-                        fullWidth
-                        placeholder="Enter the main question or instructions here..."
-                    />
-
-                    <TextField
-                        label="Image URL (Optional)"
-                        value={puzzle.imageUrl}
-                        onChange={(e) => setPuzzle({ ...puzzle, imageUrl: e.target.value })}
-                        fullWidth
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <ImageIcon size={20} />
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
-                    {puzzle.imageUrl && (
-                        <Box sx={{ mt: 1, borderRadius: 2, overflow: 'hidden', maxHeight: 200, maxWidth: '100%' }}>
-                            <img src={puzzle.imageUrl} alt="Preview" style={{ height: '100%', objectFit: 'contain' }} />
-                        </Box>
-                    )}
-
-                    <Divider sx={{ my: 2 }} />
-
-                    {/* DYNAMIC CONTENT BASED ON TYPE */}
-                    {puzzle.type === 'MCQ' && (
-                        <Box>
-                            <Typography variant="subtitle2" gutterBottom fontWeight="bold">Options (Select the correct one)</Typography>
-                            <Stack spacing={2}>
-                                {puzzle.options.map((opt, idx) => (
-                                    <Box key={idx} display="flex" gap={2} alignItems="center">
-                                        <Button
-                                            variant={puzzle.correctAnswer === opt && opt !== '' ? "contained" : "outlined"}
-                                            onClick={() => setPuzzle({ ...puzzle, correctAnswer: opt })}
-                                            color={puzzle.correctAnswer === opt ? "success" : "primary"}
-                                            sx={{ minWidth: 40, p: 1 }}
-                                        >
-                                            {puzzle.correctAnswer === opt ? <Check size={20} /> : String.fromCharCode(65 + idx)}
-                                        </Button>
-                                        <TextField
-                                            fullWidth
-                                            size="small"
-                                            value={opt}
-                                            onChange={(e) => handleOptionChange(idx, e.target.value)}
-                                            placeholder={`Option ${idx + 1}`}
-                                        />
-                                        <IconButton onClick={() => removeOption(idx)} color="error" size="small">
-                                            <Trash2 size={18} />
-                                        </IconButton>
-                                    </Box>
+            {/* LIST OF EXISTING PUZZLES */}
+            <Stack spacing={2} mb={6}>
+                {dailyPuzzles.map((p) => (
+                    <Paper key={p.id} elevation={0} sx={{ p: 2, borderRadius: 3, bgcolor: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Box display="flex" flexDirection="column" gap={0.5} flex={1}>
+                            <Box display="flex" gap={1} flexWrap="wrap">
+                                {(p.grades || []).map(g => (
+                                    <Chip key={g} label={`Grade ${g}`} size="small" sx={{ bgcolor: '#e0f2fe', color: '#0369a1', fontWeight: 'bold' }} />
                                 ))}
-                                <Button startIcon={<Plus size={18} />} onClick={addOption} variant="text" sx={{ alignSelf: 'start' }}>
-                                    Add Option
-                                </Button>
-                            </Stack>
-                        </Box>
-                    )}
-
-                    {(puzzle.type === 'TEXT' || puzzle.type === 'FILL_BLANK') && (
-                        <Box>
-                            <TextField
-                                label="Correct Answer"
-                                value={puzzle.correctAnswer}
-                                onChange={(e) => setPuzzle({ ...puzzle, correctAnswer: e.target.value })}
-                                fullWidth
-                                helperText="For text answers, this will be matched case-insensitively. For Fill in Blanks, if there are multiple blanks, separate answers with commas (e.g., 'cat, dog'). "
+                            </Box>
+                            <Typography
+                                variant="subtitle2"
+                                noWrap
+                                sx={{ maxWidth: 400 }}
+                                dangerouslySetInnerHTML={{ __html: p.question }}
                             />
                         </Box>
-                    )}
-
-                    {puzzle.type === 'MATCH' && (
-                        <Box>
-                            <Typography variant="subtitle2" gutterBottom fontWeight="bold">Matching Pairs</Typography>
-                            <Stack spacing={2}>
-                                {puzzle.pairs.map((pair, idx) => (
-                                    <Box key={idx} display="flex" gap={2} alignItems="center">
-                                        <TextField
-                                            fullWidth
-                                            size="small"
-                                            value={pair.left}
-                                            onChange={(e) => handlePairChange(idx, 'left', e.target.value)}
-                                            placeholder="Left Item"
-                                        />
-                                        <MoveVertical size={20} color="#94a3b8" />
-                                        <TextField
-                                            fullWidth
-                                            size="small"
-                                            value={pair.right}
-                                            onChange={(e) => handlePairChange(idx, 'right', e.target.value)}
-                                            placeholder="Right Item"
-                                        />
-                                        <IconButton onClick={() => removePair(idx)} color="error" size="small">
-                                            <Trash2 size={18} />
-                                        </IconButton>
-                                    </Box>
-                                ))}
-                                <Button startIcon={<Plus size={18} />} onClick={addPair} variant="text" sx={{ alignSelf: 'start' }}>
-                                    Add Pair
-                                </Button>
-                            </Stack>
+                        <Chip label={p.type} size="small" variant="outlined" />
+                        <Box display="flex" gap={1}>
+                            <IconButton onClick={(e) => { e.stopPropagation(); handleEditClick(p); }} size="small" sx={{ color: '#2563eb', bgcolor: '#eff6ff' }}>
+                                <Edit2 size={16} />
+                            </IconButton>
+                            <IconButton onClick={(e) => { e.stopPropagation(); handleDelete(p.id); }} size="small" sx={{ color: '#ef4444', bgcolor: '#fef2f2' }}>
+                                <Trash2 size={16} />
+                            </IconButton>
                         </Box>
-                    )}
+                    </Paper>
+                ))}
 
-                    {puzzle.type === 'ORDER' && (
-                        <Box>
-                            <Typography variant="subtitle2" gutterBottom fontWeight="bold">Correct Sequence (Top to Bottom)</Typography>
-                            <Stack spacing={2}>
-                                {puzzle.options.map((opt, idx) => (
-                                    <Box key={idx} display="flex" gap={2} alignItems="center">
-                                        <Chip label={idx + 1} size="small" />
-                                        <TextField
-                                            fullWidth
-                                            size="small"
-                                            value={opt}
-                                            onChange={(e) => handleOptionChange(idx, e.target.value)}
-                                            placeholder={`Item ${idx + 1}`}
-                                        />
-                                        <IconButton onClick={() => removeOption(idx)} color="error" size="small">
-                                            <Trash2 size={18} />
-                                        </IconButton>
-                                    </Box>
-                                ))}
-                                <Button startIcon={<Plus size={18} />} onClick={addOption} variant="text" sx={{ alignSelf: 'start' }}>
-                                    Add Item
-                                </Button>
-                            </Stack>
-                        </Box>
-                    )}
+                {dailyPuzzles.length === 0 && !isEditing && (
+                    <Box sx={{ p: 4, textAlign: 'center', color: '#94a3b8', border: '2px dashed #e2e8f0', borderRadius: 4 }}>
+                        <Typography>No puzzles created for this date yet.</Typography>
+                        <Button startIcon={<Plus />} variant="contained" sx={{ mt: 2 }} onClick={() => resetForm([])}>Create First Puzzle</Button>
+                    </Box>
+                )}
 
+                {dailyPuzzles.length > 0 && !isEditing && (assignedGrades.size < ALL_GRADES.length) && (
                     <Button
-                        variant="contained"
-                        size="large"
-                        startIcon={loading ? null : <Save />}
-                        onClick={handleSave}
-                        disabled={loading}
-                        sx={{ mt: 4, py: 1.5, fontWeight: 'bold' }}
+                        startIcon={<Plus />}
+                        variant="outlined"
+                        fullWidth
+                        sx={{ py: 2, borderStyle: 'dashed' }}
+                        onClick={() => resetForm(dailyPuzzles)}
                     >
-                        {loading ? 'Saving...' : 'Save Puzzle'}
+                        Create Puzzle for Remaining Grades
                     </Button>
-                </Stack>
-            </Paper>
+                )}
+            </Stack>
+
+
+            {/* EDIT/CREATE FORM */}
+            {isEditing && (
+                <Paper elevation={0} sx={{ p: 4, borderRadius: 4, border: '2px solid #2563eb', bgcolor: '#ffff' }} id="puzzle-form">
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                        <Typography variant="h6" fontWeight="bold" color="#2563eb">
+                            {editingId ? 'Edit Puzzle' : 'New Puzzle'}
+                        </Typography>
+                        <IconButton onClick={handleCancelEdit} size="small"><X /></IconButton>
+                    </Box>
+
+                    {/* GRADE SELECTION */}
+                    <Box mb={3} p={2} bgcolor="#f8fafc" borderRadius={2}>
+                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>Select Grades</Typography>
+                        <Grid container spacing={1}>
+                            {ALL_GRADES.map(grade => {
+                                // Disabled if assigned to another puzzle AND not part of current form
+                                const isAssignedElsewhere = assignedGrades.has(grade) && !(formPuzzle.grades || []).includes(grade);
+                                return (
+                                    <Grid item key={grade}>
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    checked={(formPuzzle.grades || []).includes(grade)}
+                                                    onChange={() => handleGradeToggle(grade)}
+                                                    disabled={isAssignedElsewhere}
+                                                    size="small"
+                                                />
+                                            }
+                                            label={<Typography variant="body2" color={isAssignedElsewhere ? 'text.disabled' : 'text.primary'}>Grade {grade}</Typography>}
+                                        />
+                                    </Grid>
+                                )
+                            })}
+                        </Grid>
+                        {assignedGrades.size === ALL_GRADES.length && !editingId && (
+                            <Typography variant="caption" color="error.main" sx={{ mt: 1, display: 'block' }}>
+                                All grades are already assigned to other puzzles. Uncheck grades from existing puzzles to free them up.
+                            </Typography>
+                        )}
+                    </Box>
+
+                    <Stack spacing={3}>
+                        <TextField
+                            select
+                            label="Puzzle Type"
+                            value={formPuzzle.type}
+                            onChange={(e) => setFormPuzzle({ ...formPuzzle, type: e.target.value })}
+                            fullWidth
+                        >
+                            {PUZZLE_TYPES.map((option) => (
+                                <MenuItem key={option.value} value={option.value}>
+                                    {option.label}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+
+                        <TextField
+                            label="Question / Instructions"
+                            multiline
+                            rows={3}
+                            value={formPuzzle.question}
+                            onChange={(e) => setFormPuzzle({ ...formPuzzle, question: e.target.value })}
+                            fullWidth
+                            placeholder="Enter the main question..."
+                            helperText="Supports basic HTML (e.g., <b>bold</b>, <br> line breaks, <i>italics</i>)"
+                        />
+
+                        <TextField
+                            label="Image URL (Optional)"
+                            value={formPuzzle.imageUrl}
+                            onChange={(e) => setFormPuzzle({ ...formPuzzle, imageUrl: e.target.value })}
+                            fullWidth
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start"><ImageIcon size={20} /></InputAdornment>
+                                ),
+                            }}
+                        />
+                        {formPuzzle.imageUrl && (
+                            <Box sx={{ mt: 1, borderRadius: 2, overflow: 'hidden', maxHeight: 200, maxWidth: '100%' }}>
+                                <img src={formPuzzle.imageUrl} alt="Preview" style={{ height: '100%', objectFit: 'contain' }} />
+                            </Box>
+                        )}
+
+                        <Divider />
+
+                        {/* DYNAMIC FIELDS (MCQ, MATCH, etc.) - Same as before, just using formPuzzle */}
+                        {formPuzzle.type === 'MCQ' && (
+                            <Box>
+                                <Typography variant="subtitle2" gutterBottom fontWeight="bold">Options</Typography>
+                                <Stack spacing={2}>
+                                    {formPuzzle.options.map((opt, idx) => (
+                                        <Box key={idx} display="flex" gap={2} alignItems="center">
+                                            <Button
+                                                variant={formPuzzle.correctAnswer === opt && opt !== '' ? "contained" : "outlined"}
+                                                onClick={() => setFormPuzzle({ ...formPuzzle, correctAnswer: opt })}
+                                                color={formPuzzle.correctAnswer === opt ? "success" : "primary"}
+                                                sx={{ minWidth: 40, p: 1 }}
+                                            >
+                                                {formPuzzle.correctAnswer === opt ? <Check size={20} /> : String.fromCharCode(65 + idx)}
+                                            </Button>
+                                            <TextField
+                                                fullWidth
+                                                size="small"
+                                                value={opt}
+                                                onChange={(e) => handleOptionChange(idx, e.target.value)}
+                                                placeholder={`Option ${idx + 1}`}
+                                            />
+                                            <IconButton onClick={() => removeOption(idx)} color="error" size="small"><Trash2 size={18} /></IconButton>
+                                        </Box>
+                                    ))}
+                                    <Button startIcon={<Plus size={18} />} onClick={addOption} variant="text" sx={{ alignSelf: 'start' }}>Add Option</Button>
+                                </Stack>
+                            </Box>
+                        )}
+
+                        {(formPuzzle.type === 'TEXT' || formPuzzle.type === 'FILL_BLANK') && (
+                            <TextField
+                                label="Correct Answer"
+                                value={formPuzzle.correctAnswer}
+                                onChange={(e) => setFormPuzzle({ ...formPuzzle, correctAnswer: e.target.value })}
+                                fullWidth
+                                helperText="Comma separated valid answers."
+                            />
+                        )}
+
+                        {formPuzzle.type === 'MATCH' && (
+                            <Box>
+                                <Typography variant="subtitle2" gutterBottom fontWeight="bold">Pairs</Typography>
+                                <Stack spacing={2}>
+                                    {formPuzzle.pairs.map((pair, idx) => (
+                                        <Box key={idx} display="flex" gap={2} alignItems="center">
+                                            <TextField fullWidth size="small" value={pair.left} onChange={(e) => handlePairChange(idx, 'left', e.target.value)} placeholder="Left" />
+                                            <MoveVertical size={20} color="#94a3b8" />
+                                            <TextField fullWidth size="small" value={pair.right} onChange={(e) => handlePairChange(idx, 'right', e.target.value)} placeholder="Right" />
+                                            <IconButton onClick={() => removePair(idx)} color="error" size="small"><Trash2 size={18} /></IconButton>
+                                        </Box>
+                                    ))}
+                                    <Button startIcon={<Plus size={18} />} onClick={addPair} variant="text" sx={{ alignSelf: 'start' }}>Add Pair</Button>
+                                </Stack>
+                            </Box>
+                        )}
+
+                        {formPuzzle.type === 'ORDER' && (
+                            <Box>
+                                <Typography variant="subtitle2" gutterBottom fontWeight="bold">Change Correct Sequence</Typography>
+                                <Stack spacing={2}>
+                                    {formPuzzle.options.map((opt, idx) => (
+                                        <Box key={idx} display="flex" gap={2} alignItems="center">
+                                            <Chip label={idx + 1} size="small" />
+                                            <TextField fullWidth size="small" value={opt} onChange={(e) => handleOptionChange(idx, e.target.value)} placeholder={`Item ${idx + 1}`} />
+                                            <IconButton onClick={() => removeOption(idx)} color="error" size="small"><Trash2 size={18} /></IconButton>
+                                        </Box>
+                                    ))}
+                                    <Button startIcon={<Plus size={18} />} onClick={addOption} variant="text" sx={{ alignSelf: 'start' }}>Add Item</Button>
+                                </Stack>
+                            </Box>
+                        )}
+
+                        <Box display="flex" gap={2} mt={2}>
+                            <Button
+                                variant="contained"
+                                size="large"
+                                startIcon={<Save />}
+                                onClick={handleSave}
+                                disabled={loading}
+                                fullWidth
+                                sx={{ py: 1.5, fontWeight: 'bold' }}
+                            >
+                                {loading ? 'Saving...' : 'Save Puzzle'}
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                size="large"
+                                onClick={handleCancelEdit}
+                                disabled={loading}
+                                fullWidth
+                                sx={{ py: 1.5, fontWeight: 'bold' }}
+                            >
+                                Cancel
+                            </Button>
+                        </Box>
+                    </Stack>
+                </Paper>
+            )}
         </Box>
     );
 };

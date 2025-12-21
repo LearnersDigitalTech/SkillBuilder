@@ -8,34 +8,84 @@ import { firebaseDatabase } from '@/backend/firebaseHandler';
 // Actually, since I can't install, I should not import 'canvas-confetti'. 
 // I will simulate confetti or use a simple implementation below.
 
-// Simple Confetti Implementation using native DOM
+// Canvas-based Confetti Implementation
 const triggerConfetti = () => {
-    const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+    const canvas = document.createElement('canvas');
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100vw';
+    canvas.style.height = '100vh';
+    canvas.style.zIndex = '9999';
+    canvas.style.pointerEvents = 'none';
+    document.body.appendChild(canvas);
 
-    for (let i = 0; i < 100; i++) {
-        const particle = document.createElement('div');
-        particle.style.position = 'fixed';
-        particle.style.width = '10px';
-        particle.style.height = '10px';
-        particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        particle.style.left = Math.random() * 100 + 'vw';
-        particle.style.top = '-10px';
-        particle.style.zIndex = '9999';
-        particle.style.transition = 'top 3s ease-out, transform 3s ease-out';
-        document.body.appendChild(particle);
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-        setTimeout(() => {
-            particle.style.top = '110vh';
-            particle.style.transform = `rotate(${Math.random() * 360}deg)`;
-        }, 100);
+    const particles = [];
+    const colors = ['#ef4444', '#22c55e', '#3b82f6', '#eab308', '#ec4899', '#a855f7', '#06b6d4'];
 
-        setTimeout(() => {
-            particle.remove();
-        }, 3000);
+    const createParticle = (x, y) => ({
+        x, y,
+        vx: (Math.random() - 0.5) * 30, // Horizontal spread
+        vy: (Math.random() - 1) * 30 - 10, // Upward explosive force
+        color: colors[Math.floor(Math.random() * colors.length)],
+        size: Math.random() * 10 + 5,
+        gravity: 0.8,
+        drag: 0.95,
+        rotation: Math.random() * 360,
+        rotationSpeed: (Math.random() - 0.5) * 10
+    });
+
+    // Create explosion from center
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+
+    for (let i = 0; i < 200; i++) {
+        particles.push(createParticle(centerX, centerY));
     }
+
+    let animationId;
+    const render = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let activeParticles = 0;
+
+        particles.forEach(p => {
+            if (p.size <= 0.1) return;
+            activeParticles++;
+
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += p.gravity;
+            p.vx *= p.drag;
+            p.vy *= p.drag;
+            p.size *= 0.96;
+            p.rotation += p.rotationSpeed;
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rotation * Math.PI) / 180);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            ctx.restore();
+        });
+
+        if (activeParticles > 0) {
+            animationId = requestAnimationFrame(render);
+        } else {
+            cancelAnimationFrame(animationId);
+            if (document.body.contains(canvas)) {
+                document.body.removeChild(canvas);
+            }
+        }
+    };
+
+    render();
 };
 
-const PuzzleModal = ({ open, onClose, puzzle, user }) => {
+const PuzzleModal = ({ open, onClose, puzzle, user, learnerId, onComplete }) => {
     const [answer, setAnswer] = useState(''); // Text/MCQ
     const [matchPairs, setMatchPairs] = useState({}); // { left: right, ... }
     const [orderList, setOrderList] = useState([]); // Array of strings
@@ -74,10 +124,6 @@ const PuzzleModal = ({ open, onClose, puzzle, user }) => {
             // Ensure all pairs are matched
             if (Object.keys(matchPairs).length !== puzzle.pairs.length) isCorrect = false;
         } else if (puzzle.type === 'ORDER') {
-            // Check if order matches original options (assuming API returns correct order in `options`)
-            // Wait, usually API returns correct order. But I shuffled it. 
-            // So I need to compare `orderList` with `puzzle.options` (which is the correct order).
-            // Actually, for ORDER type, `puzzle.options` SHOULD be the correct order.
             isCorrect = JSON.stringify(orderList) === JSON.stringify(puzzle.options);
         }
 
@@ -86,14 +132,17 @@ const PuzzleModal = ({ open, onClose, puzzle, user }) => {
             triggerConfetti();
 
             // Log success to Firebase
-            if (user && puzzle.id) {
-                const userId = user.uid || user.phoneNumber || 'anonymous'; // Robust ID
+            if (learnerId) {
                 try {
-                    // We can't easily get 'userKey' here without context, so we trust `user` prop has identifiers 
-                    // or we pass a save handler.
-                    // I'll skip complex logging for now or use a simple path:
-                    // NMD_2025/PuzzleAttempts/{date}/{userId}
-                } catch (e) { console.error(e) }
+                    const today = new Date().toLocaleDateString('en-CA');
+                    const completionRef = ref(firebaseDatabase, `NMD_2025/PuzzleCompletions/${today}/${learnerId}`);
+                    await set(completionRef, true);
+
+                    // Delay slightly to let animation play, then trigger completion handler
+                    setTimeout(() => {
+                        if (onComplete) onComplete();
+                    }, 2000);
+                } catch (e) { console.error("Error saving completion:", e) }
             }
         } else {
             setFeedback('incorrect');
@@ -153,9 +202,13 @@ const PuzzleModal = ({ open, onClose, puzzle, user }) => {
 
                 {/* QUESTION AREA */}
                 <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
-                    <Typography variant="h5" fontWeight="bold" align="center" sx={{ color: '#111827' }}>
-                        {puzzle.question}
-                    </Typography>
+                    <Typography
+                        variant="h5"
+                        fontWeight="bold"
+                        align="center"
+                        sx={{ color: '#111827' }}
+                        dangerouslySetInnerHTML={{ __html: puzzle.question }}
+                    />
 
                     {puzzle.imageUrl && (
                         <Box sx={{ borderRadius: 3, overflow: 'hidden', maxHeight: 300, mx: 'auto', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
@@ -188,7 +241,7 @@ const PuzzleModal = ({ open, onClose, puzzle, user }) => {
                                                 }
                                             }}
                                         >
-                                            {opt}
+                                            <span dangerouslySetInnerHTML={{ __html: opt }} />
                                         </Button>
                                     </Grid>
                                 ))}
