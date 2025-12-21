@@ -8,7 +8,7 @@ import dynamic from "next/dynamic";
 import SampleDashboard from "@/components/SampleDashboard/SampleDashboard.component";
 import Footer from "@/components/Footer/Footer.component";
 import { useRouter } from "next/navigation";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { QuizSessionContext } from "../../app/context/QuizSessionContext";
 import { toast } from "react-toastify";
 import SuccessStories from "@/components/SuccessStories/SuccessStories.component";
@@ -17,15 +17,55 @@ import AuthModal from "@/components/Auth/AuthModal.component";
 import { useAuth } from "@/context/AuthContext";
 import CustomModal from "@/components/CustomModal/CustomModal.component";
 import { get, ref } from "firebase/database";
+
 import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler";
+import { useSearchParams } from "next/navigation";
+import confetti from "canvas-confetti";
+import Curtain from "@/components/Launch/Curtain";
 
 const HomeContent = () => {
     const router = useRouter();
+    const searchParams = useSearchParams(); // Get query params
+    const launched = searchParams.get("launched") === "true";
+
+    // Curtain State
+    const [curtainOpen, setCurtainOpen] = useState(!launched); // If launched, start closed (false), else open (true/hidden)
+
     const [quizContext, setQuizContext] = useContext(QuizSessionContext);
     const { user, userData } = useAuth();
     const [authModalOpen, setAuthModalOpen] = useState(false);
     const [alreadyAttemptedModalOpen, setAlreadyAttemptedModalOpen] = useState(false);
     const [gradeModalOpen, setGradeModalOpen] = useState(false);
+
+    // Launch Effect
+    useEffect(() => {
+        if (launched) {
+            // Wait a moment then open curtain
+            setTimeout(() => {
+                setCurtainOpen(true);
+                // Trigger confetti
+                const duration = 5 * 1000;
+                const animationEnd = Date.now() + duration;
+                const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+                const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+                const interval = setInterval(function () {
+                    const timeLeft = animationEnd - Date.now();
+
+                    if (timeLeft <= 0) {
+                        return clearInterval(interval);
+                    }
+
+                    const particleCount = 50 * (timeLeft / duration);
+
+                    // since particles fall down, start a bit higher than random
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+                }, 250);
+            }, 500);
+        }
+    }, [launched]);
 
     const handlePracticeClick = () => {
         setGradeModalOpen(true);
@@ -165,6 +205,7 @@ const HomeContent = () => {
 
     return (
         <div className={Styles.page}>
+            <Curtain open={curtainOpen} />
             <Navigation />
             <div className={Styles.heroContainer}>
                 <div className={Styles.contentContainer}>

@@ -14,6 +14,12 @@ export const metadata = {
   },
 };
 
+import { Suspense } from 'react';
+
 export default function Home() {
-  return <HomeContent />;
+  return (
+    <Suspense fallback={<div className="h-screen w-screen bg-[#0a192f]" />}>
+      <HomeContent />
+    </Suspense>
+  );
 }
