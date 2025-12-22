@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import MathBackground from "@/components/Launch/MathBackground";
+import { Volume2, VolumeX } from "lucide-react";
 
 // Visual Style Constants
 const BG_COLOR = "bg-[#0a192f]"; // Deep navy/charcoal
@@ -27,6 +29,48 @@ export default function LaunchPage() {
         { id: 7, duration: 5500 }, // Countdown (5s + buffer)
         { id: 8, duration: 0 },    // Launch Button (No auto-advance)
     ];
+
+    const [isMuted, setIsMuted] = useState(false);
+    const audioRef = useRef(null);
+
+    useEffect(() => {
+        // Initialize Audio
+        const audio = new Audio("/music/launch_music.mpeg");
+        audio.loop = true;
+        audioRef.current = audio;
+
+        // Attempt to play
+        // We use a promise chain to handle the autoplay rejection gracefully
+        audio.play()
+            .catch(() => {
+                // Autoplay blocked. Fallback to muted playback.
+                // We do NOT log this as an error to avoid Next.js error overlay.
+                console.log("Autoplay blocked. Switching to muted mode.");
+                audio.muted = true;
+                setIsMuted(true);
+                return audio.play();
+            })
+            .catch((e) => {
+                // Even muted playback failed (unlikely, but possible)
+                console.log("Playback failed entirely.");
+            });
+
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        if (audioRef.current) {
+            audioRef.current.muted = isMuted;
+            if (!isMuted) {
+                audioRef.current.play().catch(e => console.warn("Audio play failed (autoplay blocked):", e));
+            }
+        }
+    }, [isMuted]);
 
     useEffect(() => {
         // Current slide duration logic
@@ -187,8 +231,19 @@ export default function LaunchPage() {
         <main
             className={`fixed inset-0 z-50 flex items-center justify-center ${BG_COLOR} ${TEXT_COLOR} overflow-hidden font-sans selection:bg-cyan-500 selection:text-white`}
         >
+            <MathBackground />
+
+            {/* Audio Control */}
+            <button
+                onClick={() => setIsMuted(!isMuted)}
+                className="absolute top-6 right-6 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all backdrop-blur-sm"
+                aria-label={isMuted ? "Unmute" : "Mute"}
+            >
+                {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+            </button>
+
             <div
-                className={`transition-opacity duration-1000 ease-in-out ${fade} w-full flex justify-center`}
+                className={`relative z-10 transition-opacity duration-1000 ease-in-out ${fade} w-full flex justify-center`}
             >
                 {renderContent()}
             </div>
