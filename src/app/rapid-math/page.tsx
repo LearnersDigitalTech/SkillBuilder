@@ -109,7 +109,7 @@ export default function Home() {
     <main className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col font-sans overflow-x-hidden">
       <Navigation />
 
-      <div className="flex-1 flex flex-col items-center justify-center p-4 py-8 md:p-4 animate-in fade-in duration-500 min-h-[calc(100vh-64px)] md:max-h-[calc(100vh-64px)] md:overflow-y-auto">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 py-8 md:p-4 animate-in fade-in duration-500">
         <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
 
           {/* Hero / Intro Section */}
@@ -226,7 +226,7 @@ export default function Home() {
                   onClick={() => router.push('/rapid-math/speed-test')}
                   variant="outline"
                   size="lg"
-                  className="w-full border-2 border-orange-200 dark:border-orange-800 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 py-6 text-xl font-bold rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
+                  className="w-full border-2 border-orange-200 dark:border-orange-800 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-700 dark:hover:text-orange-300 hover:border-orange-300 dark:hover:border-orange-700 py-6 text-xl font-bold rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
                 >
                   <Zap size={24} /> Speed Test Challenge
                 </Button>
@@ -244,7 +244,7 @@ export default function Home() {
             </h2>
             <p className="text-slate-600 dark:text-slate-400">Can you beat the fastest times?</p>
           </div>
-          <SpeedTestLeaderboard limitCount={15} />
+          <SpeedTestLeaderboard limitCount={10} />
         </div>
       </div>
 

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { SpeedTestQuestionCard } from "./SpeedTestQuestionCard"
 import { SpeedTestLeaderboard } from "./SpeedTestLeaderboard"
 import { Button } from "@/components/ui/button"
-import { Play, Timer as TimerIcon, BarChart2, StopCircle } from "lucide-react"
+import { Play, Timer as TimerIcon, BarChart2, StopCircle, Trophy } from "lucide-react"
 import { db, auth, googleProvider } from "@/backend/firebaseHandler"
 import { collection, addDoc, serverTimestamp, query, where, getDocs, updateDoc, doc, getCountFromServer } from "firebase/firestore"
 import { useAuth } from "@/context/AuthContext"
@@ -23,6 +23,7 @@ interface GameStats {
     totalQuestions: number
     totalTime: number // in seconds
     avgTime: number
+    correct?: number // optional: number of correct answers
 }
 
 export function SpeedTestGame() {
@@ -182,7 +183,12 @@ export function SpeedTestGame() {
                 setSaveStatus("saved")
                 setLastLeaderboardUpdate(Date.now())
 
-                const betterScoresQuery = query(scoresRef, where("avgTime", "<", stats.avgTime))
+                // Calculate rank by counting better scores (only qualified users)
+                const betterScoresQuery = query(
+                    scoresRef,
+                    where("totalQuestions", ">=", 10),
+                    where("avgTime", "<", stats.avgTime)
+                )
                 const betterSnapshot = await getCountFromServer(betterScoresQuery)
                 const rank = betterSnapshot.data().count + 1
 
@@ -195,7 +201,15 @@ export function SpeedTestGame() {
         } catch (err) {
             console.error("Error saving score:", err)
             setSaveStatus(`error: ${err instanceof Error ? err.message : String(err)}`)
-            setRankFeedback("Error saving score. Please try again.")
+
+            // Check if it's a Firebase API disabled error
+            if (err instanceof Error && err.message.includes("Cloud Firestore API")) {
+                setRankFeedback("⚠️ Firebase API is disabled. Please enable Cloud Firestore in Firebase Console.")
+            } else if (err instanceof Error && err.message.includes("index")) {
+                setRankFeedback("⚠️ Firebase index required. Check console for index creation link.")
+            } else {
+                setRankFeedback("Error saving score. Please try again.")
+            }
         } finally {
             setIsSaving(false)
         }
@@ -228,115 +242,289 @@ export function SpeedTestGame() {
 
     if (gameState === "intro") {
         return (
-            <div className="flex-1 flex flex-col items-center justify-center p-4">
-                <div className="max-w-xl w-full text-center space-y-8 animate-in fade-in zoom-in duration-500">
-                    <div className="space-y-4">
-                        <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">
-                            Speed Test
-                        </h1>
-                        <p className="text-xl text-slate-600 dark:text-slate-400">
-                            How fast can you calculate? Solve as many questions as you can.
-                            Your average speed determines your rank!
-                        </p>
+            <div className="flex-1 flex flex-col items-center justify-center p-4 py-8">
+                {/* Title Section */}
+                <div className="w-full max-w-6xl text-center space-y-4 mb-8 animate-in fade-in duration-500">
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">
+                        Speed Test
+                    </h1>
+                    <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+                        How fast can you calculate? Solve as many questions as you can.
+                        Your average speed determines your rank!
+                    </p>
+                </div>
+
+                {/* Side-by-Side Layout: Rules + Leaderboard */}
+                <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 animate-in zoom-in duration-500 delay-100">
+
+                    {/* Left Column: Rules + Start Button */}
+                    <div className="space-y-6">
+                        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700">
+                            <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-4">Rules</h3>
+                            <ul className="text-left space-y-3 text-slate-600 dark:text-slate-400">
+                                <li className="flex gap-3">
+                                    <span className="bg-orange-100 text-orange-600 rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm shrink-0">1</span>
+                                    <span>Addition & Subtraction with 2-digit numbers.</span>
+                                </li>
+                                <li className="flex gap-3">
+                                    <span className="bg-orange-100 text-orange-600 rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm shrink-0">2</span>
+                                    <span>Multiplication up to 20, Division within 100.</span>
+                                </li>
+                                <li className="flex gap-3">
+                                    <span className="bg-orange-100 text-orange-600 rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm shrink-0">3</span>
+                                    <span>Minimum <strong>10 questions</strong> to qualify for the leaderboard.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <Button
+                            onClick={startGame}
+                            size="lg"
+                            className="w-full text-xl md:text-2xl font-bold py-6 md:py-8 rounded-2xl bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 shadow-xl shadow-orange-500/20 transition-all hover:scale-105"
+                        >
+                            <Play fill="currentColor" className="mr-2" /> Start Challenge
+                        </Button>
                     </div>
 
-                    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700">
-                        <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-4">Rules</h3>
-                        <ul className="text-left space-y-3 text-slate-600 dark:text-slate-400">
-                            <li className="flex gap-3">
-                                <span className="bg-orange-100 text-orange-600 rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm shrink-0">1</span>
-                                <span>Addition & Subtraction with 2-digit numbers.</span>
-                            </li>
-                            <li className="flex gap-3">
-                                <span className="bg-orange-100 text-orange-600 rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm shrink-0">2</span>
-                                <span>Multiplication up to 20, Division within 100.</span>
-                            </li>
-                            <li className="flex gap-3">
-                                <span className="bg-orange-100 text-orange-600 rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm shrink-0">3</span>
-                                <span>Minimum <strong>10 questions</strong> to qualify for the leaderboard.</span>
-                            </li>
-                        </ul>
+                    {/* Right Column: Leaderboard */}
+                    <div className="lg:sticky lg:top-8 lg:self-start">
+                        <SpeedTestLeaderboard />
                     </div>
-
-                    <Button
-                        onClick={startGame}
-                        size="lg"
-                        className="w-full text-2xl font-bold py-8 rounded-2xl bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 shadow-xl shadow-orange-500/20"
-                    >
-                        <Play fill="currentColor" className="mr-2" /> Start Challenge
-                    </Button>
-
-                    <SpeedTestLeaderboard />
                 </div>
             </div>
         )
     }
 
     if (gameState === "summary") {
+        // Calculate performance tier based on average time
+        const getPerformanceTier = (avgTime: number) => {
+            if (avgTime < 5) return {
+                tier: "Lightning Fast",
+                iconName: "Zap",
+                gradient: "from-yellow-400 to-orange-500",
+                textColor: "text-yellow-600",
+                bgColor: "bg-yellow-50 dark:bg-yellow-900/20",
+                message: "Incredible speed! You're a math champion!"
+            }
+            if (avgTime < 8) return {
+                tier: "Excellent",
+                iconName: "Star",
+                gradient: "from-blue-500 to-indigo-600",
+                textColor: "text-blue-600",
+                bgColor: "bg-blue-50 dark:bg-blue-900/20",
+                message: "Outstanding performance! Keep it up!"
+            }
+            if (avgTime < 12) return {
+                tier: "Good",
+                iconName: "ThumbsUp",
+                gradient: "from-green-500 to-emerald-600",
+                textColor: "text-green-600",
+                bgColor: "bg-green-50 dark:bg-green-900/20",
+                message: "Great job! You're improving!"
+            }
+            return {
+                tier: "Keep Practicing",
+                iconName: "TrendingUp",
+                gradient: "from-orange-400 to-red-500",
+                textColor: "text-orange-600",
+                bgColor: "bg-orange-50 dark:bg-orange-900/20",
+                message: "Every practice makes you faster!"
+            }
+        }
+
+        // Get personalized next steps based on performance
+        const getNextSteps = (avgTime: number, totalQuestions: number) => {
+            if (avgTime < 5) {
+                return [
+                    "Try Hard difficulty mode",
+                    "Aim for sub-4 second average",
+                    "Help others improve"
+                ]
+            }
+            if (avgTime < 8) {
+                return [
+                    "Challenge yourself with more questions",
+                    "Try to beat your own record",
+                    "Aim for top 5 on leaderboard"
+                ]
+            }
+            if (avgTime < 12) {
+                return [
+                    "Practice multiplication tables",
+                    "Try 15 questions next time",
+                    "Aim for sub-8 second average"
+                ]
+            }
+            return [
+                "Practice 5 minutes daily",
+                "Focus on addition & subtraction first",
+                "Every attempt makes you faster!"
+            ]
+        }
+
+        // Extract rank number from rankFeedback
+        const getRankNumber = () => {
+            if (!rankFeedback) return null
+            const match = rankFeedback.match(/#(\d+)/)
+            return match ? parseInt(match[1]) : null
+        }
+
+        const performance = getPerformanceTier(stats.avgTime)
+        const nextSteps = getNextSteps(stats.avgTime, stats.totalQuestions)
+        const rankNumber = getRankNumber()
+        // Note: Speed Test doesn't track correct/incorrect, only speed
+
         return (
-            <div className="flex-1 flex flex-col items-center justify-center p-4">
-                <div className="max-w-md w-full text-center space-y-8">
-                    <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Click to Finish</h2>
-                    {/* Note: In summary we show stats */}
+            <div className="flex-1 flex flex-col items-center justify-center p-4 py-8">
+                {/* Celebration Header */}
+                <div className="w-full max-w-6xl text-center space-y-3 mb-8 animate-in fade-in duration-500">
+                    <h1 className="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-slate-100">
+                        Amazing Work{user ? `, ${user.displayName?.split(' ')[0]}` : ''}!
+                    </h1>
+                    <p className="text-lg text-slate-600 dark:text-slate-400">
+                        You completed the Speed Test Challenge!
+                    </p>
+                </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg">
-                            <div className="text-slate-500 text-sm uppercase font-bold mb-1">Avg Speed</div>
-                            <div className="text-4xl font-black text-orange-500">{stats.avgTime.toFixed(2)}s</div>
+                {/* Side-by-Side Layout: Performance + Leaderboard */}
+                <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+
+                    {/* Left Column: Performance Stats */}
+                    <div className="space-y-6 animate-in slide-in-from-left duration-500">
+
+                        {/* Performance Tier Banner */}
+                        <div className={`p-6 rounded-2xl bg-gradient-to-r ${performance.gradient} text-white shadow-xl`}>
+                            <div className="flex items-center justify-between mb-2">
+                                {performance.iconName === "Zap" && <TimerIcon className="w-10 h-10" />}
+                                {performance.iconName === "Star" && <BarChart2 className="w-10 h-10" />}
+                                {performance.iconName === "ThumbsUp" && <BarChart2 className="w-10 h-10" />}
+                                {performance.iconName === "TrendingUp" && <BarChart2 className="w-10 h-10" />}
+                                <span className="text-2xl font-black">{performance.tier}</span>
+                            </div>
+                            <p className="text-white/90 text-sm">{performance.message}</p>
                         </div>
-                        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg">
-                            <div className="text-slate-500 text-sm uppercase font-bold mb-1">Solved</div>
-                            <div className="text-4xl font-black text-blue-500">{stats.totalQuestions}</div>
+
+                        {/* Stats Grid */}
+                        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 space-y-4">
+                            <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-4">Your Performance</h3>
+
+                            {/* Avg Speed */}
+                            <div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-sm text-slate-600 dark:text-slate-400">Average Speed</span>
+                                    <span className={`text-2xl font-black ${performance.textColor}`}>
+                                        {stats.avgTime.toFixed(2)}s
+                                    </span>
+                                </div>
+                                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                                    <div
+                                        className={`h-2 rounded-full bg-gradient-to-r ${performance.gradient} transition-all duration-1000`}
+                                        style={{ width: `${Math.min((15 / stats.avgTime) * 100, 100)}%` }}
+                                    ></div>
+                                </div>
+                            </div>
+
+                            {/* Questions Solved */}
+                            <div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-sm text-slate-600 dark:text-slate-400">Questions Solved</span>
+                                    <span className="text-2xl font-black text-blue-600">
+                                        {stats.totalQuestions}
+                                    </span>
+                                </div>
+                                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                                    <div
+                                        className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-1000"
+                                        style={{ width: `${(stats.totalQuestions / 50) * 100}%` }}
+                                    ></div>
+                                </div>
+                            </div>
+
+                            {/* Speed Test focuses on speed, not accuracy */}
+                        </div>
+
+                        {/* Rank Achievement Banner */}
+                        {rankNumber && stats.totalQuestions >= 10 && (
+                            <div className={`p-6 rounded-2xl shadow-xl border-2 ${rankNumber <= 3
+                                ? 'bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-400'
+                                : rankNumber <= 10
+                                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-400'
+                                    : 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-400'
+                                }`}>
+                                <div className="text-center space-y-2">
+                                    <div className="text-4xl">
+                                        {rankNumber <= 3 && <Trophy className="w-12 h-12 mx-auto text-yellow-600" />}
+                                        {rankNumber > 3 && <Trophy className="w-12 h-12 mx-auto text-slate-600" />}
+                                    </div>
+                                    <div className="text-2xl font-black text-slate-800 dark:text-slate-100">
+                                        {rankNumber <= 3 ? `YOU'RE #${rankNumber}!` : `Rank #${rankNumber}`}
+                                    </div>
+                                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                                        {rankNumber === 1 ? "You're the fastest speedster!" :
+                                            rankNumber <= 3 ? "You're on the podium! Amazing!" :
+                                                rankNumber <= 10 ? "You're in the top 10! Excellent!" :
+                                                    rankNumber <= 25 ? `Just ${26 - rankNumber} spots from top 25!` :
+                                                        "Keep practicing to climb higher!"}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Next Steps */}
+                        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700">
+                            <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-4">Next Steps</h3>
+                            <ul className="space-y-3">
+                                {nextSteps.map((step, index) => (
+                                    <li key={index} className="flex items-start gap-3 text-slate-600 dark:text-slate-400">
+                                        <span className="text-slate-400">•</span>
+                                        <span>{step}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="space-y-4">
+                            {!user && stats.totalQuestions >= 10 && (
+                                <Button
+                                    onClick={handleLoginAndSave}
+                                    disabled={isSaving}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-6 text-lg font-bold shadow-lg"
+                                >
+                                    {isSaving ? "Saving..." : "Log in & Save to Leaderboard"}
+                                </Button>
+                            )}
+
+                            {stats.totalQuestions < 10 && (
+                                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 rounded-xl text-sm font-medium text-center">
+                                    Solve at least 10 questions to qualify for the leaderboard!
+                                </div>
+                            )}
+
+                            <div className="flex gap-4">
+                                <Button
+                                    onClick={startGame}
+                                    className="flex-1 py-6 text-lg font-bold rounded-xl"
+                                    size="lg"
+                                    variant="outline"
+                                >
+                                    Try Again
+                                </Button>
+                                <Button
+                                    onClick={() => setGameState("intro")}
+                                    className="flex-1 py-6 text-lg font-bold rounded-xl bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700"
+                                    size="lg"
+                                >
+                                    Home
+                                </Button>
+                            </div>
                         </div>
                     </div>
 
-                    {rankFeedback && (
-                        <div className={`p-4 rounded-xl font-bold text-lg animate-in zoom-in ${rankFeedback.includes("moved up") ? "bg-green-100 text-green-700" : rankFeedback.includes("Log in") ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-600"}`}>
-                            {rankFeedback}
-                        </div>
-                    )}
-
-                    {!user && stats.totalQuestions >= 10 && (
-                        <Button
-                            onClick={handleLoginAndSave}
-                            disabled={isSaving}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-6 text-lg"
-                        >
-                            {isSaving ? "Saving..." : "Log in & Save to Leaderboard"}
-                        </Button>
-                    )}
-
-                    {/* Manual Retry/Debug for Authenticated Users */}
-                    {user && stats.totalQuestions >= 10 && saveStatus !== "saved" && (
-                        <div className="space-y-2">
-                            <div className="text-xs text-slate-400 font-mono">Status: {saveStatus}</div>
-                            <Button
-                                onClick={() => saveScore(user)}
-                                disabled={isSaving}
-                                variant="secondary"
-                                className="w-full"
-                            >
-                                {isSaving ? "Saving..." : "Retry Save Score"}
-                            </Button>
-                        </div>
-                    )}
-
-                    {stats.totalQuestions < 10 && (
-                        <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 rounded-xl text-sm">
-                            Solve at least 10 questions to appear on the leaderboard!
-                        </div>
-                    )}
-
-                    <div className="flex gap-4">
-                        <Button onClick={startGame} className="flex-1" size="lg" variant="outline">
-                            Try Again
-                        </Button>
-                        <Button onClick={() => setGameState("intro")} className="flex-1" size="lg">
-                            Home
-                        </Button>
+                    {/* Right Column: Leaderboard */}
+                    <div className="lg:sticky lg:top-8 lg:self-start animate-in slide-in-from-right duration-500 delay-100">
+                        <SpeedTestLeaderboard lastUpdated={lastLeaderboardUpdate} />
                     </div>
-
-                    <SpeedTestLeaderboard lastUpdated={lastLeaderboardUpdate} />
                 </div>
             </div>
         )
