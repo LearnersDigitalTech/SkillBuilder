@@ -18,6 +18,7 @@ import {
 import { useAuth } from "@/context/AuthContext"
 import { signInWithPopup } from "firebase/auth"
 import { auth, googleProvider } from "@/backend/firebaseHandler"
+import { SpeedTestLeaderboard } from "@/components/RapidMath/SpeedTest/SpeedTestLeaderboard"
 
 export default function Home() {
   const router = useRouter()
@@ -108,7 +109,7 @@ export default function Home() {
     <main className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col font-sans overflow-x-hidden">
       <Navigation />
 
-      <div className="flex-1 flex flex-col items-center justify-center p-4 py-8 md:p-4 animate-in fade-in duration-500 min-h-[calc(100vh-64px)] md:max-h-[calc(100vh-64px)] md:overflow-y-auto">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 py-8 md:p-4 animate-in fade-in duration-500">
         <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
 
           {/* Hero / Intro Section */}
@@ -211,17 +212,39 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Action Button */}
-              <Button
-                onClick={handleStartRequest}
-                size="lg"
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/25 py-6 text-xl font-bold rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99]"
-              >
-                Start Quiz
-              </Button>
+              {/* Action Buttons */}
+              <div className="flex flex-col gap-3">
+                <Button
+                  onClick={handleStartRequest}
+                  size="lg"
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/25 py-6 text-xl font-bold rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99]"
+                >
+                  Start Practice
+                </Button>
+
+                <Button
+                  onClick={() => router.push('/rapid-math/speed-test')}
+                  variant="outline"
+                  size="lg"
+                  className="w-full border-2 border-orange-200 dark:border-orange-800 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-700 dark:hover:text-orange-300 hover:border-orange-300 dark:hover:border-orange-700 py-6 text-xl font-bold rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
+                >
+                  <Zap size={24} /> Speed Test Challenge
+                </Button>
+              </div>
 
             </CardContent>
           </Card>
+        </div>
+
+        {/* Speed Test Leaderboard Section */}
+        <div className="w-full max-w-4xl mt-16 space-y-8 animate-in slide-in-from-bottom-8 duration-700 delay-200">
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 flex items-center justify-center gap-3">
+              <Zap className="text-orange-500 fill-orange-500" /> Speed Test Champions
+            </h2>
+            <p className="text-slate-600 dark:text-slate-400">Can you beat the fastest times?</p>
+          </div>
+          <SpeedTestLeaderboard limitCount={10} />
         </div>
       </div>
 
