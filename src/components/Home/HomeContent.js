@@ -22,6 +22,7 @@ import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler"
 import { useSearchParams } from "next/navigation";
 import confetti from "canvas-confetti";
 import Curtain from "@/components/Launch/Curtain";
+import Balloons from "@/components/Launch/Balloons";
 
 const HomeContent = () => {
     const router = useRouter();
@@ -30,6 +31,7 @@ const HomeContent = () => {
 
     // Curtain State
     const [curtainOpen, setCurtainOpen] = useState(!launched); // If launched, start closed (false), else open (true/hidden)
+    const [showBalloons, setShowBalloons] = useState(false);
 
     const [quizContext, setQuizContext] = useContext(QuizSessionContext);
     const { user, userData } = useAuth();
@@ -43,6 +45,7 @@ const HomeContent = () => {
             // Wait a moment then open curtain
             setTimeout(() => {
                 setCurtainOpen(true);
+                setShowBalloons(true);
                 // Trigger confetti
                 const duration = 5 * 1000;
                 const animationEnd = Date.now() + duration;
@@ -206,6 +209,7 @@ const HomeContent = () => {
     return (
         <div className={Styles.page}>
             <Curtain open={curtainOpen} />
+            <Balloons show={showBalloons} />
             <Navigation />
             <div className={Styles.heroContainer}>
                 <div className={Styles.contentContainer}>
