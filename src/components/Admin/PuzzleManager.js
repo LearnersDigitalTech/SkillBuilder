@@ -1,13 +1,14 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import { Box, TextField, Button, MenuItem, Typography, IconButton, Paper, Stack, Chip, Divider, InputAdornment, Checkbox, FormControlLabel, Accordion, AccordionSummary, AccordionDetails, Grid } from '@mui/material';
-import { Plus, Trash2, Save, Check, MoveVertical, Image as ImageIcon, ChevronDown, Edit2, X } from 'lucide-react';
-import { ref, set, get, remove } from 'firebase/database';
+import React, { useState, useEffect, useRef } from 'react';
+import { Box, TextField, Button, MenuItem, Typography, IconButton, Paper, Stack, Chip, Divider, InputAdornment, Checkbox, FormControlLabel, Accordion, AccordionSummary, AccordionDetails, Grid, Alert } from '@mui/material';
+import { Plus, Trash2, Save, Check, MoveVertical, Image as ImageIcon, ChevronDown, Edit2, X, Upload } from 'lucide-react';
+import { ref, set, get, remove, update } from 'firebase/database';
 import { firebaseDatabase } from '@/backend/firebaseHandler';
 
 const PUZZLE_TYPES = [
     { value: 'MCQ', label: 'Multiple Choice' },
     { value: 'TEXT', label: 'Text / Numerical Answer' },
+    { value: 'userInput', label: 'User Input' },
     { value: 'MATCH', label: 'Match the Following' },
     { value: 'FILL_BLANK', label: 'Fill in the Blanks' },
     { value: 'ORDER', label: 'Reorder / Sequence' }
@@ -17,8 +18,11 @@ const ALL_GRADES = Array.from({ length: 10 }, (_, i) => i + 1); // [1, 2, ..., 1
 
 const PuzzleManager = () => {
     const [selectedDate, setSelectedDate] = useState(new Date().toLocaleDateString('en-CA'));
+    const [viewMode, setViewMode] = useState('daily'); // 'daily' or 'bank'
+    const [bankGrade, setBankGrade] = useState(1); // Default to Grade 1 for Bank View
     const [loading, setLoading] = useState(false);
     const [dailyPuzzles, setDailyPuzzles] = useState([]); // Array of puzzle objects
+    const fileInputRef = useRef(null);
 
     // Form State
     const [isEditing, setIsEditing] = useState(false);
@@ -38,18 +42,21 @@ const PuzzleManager = () => {
     // Load available grades (those not assigned to other puzzles)
     const [assignedGrades, setAssignedGrades] = useState(new Set());
 
-    // Load existing puzzles for date
+    // Load existing puzzles
     useEffect(() => {
         const loadPuzzles = async () => {
             setLoading(true);
             try {
-                const puzzleRef = ref(firebaseDatabase, `NMD_2025/Puzzles/${selectedDate}`);
+                let puzzleRef;
+                if (viewMode === 'bank') {
+                    puzzleRef = ref(firebaseDatabase, `NMD_2025/PuzzleBank/${bankGrade}`);
+                } else {
+                    puzzleRef = ref(firebaseDatabase, `NMD_2025/Puzzles/${selectedDate}`);
+                }
+
                 const snapshot = await get(puzzleRef);
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    // Convert object to array (values) or just array if stored as array? 
-                    // To be safe against map/array mismatch, we handle normalized object.
-                    // We expect a map: { "uuid1": { ... }, "uuid2": { ... } }
                     const puzzleList = Object.values(data);
                     setDailyPuzzles(puzzleList);
                 } else {
@@ -64,7 +71,7 @@ const PuzzleManager = () => {
             }
         };
         loadPuzzles();
-    }, [selectedDate]);
+    }, [selectedDate, viewMode, bankGrade]);
 
     // Recalculate assigned grades whenever dailyPuzzles changes
     useEffect(() => {
@@ -134,8 +141,27 @@ const PuzzleManager = () => {
                 updatedAt: new Date().toISOString()
             };
 
-            const puzzleRef = ref(firebaseDatabase, `NMD_2025/Puzzles/${selectedDate}/${puzzleId}`);
-            await set(puzzleRef, newPuzzleData);
+            // Determine Save Path
+            if (viewMode === 'bank') {
+                // For Bank Mode, we save to the current Bank Grade view
+                // Ideally, we should save to ALL assigned grades if multiple are selected,
+                // but for simplicity in this view, we primarily manage the current bankGrade.
+                // However, bulk upload duplicates to all. Let's replicate that behavior?
+                // Or just save to the current view's grade for now to update IT.
+                // NOTE: If user changes grades, we might need to write to other paths. 
+                // Let's iterate selected grades and save/update there.
+
+                const updates = {};
+                newPuzzleData.grades.forEach(g => {
+                    updates[`NMD_2025/PuzzleBank/${g}/${puzzleId}`] = newPuzzleData;
+                });
+
+                await update(ref(firebaseDatabase), updates);
+            } else {
+                // Daily Mode
+                const puzzleRef = ref(firebaseDatabase, `NMD_2025/Puzzles/${selectedDate}/${puzzleId}`);
+                await set(puzzleRef, newPuzzleData);
+            }
 
             // Update local state optimistic
             // (Simulate fetch)
@@ -146,18 +172,10 @@ const PuzzleManager = () => {
             setDailyPuzzles(updatedPuzzles);
             alert('Puzzle saved successfully!');
 
-            // Check if there are remaining grades. If so, reset form for them.
-            // Calculate assigned excluding current new one, then add new one.
-            const allAssigned = new Set();
-            updatedPuzzles.forEach(p => (p.grades || []).forEach(g => allAssigned.add(g)));
-            const hasRemaining = ALL_GRADES.some(g => !allAssigned.has(g));
-
-            if (hasRemaining) {
-                resetForm(updatedPuzzles); // Auto-open form for remaining
-            } else {
-                setIsEditing(false); // Close form if all grades covered
-                setEditingId(null);
-            }
+            // Logic to determine if we should close form or reset
+            // Simplified for now: Close form
+            setIsEditing(false); // Close form
+            setEditingId(null);
 
         } catch (error) {
             console.error("Error saving puzzle:", error);
@@ -171,7 +189,13 @@ const PuzzleManager = () => {
         if (!confirm("Are you sure you want to delete this puzzle?")) return;
         setLoading(true);
         try {
-            const puzzleRef = ref(firebaseDatabase, `NMD_2025/Puzzles/${selectedDate}/${id}`);
+            let puzzleRef;
+            if (viewMode === 'bank') {
+                puzzleRef = ref(firebaseDatabase, `NMD_2025/PuzzleBank/${bankGrade}/${id}`);
+            } else {
+                puzzleRef = ref(firebaseDatabase, `NMD_2025/Puzzles/${selectedDate}/${id}`);
+            }
+
             await remove(puzzleRef);
             setDailyPuzzles(prev => prev.filter(p => p.id !== id));
         } catch (e) {
@@ -180,6 +204,143 @@ const PuzzleManager = () => {
             setLoading(false);
         }
     }
+
+    const handleClearBank = async () => {
+        if (viewMode !== 'bank') return;
+        if (!confirm(`Are you sure you want to DELETE ALL puzzles for Grade ${bankGrade}? This cannot be undone.`)) return;
+
+        // Double confirmation
+        const input = window.prompt(`Type "DELETE" to confirm clearing Grade ${bankGrade} puzzles.`);
+        if (input !== "DELETE") return;
+
+        setLoading(true);
+        try {
+            const bankRef = ref(firebaseDatabase, `NMD_2025/PuzzleBank/${bankGrade}`);
+            await remove(bankRef);
+            setDailyPuzzles([]);
+            alert(`Grade ${bankGrade} Puzzle Bank has been cleared.`);
+        } catch (e) {
+            console.error("Error clearing bank:", e);
+            alert("Failed to clear bank. Check console.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleClearAllBanks = async () => {
+        if (viewMode !== 'bank') return;
+        if (!confirm(`WARNING: This will DELETE ALL PUZZLES for ALL GRADES in the Puzzle Bank. This cannot be undone. Are you sure?`)) return;
+
+        const input = window.prompt(`Type "DELETE ALL" to confirm wiping the ENTIRE Puzzle Bank.`);
+        if (input !== "DELETE ALL") return;
+
+        setLoading(true);
+        try {
+            const allBanksRef = ref(firebaseDatabase, `NMD_2025/PuzzleBank`);
+            await remove(allBanksRef);
+            setDailyPuzzles([]);
+            alert("Entire Puzzle Bank has been cleared.");
+        } catch (e) {
+            console.error("Error clearing all banks:", e);
+            alert("Failed to clear all banks.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // --- BULK UPLOAD HANDLER ---
+    const handleBulkUpload = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const json = JSON.parse(e.target.result);
+                if (!Array.isArray(json)) throw new Error("JSON must be an array of puzzles.");
+
+                setLoading(true);
+                let successCount = 0;
+                let failCount = 0;
+
+                const updates = {};
+                // Prepare batch updates
+                // We'll group by date to check if we need to refresh current view
+                let needsRefresh = false;
+
+                for (let i = 0; i < json.length; i++) {
+                    const item = json[i];
+
+                    // Simple Validation
+                    if (!item.grades || !item.type || !item.question) {
+                        console.warn(`Skipping invalid item at index ${i}`, item);
+                        failCount++;
+                        continue;
+                    }
+
+                    const puzzleId = `puzzle_${Date.now()}_${i}`;
+
+                    const newPuzzleData = {
+                        ...item,
+                        id: puzzleId,
+                        updatedAt: new Date().toISOString()
+                    };
+                    delete newPuzzleData.date; // Remove date from object if present
+
+                    if (item.date) {
+                        // Date specific logic (old behavior)
+                        updates[`NMD_2025/Puzzles/${item.date}/${puzzleId}`] = newPuzzleData;
+                        if (item.date === selectedDate) needsRefresh = true;
+                    } else {
+                        // Puzzle Bank Logic (New)
+                        // Upload to each grade bank
+                        if (item.grades && Array.isArray(item.grades)) {
+                            item.grades.forEach(grade => {
+                                // Add to bank for this grade
+                                updates[`NMD_2025/PuzzleBank/${grade}/${puzzleId}`] = newPuzzleData;
+                            });
+                        }
+                    }
+                    successCount++;
+                }
+
+                if (Object.keys(updates).length > 0) {
+                    await update(ref(firebaseDatabase), updates);
+                    alert(`Bulk upload complete!\nSuccess: ${successCount}\nFailed: ${failCount}`);
+
+                    // Refresh logic
+                    if (json.length > 0) {
+                        const firstDate = json[0].date;
+                        if (firstDate) {
+                            // Date based update
+                            if (firstDate !== selectedDate) {
+                                setSelectedDate(firstDate);
+                            } else if (needsRefresh) {
+                                // Reload current date
+                                const puzzleRef = ref(firebaseDatabase, `NMD_2025/Puzzles/${selectedDate}`);
+                                const snapshot = await get(puzzleRef);
+                                setDailyPuzzles(snapshot.exists() ? Object.values(snapshot.val()) : []);
+                            }
+                        } else {
+                            // Bank based update - just alert (or maybe switch to a Bank tab if we had one)
+                            console.log("Uploaded to Puzzle Bank");
+                        }
+                    }
+                } else {
+                    alert("No valid puzzles found to upload.");
+                }
+
+            } catch (error) {
+                console.error("Bulk upload error:", error);
+                alert("Failed to parse JSON or upload data. Check console for details.");
+            } finally {
+                setLoading(false);
+                if (fileInputRef.current) fileInputRef.current.value = ""; // Reset input
+            }
+        };
+        reader.readAsText(file);
+    };
+
 
     // --- FORM HANDLERS ---
     const handleGradeToggle = (grade) => {
@@ -209,18 +370,105 @@ const PuzzleManager = () => {
 
 
     return (
-        <Box sx={{ maxWidth: 900, mx: 'auto', p: 3 }}>
+        <Box sx={{ p: 3 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
                 <Typography variant="h5" fontWeight="bold" color="text.primary">
                     Puzzle of the Day Manager
                 </Typography>
-                <TextField
-                    type="date"
-                    size="small"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    sx={{ width: 200 }}
-                />
+                <Box display="flex" gap={2} alignItems="center">
+                    {/* View Mode Toggle */}
+                    <Box display="flex" bgcolor="#f1f5f9" p={0.5} borderRadius={2}>
+                        <Button
+                            size="small"
+                            variant={viewMode === 'daily' ? 'contained' : 'text'}
+                            onClick={() => setViewMode('daily')}
+                            sx={{ boxShadow: 'none', borderRadius: 1.5 }}
+                        >
+                            Daily
+                        </Button>
+                        <Button
+                            size="small"
+                            variant={viewMode === 'bank' ? 'contained' : 'text'}
+                            onClick={() => setViewMode('bank')}
+                            sx={{ boxShadow: 'none', borderRadius: 1.5 }}
+                        >
+                            Bank
+                        </Button>
+                    </Box>
+
+                    {/* Date Picker (Only for Daily) */}
+                    {viewMode === 'daily' && (
+                        <TextField
+                            type="date"
+                            size="small"
+                            value={selectedDate}
+                            onChange={(e) => setSelectedDate(e.target.value)}
+                            sx={{ width: 160 }}
+                        />
+                    )}
+
+                    {/* Grade Selector (Only for Bank) */}
+                    {viewMode === 'bank' && (
+                        <TextField
+                            select
+                            size="small"
+                            value={bankGrade}
+                            onChange={(e) => setBankGrade(e.target.value)}
+                            label="Grade"
+                            sx={{ width: 120 }}
+                        >
+                            {ALL_GRADES.map(g => (
+                                <MenuItem key={g} value={g}>Grade {g}</MenuItem>
+                            ))}
+                        </TextField>
+                    )}
+
+                    <input
+                        type="file"
+                        accept=".json"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        onChange={handleBulkUpload}
+                    />
+                    <Button
+                        startIcon={<Upload size={18} />}
+                        variant="outlined"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={loading}
+                        size="small"
+                        sx={{ ml: 1 }}
+                    >
+                        Bulk Upload
+                    </Button>
+
+                    {viewMode === 'bank' && (
+                        <>
+                            {dailyPuzzles.length > 0 && (
+                                <Button
+                                    startIcon={<Trash2 size={18} />}
+                                    variant="outlined"
+                                    color="error"
+                                    onClick={handleClearBank}
+                                    disabled={loading}
+                                    size="small"
+                                    sx={{ ml: 1, borderColor: '#fecaca', color: '#dc2626', '&:hover': { borderColor: '#dc2626', bgcolor: '#fef2f2' } }}
+                                >
+                                    Clear Grade {bankGrade}
+                                </Button>
+                            )}
+                            <Button
+                                variant="outlined"
+                                color="error"
+                                onClick={handleClearAllBanks}
+                                disabled={loading}
+                                size="small"
+                                sx={{ ml: 1, borderColor: '#7f1d1d', color: '#7f1d1d', bgcolor: '#fef2f2', '&:hover': { bgcolor: '#fee2e2' } }}
+                            >
+                                Clear ALL Grades
+                            </Button>
+                        </>
+                    )}
+                </Box>
             </Box>
 
             {/* LIST OF EXISTING PUZZLES */}
@@ -235,8 +483,8 @@ const PuzzleManager = () => {
                             </Box>
                             <Typography
                                 variant="subtitle2"
-                                noWrap
-                                sx={{ maxWidth: 400 }}
+                                // noWrap // Removing noWrap to see full question if needed, or keep it
+                                sx={{ maxWidth: 600 }}
                                 dangerouslySetInnerHTML={{ __html: p.question }}
                             />
                         </Box>
@@ -254,8 +502,13 @@ const PuzzleManager = () => {
 
                 {dailyPuzzles.length === 0 && !isEditing && (
                     <Box sx={{ p: 4, textAlign: 'center', color: '#94a3b8', border: '2px dashed #e2e8f0', borderRadius: 4 }}>
-                        <Typography>No puzzles created for this date yet.</Typography>
-                        <Button startIcon={<Plus />} variant="contained" sx={{ mt: 2 }} onClick={() => resetForm([])}>Create First Puzzle</Button>
+                        <Typography>No puzzles found {viewMode === 'daily' ? 'for this date' : `in Grade ${bankGrade} Bank`}.</Typography>
+                        {viewMode === 'daily' && (
+                            <Button startIcon={<Plus />} variant="contained" sx={{ mt: 2 }} onClick={() => resetForm([])}>Create First Puzzle</Button>
+                        )}
+                        {viewMode === 'bank' && (
+                            <Typography variant="caption" display="block" mt={1}>Upload puzzles via Bulk Upload to populate the bank.</Typography>
+                        )}
                     </Box>
                 )}
 
@@ -389,7 +642,7 @@ const PuzzleManager = () => {
                             </Box>
                         )}
 
-                        {(formPuzzle.type === 'TEXT' || formPuzzle.type === 'FILL_BLANK') && (
+                        {(formPuzzle.type === 'TEXT' || formPuzzle.type === 'FILL_BLANK' || formPuzzle.type === 'userInput') && (
                             <TextField
                                 label="Correct Answer"
                                 value={formPuzzle.correctAnswer}

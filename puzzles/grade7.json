@@ -1,0 +1,1022 @@
+[
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "I had ₹8,750 in my wallet. I spent ₹3,485. How much money is left?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "5265",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Evaluate: 6 × (45 − 18)",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "162",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: −3, 0, 5, 12, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "21",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "If one book costs ₹125, how much will 24 books cost?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "3000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "I am a number. If you add 18 and divide the result by 3, you get 20. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "42",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Which integer is greater: −14 or −9?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-9",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 1, 4, 9, 16, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "25",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "What is the sum of 2.75 and 1.25?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "4",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "The temperature is −6°C. It rises by 14°C. What is the new temperature?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "What is the value of 2³?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "I have 15 dozens of notebooks. How many notebooks do I have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "180",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Convert 0.2 into a fraction in simplest form.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1/5",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Which is smaller: −18 or −25?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-25",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "If 4x = 96, what is the value of x?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "24",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "What is one-third of 3/5?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1/5",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "A shopkeeper had ₹12,450. After selling some goods, he now has ₹18,975. How much money did he earn?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "6525",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Evaluate: (84 ÷ 7) × (16 − 9)",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "84",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: −20, −10, 0, 10, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "20",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "If one chair costs ₹750, how much will 16 chairs cost?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "12000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "I am a number. When multiplied by 7 and then reduced by 21, the result is 70. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "13",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Which integer is greater: −32 or −28?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-28",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 2, 8, 18, 32, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "50",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "What is the sum of 3.6 and 4.45?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "8.05",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "The temperature is −15°C. It rises by 23°C. What is the new temperature?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "What is the value of 3² + 4²?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "25",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "I have 18 dozens of eggs. How many eggs are there?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "216",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Convert 0.375 into a fraction in simplest form.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "3/8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Which is greater: −7 or 2?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "2",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "If 6x = 210, what is the value of x?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "35",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "What is one-fourth of 4/5?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1/5",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "A factory produced 18,750 toys in a month. If 7,480 toys were sold, how many toys are left?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "11270",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Evaluate: 9 × (28 − 12) ÷ 4",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "36",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: −25, −15, −5, 5, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "15",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "If one laptop costs ₹32,500, how much will 3 laptops cost?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "97500",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "I am a number. When you subtract 18 from me and divide the result by 6, you get 7. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "60",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Which integer is smaller: −42 or −37?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-42",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 1, 3, 6, 10, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "15",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "What is the sum of 5.75 and 2.125?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "7.875",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "The temperature is −22°C. It rises by 30°C. What is the new temperature?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "What is the value of 5² − 4²?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "9",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "I have 22 dozens of oranges. How many oranges do I have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "264",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Convert 0.625 into a fraction in simplest form.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "5/8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Which is greater: −3 or −11?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-3",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "If 7x − 14 = 49, what is the value of x?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "9",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "What is one-half of 7/8?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "7/16",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "A train travels 2,450 km in 7 days. If it travels the same distance each day, how many kilometers does it travel per day?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "350",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Evaluate: (72 ÷ 9) × (25 − 17)",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "64",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: −40, −30, −20, −10, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "0",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "If one table costs ₹4,250, how much will 6 tables cost?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "25500",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "I am a number. When multiplied by 8 and then increased by 16, the result is 112. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "12",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Which integer is greater: −56 or −49?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-49",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 4, 12, 36, __, 324",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "108",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "What is the sum of 6.875 and 3.125?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "10",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "The temperature is −28°C. It rises by 35°C. What is the new temperature?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "7",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "What is the value of 6² − 5²?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "11",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "I have 25 dozens of mangoes. How many mangoes do I have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "300",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Convert 0.875 into a fraction in simplest form.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "7/8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "Which is smaller: −2 or −19?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-19",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "If 9x + 18 = 99, what is the value of x?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "9",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            7
+        ],
+        "type": "userInput",
+        "question": "What is one-third of 9/10?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "3/10",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    }
+]

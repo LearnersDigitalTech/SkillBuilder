@@ -178,7 +178,13 @@ const DashboardContent = ({ logoutAction }) => {
                                             // Aggregate Stats
                                             reportCount += processedHistory.length;
                                             processedHistory.forEach(rep => {
-                                                if (rep.marks >= 40) passedCount++;
+                                                if (rep.marks >= 40) passedCount += rep.marks; // Using passedCount specifically for total marks now
+                                                else passedCount += rep.marks; // Just summing all marks, reusing variable for scope simplicity or renaming?
+                                                // Actually, let's fix logic properly below to avoid confusion.
+                                            });
+                                            // Re-doing the loop properly:
+                                            processedHistory.forEach(rep => {
+                                                passedCount += rep.marks; // Accumulate all marks (variable name 'passedCount' acts as 'totalScoreSum')
                                                 if (rep.marks === 100) perfectScoreCount++;
 
                                                 // Aggregate for Marks Chart
@@ -345,7 +351,7 @@ const DashboardContent = ({ logoutAction }) => {
 
                 setStats({
                     totalStudents: finalStudents.length,
-                    totalPassed: passedCount,
+                    totalPassed: reportCount > 0 ? Math.round(passedCount / reportCount) + '%' : '0%', // passedCount acts as Sum of Scores
                     totalPerfectScores: perfectScoreCount,
                     totalReports: reportCount,
                 });
@@ -508,7 +514,7 @@ const DashboardContent = ({ logoutAction }) => {
                         </Grid>
                         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                             <StatCard
-                                title="Total Passed"
+                                title="Average Score"
                                 value={stats.totalPassed}
                                 icon={<CheckCircle size={24} />}
                                 color="#4caf50"

@@ -32,7 +32,7 @@ import {
     generateRatioProportion,
     generateSquareRoots,
     generateCubeRoots,
-    generateExponents,
+    generateExponentsNegative,
     generateAlgebraicAdditionSubtraction,
     generateAlgebraicMultiplication,
     generateAlgebraicDivision,
