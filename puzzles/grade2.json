@@ -1,0 +1,1022 @@
+[
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "I have 12 pencils ✏️. I give 4 to my friend. How many pencils are left?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "What number comes after 29?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "30",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: 10, 20, __, 40",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "30",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "If one box has 5 balls ⚽, how many balls are there in 4 boxes?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "20",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "I am a number between 40 and 42. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "41",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Which number is bigger: 56 or 65?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "65",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 2, 4, 6, __, 10",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "If you add 9 and 7, what is the sum?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "16",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "How many legs do 3 dogs 🐕🐕🐕 have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "12",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "What number comes before 50?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "49",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "I have 3 tens and 5 ones. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "35",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 5, 10, 15, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "20",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "If a spider 🕷️ has 8 legs, how many legs do 2 spiders have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "16",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Which number is smaller: 72 or 68?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "68",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "What is half of 20?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "10",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "I have 15 marbles and give away 5. How many marbles are left?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "10",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "What number comes after 64?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "65",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: 25, 30, __, 40",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "35",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "If one bag has 6 apples 🍎, how many apples are there in 3 bags?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "18",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "I am thinking of a number between 70 and 72. What is it?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "71",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Which number is bigger: 84 or 48?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "84",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 3, 6, 9, __, 15",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "12",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "What is the sum of 18 and 12?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "30",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "How many wheels do 3 cars 🚗🚗🚗 have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "12",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "What number comes before 90?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "89",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "I have 4 tens and 2 ones. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "42",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 100, 90, 80, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "70",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "If one octopus 🐙 has 8 legs, how many legs do 2 octopuses have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "16",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Which number is smaller: 95 or 59?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "59",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "What is half of 40?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "20",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "I have 24 chocolates 🍫. I give 6 to my sister. How many chocolates are left?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "18",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "What number comes after 99?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "100",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: 14, 21, __, 35",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "28",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "If one packet has 10 biscuits 🍪, how many biscuits are there in 5 packets?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "50",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "I am a number between 58 and 60. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "59",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Which number is bigger: 73 or 79?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "79",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 4, 8, 12, __, 20",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "16",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "What is the sum of 25 and 25?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "50",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "How many legs do 4 cows 🐄🐄🐄🐄 have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "16",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "What number comes before 100?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "99",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "I have 6 tens and 3 ones. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "63",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 50, 45, 40, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "35",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "If one frog 🐸 has 4 legs, how many legs do 5 frogs have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "20",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Which number is smaller: 64 or 46?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "46",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "What is half of 60?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "30",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "I have 30 balloons 🎈. 10 balloons fly away. How many balloons are left?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "20",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "What number comes after 119?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "120",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: 60, 55, __, 45",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "50",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "If one basket has 12 eggs 🥚, how many eggs are there in 4 baskets?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "48",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "I am a number between 89 and 91. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "90",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Which number is bigger: 102 or 120?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "120",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 6, 12, 18, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "24",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "What is the sum of 45 and 15?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "60",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "How many wheels do 5 bicycles 🚲 have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "10",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "What number comes before 200?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "199",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "I have 9 tens and 4 ones. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "94",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 200, 180, 160, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "140",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "If one ant 🐜 has 6 legs, how many legs do 4 ants have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "24",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "Which number is smaller: 150 or 105?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "105",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            2
+        ],
+        "type": "userInput",
+        "question": "What is half of 80?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "40",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    }
+]

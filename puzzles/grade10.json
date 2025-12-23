@@ -1,0 +1,1022 @@
+[
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "A shopkeeper bought a refrigerator for ₹24,500 and sold it for ₹28,350. Find the profit.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "3850",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Evaluate: 2x² − 5x + 3 when x = 4",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "15",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Find the next term of the AP: 7, 14, 21, 28, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "35",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "The sum of two consecutive natural numbers is 91. Find the smaller number.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "45",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Solve for x: 3x − 7 = 2x + 11",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "18",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Which is greater: √75 or √81?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "√81",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Simplify: (3³ × 4²) ÷ 6",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "72",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Find the value of: (5/6) + (7/12)",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "17/12",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "The temperature was −7°C and increased by 19°C. What is the new temperature?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "12",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Find the square root of 2025.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "45",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "If 4x + 9 = 57, find the value of x.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "12",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Express 0.2 as a rational number in simplest form.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1/5",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Which is smaller: −√36 or −5?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-6",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Solve for y: 6(y − 4) = 48",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "12",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "What is one-fourth of 8/9?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "2/9",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "A car travels 180 km in 3 hours. At the same speed, how far will it travel in 7 hours?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "420",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Evaluate: x² − 6x + 8 when x = 5",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "3",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Find the next term of the AP: 5, 9, 13, 17, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "21",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "The sum of two consecutive odd numbers is 64. Find the smaller number.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "31",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Solve for x: 5x − 18 = 2x + 12",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "10",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Which is greater: √98 or √100?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "√100",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Simplify: (2³ × 5²) ÷ 10",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "20",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Find the value of: (7/8) − (3/4)",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1/8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "The temperature was 9°C and dropped by 17°C. What is the new temperature?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Find the square root of 2401.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "49",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "If 7x + 14 = 63, find the value of x.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "7",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Express 0.375 as a rational number in simplest form.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "3/8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Which is smaller: −√64 or −7?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Solve for y: 4(y + 5) = 60",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "10",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "What is one-fifth of 5/6?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1/6",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "A factory produced 48,750 units in a month. If 13,685 units were defective, how many good units were produced?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "35065",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Evaluate: 3x² − 2x + 5 when x = 3",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "26",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Find the next term of the AP: 12, 19, 26, 33, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "40",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "The sum of two consecutive even numbers is 86. Find the smaller number.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "42",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Solve for x: 2x² − 7x + 3 = 0",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "3/2, 1",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Which is greater: √147 or √169?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "√169",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Simplify: (6² × 5) ÷ 15",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "12",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Find the value of: (11/12) + (5/6)",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "7/4",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "The temperature was −11°C and increased by 23°C. What is the new temperature?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "12",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Find the square root of 1764.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "42",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "If 8x − 24 = 56, find the value of x.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "10",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Express 0.45 as a rational number in simplest form.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "9/20",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Which is smaller: −√100 or −9?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-10",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Solve for y: 7(y − 2) = 70",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "12",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "What is one-third of 6/11?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "2/11",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "A train travels 450 km in 5 hours. At the same speed, how long will it take to travel 630 km?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "7",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Evaluate: x² + 5x − 14 when x = 2",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "0",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Find the next term of the AP: 3, 7, 11, 15, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "19",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "The sum of two consecutive odd numbers is 118. Find the larger number.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "59",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Solve for x: x² − 9x + 20 = 0",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "4, 5",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Which is greater: √192 or √196?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "√196",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Simplify: (8² × 3) ÷ 12",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "16",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Find the value of: (13/15) − (4/5)",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1/15",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "The temperature was 16°C and dropped by 29°C. What is the new temperature?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-13",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Find the square root of 2601.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "51",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "If 10x − 40 = 110, find the value of x.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "15",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Express 0.875 as a rational number in simplest form.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "7/8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Which is smaller: −√121 or −12?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-12",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "Solve for y: 9(y − 3) = 99",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "14",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            10
+        ],
+        "type": "userInput",
+        "question": "What is one-sixth of 4/5?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "2/15",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    }
+]

@@ -1,0 +1,1022 @@
+[
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "I have 45,680 coins. I give away 12,345 coins. How many coins are left?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "33335",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "What number comes after 79,999?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "80000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: 2, 4, 8, 16, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "32",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "If one packet has 24 pencils ✏️, how many pencils are there in 8 packets?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "192",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "I am a number between 99,999 and 100,001. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "100000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Which number is bigger: 56,784 or 56,748?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "56784",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 3, 9, 27, 81, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "243",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "What is the sum of 38,450 and 11,550?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "50000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "How many legs do 14 spiders 🕷️ have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "112",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "What number comes before 1,00,000?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "99999",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "I have 7 ten-thousands, 6 thousands, 5 hundreds, 4 tens, and 3 ones. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "76543",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 1,000, 2,000, 4,000, 8,000, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "16000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "If one crab 🦀 has 10 legs, how many legs do 9 crabs have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "90",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Which number is smaller: 42,506 or 42,560?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "42506",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "What is half of 50,000?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "25000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "I had 68,420 rupees. I spent 27,685 rupees. How much money is left?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "40735",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "What number comes after 1,24,999?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "125000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: 5, 10, 20, 40, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "80",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "If one truck carries 36 boxes 📦, how many boxes do 7 trucks carry?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "252",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "I am a number between 2,49,999 and 2,50,001. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "250000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Which number is bigger: 93,846 or 93,864?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "93864",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 100, 90, 81, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "72.9",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "What is the sum of 64,375 and 35,625?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "100000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "How many legs do 25 spiders 🕷️ have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "200",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "What number comes before 5,00,000?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "499999",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "I have 3 lakh, 4 thousand, and 5 tens. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "304050",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 2,000, 4,000, 8,000, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "16000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "If one centipede 🐛 has 100 legs, how many legs do 4 centipedes have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "400",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Which number is smaller: 78,506 or 78,560?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "78506",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "What is one-third of 90?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "30",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "I had 1,25,600 books. I donated 47,850 books. How many books are left?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "77750",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "What number comes after 3,49,999?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "350000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: 7, 14, 28, __, 112",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "56",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "If one bus carries 48 students 🚌, how many students are there in 9 buses?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "432",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "I am a number between 5,99,999 and 6,00,001. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "600000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Which number is bigger: 4,86,752 or 4,86,725?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "486752",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 1, 4, 9, 16, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "25",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "What is the sum of 2,75,450 and 3,24,550?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "600000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "How many wheels do 15 cars 🚗 have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "60",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "What number comes before 10,00,000?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "999999",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "I have 5 lakh, 2 thousand, and 7 ones. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "502007",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 81, 72, 63, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "54",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "If one starfish ⭐ has 5 arms, how many arms do 18 starfish have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "90",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Which number is smaller: 6,24,580 or 6,24,508?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "624508",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "What is one-fourth of 200?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "50",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "I had 9,50,000 rupees. I spent 3,78,450 rupees. How much money is left?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "571550",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "What number comes after 7,99,999?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "800000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: 1, 3, 6, 10, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "15",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "If one container holds 125 liters of water, how many liters are there in 6 containers?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "750",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "I am a number between 9,99,999 and 10,00,001. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1000000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Which number is bigger: 8,45,672 or 8,45,726?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "845726",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 2, 5, 10, 17, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "26",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "What is the sum of 4,58,375 and 5,41,625?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1000000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "How many legs do 35 spiders 🕷️ have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "280",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "What number comes before 20,00,000?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1999999",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "I have 12 lakh, 3 thousand, and 9 ones. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1203009",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 256, 225, 196, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "169",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "If one millipede 🐛 has 1,000 legs, how many legs do 3 millipedes have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "3000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "Which number is smaller: 9,45,608 or 9,45,680?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "945608",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            5
+        ],
+        "type": "userInput",
+        "question": "What is one-fifth of 500?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "100",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    }
+]

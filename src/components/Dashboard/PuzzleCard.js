@@ -28,68 +28,81 @@ const PuzzleCard = ({ user, activeChild, activeChildId }) => {
 
     useEffect(() => {
         const fetchPuzzleAndStatus = async () => {
-            // Get Today's Date in YYYY-MM-DD (local time)
-            // Using en-CA locale ensures YYYY-MM-DD format consistent with HTML date inputs
             const today = new Date().toLocaleDateString('en-CA');
-            console.log("🧩 Fetching Puzzle for Date:", today, "LearnerID:", learnerId);
 
-            // 1. Check Completion Status First (Non-blocking)
-            try {
-                const completionRef = ref(firebaseDatabase, `NMD_2025/PuzzleCompletions/${today}/${learnerId}`);
-                const completionSnapshot = await get(completionRef);
-                if (completionSnapshot.exists() && completionSnapshot.val() === true) {
-                    setIsCompleted(true);
-                    setLoading(false);
-                    return;
-                } else {
-                    setIsCompleted(false);
+            // 1. Identify User Grade (Critical for Bank)
+            const gradeSource = activeChild?.grade || user?.grade;
+            let userGrade = null;
+
+            if (gradeSource) {
+                const gradeString = String(gradeSource);
+                const match = gradeString.match(/\d+/);
+                if (match) {
+                    userGrade = parseInt(match[0]);
                 }
-            } catch (completionError) {
-                console.warn("⚠️ Error checking completion status (ignoring to allow puzzle load):", completionError);
-                setIsCompleted(false);
+            }
+            // console.log("🧩 User Grade Parsed:", userGrade, "Source:", gradeSource);
+
+            if (!userGrade) {
+                setLoading(false);
+                return;
             }
 
             try {
-                // 2. Fetch Puzzles for the day
-                const puzzleRef = ref(firebaseDatabase, `NMD_2025/Puzzles/${today}`);
-                const snapshot = await get(puzzleRef);
+                // 1. Check Daily Limit First (One Random Puzzle Per Day)
+                try {
+                    const lastCompletionRef = ref(firebaseDatabase, `NMD_2025/UserLastCompletion/${learnerId}`);
+                    const lastSnapshot = await get(lastCompletionRef);
 
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    const allPuzzles = Object.values(data);
-
-                    // 3. Identify User Grade
-                    // Check activeChild grade first, then user fallback
-                    const gradeSource = activeChild?.grade || user?.grade;
-                    let userGrade = null;
-
-                    if (gradeSource) {
-                        // Handle both number (3) and string ("Grade 3", "3rd", "Class 3") formats
-                        const gradeString = String(gradeSource);
-                        const match = gradeString.match(/\d+/);
-                        if (match) {
-                            userGrade = parseInt(match[0]);
-                        }
-                    }
-
-                    console.log("🧩 User Grade Parsed:", userGrade, "Source:", gradeSource);
-
-                    if (userGrade) {
-                        // Find puzzle that includes this grade
-                        const matchedPuzzle = allPuzzles.find(p => (p.grades || []).includes(userGrade));
-
-                        if (matchedPuzzle) {
-                            setPuzzle(matchedPuzzle);
-                        } else {
-                            // Grade specific puzzle not found
-                            setPuzzle(null);
-                        }
+                    if (lastSnapshot.exists() && lastSnapshot.val() === today) {
+                        console.log("🧩 Already solved a puzzle today:", today);
+                        setIsCompleted(true);
+                        setLoading(false);
+                        return; // Stop here, show "Come back tomorrow"
                     } else {
+                        setIsCompleted(false);
+                    }
+                } catch (error) {
+                    console.warn("⚠️ Error checking last completion:", error);
+                    // Proceed on error (fail open or closed? Open feels safer for UX, letting them play)
+                }    // 2. Fetch User Completions
+                const completionsRef = ref(firebaseDatabase, `NMD_2025/UserCompletions/${learnerId}`);
+                const completionsSnapshot = await get(completionsRef);
+                const completedPuzzleIds = new Set();
+
+                if (completionsSnapshot.exists()) {
+                    const data = completionsSnapshot.val();
+                    // data is like { "puzzle_id_1": true, "puzzle_id_2": true }
+                    Object.keys(data).forEach(id => completedPuzzleIds.add(id));
+                }
+
+                // 3. Fetch Puzzle Bank for Grade
+                const bankRef = ref(firebaseDatabase, `NMD_2025/PuzzleBank/${userGrade}`);
+                const bankSnapshot = await get(bankRef);
+
+                if (bankSnapshot.exists()) {
+                    const allPuzzles = Object.values(bankSnapshot.val());
+
+                    // 4. Filter out completed puzzles
+                    const availablePuzzles = allPuzzles.filter(p => !completedPuzzleIds.has(p.id));
+
+                    if (availablePuzzles.length > 0) {
+                        // 5. Pick Random
+                        const randomIndex = Math.floor(Math.random() * availablePuzzles.length);
+                        const selectedPuzzle = availablePuzzles[randomIndex];
+                        setPuzzle(selectedPuzzle);
+                        setIsCompleted(false); // Just loaded a fresh one
+                    } else {
+                        // All solved!
+                        // Maybe show a "You've solved everything!" state or just Completed state if we want to blocking
+                        // Logic change: If all solved, we could show the "Completed" view.
+                        setIsCompleted(true);
                         setPuzzle(null);
                     }
                 } else {
-                    setPuzzle(null); // No puzzle today
+                    setPuzzle(null); // No puzzles in bank for this grade
                 }
+
             } catch (error) {
                 console.error("Error fetching puzzle:", error);
             } finally {
