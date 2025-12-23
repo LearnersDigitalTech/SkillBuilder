@@ -38,31 +38,67 @@ const generate = (generator, count = 10) => {
 };
 
 const Grade7Questions = {
-    q1: generate(generateNaturalWholeNumbers),
-    q2: generate(generateIntegersG10),
-    q3: generate(generateFractionsG10),
-    q4: generate(generateDecimalsG10),
-    q5: generate(generateLCMG10),
-    q6: generate(generateHCF),
-    q7: generate(generateRatioProportion),
-    q8: generate(generateBODMAS),
-    q9: generate(generatePerimeterAndArea),
-    q10: generate(generateCommercialMath),
-    q11: generate(() => generateExponentLaws([0])), // Product Law
-    q12: generate(() => generateExponentLaws([1])), // Quotient Law
-    q13: generate(() => generateExponentLaws([2])), // Power of Power
-    q14: generate(() => generateExponentLaws([4])), // Power of Product
-    q15: generate(() => generateExponentLaws([5])), // Power of Quotient
-    q16: generate(() => generateExponentLaws([3])), // Zero Exponent
-    q17: generate(() => generateExponentLaws([6])), // Negative Exponent
-    q18: generate(generateGrade7Algebra),
-    q19: generate(generateAlgebraWordProblemTable),
-    q20: generate(generateLinesAndAngles),
-    q21: generate(generateTrianglesProperties),
-    // q22: generate(generateSolidShapesProperties),
-    q22: generate(generatePercentage),
-    q23: generate(generateDataHandling),
-    q24: generate(generateBarGraph),
+    // =========================
+    // Chapter 1: Integers & Number System
+    // =========================
+    q1: generate(generateNaturalWholeNumbers),     // Natural & whole numbers
+    q2: generate(generateIntegersG10),             // Integers & number line
+    q3: generate(generateFractionsG10),            // Fractions
+    q4: generate(generateDecimalsG10),             // Decimals
+
+    // =========================
+    // Chapter 2: Factors & Multiples
+    // =========================
+    q5: generate(generateLCMG10),                  // LCM
+    q6: generate(generateHCF),                     // HCF
+
+    // =========================
+    // Chapter 3: Ratio, Proportion & BODMAS
+    // =========================
+    q7: generate(generateRatioProportion),         // Ratio & proportion
+    q8: generate(generateBODMAS),                  // Order of operations
+
+    // =========================
+    // Chapter 4: Exponents
+    // =========================
+    q9: generate(() => generateExponentLaws([0])), // Product law
+    q10: generate(() => generateExponentLaws([1])),// Quotient law
+    q11: generate(() => generateExponentLaws([2])),// Power of power
+    q12: generate(() => generateExponentLaws([4])),// Power of product
+    q13: generate(() => generateExponentLaws([5])),// Power of quotient
+    q14: generate(() => generateExponentLaws([3])),// Zero exponent
+    q15: generate(() => generateExponentLaws([6])),// Negative exponent
+
+    // =========================
+    // Chapter 5: Algebraic Expressions
+    // =========================
+    q16: generate(generateGrade7Algebra),           // Simple algebraic expressions
+    q17: generate(generateAlgebraWordProblemTable), // Word problems
+
+    // =========================
+    // Chapter 6: Geometry
+    // =========================
+    q18: generate(generateLinesAndAngles),          // Lines & angles
+    q19: generate(generateTrianglesProperties),     // Properties of triangles
+    q20: generate(generateSolidShapesProperties),   // 3D shapes & nets
+
+    // =========================
+    // Chapter 7: Mensuration
+    // =========================
+    q21: generate(generatePerimeterAndArea),        // Perimeter & area
+
+    // =========================
+    // Chapter 8: Comparing Quantities
+    // =========================
+    q22: generate(generatePercentage),              // Percentage
+    q23: generate(generateCommercialMath),          // Profit, loss, SI
+
+    // =========================
+    // Chapter 9: Data Handling
+    // =========================
+    q24: generate(generateDataHandling),            // Mean, median, mode
+    q25: generate(generateBarGraph),                 // Bar graphs
+
     // Fill remaining slots to reach q30
     // q21: generate(generateIntegerOps),
     // q22: generate(generateRationalOps),
