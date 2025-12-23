@@ -20,6 +20,9 @@ import {
 } from '../Grade7/grade7Generators.mjs';
 
 import {
+    generateQuadrilateralsGrade8
+} from '../Grade8/grade8Generators.mjs'
+import {
     generateNaturalWholeNumbers,
     generateIntegers as generateIntegersG10,
     generateFractions as generateFractionsG10,
@@ -51,55 +54,105 @@ import {
     generateNumberSquareProblem
 } from '../Grade10/grade10Generators.mjs';
 
+
+import {
+    generateFactorTree,
+} from '../Grade5/grade5Generators.mjs';
+
 const generate = (generator, count = 10) => {
     return Array.from({ length: count }, () => generator());
 };
 
+// const Grade9Questions = {
+//     // Number Systems
+//     q1: generate(generateNaturalWholeNumbers),   // Real numbers basics
+//     q2: generate(generateIntegersG10),           // Integers & number line
+//     q3: generate(generateFractionsG10),          // Rational numbers
+//     q4: generate(generateDecimalsG10),
+//     q5: generate(generateFactorTree),
+//     q6: generate(generateLCMG10),
+//     q7: generate(generateHCF),      // Decimal expansions
+//     q8: generate(generateRatioProportion),
+
+//     // Polynomials
+//     q9: generate(generatePolynomialBasics),
+//     q10: generate(generatePolynomialOperations), // Updated for formatting fix
+//     q11: generate(generatePolynomialFactorization),
+//     q12: generate(generatePolynomialZeroes),
+
+//     // Linear Equations in Two Variables
+//     q13: generate(generateQuadrilateralsGrade8),
+//     q14: generate(generateLinearEquationSolutions),
+//     q15: generate(generateLinearEquationSolving),
+
+//     // Coordinate Geometry
+//     q16: generate(generateCartesianPoint),
+//     // q12: generate(generateCoordinateBasics),
+//     // q14: generate(generateCoordinateFormulas),
+
+//     // Geometry: Lines, Angles, Triangles, Quadrilaterals
+//     // q14: generate(generateBODMAS),               // You can repurpose or remove if not needed
+//     q17: generate(generateAlgebraicAdditionSubtraction), // Optional basic algebra
+//     q18: generate(generateAlgebraicMultiplication),       // Optional
+//     q19: generate(generateAlgebraicDivision),             // Optional
+
+//     q20: generate(generatePerimeterAndArea),
+//     // q19: generate(generatePerimeter),
+//     q21: generate(generateArea),                 // Triangles & parallelograms
+//     q22: generate(generateMensurationArea),      // Heron’s Formula cases
+//     q23: generate(generateMensurationVolume),    // Cube, cuboid, cylinder
+
+//     // Statistics & Probability
+//     q24: generate(generateStatistics),
+//     q25: generate(generateProbability),
+
+//     // Constructions (if you add generators later)
+//     //q24: generate(generateConstructionBasics), // keep placeholder if needed
+// };
+
 const Grade9Questions = {
-    // Number Systems
-    q1: generate(generateNaturalWholeNumbers),   // Real numbers basics
-    q2: generate(generateIntegersG10),           // Integers & number line
-    q3: generate(generateFractionsG10),          // Rational numbers
+
+    // 1. Number Systems
+    q1: generate(generateNaturalWholeNumbers),
+    q2: generate(generateIntegersG10),
+    q3: generate(generateFractionsG10),
     q4: generate(generateDecimalsG10),
-    q5: generate(generateLCMG10),
-    q6: generate(generateHCF),      // Decimal expansions
-    q7: generate(generateRatioProportion),
+    q5: generate(generateFactorTree),
+    q6: generate(generateLCMG10),
+    q7: generate(generateHCF),
+    q8: generate(generateRatioProportion),
 
-    // Polynomials
-    q8: generate(generatePolynomialBasics),
-    q9: generate(generatePolynomialOperations), // Updated for formatting fix
-    q10: generate(generatePolynomialFactorization),
-    q11: generate(generatePolynomialZeroes),
+    // 2. Algebra Basics
+    q9: generate(generateAlgebraicAdditionSubtraction),
+    q10: generate(generateAlgebraicMultiplication),
+    q11: generate(generateAlgebraicDivision),
 
-    // Linear Equations in Two Variables
-    q12: generate(generateLinearEquationSolutions),
-    q13: generate(generateLinearEquationSolving),
+    // 3. Polynomials
+    q12: generate(generatePolynomialBasics),
+    q13: generate(generatePolynomialOperations),
+    q14: generate(generatePolynomialFactorization),
+    q15: generate(generatePolynomialZeroes),
 
-    // Coordinate Geometry
-    q14: generate(generateCartesianPoint),
-    // q12: generate(generateCoordinateBasics),
-    // q14: generate(generateCoordinateFormulas),
+    // 4. Linear Equations in Two Variables
+    q16: generate(generateLinearEquationSolutions),
+    q17: generate(generateLinearEquationSolving),
 
-    // Geometry: Lines, Angles, Triangles, Quadrilaterals
-    // q14: generate(generateBODMAS),               // You can repurpose or remove if not needed
-    q15: generate(generateAlgebraicAdditionSubtraction), // Optional basic algebra
-    q16: generate(generateAlgebraicMultiplication),       // Optional
-    q17: generate(generateAlgebraicDivision),             // Optional
+    // 5. Coordinate Geometry
+    q18: generate(generateCartesianPoint),
 
-    q18: generate(generatePerimeterAndArea),
-    // q19: generate(generatePerimeter),
-    q19: generate(generateArea),                 // Triangles & parallelograms
-    q20: generate(generateMensurationArea),      // Heron’s Formula cases
-    q21: generate(generateMensurationVolume),    // Cube, cuboid, cylinder
+    // 6. Geometry
+    q19: generate(generateQuadrilateralsGrade8),
+    q20: generate(generatePerimeterAndArea),
+    q21: generate(generateArea),
 
-    // Statistics & Probability
-    q22: generate(generateStatistics),
-    // q23: generate(generateProbability),
+    // 7. Mensuration
+    q22: generate(generateMensurationArea),
+    q23: generate(generateMensurationVolume),
 
-    // Constructions (if you add generators later)
-    // q24: generate(generateConstructionBasics), // keep placeholder if needed
+    // 8. Statistics & Probability
+    q24: generate(generateStatistics),
+    q25: generate(generateProbability),
 };
-
 
 
 export const Grade9GeneratorMap = {

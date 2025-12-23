@@ -306,6 +306,51 @@ export const generateHCF = () => {
     };
 };
 
+
+// --- CAT05 + CAT06: LCM & HCF (2 numbers only) ---
+export const generateLCMandHCF = () => {
+    const rows = [];
+
+    // Q1: LCM of 2 numbers
+    let lcmA = getRandomInt(4, 15);
+    let lcmB = getRandomInt(4, 15);
+    while (lcmA === lcmB) {
+        lcmB = getRandomInt(4, 15);
+    }
+    const lcmVal = lcm(lcmA, lcmB);
+    rows.push({
+        text: `Find the LCM of $${lcmA}, ${lcmB}$`,
+        answer: String(lcmVal)
+    });
+
+    // Q2: HCF of 2 numbers
+    let hcfA = getRandomInt(12, 40);
+    let hcfB = getRandomInt(12, 40);
+    let hcfVal = gcd(hcfA, hcfB);
+    while (hcfVal <= 1 || hcfA === hcfB) {
+        hcfA = getRandomInt(12, 40);
+        hcfB = getRandomInt(12, 40);
+        hcfVal = gcd(hcfA, hcfB);
+    }
+    rows.push({
+        text: `Find the HCF of $${hcfA}, ${hcfB}$`,
+        answer: String(hcfVal)
+    });
+
+    const answerObj = {};
+    rows.forEach((r, i) => {
+        answerObj[i] = r.answer;
+    });
+
+    return {
+        type: 'tableInput',
+        answer: JSON.stringify(answerObj),
+        rows: rows,
+        topic: 'LCM and HCF'
+    };
+};
+
+
 // --- CAT07: Ratio and Proportion ---
 export const generateRatioProportion = () => {
     const rows = [];
@@ -373,7 +418,7 @@ export const generateSquareRoots = () => {
 
     return {
         type: 'tableInput',
-        question: 'Evaluate the following Squares and Square Roots:',
+        question: '',
         answer: JSON.stringify(answerObj),
         rows: rows,
         topic: 'Square and Square Roots'
@@ -413,7 +458,7 @@ export const generateCubeRoots = () => {
 
     return {
         type: 'tableInput',
-        question: 'Evaluate the following Cubes and Cube Roots:',
+        question: '',
         answer: JSON.stringify(answerObj),
         rows: rows,
         topic: 'Cube and Cube Roots'
@@ -474,7 +519,7 @@ export const generateBODMAS = () => {
 
     return {
         type: 'tableInput',
-        question: 'Solve using BODMAS rules:',
+        question: '',
         answer: JSON.stringify(answerObj),
         rows: rows,
         topic: 'BODMAS'
@@ -708,34 +753,116 @@ export const generateLinearEquationOneVar = () => {
 
 // --- CAT16: Simultaneous Equations ---
 // --- CAT16: Simultaneous Equations ---
+// export const generateSimultaneousEquations = () => {
+//     // 5x - 4y = 81
+//     // 7x + 4y = 27
+//     const rows = [];
+
+//     // Generate integer solution
+//     const x = getRandomInt(1, 10);
+//     const y = getRandomInt(1, 10);
+
+//     // Eq 1: a1x + b1y = c1
+//     const a1 = getRandomInt(2, 9);
+//     const b1 = getRandomInt(2, 9);
+//     // Randomize signs
+//     const sign1 = Math.random() < 0.5 ? -1 : 1;
+//     const c1 = a1 * x + (sign1 * b1) * y;
+
+//     // Eq 2: a2x + b2y = c2
+//     const a2 = getRandomInt(2, 9);
+//     const b2 = getRandomInt(2, 9);
+//     // Ensure not parallel/identical lines
+//     const sign2 = Math.random() < 0.5 ? -1 : 1;
+//     const c2 = a2 * x + (sign2 * b2) * y;
+
+//     const op1 = sign1 === -1 ? '-' : '+';
+//     const op2 = sign2 === -1 ? '-' : '+';
+
+//     const eqText = `$$ \\begin{cases} ${a1}x ${op1} ${b1}y = ${c1} \\\\ ${a2}x ${op2} ${b2}y = ${c2} \\end{cases} $$`;
+
+//     rows.push({ text: `x =`, answer: String(x) });
+//     rows.push({ text: `y =`, answer: String(y) });
+
+//     const answerObj = { 0: String(x), 1: String(y) };
+
+//     return {
+//         type: 'tableInput',
+//         question: `Solve Simultaneous Linear Equations in Two Variables: <br/> ${eqText}`,
+//         answer: JSON.stringify(answerObj),
+//         rows: rows,
+//         topic: 'Simultaneous Equations'
+//     };
+// };
+
 export const generateSimultaneousEquations = () => {
-    // 5x - 4y = 81
-    // 7x + 4y = 27
-    const rows = [];
+    let x, y, a1, b1, c1, a2, b2, c2, sign1, sign2;
+    let isValid = false;
+    let attempts = 0;
+    const maxAttempts = 100;
 
-    // Generate integer solution
-    const x = getRandomInt(1, 10);
-    const y = getRandomInt(1, 10);
+    while (!isValid && attempts < maxAttempts) {
+        attempts++;
 
-    // Eq 1: a1x + b1y = c1
-    const a1 = getRandomInt(2, 9);
-    const b1 = getRandomInt(2, 9);
-    // Randomize signs
-    const sign1 = Math.random() < 0.5 ? -1 : 1;
-    const c1 = a1 * x + (sign1 * b1) * y;
+        // Generate integer solution
+        x = getRandomInt(1, 10);
+        y = getRandomInt(1, 10);
 
-    // Eq 2: a2x + b2y = c2
-    const a2 = getRandomInt(2, 9);
-    const b2 = getRandomInt(2, 9);
-    // Ensure not parallel/identical lines
-    const sign2 = Math.random() < 0.5 ? -1 : 1;
-    const c2 = a2 * x + (sign2 * b2) * y;
+        // Eq 1: a1x + b1y = c1
+        a1 = getRandomInt(2, 9);
+        b1 = getRandomInt(2, 9);
+        sign1 = Math.random() < 0.5 ? -1 : 1;
+        c1 = a1 * x + (sign1 * b1) * y;
+
+        // Eq 2: a2x + b2y = c2
+        a2 = getRandomInt(2, 9);
+        b2 = getRandomInt(2, 9);
+        sign2 = Math.random() < 0.5 ? -1 : 1;
+        c2 = a2 * x + (sign2 * b2) * y;
+
+        // Check for valid system (not parallel, not identical)
+        // Two lines are parallel/identical if a1/a2 = b1/b2
+        // We need: a1 * (sign2 * b2) ≠ a2 * (sign1 * b1)
+        const cross1 = a1 * (sign2 * b2);
+        const cross2 = a2 * (sign1 * b1);
+
+        // Ensure lines are not parallel (determinant ≠ 0)
+        if (cross1 !== cross2) {
+            // Additional check: ensure c1 and c2 are not zero
+            if (c1 !== 0 && c2 !== 0) {
+                // Check that equations are not identical
+                // Scale check: if a1/a2 = b1/b2 = c1/c2, they're identical
+                const ratio1 = a1 / a2;
+                const ratio2 = (sign1 * b1) / (sign2 * b2);
+                const ratio3 = c1 / c2;
+
+                if (Math.abs(ratio1 - ratio2) > 0.001 || Math.abs(ratio1 - ratio3) > 0.001) {
+                    isValid = true;
+                }
+            }
+        }
+    }
+
+    // If we couldn't generate a valid system, use a fallback
+    if (!isValid) {
+        x = 3;
+        y = 2;
+        a1 = 5;
+        b1 = 4;
+        sign1 = -1;
+        c1 = a1 * x + (sign1 * b1) * y; // 5*3 - 4*2 = 7
+        a2 = 7;
+        b2 = 4;
+        sign2 = 1;
+        c2 = a2 * x + (sign2 * b2) * y; // 7*3 + 4*2 = 29
+    }
 
     const op1 = sign1 === -1 ? '-' : '+';
     const op2 = sign2 === -1 ? '-' : '+';
 
     const eqText = `$$ \\begin{cases} ${a1}x ${op1} ${b1}y = ${c1} \\\\ ${a2}x ${op2} ${b2}y = ${c2} \\end{cases} $$`;
 
+    const rows = [];
     rows.push({ text: `x =`, answer: String(x) });
     rows.push({ text: `y =`, answer: String(y) });
 
