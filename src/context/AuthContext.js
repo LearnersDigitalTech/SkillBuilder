@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useMemo } from "react";
 import { auth, firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { get, ref } from "firebase/database";
@@ -9,7 +9,15 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [userData, setUserData] = useState(null);
+    const [activeChildId, setActiveChildId] = useState(null);
+    const [activeChildLoading, setActiveChildLoading] = useState(true);
     const [loading, setLoading] = useState(true);
+
+    // Compute active child from userData + activeChildId
+    const activeChild = useMemo(() => {
+        if (!userData?.children || !activeChildId) return null;
+        return userData.children[activeChildId] || null;
+    }, [userData, activeChildId]);
 
     // Function to fetch and normalize user data from Firebase
     const fetchUserData = async (currentUser) => {
@@ -75,6 +83,42 @@ export const AuthProvider = ({ children }) => {
         return () => unsubscribe();
     }, []);
 
+    // Initialize activeChildId from localStorage when userData loads
+    useEffect(() => {
+        if (!user || !userData?.children) {
+            setActiveChildLoading(false);
+            return;
+        }
+
+        const userKey = getUserDatabaseKey(user);
+        const storedChildId = typeof window !== "undefined"
+            ? window.localStorage.getItem(`activeChild_${userKey}`)
+            : null;
+
+        const childKeys = Object.keys(userData.children);
+
+        if (storedChildId && childKeys.includes(storedChildId)) {
+            setActiveChildId(storedChildId);
+        } else if (childKeys.length > 0) {
+            // Default to first child
+            setActiveChildId(childKeys[0]);
+        }
+
+        // Mark as loaded after initialization
+        setActiveChildLoading(false);
+    }, [user, userData]);
+
+    // Function to update active child and persist to localStorage
+    const updateActiveChild = (childId) => {
+        setActiveChildId(childId);
+
+        if (user && typeof window !== "undefined") {
+            const userKey = getUserDatabaseKey(user);
+            window.localStorage.setItem(`activeChild_${userKey}`, childId);
+            window.localStorage.setItem('lastActiveChild', childId); // Generic fallback
+        }
+    };
+
     // Function to refresh user data from Firebase (can be called after updates)
     const refreshUserData = async () => {
         if (user) {
@@ -87,13 +131,25 @@ export const AuthProvider = ({ children }) => {
             await signOut(auth);
             setUser(null);
             setUserData(null);
+            setActiveChildId(null);
         } catch (error) {
             console.error("Error signing out:", error);
         }
     };
 
     return (
-        <AuthContext.Provider value={{ user, userData, loading, logout, setUserData, refreshUserData }}>
+        <AuthContext.Provider value={{
+            user,
+            userData,
+            activeChild,
+            activeChildId,
+            activeChildLoading,
+            setActiveChildId: updateActiveChild,
+            loading,
+            logout,
+            setUserData,
+            refreshUserData
+        }}>
             {children}
         </AuthContext.Provider>
     );
