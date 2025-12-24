@@ -84,12 +84,9 @@ export function useViolationLogger({ testType, testId, enabled }: UseViolationLo
         setViolations(prev => {
             const updated = [...prev, violation]
 
-            // Update Firebase
+            // Update Firebase - use Date objects instead of serverTimestamp() in arrays
             updateDoc(doc(db, 'testViolations', sessionDocId), {
-                violations: updated.map(v => ({
-                    ...v,
-                    timestamp: serverTimestamp()
-                })),
+                violations: updated, // Don't transform timestamps - use Date objects directly
                 totalViolations: updated.length
             }).catch(err => console.error('Error updating violations:', err))
 
