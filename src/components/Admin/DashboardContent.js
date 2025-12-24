@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Box, Grid, Typography, CircularProgress, Container, Button, Stack } from '@mui/material';
-import { Users, CheckCircle, XCircle, FileText, LayoutDashboard, List, Trophy } from 'lucide-react';
+import { Users, CheckCircle, XCircle, FileText, LayoutDashboard, List, Trophy, Gift } from 'lucide-react';
 import { ref, get, remove } from 'firebase/database';
 import { firebaseDatabase, db } from '@/backend/firebaseHandler';
 import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
@@ -9,6 +9,7 @@ import StatCard from './StatCard';
 import { MarksBarChart, StudentsAreaChart } from './Charts';
 import StudentList from './StudentList';
 import PuzzleManager from './PuzzleManager';
+import LotteryManager from './LotteryManager';
 
 const DashboardContent = ({ logoutAction }) => {
     const [view, setView] = useState('overview'); // 'overview' | 'students'
@@ -498,6 +499,14 @@ const DashboardContent = ({ logoutAction }) => {
                 >
                     Puzzles
                 </Button>
+                <Button
+                    variant={view === 'lottery' ? 'contained' : 'outlined'}
+                    startIcon={<Gift size={20} />}
+                    onClick={() => setView('lottery')}
+                    sx={{ borderRadius: 2, textTransform: 'none', px: 3 }}
+                >
+                    Lottery
+                </Button>
             </Stack>
 
             {view === 'overview' ? (
@@ -554,6 +563,8 @@ const DashboardContent = ({ logoutAction }) => {
                 </>
             ) : view === 'puzzles' ? (
                 <PuzzleManager />
+            ) : view === 'lottery' ? (
+                <LotteryManager />
             ) : (
                 <StudentList
                     students={studentList}
