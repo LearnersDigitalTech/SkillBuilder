@@ -176,11 +176,7 @@ const DashboardContent = ({ logoutAction }) => {
 
                                             // Aggregate Stats
                                             reportCount += processedHistory.length;
-                                            processedHistory.forEach(rep => {
-                                                if (rep.marks >= 40) passedCount += rep.marks; // Using passedCount specifically for total marks now
-                                                else passedCount += rep.marks; // Just summing all marks, reusing variable for scope simplicity or renaming?
-                                                // Actually, let's fix logic properly below to avoid confusion.
-                                            });
+
                                             // Re-doing the loop properly:
                                             processedHistory.forEach(rep => {
                                                 passedCount += rep.marks; // Accumulate all marks (variable name 'passedCount' acts as 'totalScoreSum')
