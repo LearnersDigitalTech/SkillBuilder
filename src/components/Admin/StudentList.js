@@ -67,6 +67,7 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
     const router = useRouter();
     const chartRef = useRef(null);
     const [selectedGrade, setSelectedGrade] = useState('All');
+    const [selectedDate, setSelectedDate] = useState('');
     const [minScore, setMinScore] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
     const [open, setOpen] = useState(false);
@@ -109,12 +110,24 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
             const emailMatch = student.email?.toLowerCase().includes(term);
             const searchMatch = !searchTerm || nameMatch || phoneMatch || emailMatch;
 
-            return gradeMatch && scoreMatch && searchMatch;
+            // Date Filter
+            const getDate = (s) => (viewMode === 'rapid' ? (s.rapidMath?.date || null) : (s.date || null));
+            const studentDateRaw = getDate(student);
+
+            let dateMatch = true;
+            if (selectedDate && studentDateRaw) {
+                const studentDate = new Date(studentDateRaw).toLocaleDateString('en-CA'); // YYYY-MM-DD
+                dateMatch = studentDate === selectedDate;
+            } else if (selectedDate && !studentDateRaw) {
+                dateMatch = false;
+            }
+
+            return gradeMatch && scoreMatch && searchMatch && dateMatch;
         }).sort((a, b) => {
             const getDate = (s) => (viewMode === 'rapid' ? (s.rapidMath?.date || 0) : (s.date || 0));
             return new Date(getDate(b)) - new Date(getDate(a));
         });
-    }, [students, selectedGrade, minScore, viewMode, searchTerm]);
+    }, [students, selectedGrade, minScore, viewMode, searchTerm, selectedDate]);
 
     const handleView = (student) => {
         setSelectedStudent(student);
@@ -502,11 +515,11 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
             }}>
                 <Grid container spacing={3} alignItems="center">
                     {/* Search Field */}
-                    <Grid item xs={12} md={5}>
+                    <Grid item xs={12} md={3}>
                         <TextField
                             fullWidth
                             size="small"
-                            placeholder="Search Student Name, Phone..."
+                            placeholder="Search Student..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             InputProps={{
@@ -527,8 +540,28 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
                         />
                     </Grid>
 
-                    {/* Grade Filter */}
+                    {/* Date Filter */}
                     <Grid item xs={12} md={3}>
+                        <TextField
+                            fullWidth
+                            type="date"
+                            size="small"
+                            value={selectedDate}
+                            onChange={(e) => setSelectedDate(e.target.value)}
+                            InputLabelProps={{ shrink: true }}
+                            label="Filter by Date"
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '12px',
+                                    bgcolor: '#f8fafc',
+                                    '& fieldset': { borderColor: '#e2e8f0' }
+                                }
+                            }}
+                        />
+                    </Grid>
+
+                    {/* Grade Filter */}
+                    <Grid item xs={12} md={2}>
                         <FormControl fullWidth size="small">
                             <InputLabel sx={{ fontWeight: 500, color: '#64748b' }}>Filter by Grade</InputLabel>
                             <Select

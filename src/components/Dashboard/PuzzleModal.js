@@ -115,7 +115,7 @@ const PuzzleModal = ({ open, onClose, puzzle, user, learnerId, onComplete }) => 
         // Validation Logic
         if (puzzle.type === 'MCQ') {
             isCorrect = answer === puzzle.correctAnswer;
-        } else if (puzzle.type === 'TEXT' || puzzle.type === 'FILL_BLANK') {
+        } else if (puzzle.type === 'TEXT' || puzzle.type === 'FILL_BLANK' || puzzle.type === 'userInput') {
             const possibleAnswers = puzzle.correctAnswer.split(',').map(s => s.trim().toLowerCase());
             isCorrect = possibleAnswers.includes(answer.toLowerCase().trim());
         } else if (puzzle.type === 'MATCH') {
@@ -134,9 +134,14 @@ const PuzzleModal = ({ open, onClose, puzzle, user, learnerId, onComplete }) => 
             // Log success to Firebase
             if (learnerId) {
                 try {
-                    const today = new Date().toLocaleDateString('en-CA');
-                    const completionRef = ref(firebaseDatabase, `NMD_2025/PuzzleCompletions/${today}/${learnerId}`);
+                    // New Random Bank Logic: Save by Puzzle ID, not Date
+                    const completionRef = ref(firebaseDatabase, `NMD_2025/UserCompletions/${learnerId}/${puzzle.id}`);
                     await set(completionRef, true);
+
+                    // Also save "Last Completion Date" to enforce 1 puzzle per day
+                    const today = new Date().toLocaleDateString('en-CA');
+                    const lastCompletionRef = ref(firebaseDatabase, `NMD_2025/UserLastCompletion/${learnerId}`);
+                    await set(lastCompletionRef, today);
 
                     // Delay slightly to let animation play, then trigger completion handler
                     setTimeout(() => {
@@ -248,8 +253,8 @@ const PuzzleModal = ({ open, onClose, puzzle, user, learnerId, onComplete }) => 
                             </Grid>
                         )}
 
-                        {/* TEXT / FILL BLANK */}
-                        {(puzzle.type === 'TEXT' || puzzle.type === 'FILL_BLANK') && (
+                        {/* TEXT / FILL BLANK / USER INPUT */}
+                        {(puzzle.type === 'TEXT' || puzzle.type === 'FILL_BLANK' || puzzle.type === 'userInput') && (
                             <TextField
                                 fullWidth
                                 placeholder="Type your answer here..."

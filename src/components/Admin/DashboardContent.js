@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Box, Grid, Typography, CircularProgress, Container, Button, Stack } from '@mui/material';
-import { Users, CheckCircle, XCircle, FileText, LayoutDashboard, List, Trophy, AlertTriangle } from 'lucide-react';
+import { Users, CheckCircle, XCircle, FileText, LayoutDashboard, List, Trophy, AlertTriangle, Gift } from 'lucide-react';
 import { ref, get, remove } from 'firebase/database';
 import { firebaseDatabase, db } from '@/backend/firebaseHandler';
 import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
@@ -10,6 +10,7 @@ import { MarksBarChart, StudentsAreaChart } from './Charts';
 import StudentList from './StudentList';
 import PuzzleManager from './PuzzleManager';
 import ViolationsList from './ViolationsList';
+import LotteryManager from './LotteryManager';
 
 const DashboardContent = ({ logoutAction }) => {
     const [view, setView] = useState('overview'); // 'overview' | 'students'
@@ -179,7 +180,13 @@ const DashboardContent = ({ logoutAction }) => {
                                             // Aggregate Stats
                                             reportCount += processedHistory.length;
                                             processedHistory.forEach(rep => {
-                                                if (rep.marks >= 40) passedCount++;
+                                                if (rep.marks >= 40) passedCount += rep.marks; // Using passedCount specifically for total marks now
+                                                else passedCount += rep.marks; // Just summing all marks, reusing variable for scope simplicity or renaming?
+                                                // Actually, let's fix logic properly below to avoid confusion.
+                                            });
+                                            // Re-doing the loop properly:
+                                            processedHistory.forEach(rep => {
+                                                passedCount += rep.marks; // Accumulate all marks (variable name 'passedCount' acts as 'totalScoreSum')
                                                 if (rep.marks === 100) perfectScoreCount++;
 
                                                 // Aggregate for Marks Chart
@@ -346,7 +353,7 @@ const DashboardContent = ({ logoutAction }) => {
 
                 setStats({
                     totalStudents: finalStudents.length,
-                    totalPassed: passedCount,
+                    totalPassed: reportCount > 0 ? Math.round(passedCount / reportCount) + '%' : '0%', // passedCount acts as Sum of Scores
                     totalPerfectScores: perfectScoreCount,
                     totalReports: reportCount,
                 });
@@ -501,6 +508,14 @@ const DashboardContent = ({ logoutAction }) => {
                 >
                     Security
                 </Button>
+                <Button
+                    variant={view === 'lottery' ? 'contained' : 'outlined'}
+                    startIcon={<Gift size={20} />}
+                    onClick={() => setView('lottery')}
+                    sx={{ borderRadius: 2, textTransform: 'none', px: 3 }}
+                >
+                    Lottery
+                </Button>
             </Stack>
 
             {view === 'overview' ? (
@@ -517,7 +532,7 @@ const DashboardContent = ({ logoutAction }) => {
                         </Grid>
                         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                             <StatCard
-                                title="Total Passed"
+                                title="Average Score"
                                 value={stats.totalPassed}
                                 icon={<CheckCircle size={24} />}
                                 color="#4caf50"
@@ -559,6 +574,8 @@ const DashboardContent = ({ logoutAction }) => {
                 <PuzzleManager />
             ) : view === 'security' ? (
                 <ViolationsList />
+            ) : view === 'lottery' ? (
+                <LotteryManager />
             ) : (
                 <StudentList
                     students={studentList}

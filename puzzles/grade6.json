@@ -1,0 +1,1022 @@
+[
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "I had 2,450 marbles. I gave away 785 marbles. How many marbles are left?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1665",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "What is the value of: 3 × (120 + 30)?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "450",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: 1/2, 2/4, 3/6, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "4/8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "If one notebook costs ₹25, how much do 18 notebooks cost?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "450",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "I am a number. When you divide me by 5, the answer is 36. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "180",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Which number is greater: −7 or −3?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-3",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 2, 6, 12, 20, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "30",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "What is the sum of 3/4 and 1/4?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "If the temperature is −5°C and it rises by 12°C, what is the new temperature?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "7",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "What is the LCM of 4 and 6?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "12",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "I have 3 dozens of pens. How many pens do I have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "36",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Convert 0.75 into a fraction in simplest form.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "3/4",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Which is smaller: −12 or −20?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-20",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "If x + 15 = 40, what is the value of x?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "25",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "What is half of 3/4?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "3/8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "A shopkeeper had 3,600 kg of rice. He sold 1,475 kg. How much rice is left?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "2125",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Evaluate: 240 ÷ (6 × 5)",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: 1/3, 2/6, 3/9, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "4/12",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "If one ticket costs ₹75, how much will 16 tickets cost?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1200",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "I am a number. When multiplied by 9, the answer is 315. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "35",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Which integer is greater: −15 or −8?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 1, 4, 9, 16, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "25",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "What is the sum of 5/6 and 1/6?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "The temperature is 3°C. It falls by 11°C. What is the new temperature?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "What is the HCF of 18 and 24?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "6",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "I have 5 dozens of oranges. How many oranges are there?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "60",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Convert 3/5 into a decimal.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "0.6",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Which is greater: −2 or 4?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "4",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "If y − 18 = 27, what is the value of y?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "45",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "What is one-third of 3/4?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1/4",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "A farmer harvested 7,250 kg of wheat. He sold 2,875 kg. How much wheat is left?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "4375",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Evaluate: 15 × (24 ÷ 6)",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "60",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: 2/5, 4/10, 6/15, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "8/20",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "If one chair costs ₹1,250, how much will 8 chairs cost?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "10000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "I am a number. When divided by 8, the quotient is 75. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "600",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Which integer is smaller: −18 or −12?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-18",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 3, 9, 27, __, 243",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "81",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "What is the sum of 7/10 and 3/10?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "The temperature is −12°C. It rises by 20°C. What is the new temperature?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "What is the LCM of 8 and 12?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "24",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "I have 7 dozens of eggs. How many eggs are there?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "84",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Convert 0.625 into a fraction in simplest form.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "5/8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Which is greater: −25 or −19?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-19",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "If 3x = 72, what is the value of x?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "24",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "What is one-fourth of 2/3?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1/6",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "A library had 12,500 books. After buying some new books, it now has 18,750 books. How many books were bought?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "6250",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Evaluate: (48 ÷ 6) × (15 − 7)",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "64",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: 3/7, 6/14, 9/21, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "12/28",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "If one bag of rice weighs 25 kg, what is the total weight of 14 such bags?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "350",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "I am a number. When divided by 12, the quotient is 45. What number am I?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "540",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Which integer is greater: −30 or −45?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-30",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 5, 15, 45, __, 405",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "135",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "What is the sum of 11/12 and 1/12?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "The temperature is −18°C. It rises by 25°C. What is the new temperature?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "7",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "What is the HCF of 36 and 54?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "18",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "I have 9 dozens of bananas. How many bananas are there?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "108",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Convert 7/8 into a decimal.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "0.875",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "Which is smaller: −3 or −11?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-11",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "If 5x = 125, what is the value of x?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "25",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            6
+        ],
+        "type": "userInput",
+        "question": "What is one-half of 5/6?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "5/12",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    }
+]

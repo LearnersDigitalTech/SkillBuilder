@@ -1,0 +1,1022 @@
+[
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Count the apples 🍎🍎🍎",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "3",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "What number comes after 5?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "6",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "I have 2 balloons 🎈🎈 and get 1 more 🎈. How many balloons now?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "3",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: 1, 2, __, 4",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "3",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "How many stars are there? ⭐⭐⭐⭐⭐",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "5",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Which number is bigger: 7 or 4?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "7",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "If you have 1 toy 🧸 and get 1 more, how many toys do you have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "2",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 2, 4, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "6",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "How many legs do 2 cats 🐱🐱 have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "What number comes before 10?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "9",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Count the dots: ●●●●",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "4",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "I am thinking of a number between 3 and 5. What is it?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "4",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "If you count fingers on one hand, how many fingers are there?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "5",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 1, 3, 5, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "7",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Which number is smaller: 6 or 9?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "6",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "I have 5 candies 🍬 and give 2 away. How many candies are left?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "3",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "What number comes after 12?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "13",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Count the birds 🐦🐦🐦🐦🐦🐦",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "6",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: 6, 7, __, 9",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "If you have 3 balls ⚽⚽⚽ and get 2 more ⚽⚽, how many balls are there?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "5",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Which number is bigger: 10 or 8?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "10",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "How many wheels does a bicycle 🚲 have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "2",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 5, 6, 7, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "If you have 4 toys 🧸🧸🧸🧸 and lose 1, how many toys are left?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "3",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "What number comes before 15?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "14",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Count the hearts ❤️❤️❤️❤️❤️❤️❤️",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "7",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "I am thinking of a number between 7 and 9. What is it?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "How many sides does a triangle 🔺 have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "3",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 10, 9, 8, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "7",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Which number is smaller: 11 or 6?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "6",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Count the fish 🐟🐟🐟🐟🐟🐟🐟🐟",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "What number comes after 19?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "20",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "I have 6 pencils ✏️ and lose 2. How many pencils are left?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "4",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: 11, 12, __, 14",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "13",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "How many wheels does a car 🚗 have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "4",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Which number is bigger: 18 or 15?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "18",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 3, 6, 9, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "12",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "If you have 5 cookies 🍪🍪🍪🍪🍪 and eat 1, how many cookies remain?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "4",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "What number comes before 25?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "24",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Count the trees 🌳🌳🌳🌳🌳🌳🌳🌳🌳",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "9",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "I am thinking of a number between 9 and 11. What is it?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "10",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "How many sides does a square ⬜ have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "4",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 20, 18, 16, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "14",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Which number is smaller: 22 or 17?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "17",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "If you count the days in a week, how many are there?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "7",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Count the flowers 🌸🌸🌸🌸🌸🌸",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "6",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "What number comes after 29?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "30",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "I have 9 balloons 🎈🎈🎈🎈🎈🎈🎈🎈🎈. One flies away. How many are left?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: 14, 15, __, 17",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "16",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "How many legs does a cow 🐄 have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "4",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Which number is bigger: 25 or 20?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "25",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 4, 8, 12, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "16",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "If you have 7 chocolates 🍫🍫🍫🍫🍫🍫🍫 and eat 2, how many are left?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "5",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "What number comes before 40?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "39",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Count the moons 🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "10",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "I am thinking of a number between 14 and 16. What is it?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "15",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "How many sides does a rectangle ▭ have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "4",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 30, 28, 26, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "24",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "Which number is smaller: 33 or 38?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "33",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            1
+        ],
+        "type": "userInput",
+        "question": "If you count all months in a year, how many months are there?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "12",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    }
+]
