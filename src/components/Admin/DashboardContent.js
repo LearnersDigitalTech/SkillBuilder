@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { Box, Grid, Typography, CircularProgress, Container, Button, Stack } from '@mui/material';
 import { Users, CheckCircle, XCircle, FileText, LayoutDashboard, List, Trophy } from 'lucide-react';
 import { ref, get, remove } from 'firebase/database';
-import { firebaseDatabase } from '@/backend/firebaseHandler';
+import { firebaseDatabase, db } from '@/backend/firebaseHandler';
+import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import StatCard from './StatCard';
 import { MarksBarChart, StudentsAreaChart } from './Charts';
 import StudentList from './StudentList';
@@ -177,7 +178,13 @@ const DashboardContent = ({ logoutAction }) => {
                                             // Aggregate Stats
                                             reportCount += processedHistory.length;
                                             processedHistory.forEach(rep => {
-                                                if (rep.marks >= 40) passedCount++;
+                                                if (rep.marks >= 40) passedCount += rep.marks; // Using passedCount specifically for total marks now
+                                                else passedCount += rep.marks; // Just summing all marks, reusing variable for scope simplicity or renaming?
+                                                // Actually, let's fix logic properly below to avoid confusion.
+                                            });
+                                            // Re-doing the loop properly:
+                                            processedHistory.forEach(rep => {
+                                                passedCount += rep.marks; // Accumulate all marks (variable name 'passedCount' acts as 'totalScoreSum')
                                                 if (rep.marks === 100) perfectScoreCount++;
 
                                                 // Aggregate for Marks Chart
@@ -344,7 +351,7 @@ const DashboardContent = ({ logoutAction }) => {
 
                 setStats({
                     totalStudents: finalStudents.length,
-                    totalPassed: passedCount,
+                    totalPassed: reportCount > 0 ? Math.round(passedCount / reportCount) + '%' : '0%', // passedCount acts as Sum of Scores
                     totalPerfectScores: perfectScoreCount,
                     totalReports: reportCount,
                 });
@@ -400,11 +407,26 @@ const DashboardContent = ({ logoutAction }) => {
 
     const handleDeleteStudent = async (studentId) => {
         try {
-            // Remove from Firebase
+            // 1. Remove from Firebase Realtime Database (Registrations)
             const studentRef = ref(firebaseDatabase, `NMD_2025/Registrations/${studentId}`);
             await remove(studentRef);
 
-            // Update local state
+            // 2. Remove Speed Test scores from Firestore
+            // Query for all Speed Test scores by this user
+            const speedTestRef = collection(db, "rapidMathSpeedTest");
+            const q = query(speedTestRef, where("userId", "==", studentId));
+            const querySnapshot = await getDocs(q);
+
+            // Delete all matching Speed Test scores
+            const deletePromises = [];
+            querySnapshot.forEach((docSnapshot) => {
+                deletePromises.push(deleteDoc(doc(db, "rapidMathSpeedTest", docSnapshot.id)));
+            });
+            await Promise.all(deletePromises);
+
+            console.log(`Deleted ${deletePromises.length} Speed Test score(s) for user ${studentId}`);
+
+            // 3. Update local state
             setStudentList(prevList => prevList.filter(student => student.id !== studentId));
             setStats(prevStats => ({
                 ...prevStats,
@@ -492,7 +514,7 @@ const DashboardContent = ({ logoutAction }) => {
                         </Grid>
                         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                             <StatCard
-                                title="Total Passed"
+                                title="Average Score"
                                 value={stats.totalPassed}
                                 icon={<CheckCircle size={24} />}
                                 color="#4caf50"

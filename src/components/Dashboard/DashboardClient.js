@@ -15,10 +15,9 @@ import ProgressChart from "./ProgressChart";
 import PuzzleCard from "./PuzzleCard";
 
 const DashboardClient = () => {
-    const { user, userData, setUserData, logout, loading, refreshUserData } = useAuth();
+    const { user, userData, setUserData, logout, loading, refreshUserData, activeChildId, setActiveChildId } = useAuth();
     const router = useRouter();
     const [quizContext, setQuizContext] = useContext(QuizSessionContext);
-    const [activeChildId, setActiveChildId] = useState(null);
     const [showProfileList, setShowProfileList] = useState(false); // Toggle for Profile/Stats view
     const profileCardRef = React.useRef(null); // Ref for click outside logic
 
@@ -158,39 +157,12 @@ const DashboardClient = () => {
     };
 
     // Initialize active child based on userData and persisted preference
+    // NOTE: This is now handled by AuthContext, but we keep this for backward compatibility
+    // with any local-only logic that might depend on it
     useEffect(() => {
-        const currentUserData = userData || (typeof window !== "undefined" ? JSON.parse(window.localStorage.getItem("quizSession"))?.userDetails : null);
-
-        if ((!user && !currentUserData) || (!userData && !currentUserData) || !currentUserData.children) return;
-
-        // Robust user key retrieval
-        let userKey = null;
-        if (user) {
-            userKey = getUserDatabaseKey(user);
-        }
-        if (!userKey && currentUserData) {
-            userKey = currentUserData.userKey || currentUserData.phoneNumber || currentUserData.parentPhone || currentUserData.parentEmail;
-        }
-
-        if (!userKey) return;
-
-        let storedChildId = typeof window !== "undefined"
-            ? window.localStorage.getItem(`activeChild_${userKey}`)
-            : null;
-
-        // Fallback to generic key if specific key fails
-        if (!storedChildId && typeof window !== "undefined") {
-            storedChildId = window.localStorage.getItem('lastActiveChild');
-        }
-
-        const childKeys = Object.keys(currentUserData.children || {});
-        if (storedChildId && childKeys.includes(storedChildId)) {
-            setActiveChildId(storedChildId);
-        } else if (childKeys.length > 0) {
-            // Default to first child if no preference stored
-            setActiveChildId(childKeys[0]);
-        }
-    }, [user, userData]);
+        // AuthContext now handles activeChildId initialization
+        // This effect is kept for any dashboard-specific logic if needed
+    }, [user, userData, activeChildId]);
 
     // Fetch reports for the selected child, with simple per-child caching
     useEffect(() => {
@@ -279,23 +251,8 @@ const DashboardClient = () => {
 
     const handleChildChange = (event) => {
         const newChildId = event.target.value;
+        // Use AuthContext's setActiveChildId which handles localStorage persistence
         setActiveChildId(newChildId);
-
-        // Persist preference
-        if (user || userData) {
-            let userKey = null;
-            if (user) {
-                userKey = getUserDatabaseKey(user);
-            }
-            if (!userKey && userData) {
-                userKey = userData.userKey || userData.phoneNumber || userData.parentPhone || userData.parentEmail; // Robust fallback
-            }
-
-            if (userKey && typeof window !== "undefined") {
-                window.localStorage.setItem(`activeChild_${userKey}`, newChildId);
-                window.localStorage.setItem('lastActiveChild', newChildId); // Generic fallback
-            }
-        }
     };
 
     const handleOpenAddChild = () => {

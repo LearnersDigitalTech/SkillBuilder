@@ -9,6 +9,7 @@ import { db, auth, googleProvider } from "@/backend/firebaseHandler"
 import { collection, addDoc, serverTimestamp, query, where, getDocs, updateDoc, doc, getCountFromServer } from "firebase/firestore"
 import { useAuth } from "@/context/AuthContext"
 import { signInWithPopup } from "firebase/auth"
+import { CircularProgress } from "@mui/material"
 
 interface Question {
     id: number
@@ -27,7 +28,7 @@ interface GameStats {
 }
 
 export function SpeedTestGame() {
-    const { user } = useAuth()
+    const { user, activeChild, activeChildId, activeChildLoading } = useAuth()
     const [gameState, setGameState] = useState<"intro" | "playing" | "summary">("intro")
     const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null)
     const [questionStartTime, setQuestionStartTime] = useState(0)
@@ -67,15 +68,14 @@ export function SpeedTestGame() {
             correctAnswer = num1 * num2
         } else if (operation === "/") {
             // one number up to 100, other up to 20
-            const divisor = Math.floor(Math.random() * 19) + 2 // 2-20
-            const quotient = Math.floor(Math.random() * 50) + 1 // roughly to keep dividend <= 100ish, logic below
-            // Actually requirement: "one number up to 100 and the other is up to 20"
-            // Usually format is Dividend / Divisor = Quotient
-            // So Dividend <= 100, Divisor <= 20.
-            const d = Math.floor(Math.random() * 19) + 2 // Divisor 2-20
-            // Max dividend is 100. So max quotient is 100/d.
-            const maxQ = Math.floor(100 / d)
-            const q = Math.floor(Math.random() * maxQ) + 1
+            // Prevent trivial questions like n÷n=1
+            let d, q
+            do {
+                d = Math.floor(Math.random() * 19) + 2 // Divisor 2-20
+                // Max dividend is 100. So max quotient is 100/d.
+                const maxQ = Math.floor(100 / d)
+                q = Math.floor(Math.random() * maxQ) + 1
+            } while (d === q) // Prevent n÷n=1 questions
 
             num2 = d
             num1 = q * d // Dividend
@@ -140,7 +140,16 @@ export function SpeedTestGame() {
         setSaveStatus("saving...")
         try {
             const scoresRef = collection(db, "rapidMathSpeedTest")
-            const q = query(scoresRef, where("userId", "==", currentUser.uid))
+
+            // CRITICAL FIX: Query by BOTH userId AND childId to separate scores per child
+            // Without childId filter, it would find ANY score for the parent and update the wrong child's score
+            const q = activeChildId
+                ? query(scoresRef,
+                    where("userId", "==", currentUser.uid),
+                    where("childId", "==", activeChildId)
+                )
+                : query(scoresRef, where("userId", "==", currentUser.uid))
+
             const snapshot = await getDocs(q)
 
             let shouldUpdate = false
@@ -151,7 +160,7 @@ export function SpeedTestGame() {
                 existingDocId = doc.id
                 const data = doc.data()
 
-                console.log("Found existing score:", data)
+                console.log("Found existing score for this child:", data)
 
                 if (stats.avgTime < data.avgTime) {
                     shouldUpdate = true
@@ -165,13 +174,28 @@ export function SpeedTestGame() {
             console.log("Should update?", shouldUpdate)
 
             if (shouldUpdate) {
+                // Defensive check: Ensure we have the correct child
+                if (!activeChild || !activeChildId) {
+                    console.error("⚠️ WARNING: No active child found! Score may be saved incorrectly.");
+                    console.error("activeChild:", activeChild);
+                    console.error("activeChildId:", activeChildId);
+                }
+
                 const scoreData = {
                     userId: currentUser.uid,
-                    displayName: currentUser.displayName || currentUser.email?.split('@')[0] || "Anonymous",
+                    displayName: activeChild?.name || currentUser.displayName || currentUser.email?.split('@')[0] || "Anonymous",
+                    childId: activeChildId || null,
+                    parentEmail: currentUser.email || null,
                     avgTime: stats.avgTime,
                     totalQuestions: stats.totalQuestions,
                     timestamp: serverTimestamp()
                 }
+
+                console.log("💾 Saving Speed Test score:", {
+                    displayName: scoreData.displayName,
+                    childId: scoreData.childId,
+                    activeChildName: activeChild?.name
+                });
 
                 if (existingDocId) {
                     await updateDoc(doc(db, "rapidMathSpeedTest", existingDocId), scoreData)
@@ -240,6 +264,16 @@ export function SpeedTestGame() {
         }
     }
 
+    // Show loading state while activeChild is being initialized
+    if (activeChildLoading) {
+        return (
+            <div className="flex-1 flex flex-col items-center justify-center p-4">
+                <CircularProgress />
+                <p className="mt-4 text-slate-600 dark:text-slate-400">Loading profile...</p>
+            </div>
+        )
+    }
+
     if (gameState === "intro") {
         return (
             <div className="flex-1 flex flex-col items-center justify-center p-4 py-8">
@@ -248,6 +282,14 @@ export function SpeedTestGame() {
                     <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">
                         Speed Test
                     </h1>
+                    {activeChild && (
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Playing as:</span>
+                            <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-sm font-bold rounded-full border border-blue-200 dark:border-blue-800">
+                                {activeChild.name}
+                            </span>
+                        </div>
+                    )}
                     <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
                         How fast can you calculate? Solve as many questions as you can.
                         Your average speed determines your rank!
@@ -379,7 +421,7 @@ export function SpeedTestGame() {
                 {/* Celebration Header */}
                 <div className="w-full max-w-6xl text-center space-y-3 mb-8 animate-in fade-in duration-500">
                     <h1 className="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-slate-100">
-                        Amazing Work{user ? `, ${user.displayName?.split(' ')[0]}` : ''}!
+                        Amazing Work{activeChild ? `, ${activeChild.name.split(' ')[0]}` : user ? `, ${user.displayName?.split(' ')[0]}` : ''}!
                     </h1>
                     <p className="text-lg text-slate-600 dark:text-slate-400">
                         You completed the Speed Test Challenge!
@@ -435,7 +477,7 @@ export function SpeedTestGame() {
                                 <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
                                     <div
                                         className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-1000"
-                                        style={{ width: `${(stats.totalQuestions / 50) * 100}%` }}
+                                        style={{ width: `${Math.min((stats.totalQuestions / 50) * 100, 100)}%` }}
                                     ></div>
                                 </div>
                             </div>

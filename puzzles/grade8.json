@@ -1,0 +1,1022 @@
+[
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "A shopkeeper bought a TV for ₹18,500 and sold it for ₹22,750. What is the profit?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "4250",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Evaluate: 15 × (24 − 16) + 12",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "132",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: −5, −2, 1, 4, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "7",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "If one notebook costs ₹45, how much will 28 notebooks cost?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1260",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Solve for x: x + 27 = 85",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "58",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Which rational number is greater: −3/4 or −1/2?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-1/2",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 1, 4, 9, 16, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "25",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "What is the value of (3/5) + (7/10)?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "13/10",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "The temperature is −9°C. It falls by 13°C. What is the new temperature?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-22",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Find the square of 18.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "324",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "I have 20 dozens of pens. How many pens do I have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "240",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Convert 0.125 into a fraction in simplest form.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1/8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Which is smaller: −7/3 or −2?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-7/3",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Solve for y: 5y = 180",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "36",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "What is one-fourth of 2/3?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1/6",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "A cyclist travels 18 km in 1 hour. How far will the cyclist travel in 7 hours?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "126",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Evaluate: (64 ÷ 8)²",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "64",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: −18, −12, −6, 0, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "6",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "If one chair costs ₹1,350, how much will 9 chairs cost?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "12150",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Solve for x: 4x − 18 = 62",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "20",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Which rational number is smaller: −5/6 or −3/4?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-5/6",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 2, 6, 12, 20, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "30",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "What is the value of (7/8) − (3/8)?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1/2",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "The temperature is 4°C. It falls by 15°C. What is the new temperature?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-11",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Find the cube of 7.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "343",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "I have 28 dozens of bananas. How many bananas do I have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "336",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Convert 0.375 into a fraction in simplest form.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "3/8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Which is greater: −9/4 or −2?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-2",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Solve for y: 9y = 405",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "45",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "What is one-third of 5/6?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "5/18",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "A factory produced 12,480 toys. If 3,965 toys were defective, how many good toys are there?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "8515",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Evaluate: 5 × (36 − 18) + 24 ÷ 6",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "94",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: −30, −20, −10, 0, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "10",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "If one desk costs ₹2,750, how much will 14 desks cost?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "38500",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Solve for x: 7x + 25 = 214",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "27",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Which rational number is greater: −11/6 or −7/3?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-11/6",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 3, 12, 27, 48, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "75",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "What is the value of (5/6) + (7/12)?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "17/12",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "The temperature is −14°C. It rises by 21°C. What is the new temperature?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "7",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Find the square of 23.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "529",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "I have 32 dozens of notebooks. How many notebooks do I have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "384",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Convert 0.6 into a fraction in simplest form.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "3/5",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Which is smaller: −13/4 or −3?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-13/4",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Solve for y: 12y − 36 = 180",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "18",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "What is one-fifth of 5/8?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1/8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "A water tank holds 18,750 liters of water. If 6,485 liters are used, how much water is left?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "12265",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Evaluate: (96 ÷ 12) × (18 − 10)",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "64",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Fill the missing number: −45, −30, −15, 0, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "15",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "If one machine costs ₹48,750, how much will 4 machines cost?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "195000",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Solve for x: 9x − 27 = 216",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "27",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Which rational number is smaller: −9/5 or −7/4?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-9/5",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Complete the pattern: 5, 20, 45, 80, __",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "125",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "What is the value of (9/10) − (2/5)?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "1/2",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "The temperature is 6°C. It falls by 19°C. What is the new temperature?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-13",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Find the cube of 9.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "729",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "I have 36 dozens of apples. How many apples do I have?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "432",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Convert 0.875 into a fraction in simplest form.",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "7/8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Which is greater: −11/3 or −4?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "-11/3",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "Solve for y: 15y + 45 = 270",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "15",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    },
+    {
+        "grades": [
+            8
+        ],
+        "type": "userInput",
+        "question": "What is one-half of 3/4?",
+        "options": [
+            "",
+            "",
+            "",
+            ""
+        ],
+        "correctAnswer": "3/8",
+        "rows": [],
+        "headers": [],
+        "variant": ""
+    }
+]

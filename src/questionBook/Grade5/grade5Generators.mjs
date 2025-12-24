@@ -582,6 +582,43 @@ export const generateAngleTypes = () => {
 
     question = `What type of angle is ${angle}°?`;
 
+    // SVG Generation
+    const cx = 100, cy = 100, r = 80;
+    const radians = angle * (Math.PI / 180);
+
+    // Calculate end point for the angled ray (mathematically CCW, so negative sin in SVG)
+    const x2 = cx + r * Math.cos(-radians);
+    const y2 = cy + r * Math.sin(-radians);
+
+    // Arc path (smaller radius)
+    const arcR = 30;
+    const ax1 = cx + arcR;
+    const ay1 = cy;
+    const ax2 = cx + arcR * Math.cos(-radians);
+    const ay2 = cy + arcR * Math.sin(-radians);
+
+    const largeArc = angle > 180 ? 1 : 0;
+    const sweep = 0; // CCW
+
+    const arcPath = `M ${ax1} ${ay1} A ${arcR} ${arcR} 0 ${largeArc} ${sweep} ${ax2} ${ay2}`;
+
+    let svgContent = `
+        <line x1="${cx}" y1="${cy}" x2="${cx + r}" y2="${cy}" stroke="black" stroke-width="2" />
+        <line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="black" stroke-width="2" />
+        <path d="${arcPath}" fill="none" stroke="red" stroke-width="2" />
+    `;
+
+    // Add small square for Right angle
+    if (type === "Right") {
+        svgContent = `
+            <line x1="${cx}" y1="${cy}" x2="${cx + r}" y2="${cy}" stroke="black" stroke-width="2" />
+            <line x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy - r}" stroke="black" stroke-width="2" />
+            <rect x="${cx}" y="${cy - 20}" width="20" height="20" fill="none" stroke="red" stroke-width="2" />
+        `;
+    }
+
+    const imageUri = `data:image/svg+xml;base64,${Buffer.from(`<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width="100%" height="100%" fill="white"/>${svgContent}</svg>`).toString('base64')}`;
+
     const options = shuffleArray([
         { value: type, label: type },
         { value: types[(types.indexOf(type) + 1) % 5], label: types[(types.indexOf(type) + 1) % 5] },
@@ -592,6 +629,7 @@ export const generateAngleTypes = () => {
     return {
         type: "mcq",
         question: question,
+        image: imageUri,
         topic: "Geometry / Angles",
         options: options,
         answer: type
@@ -624,6 +662,96 @@ export const generateAreaPerimeterShapes = () => {
     }
 };
 
+export const generateAreaShape = () => {
+    const isSquare = Math.random() > 0.5;
+
+    if (isSquare) {
+        let side = getRandomInt(3, 12);
+        const area = side * side;
+        const question = `Find the area of a square with side ${side} cm.`;
+
+        const svgContent = `
+            <rect x="50" y="50" width="100" height="100" stroke="#374151" stroke-width="2" fill="#e0e7ff" />
+            <text x="100" y="175" font-size="16" text-anchor="middle" fill="#1f2937">${side} cm</text>
+            <text x="165" y="105" font-size="16" text-anchor="middle" fill="#1f2937">${side} cm</text>
+        `;
+        const imageUri = `data:image/svg+xml;base64,${Buffer.from(`<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width="100%" height="100%" fill="white"/>${svgContent}</svg>`).toString('base64')}`;
+
+        return {
+            type: "userInput",
+            question: question,
+            image: imageUri,
+            topic: "Geometry / Area",
+            answer: String(area)
+        };
+    } else {
+        let l = getRandomInt(5, 12);
+        let b = getRandomInt(3, l - 1); // Ensure width is different
+        const area = l * b;
+        const question = `Find the area of a rectangle with length ${l} cm and breadth ${b} cm.`;
+
+        const svgContent = `
+            <rect x="30" y="60" width="140" height="80" stroke="#374151" stroke-width="2" fill="#e0e7ff" />
+            <text x="100" y="160" font-size="16" text-anchor="middle" fill="#1f2937">${l} cm</text>
+            <text x="185" y="105" font-size="16" text-anchor="middle" fill="#1f2937">${b} cm</text>
+        `;
+        const imageUri = `data:image/svg+xml;base64,${Buffer.from(`<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width="100%" height="100%" fill="white"/>${svgContent}</svg>`).toString('base64')}`;
+
+        return {
+            type: "userInput",
+            question: question,
+            image: imageUri,
+            topic: "Geometry / Area",
+            answer: String(area)
+        };
+    }
+};
+
+export const generatePerimeterShape = () => {
+    const isSquare = Math.random() > 0.5;
+
+    if (isSquare) {
+        let side = getRandomInt(3, 12);
+        const perimeter = side * 4;
+        const question = `Find the perimeter of a square with side ${side} cm.`;
+
+        const svgContent = `
+            <rect x="50" y="50" width="100" height="100" stroke="#374151" stroke-width="2" fill="#ffe4e6" />
+            <text x="100" y="175" font-size="16" text-anchor="middle" fill="#1f2937">${side} cm</text>
+            <text x="165" y="105" font-size="16" text-anchor="middle" fill="#1f2937">${side} cm</text>
+        `;
+        const imageUri = `data:image/svg+xml;base64,${Buffer.from(`<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width="100%" height="100%" fill="white"/>${svgContent}</svg>`).toString('base64')}`;
+
+        return {
+            type: "userInput",
+            question: question,
+            image: imageUri,
+            topic: "Geometry / Perimeter",
+            answer: String(perimeter)
+        };
+    } else {
+        let l = getRandomInt(5, 12);
+        let b = getRandomInt(3, l - 1);
+        const perimeter = 2 * (l + b);
+        const question = `Find the perimeter of a rectangle with length ${l} cm and breadth ${b} cm.`;
+
+        const svgContent = `
+            <rect x="30" y="60" width="140" height="80" stroke="#374151" stroke-width="2" fill="#ffe4e6" />
+            <text x="100" y="160" font-size="16" text-anchor="middle" fill="#1f2937">${l} cm</text>
+            <text x="185" y="105" font-size="16" text-anchor="middle" fill="#1f2937">${b} cm</text>
+        `;
+        const imageUri = `data:image/svg+xml;base64,${Buffer.from(`<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width="100%" height="100%" fill="white"/>${svgContent}</svg>`).toString('base64')}`;
+
+        return {
+            type: "userInput",
+            question: question,
+            image: imageUri,
+            topic: "Geometry / Perimeter",
+            answer: String(perimeter)
+        };
+    }
+};
+
 // --- Data Handling ---
 
 export const generatePieChart = () => {
@@ -647,9 +775,9 @@ export const generatePieChart = () => {
     const tennisPath = `M 100 100 L 20 100 A 80 80 0 0 1 100 20 Z`;
 
     // Labels
-    const textCricket = `<text x="140" y="100" fill="white" font-size="12">Cricket 50%</text>`;
-    const textFootball = `<text x="60" y="150" fill="white" font-size="12">Football 25%</text>`;
-    const textTennis = `<text x="60" y="60" fill="white" font-size="12">Tennis 25%</text>`;
+    const textCricket = `<text x="140" y="100" fill="black" font-size="12" text-anchor="middle">Cricket 50%</text>`;
+    const textFootball = `<text x="60" y="150" fill="black" font-size="12" text-anchor="middle">Football 25%</text>`;
+    const textTennis = `<text x="60" y="60" fill="black" font-size="12" text-anchor="middle">Tennis 25%</text>`;
 
     const svgContent = `
         <circle cx="100" cy="100" r="80" fill="#eee" />
@@ -661,7 +789,7 @@ export const generatePieChart = () => {
         ${textTennis}
     `;
 
-    const imageUri = `data:image/svg+xml;base64,${Buffer.from(`<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'>${svgContent}</svg>`).toString('base64')}`;
+    const imageUri = `data:image/svg+xml;base64,${Buffer.from(`<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width="100%" height="100%" fill="white"/>${svgContent}</svg>`).toString('base64')}`;
 
     return {
         type: "userInput",

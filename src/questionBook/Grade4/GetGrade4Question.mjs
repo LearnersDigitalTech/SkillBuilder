@@ -56,11 +56,11 @@ const Grade4Questions = {
     q19: generate(generate3DShapeIdentification),
     q20: generate(generateFVETable),
     q21: generate(generateAreaShape),
-    q22: generate(generatePerimeterShape),
-    q23: generate(generateMeasurementConversion),
-    q24: generate(generateMeasurementConversionApplicationLevel),
-    q25: generate(generateBarGraph),
-    q26: generate(generateSimpleGrade4Pattern),
+    // q22: generate(generatePerimeterShape),
+    q22: generate(generateMeasurementConversion),
+    q23: generate(generateMeasurementConversionApplicationLevel),
+    q24: generate(generateBarGraph),
+    q25: generate(generateSimpleGrade4Pattern),
 
     // q26: generate(generateSimpleGrade4Pattern),
     // Fill remaining slots

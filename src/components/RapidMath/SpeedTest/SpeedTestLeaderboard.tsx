@@ -12,6 +12,8 @@ interface LeaderboardEntry {
     avgTime: number
     totalQuestions: number
     userId: string
+    childId?: string | null
+    parentEmail?: string | null
 }
 
 interface UserRankData {
@@ -26,7 +28,7 @@ export const SpeedTestLeaderboard = memo(function SpeedTestLeaderboard({
     limitCount?: number
     lastUpdated?: number
 }) {
-    const { user } = useAuth()
+    const { user, activeChildId } = useAuth()
     const [topScores, setTopScores] = useState<LeaderboardEntry[]>([])
     const [userRank, setUserRank] = useState<UserRankData | null>(null)
     const [loading, setLoading] = useState(true)
@@ -67,10 +69,17 @@ export const SpeedTestLeaderboard = memo(function SpeedTestLeaderboard({
 
                 // Query 2: Fetch current user's rank (if logged in)
                 if (user?.uid) {
-                    const userQuery = query(
-                        collection(db, "rapidMathSpeedTest"),
-                        where("userId", "==", user.uid)
-                    )
+                    // CRITICAL FIX: Query by BOTH userId AND childId to get correct child's rank
+                    const userQuery = activeChildId
+                        ? query(
+                            collection(db, "rapidMathSpeedTest"),
+                            where("userId", "==", user.uid),
+                            where("childId", "==", activeChildId)
+                        )
+                        : query(
+                            collection(db, "rapidMathSpeedTest"),
+                            where("userId", "==", user.uid)
+                        )
 
                     const userSnapshot = await getDocs(userQuery)
 
@@ -79,8 +88,11 @@ export const SpeedTestLeaderboard = memo(function SpeedTestLeaderboard({
                         const userData = userDoc.data() as Omit<LeaderboardEntry, "id">
                         const userEntry: LeaderboardEntry = { id: userDoc.id, ...userData }
 
-                        // Check if user is already in top 10
-                        const isInTop10 = fetchedScores.some(score => score.userId === user.uid)
+                        // Check if current child is already in top 10
+                        const isInTop10 = fetchedScores.some(score =>
+                            score.userId === user.uid &&
+                            (!activeChildId || !score.childId || score.childId === activeChildId)
+                        )
 
                         if (!isInTop10 && userEntry.totalQuestions >= 10) {
                             // Calculate user's rank by counting better scores
@@ -163,7 +175,9 @@ export const SpeedTestLeaderboard = memo(function SpeedTestLeaderboard({
                 ) : (
                     <>
                         {topScores.map((score, index) => {
-                            const isCurrentUser = user?.uid === score.userId
+                            // Match both userId and childId for accurate identification
+                            const isCurrentUser = user?.uid === score.userId &&
+                                (!activeChildId || !score.childId || score.childId === activeChildId)
                             const rankEmoji = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : ""
 
                             return (
