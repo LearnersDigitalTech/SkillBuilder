@@ -29,6 +29,7 @@ import { Dialog, DialogTitle, DialogContent, TextField, Button } from "@mui/mate
 import { ref, update } from "firebase/database";
 import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler";
 import { useAuth } from "@/context/AuthContext";
+import { SecureTestEnvironment } from "@/components/Security";
 
 
 const QuizClient = () => {
@@ -750,148 +751,171 @@ const QuizClient = () => {
     }
 
     return (
-        <div className={Styles.quizPageWrapper}>
-            {/* Main Question Section */}
-            <div className={Styles.questionSection}>
-                {
-                    questionPaper && questionPaper[activeQuestionIndex] && questionPaper[activeQuestionIndex].type === "mcq" ?
-                        <TypeMCQ
-                            onClick={handleNext}
-                            onPrevious={handlePrevious}
-                            onMarkForReview={handleMarkForReview}
-                            onAnswerChange={handleAnswerChange}
-                            questionPaper={questionPaper}
-                            activeQuestionIndex={activeQuestionIndex}
-                            question={questionPaper[activeQuestionIndex].question}
-                            topic={questionPaper[activeQuestionIndex].topic}
-                            options={questionPaper[activeQuestionIndex].options}
-                            grade={quizContext.userDetails.activeChild?.grade || quizContext.userDetails.grade}
-                            timeTakeRef={timeTakeRef}
-                            image={questionPaper[activeQuestionIndex].image}
-                        /> : null
-                }
-                {
-                    questionPaper && questionPaper[activeQuestionIndex] && questionPaper[activeQuestionIndex].type === "userInput" ?
-                        <TypeUserInput
-                            onClick={handleNext}
-                            onPrevious={handlePrevious}
-                            onMarkForReview={handleMarkForReview}
-                            onAnswerChange={handleAnswerChange}
-                            questionPaper={questionPaper}
-                            activeQuestionIndex={activeQuestionIndex}
-                            question={questionPaper[activeQuestionIndex].question}
-                            topic={questionPaper[activeQuestionIndex].topic}
-                            grade={quizContext.userDetails.activeChild?.grade || quizContext.userDetails.grade}
-                            timeTakeRef={timeTakeRef}
-                        /> : null
-                }
-                {
-                    questionPaper && questionPaper[activeQuestionIndex] && questionPaper[activeQuestionIndex].type === "tableInput" ?
-                        <TypeTableInput
-                            onClick={handleNext}
-                            onPrevious={handlePrevious}
-                            onAnswerChange={handleAnswerChange}
-                            questionPaper={questionPaper}
-                            activeQuestionIndex={activeQuestionIndex}
-                            topic={questionPaper[activeQuestionIndex].topic}
-                            grade={quizContext.userDetails.activeChild?.grade || quizContext.userDetails.grade}
-                            timeTakeRef={timeTakeRef}
-                        /> : null
-                }
-                {
-                    questionPaper && questionPaper[activeQuestionIndex] && questionPaper[activeQuestionIndex].type === "trueAndFalse" ?
-                        <TypeTrueAndFalse
-                            onClick={handleNext}
-                            onPrevious={handlePrevious}
-                            onMarkForReview={handleMarkForReview}
-                            onAnswerChange={handleAnswerChange}
-                            questionPaper={questionPaper}
-                            activeQuestionIndex={activeQuestionIndex}
-                            question={questionPaper[activeQuestionIndex].question}
-                            topic={questionPaper[activeQuestionIndex].topic}
-                            grade={quizContext.userDetails.activeChild?.grade || quizContext.userDetails.grade}
-                            timeTakeRef={timeTakeRef}
-                        /> : null
-                }
-                {
-                    questionPaper && questionPaper[activeQuestionIndex] && questionPaper[activeQuestionIndex].type === "factorTree" ?
-                        <TypeFactorTree
-                            onClick={handleNext}
-                            onPrevious={handlePrevious}
-                            onAnswerChange={handleAnswerChange}
-                            questionPaper={questionPaper}
-                            activeQuestionIndex={activeQuestionIndex}
-                            topic={questionPaper[activeQuestionIndex].topic}
-                            grade={quizContext.userDetails.activeChild?.grade || quizContext.userDetails.grade}
-                            timeTakeRef={timeTakeRef}
-                        /> : null
-                }
-            </div>
+        <SecureTestEnvironment
+            testType="assessment"
+            testId={`assessment-${quizContext.userDetails?.activeChildId || 'default'}-${Date.now()}`}
+            testName="Assessment"
+            maxTabSwitches={4}
+            onAutoSubmit={() => {
+                // Skip auto-submit modal, go directly to name entry
+                console.log('🚨 Auto-submit triggered - showing name dialog');
 
-            {/* Sidebar with Timer and Palette */}
-            <div className={Styles.sidebarSection}>
-                <div className={Styles.timerSection}>
-                    <Timer timerFinished={handleTimerFinished} getTimeTaken={getTimeTaken} initialTime={remainingTime} />
-                </div>
-                <div className={Styles.paletteSection}>
-                    {paletteComponent}
-                </div>
-            </div>
+                // Save current answer first
+                const currentAnswer = questionPaper[activeQuestionIndex]?.userAnswer;
+                const timeSpent = timeTakeRef.current;
 
-            {/* Name Prompt Dialog */}
-            <Dialog
-                open={nameDialogOpen}
-                onClose={() => !savingName && setNameDialogOpen(false)}
-                maxWidth="sm"
-                fullWidth
-                PaperProps={{
-                    style: {
-                        borderRadius: '16px',
-                        padding: '8px'
+                // Store pending submit data
+                setPendingSubmit({ answer: currentAnswer, time: timeSpent });
+
+                // Show name dialog immediately
+                setNameDialogOpen(true);
+            }}
+            disableSecurityWhileNaming={nameDialogOpen}
+        >
+            <div className={Styles.quizPageWrapper}>
+                {/* Main Question Section */}
+                <div className={Styles.questionSection}>
+                    {
+                        questionPaper && questionPaper[activeQuestionIndex] && questionPaper[activeQuestionIndex].type === "mcq" ?
+                            <TypeMCQ
+                                onClick={handleNext}
+                                onPrevious={handlePrevious}
+                                onMarkForReview={handleMarkForReview}
+                                onAnswerChange={handleAnswerChange}
+                                questionPaper={questionPaper}
+                                activeQuestionIndex={activeQuestionIndex}
+                                question={questionPaper[activeQuestionIndex].question}
+                                topic={questionPaper[activeQuestionIndex].topic}
+                                options={questionPaper[activeQuestionIndex].options}
+                                grade={quizContext.userDetails.activeChild?.grade || quizContext.userDetails.grade}
+                                timeTakeRef={timeTakeRef}
+                                image={questionPaper[activeQuestionIndex].image}
+                            /> : null
                     }
-                }}
-            >
-                <DialogTitle style={{ textAlign: 'center', fontWeight: 600, fontSize: '1.25rem' }}>
-                    What's your name?
-                </DialogTitle>
-                <DialogContent>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '8px' }}>
-                        <p style={{ textAlign: 'center', color: '#666', margin: 0 }}>
-                            Please enter the name of the student taking this assessment
-                        </p>
-                        <TextField
-                            autoFocus
-                            fullWidth
-                            label="Student's Name"
-                            variant="outlined"
-                            value={childNameInput}
-                            onChange={(e) => setChildNameInput(e.target.value)}
-                            disabled={savingName}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter' && childNameInput.trim()) {
-                                    handleSaveNameAndSubmit();
-                                }
-                            }}
-                            placeholder="Enter your full name"
-                        />
-                        <Button
-                            variant="contained"
-                            onClick={handleSaveNameAndSubmit}
-                            disabled={savingName || !childNameInput.trim()}
-                            style={{
-                                backgroundColor: '#3c91f3',
-                                textTransform: 'none',
-                                fontSize: '1rem',
-                                padding: '12px 24px',
-                                borderRadius: '8px'
-                            }}
-                        >
-                            {savingName ? 'Saving...' : 'Submit Quiz'}
-                        </Button>
+                    {
+                        questionPaper && questionPaper[activeQuestionIndex] && questionPaper[activeQuestionIndex].type === "userInput" ?
+                            <TypeUserInput
+                                onClick={handleNext}
+                                onPrevious={handlePrevious}
+                                onMarkForReview={handleMarkForReview}
+                                onAnswerChange={handleAnswerChange}
+                                questionPaper={questionPaper}
+                                activeQuestionIndex={activeQuestionIndex}
+                                question={questionPaper[activeQuestionIndex].question}
+                                topic={questionPaper[activeQuestionIndex].topic}
+                                grade={quizContext.userDetails.activeChild?.grade || quizContext.userDetails.grade}
+                                timeTakeRef={timeTakeRef}
+                            /> : null
+                    }
+                    {
+                        questionPaper && questionPaper[activeQuestionIndex] && questionPaper[activeQuestionIndex].type === "tableInput" ?
+                            <TypeTableInput
+                                onClick={handleNext}
+                                onPrevious={handlePrevious}
+                                onAnswerChange={handleAnswerChange}
+                                questionPaper={questionPaper}
+                                activeQuestionIndex={activeQuestionIndex}
+                                topic={questionPaper[activeQuestionIndex].topic}
+                                grade={quizContext.userDetails.activeChild?.grade || quizContext.userDetails.grade}
+                                timeTakeRef={timeTakeRef}
+                            /> : null
+                    }
+                    {
+                        questionPaper && questionPaper[activeQuestionIndex] && questionPaper[activeQuestionIndex].type === "trueAndFalse" ?
+                            <TypeTrueAndFalse
+                                onClick={handleNext}
+                                onPrevious={handlePrevious}
+                                onMarkForReview={handleMarkForReview}
+                                onAnswerChange={handleAnswerChange}
+                                questionPaper={questionPaper}
+                                activeQuestionIndex={activeQuestionIndex}
+                                question={questionPaper[activeQuestionIndex].question}
+                                topic={questionPaper[activeQuestionIndex].topic}
+                                grade={quizContext.userDetails.activeChild?.grade || quizContext.userDetails.grade}
+                                timeTakeRef={timeTakeRef}
+                            /> : null
+                    }
+                    {
+                        questionPaper && questionPaper[activeQuestionIndex] && questionPaper[activeQuestionIndex].type === "factorTree" ?
+                            <TypeFactorTree
+                                onClick={handleNext}
+                                onPrevious={handlePrevious}
+                                onAnswerChange={handleAnswerChange}
+                                questionPaper={questionPaper}
+                                activeQuestionIndex={activeQuestionIndex}
+                                topic={questionPaper[activeQuestionIndex].topic}
+                                grade={quizContext.userDetails.activeChild?.grade || quizContext.userDetails.grade}
+                                timeTakeRef={timeTakeRef}
+                            /> : null
+                    }
+                </div>
+
+                {/* Sidebar with Timer and Palette */}
+                <div className={Styles.sidebarSection}>
+                    <div className={Styles.timerSection}>
+                        <Timer timerFinished={handleTimerFinished} getTimeTaken={getTimeTaken} initialTime={remainingTime} />
                     </div>
-                </DialogContent>
-            </Dialog>
-        </div>
+                    <div className={Styles.paletteSection}>
+                        {paletteComponent}
+                    </div>
+                </div>
+
+                {/* Name Prompt Dialog - Non-dismissible */}
+                <Dialog
+                    open={nameDialogOpen}
+                    onClose={() => { }} // Prevent closing by clicking outside
+                    disableEscapeKeyDown // Prevent closing with ESC key
+                    maxWidth="sm"
+                    fullWidth
+                    PaperProps={{
+                        style: {
+                            borderRadius: '16px',
+                            padding: '8px'
+                        }
+                    }}
+                >
+                    <DialogTitle style={{ textAlign: 'center', fontWeight: 600, fontSize: '1.25rem' }}>
+                        What's your name?
+                    </DialogTitle>
+                    <DialogContent>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '8px' }}>
+                            <p style={{ textAlign: 'center', color: '#666', margin: 0 }}>
+                                Please enter the name of the student taking this assessment
+                            </p>
+                            <TextField
+                                autoFocus
+                                fullWidth
+                                label="Student's Name"
+                                variant="outlined"
+                                value={childNameInput}
+                                onChange={(e) => setChildNameInput(e.target.value)}
+                                disabled={savingName}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && childNameInput.trim()) {
+                                        handleSaveNameAndSubmit();
+                                    }
+                                }}
+                                placeholder="Enter your full name"
+                            />
+                            <Button
+                                variant="contained"
+                                onClick={handleSaveNameAndSubmit}
+                                disabled={savingName || !childNameInput.trim()}
+                                style={{
+                                    backgroundColor: '#3c91f3',
+                                    textTransform: 'none',
+                                    fontSize: '1rem',
+                                    padding: '12px 24px',
+                                    borderRadius: '8px'
+                                }}
+                            >
+                                {savingName ? 'Saving...' : 'Submit Quiz'}
+                            </Button>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+            </div>
+        </SecureTestEnvironment>
     )
 }
 

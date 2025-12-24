@@ -13,6 +13,7 @@ const ACCENT_COLOR = "text-cyan-400"; // Subtle math accent
 
 export default function LaunchPage() {
     const router = useRouter();
+    const [hasLaunched, setHasLaunched] = useState(false); // New state for initial interaction
     const [currentSlide, setCurrentSlide] = useState(0);
     const [fade, setFade] = useState("opacity-0");
     const [countdown, setCountdown] = useState(5);
@@ -27,31 +28,29 @@ export default function LaunchPage() {
         { id: 5, duration: 6000 }, // Moment
         { id: 6, duration: 6000 }, // Brand
         { id: 7, duration: 5500 }, // Countdown (5s + buffer)
-        { id: 8, duration: 0 },    // Launch Button (No auto-advance)
     ];
 
     const [isMuted, setIsMuted] = useState(false);
     const audioRef = useRef(null);
 
+    // Audio Initialization - triggered only after hasLaunched is true
     useEffect(() => {
+        if (!hasLaunched) return;
+
         // Initialize Audio
         const audio = new Audio("/music/launch_music.mpeg");
         audio.loop = true;
         audioRef.current = audio;
 
         // Attempt to play
-        // We use a promise chain to handle the autoplay rejection gracefully
         audio.play()
             .catch(() => {
-                // Autoplay blocked. Fallback to muted playback.
-                // We do NOT log this as an error to avoid Next.js error overlay.
                 console.log("Autoplay blocked. Switching to muted mode.");
                 audio.muted = true;
                 setIsMuted(true);
                 return audio.play();
             })
             .catch((e) => {
-                // Even muted playback failed (unlikely, but possible)
                 console.log("Playback failed entirely.");
             });
 
@@ -61,7 +60,7 @@ export default function LaunchPage() {
                 audioRef.current = null;
             }
         };
-    }, []);
+    }, [hasLaunched]);
 
     useEffect(() => {
         if (audioRef.current) {
@@ -73,6 +72,8 @@ export default function LaunchPage() {
     }, [isMuted]);
 
     useEffect(() => {
+        if (!hasLaunched) return;
+
         // Current slide duration logic
         const slideConfig = slides[currentSlide];
         if (!slideConfig) return;
@@ -96,9 +97,7 @@ export default function LaunchPage() {
                 setCountdown((prev) => {
                     if (prev <= 1) {
                         clearInterval(interval);
-                        // Move to Launch Button slide automatically when countdown ends
-                        setCurrentSlide(7); // Index for id:8
-                        return 1;
+                        return 0;
                     }
                     return prev - 1;
                 });
@@ -122,10 +121,23 @@ export default function LaunchPage() {
             if (timer) clearTimeout(timer);
             if (interval) clearInterval(interval);
         };
-    }, [currentSlide, router]);
+    }, [currentSlide, router, hasLaunched]);
+
+    // Handle auto-redirect when countdown hits 0
+    useEffect(() => {
+        if (countdown === 0) {
+            router.push("/?launched=true");
+        }
+    }, [countdown, router]);
+
+    // Handle initial launch click
+    const handleLaunch = () => {
+        setHasLaunched(true);
+    };
 
     // Render Content based on Slide ID
     const renderContent = () => {
+        if (!slides[currentSlide]) return null;
         switch (slides[currentSlide].id) {
             case 1: // Context
                 return (
@@ -211,14 +223,14 @@ export default function LaunchPage() {
                         </div>
                     </div>
                 );
-            case 8: // Launch Button
+            case 8: // Launch Button (Final)
                 return (
                     <div className="text-center animate-in fade-in zoom-in duration-1000">
                         <button
                             onClick={() => router.push("/?launched=true")}
                             className="bg-cyan-500 hover:bg-cyan-400 text-white text-xl md:text-3xl font-bold py-4 px-12 rounded-full shadow-[0_0_30px_rgba(6,182,212,0.6)] transition-all transform hover:scale-105 active:scale-95 tracking-widest uppercase"
                         >
-                            Launch Website
+                            Get Started
                         </button>
                     </div>
                 );
@@ -233,20 +245,34 @@ export default function LaunchPage() {
         >
             <MathBackground />
 
-            {/* Audio Control */}
-            <button
-                onClick={() => setIsMuted(!isMuted)}
-                className="absolute top-6 right-6 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all backdrop-blur-sm"
-                aria-label={isMuted ? "Unmute" : "Mute"}
-            >
-                {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
-            </button>
+            {!hasLaunched ? (
+                // Initial Launch Overlay
+                <div className="z-50 animate-in fade-in zoom-in duration-1000">
+                    <button
+                        onClick={handleLaunch}
+                        className="bg-cyan-500 hover:bg-cyan-400 text-white text-2xl md:text-4xl font-serif font-bold py-6 px-16 rounded-full shadow-[0_0_50px_rgba(6,182,212,0.8)] transition-all transform hover:scale-105 active:scale-95 tracking-widest uppercase border-4 border-cyan-400/50"
+                    >
+                        Launch Website
+                    </button>
+                </div>
+            ) : (
+                <>
+                    {/* Audio Control */}
+                    <button
+                        onClick={() => setIsMuted(!isMuted)}
+                        className="absolute top-6 right-6 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all backdrop-blur-sm"
+                        aria-label={isMuted ? "Unmute" : "Mute"}
+                    >
+                        {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+                    </button>
 
-            <div
-                className={`relative z-10 transition-opacity duration-1000 ease-in-out ${fade} w-full flex justify-center`}
-            >
-                {renderContent()}
-            </div>
+                    <div
+                        className={`relative z-10 transition-opacity duration-1000 ease-in-out ${fade} w-full flex justify-center`}
+                    >
+                        {renderContent()}
+                    </div>
+                </>
+            )}
 
         </main>
     );

@@ -23,6 +23,7 @@ import { useSearchParams } from "next/navigation";
 import confetti from "canvas-confetti";
 import Curtain from "@/components/Launch/Curtain";
 import Balloons from "@/components/Launch/Balloons";
+import FloatingLottery from "@/components/Lottery/FloatingLottery.component";
 
 const HomeContent = () => {
     const router = useRouter();
@@ -210,6 +211,7 @@ const HomeContent = () => {
         <div className={Styles.page}>
             <Curtain open={curtainOpen} />
             <Balloons show={showBalloons} />
+            <FloatingLottery />
             <Navigation />
             <div className={Styles.heroContainer}>
                 <div className={Styles.contentContainer}>
