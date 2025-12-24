@@ -214,23 +214,31 @@ const DashboardClient = () => {
 
     // Robust active child resolution
     let activeChild = null;
+    let fallbackChildId = null; // Track fallback without setting state during render
+
     if (children) {
         if (activeChildId && children[activeChildId]) {
             activeChild = children[activeChildId];
         } else if (children['default']) {
             // Fallback to 'default' child if it exists (legacy users)
             activeChild = children['default'];
-            // Update activeChildId to reflect this if it was null
-            if (!activeChildId) setActiveChildId('default');
+            fallbackChildId = 'default';
         } else {
             // Last resort: take the first child found
             const firstKey = Object.keys(children)[0];
             if (firstKey) {
                 activeChild = children[firstKey];
-                if (!activeChildId) setActiveChildId(firstKey);
+                fallbackChildId = firstKey;
             }
         }
     }
+
+    // Set fallback child ID in useEffect to avoid setState during render
+    useEffect(() => {
+        if (fallbackChildId && !activeChildId) {
+            setActiveChildId(fallbackChildId);
+        }
+    }, [fallbackChildId, activeChildId, setActiveChildId]);
 
     if (loading) {
         return (

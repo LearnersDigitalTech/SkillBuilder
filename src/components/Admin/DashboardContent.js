@@ -9,7 +9,7 @@ import StatCard from './StatCard';
 import { MarksBarChart, StudentsAreaChart } from './Charts';
 import StudentList from './StudentList';
 import PuzzleManager from './PuzzleManager';
-import ViolationsList from './ViolationsList';
+import SecurityDashboard from './SecurityDashboard';
 import LotteryManager from './LotteryManager';
 
 const DashboardContent = ({ logoutAction }) => {
@@ -573,7 +573,7 @@ const DashboardContent = ({ logoutAction }) => {
             ) : view === 'puzzles' ? (
                 <PuzzleManager />
             ) : view === 'security' ? (
-                <ViolationsList />
+                <SecurityDashboard />
             ) : view === 'lottery' ? (
                 <LotteryManager />
             ) : (
