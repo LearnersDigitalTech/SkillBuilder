@@ -1,0 +1,309 @@
+"use client";
+import { useState, useRef } from "react";
+import { useForm } from "react-hook-form";
+import { Gift, Sparkles, User, BookOpen, Phone, Download, Trophy, Zap, GraduationCap } from "lucide-react";
+import { Button } from "@mui/material";
+import Confetti from "canvas-confetti";
+import { toPng } from 'html-to-image';
+import { ref, push, set, query, orderByChild, equalTo, get } from "firebase/database";
+import { firebaseDatabase } from "@/backend/firebaseHandler";
+import Navigation from "@/components/Navigation/Navigation.component";
+import Footer from "@/components/Footer/Footer.component";
+
+
+const LotteryPage = () => {
+    const { register, handleSubmit, formState: { errors }, reset } = useForm();
+    const [submitted, setSubmitted] = useState(false);
+    const [ticketCode, setTicketCode] = useState(null);
+    const ticketRef = useRef(null);
+
+    const generateTicketCode = () => {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let result = 'LGS-'; // Prefix for Learners Global School
+        for (let i = 0; i < 6; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return result;
+    };
+
+    const onSubmit = async (data) => {
+        // Check if phone number already exists
+        try {
+            const registrationsRef = ref(firebaseDatabase, 'Lottery/Registrations');
+            // Index not defined on server, so we fetch all and filter client-side
+            // This is acceptable for smaller datasets
+            const snapshot = await get(registrationsRef);
+
+            if (snapshot.exists()) {
+                const allRegs = snapshot.val();
+                // Find entry with matching phone number
+                const existingEntry = Object.values(allRegs).find(reg => reg.phoneNumber === data.phoneNumber);
+
+                if (existingEntry) {
+                    setTicketCode(existingEntry.ticketCode);
+                    setSubmitted(true);
+                    // Optional: Show a message that this is an existing ticket
+                    return;
+                }
+            }
+        } catch (error) {
+            console.error("Error checking for duplicates:", error);
+        }
+
+        const newCode = generateTicketCode();
+        setTicketCode(newCode);
+
+        // Save to Firebase
+        try {
+            const registrationsRef = ref(firebaseDatabase, 'Lottery/Registrations');
+            const newRegRef = push(registrationsRef);
+            await set(newRegRef, {
+                ...data, // parentName, studentName, phoneNumber, studentGrade
+                ticketCode: newCode,
+                timestamp: Date.now(),
+                createdAt: new Date().toISOString()
+            });
+        } catch (error) {
+            console.error("Error saving registration:", error);
+        }
+
+        // Trigger confetti
+        Confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 }
+        });
+
+        setSubmitted(true);
+        reset();
+    };
+
+    const handleDownload = async () => {
+        if (!ticketRef.current) return;
+
+        try {
+            const dataUrl = await toPng(ticketRef.current, { cacheBust: true });
+            const link = document.createElement('a');
+            link.download = `LotteryTicket-${ticketCode}.png`;
+            link.href = dataUrl;
+            link.click();
+        } catch (error) {
+            console.error("Ticket download failed:", error);
+            alert("Failed to download ticket. Please try again.");
+        }
+    };
+
+    return (
+        <div className="min-h-screen flex flex-col" style={{ background: 'radial-gradient(circle at 70% 50%, #ffffff 0%, #e0f2fe 100%)' }}>
+            <Navigation />
+
+            <main className="flex-grow container mx-auto px-4 py-12 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24">
+                <div className="text-center md:text-left flex-1 animate-in fade-in slide-in-from-left duration-700 max-w-2xl">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 font-semibold text-sm mb-6 border border-blue-200">
+                        <Sparkles className="w-4 h-4" /> National Mathematics Day Special
+                    </div>
+
+                    <h1 className="text-5xl md:text-7xl font-extrabold mb-6 text-slate-900 leading-tight tracking-tight">
+                        Win a <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Mega Scholarship!</span>
+                    </h1>
+
+                    <p className="text-lg text-slate-600 mb-10 leading-relaxed font-medium">
+                        Celebrate mathematics with us! Enter the lucky draw for a chance to win exclusive educational rewards and scholarships.
+                    </p>
+
+                    <div className="space-y-6">
+                        <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="p-3 rounded-lg bg-yellow-100 text-yellow-600">
+                                <Trophy className="w-6 h-6" />
+                            </div>
+                            <div className="text-left">
+                                <h3 className="font-bold text-slate-900 text-lg">Top 3 Winners</h3>
+                                <p className="text-slate-500">Get up to 100% scholarship for the upcoming academic year.</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="p-3 rounded-lg bg-purple-100 text-purple-600">
+                                <Gift className="w-6 h-6" />
+                            </div>
+                            <div className="text-left">
+                                <h3 className="font-bold text-slate-900 text-lg">Exciting Gadgets</h3>
+                                <p className="text-slate-500">Tablets, smartwatches, and learning kits up for grabs!</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="p-3 rounded-lg bg-green-100 text-green-600">
+                                <GraduationCap className="w-6 h-6" />
+                            </div>
+                            <div className="text-left">
+                                <h3 className="font-bold text-slate-900 text-lg">Certificate of Honor</h3>
+                                <p className="text-slate-500">Featured recognition on the Learners Wall of Fame.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {!submitted ? (
+                    <div className="w-full max-w-md bg-white p-8 rounded-2xl border border-slate-200 shadow-xl backdrop-blur-sm animate-in fade-in slide-in-from-right duration-700">
+                        <h2 className="text-2xl font-bold mb-6 text-center text-slate-800">Get Your Ticket</h2>
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1 ml-1 text-slate-700">Parent Name</label>
+                                <div className="relative">
+                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                    <input
+                                        {...register("parentName", { required: "Parent name is required" })}
+                                        className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-400 text-slate-900"
+                                        placeholder="Enter parent's name"
+                                    />
+                                </div>
+                                {errors.parentName && <span className="text-red-500 text-xs ml-1 mt-1">{errors.parentName.message}</span>}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1 ml-1 text-slate-700">Student Name</label>
+                                <div className="relative">
+                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                    <input
+                                        {...register("studentName", { required: "Student name is required" })}
+                                        className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-400 text-slate-900"
+                                        placeholder="Enter student's name"
+                                    />
+                                </div>
+                                {errors.studentName && <span className="text-red-500 text-xs ml-1 mt-1">{errors.studentName.message}</span>}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1 ml-1 text-slate-700">Phone Number</label>
+                                <div className="relative">
+                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                    <input
+                                        {...register("phoneNumber", {
+                                            required: "Phone number is required",
+                                            pattern: { value: /^[0-9]{10}$/, message: "Valid 10-digit number required" }
+                                        })}
+                                        className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-400 text-slate-900"
+                                        placeholder="Enter 10-digit number"
+                                        type="tel"
+                                    />
+                                </div>
+                                {errors.phoneNumber && <span className="text-red-500 text-xs ml-1 mt-1">{errors.phoneNumber.message}</span>}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1 ml-1 text-slate-700">Student Grade</label>
+                                <div className="relative">
+                                    <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                    <select
+                                        {...register("studentGrade", { required: "Grade is required" })}
+                                        className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all appearance-none text-slate-900"
+                                    >
+                                        <option value="" className="text-slate-500">Select Grade</option>
+                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(g => (
+                                            <option key={g} value={g} className="text-slate-900">Grade {g}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                {errors.studentGrade && <span className="text-red-500 text-xs ml-1 mt-1">{errors.studentGrade.message}</span>}
+                            </div>
+
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                fullWidth
+                                sx={{
+                                    mt: 2,
+                                    background: 'linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%)', // Match Home Page Blue Gradient
+                                    color: 'white',
+                                    padding: '12px',
+                                    fontWeight: 'bold',
+                                    fontSize: '1.1rem',
+                                    textTransform: 'none',
+                                    borderRadius: '8px',
+                                    '&:hover': {
+                                        background: 'linear-gradient(135deg, #1d4ed8 0%, #0369a1 100%)',
+                                        boxShadow: '0 10px 15px -3px rgba(37, 99, 235, 0.3)'
+                                    }
+                                }}
+                            >
+                                Get Ticket
+                            </Button>
+                        </form>
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center w-full max-w-md animate-in zoom-in duration-300">
+                        {/* Ticket Card Area - This is what gets downloaded */}
+                        <div
+                            ref={ticketRef}
+                            className="w-full p-8 rounded-2xl border-4 border-yellow-400/30 text-center shadow-2xl relative overflow-hidden bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-900 text-white"
+                        >
+                            {/* Decorative circles */}
+                            <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-slate-950"></div>
+                            <div className="absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-slate-950"></div>
+
+                            <div className="p-4 rounded-full inline-block mb-4 bg-white/10 text-yellow-400">
+                                <Gift className="w-12 h-12" />
+                            </div>
+
+                            <h2 className="text-2xl font-bold mb-2 text-white">Registration Successful!</h2>
+
+                            <div className="my-6 p-4 rounded-xl border-2 border-dashed border-yellow-400/50 bg-white/5">
+                                <p className="text-sm mb-2 uppercase tracking-wider font-semibold text-yellow-200">Your Ticket Code</p>
+                                <p className="text-4xl font-mono font-bold tracking-widest drop-shadow-md text-yellow-400">
+                                    {ticketCode}
+                                </p>
+                            </div>
+
+                            <p className="text-sm text-blue-100">
+                                Keep this code safe! We will announce the winners soon.
+                            </p>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="mt-8 flex flex-col gap-4 w-full px-4">
+                            <Button
+                                variant="contained"
+                                startIcon={<Download />}
+                                onClick={handleDownload}
+                                sx={{
+                                    background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                                    color: 'white',
+                                    padding: '12px',
+                                    fontWeight: 'bold',
+                                    textTransform: 'none',
+                                    borderRadius: '8px',
+                                    '&:hover': {
+                                        background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
+                                        boxShadow: '0 0 15px rgba(34, 197, 94, 0.4)'
+                                    }
+                                }}
+                            >
+                                Download Ticket
+                            </Button>
+
+                            <Button
+                                variant="outlined"
+                                onClick={() => {
+                                    setSubmitted(false);
+                                    setTicketCode(null);
+                                }}
+                                sx={{
+                                    color: '#2563eb', // Blue text for light mode
+                                    borderColor: '#2563eb',
+                                    padding: '10px',
+                                    '&:hover': { borderColor: '#1d4ed8', background: '#eff6ff' }
+                                }}
+                            >
+                                Register Another
+                            </Button>
+                        </div>
+                    </div>
+                )}
+            </main>
+            <Footer />
+        </div>
+    );
+};
+
+export default LotteryPage;
