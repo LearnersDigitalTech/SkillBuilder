@@ -35,7 +35,15 @@ const QuestionPalette = ({
             <div className={Styles.gridContainer} ref={gridRef}>
                 {questions.map((q, index) => {
                     if (!q) return null;
-                    const isCompleted = q.userAnswer !== null && q.userAnswer !== undefined && q.userAnswer !== "";
+                    let isCompleted = q.userAnswer !== null && q.userAnswer !== undefined && q.userAnswer !== "";
+
+                    // Logic to handle JSON strings (e.g. "{}", "[]") which should be treated as not answered
+                    if (isCompleted && typeof q.userAnswer === 'string') {
+                        const trimmed = q.userAnswer.trim();
+                        if (trimmed === '{}' || trimmed === '[]') {
+                            isCompleted = false;
+                        }
+                    }
                     const isActive = index === activeQuestionIndex;
                     const isMarkedForReview = q.markedForReview || false;
 
