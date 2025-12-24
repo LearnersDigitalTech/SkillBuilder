@@ -65,7 +65,7 @@
     display: flex;
     gap: 2rem;
     width: max-content;
-    animation: scroll 40s linear infinite;
+    animation: scroll 80s linear infinite;
     padding-left: 2rem;
     /* Initial offset */
 }
@@ -220,7 +220,7 @@
 
     .track {
         gap: 1rem;
-        animation-duration: 30s;
+        animation-duration: 50s;
         /* Faster scroll on small screens */
     }
 }
