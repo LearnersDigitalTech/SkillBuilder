@@ -15,6 +15,7 @@ const LotteryPage = () => {
     const { register, handleSubmit, formState: { errors }, reset } = useForm();
     const [submitted, setSubmitted] = useState(false);
     const [ticketCode, setTicketCode] = useState(null);
+    const [registrationType, setRegistrationType] = useState('parent'); // 'parent' | 'guest'
     const ticketRef = useRef(null);
 
     const generateTicketCode = () => {
@@ -27,22 +28,39 @@ const LotteryPage = () => {
     };
 
     const onSubmit = async (data) => {
+        // Prepare payload based on type
+        const payload = {
+            phoneNumber: data.phoneNumber,
+            userType: registrationType,
+            ticketCode: null, // to be generated
+            // Common fields or specific ones
+            ...(registrationType === 'parent' ? {
+                parentName: data.parentName,
+                studentName: data.studentName,
+                studentGrade: data.studentGrade
+            } : {
+                // For guest, we can map "Name" to studentName in DB for compatibility 
+                // or use a new field 'guestName'. Let's use 'studentName' as 'Name' for simplicity in admin view
+                // asking for "Name" -> saving as studentName (or we can add guestName property)
+                studentName: data.guestName,
+                parentName: "N/A", // Placeholder
+                studentGrade: "Guest"
+            })
+        };
+
         // Check if phone number already exists
         try {
             const registrationsRef = ref(firebaseDatabase, 'Lottery/Registrations');
             // Index not defined on server, so we fetch all and filter client-side
-            // This is acceptable for smaller datasets
             const snapshot = await get(registrationsRef);
 
             if (snapshot.exists()) {
                 const allRegs = snapshot.val();
-                // Find entry with matching phone number
                 const existingEntry = Object.values(allRegs).find(reg => reg.phoneNumber === data.phoneNumber);
 
                 if (existingEntry) {
                     setTicketCode(existingEntry.ticketCode);
                     setSubmitted(true);
-                    // Optional: Show a message that this is an existing ticket
                     return;
                 }
             }
@@ -58,7 +76,7 @@ const LotteryPage = () => {
             const registrationsRef = ref(firebaseDatabase, 'Lottery/Registrations');
             const newRegRef = push(registrationsRef);
             await set(newRegRef, {
-                ...data, // parentName, studentName, phoneNumber, studentGrade
+                ...payload,
                 ticketCode: newCode,
                 timestamp: Date.now(),
                 createdAt: new Date().toISOString()
@@ -67,7 +85,6 @@ const LotteryPage = () => {
             console.error("Error saving registration:", error);
         }
 
-        // Trigger confetti
         Confetti({
             particleCount: 150,
             spread: 70,
@@ -100,79 +117,94 @@ const LotteryPage = () => {
             <main className="flex-grow container mx-auto px-4 py-12 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24">
                 <div className="text-center md:text-left flex-1 animate-in fade-in slide-in-from-left duration-700 max-w-2xl">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 font-semibold text-sm mb-6 border border-blue-200">
-                        <Sparkles className="w-4 h-4" /> National Mathematics Day Special
+                        <Sparkles className="w-4 h-4" /> LEARNERS GLOBAL SCHOOL AND PU COLLEGE
                     </div>
 
                     <h1 className="text-5xl md:text-7xl font-extrabold mb-6 text-slate-900 leading-tight tracking-tight">
-                        Win a <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Mega Scholarship!</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Annual Day Celebration!</span>
                     </h1>
 
-                    <p className="text-lg text-slate-600 mb-10 leading-relaxed font-medium">
-                        Celebrate mathematics with us! Enter the lucky draw for a chance to win exclusive educational rewards and scholarships.
+                    <p className="text-lg text-slate-600 mb-8 leading-relaxed font-medium">
+                        "Education is the passport to the future, for tomorrow belongs to those who prepare for it today."
+                        <br />
+                        <span className="text-sm text-slate-500 mt-2 block">Join us in celebrating a year of brilliance, creativity, and mathematical wonders!</span>
                     </p>
-
-                    <div className="space-y-6">
-                        <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                            <div className="p-3 rounded-lg bg-yellow-100 text-yellow-600">
-                                <Trophy className="w-6 h-6" />
-                            </div>
-                            <div className="text-left">
-                                <h3 className="font-bold text-slate-900 text-lg">Top 3 Winners</h3>
-                                <p className="text-slate-500">Get up to 100% scholarship for the upcoming academic year.</p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                            <div className="p-3 rounded-lg bg-purple-100 text-purple-600">
-                                <Gift className="w-6 h-6" />
-                            </div>
-                            <div className="text-left">
-                                <h3 className="font-bold text-slate-900 text-lg">Exciting Gadgets</h3>
-                                <p className="text-slate-500">Tablets, smartwatches, and learning kits up for grabs!</p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                            <div className="p-3 rounded-lg bg-green-100 text-green-600">
-                                <GraduationCap className="w-6 h-6" />
-                            </div>
-                            <div className="text-left">
-                                <h3 className="font-bold text-slate-900 text-lg">Certificate of Honor</h3>
-                                <p className="text-slate-500">Featured recognition on the Learners Wall of Fame.</p>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 {!submitted ? (
                     <div className="w-full max-w-md bg-white p-8 rounded-2xl border border-slate-200 shadow-xl backdrop-blur-sm animate-in fade-in slide-in-from-right duration-700">
                         <h2 className="text-2xl font-bold mb-6 text-center text-slate-800">Get Your Ticket</h2>
-                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1 ml-1 text-slate-700">Parent Name</label>
-                                <div className="relative">
-                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                                    <input
-                                        {...register("parentName", { required: "Parent name is required" })}
-                                        className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-400 text-slate-900"
-                                        placeholder="Enter parent's name"
-                                    />
-                                </div>
-                                {errors.parentName && <span className="text-red-500 text-xs ml-1 mt-1">{errors.parentName.message}</span>}
-                            </div>
 
-                            <div>
-                                <label className="block text-sm font-medium mb-1 ml-1 text-slate-700">Student Name</label>
-                                <div className="relative">
-                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                                    <input
-                                        {...register("studentName", { required: "Student name is required" })}
-                                        className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-400 text-slate-900"
-                                        placeholder="Enter student's name"
-                                    />
+                        {/* Registration Type Toggle */}
+                        <div className="flex p-1 bg-slate-100 rounded-lg mb-6">
+                            <button
+                                type="button"
+                                onClick={() => setRegistrationType('parent')}
+                                className={`flex-1 py-2 text-sm font-semibold rounded-md transition-all ${registrationType === 'parent'
+                                    ? 'bg-white text-blue-600 shadow-sm'
+                                    : 'text-slate-500 hover:text-slate-700'
+                                    }`}
+                            >
+                                Parent
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setRegistrationType('guest')}
+                                className={`flex-1 py-2 text-sm font-semibold rounded-md transition-all ${registrationType === 'guest'
+                                    ? 'bg-white text-blue-600 shadow-sm'
+                                    : 'text-slate-500 hover:text-slate-700'
+                                    }`}
+                            >
+                                Guest
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+                            {registrationType === 'parent' && (
+                                <>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1 ml-1 text-slate-700">Parent Name</label>
+                                        <div className="relative">
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                            <input
+                                                {...register("parentName", { required: "Parent name is required" })}
+                                                className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-400 text-slate-900"
+                                                placeholder="Enter parent's name"
+                                            />
+                                        </div>
+                                        {errors.parentName && <span className="text-red-500 text-xs ml-1 mt-1">{errors.parentName.message}</span>}
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1 ml-1 text-slate-700">Student Name</label>
+                                        <div className="relative">
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                            <input
+                                                {...register("studentName", { required: "Student name is required" })}
+                                                className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-400 text-slate-900"
+                                                placeholder="Enter student's name"
+                                            />
+                                        </div>
+                                        {errors.studentName && <span className="text-red-500 text-xs ml-1 mt-1">{errors.studentName.message}</span>}
+                                    </div>
+                                </>
+                            )}
+
+                            {registrationType === 'guest' && (
+                                <div>
+                                    <label className="block text-sm font-medium mb-1 ml-1 text-slate-700">Name</label>
+                                    <div className="relative">
+                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                        <input
+                                            {...register("guestName", { required: "Name is required" })}
+                                            className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-400 text-slate-900"
+                                            placeholder="Enter your name"
+                                        />
+                                    </div>
+                                    {errors.guestName && <span className="text-red-500 text-xs ml-1 mt-1">{errors.guestName.message}</span>}
                                 </div>
-                                {errors.studentName && <span className="text-red-500 text-xs ml-1 mt-1">{errors.studentName.message}</span>}
-                            </div>
+                            )}
 
                             <div>
                                 <label className="block text-sm font-medium mb-1 ml-1 text-slate-700">Phone Number</label>
@@ -189,24 +221,27 @@ const LotteryPage = () => {
                                     />
                                 </div>
                                 {errors.phoneNumber && <span className="text-red-500 text-xs ml-1 mt-1">{errors.phoneNumber.message}</span>}
+                                <p className="text-slate-500 text-xs ml-1 mt-1">Note: Only one ticket allowed per phone number.</p>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium mb-1 ml-1 text-slate-700">Student Grade</label>
-                                <div className="relative">
-                                    <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                                    <select
-                                        {...register("studentGrade", { required: "Grade is required" })}
-                                        className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all appearance-none text-slate-900"
-                                    >
-                                        <option value="" className="text-slate-500">Select Grade</option>
-                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(g => (
-                                            <option key={g} value={g} className="text-slate-900">Grade {g}</option>
-                                        ))}
-                                    </select>
+                            {registrationType === 'parent' && (
+                                <div>
+                                    <label className="block text-sm font-medium mb-1 ml-1 text-slate-700">Student Grade</label>
+                                    <div className="relative">
+                                        <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                        <select
+                                            {...register("studentGrade", { required: "Grade is required" })}
+                                            className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all appearance-none text-slate-900"
+                                        >
+                                            <option value="" className="text-slate-500">Select Grade</option>
+                                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(g => (
+                                                <option key={g} value={g} className="text-slate-900">Grade {g}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    {errors.studentGrade && <span className="text-red-500 text-xs ml-1 mt-1">{errors.studentGrade.message}</span>}
                                 </div>
-                                {errors.studentGrade && <span className="text-red-500 text-xs ml-1 mt-1">{errors.studentGrade.message}</span>}
-                            </div>
+                            )}
 
                             <Button
                                 type="submit"

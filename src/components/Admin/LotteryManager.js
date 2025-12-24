@@ -31,6 +31,7 @@ const LotteryManager = () => {
     // Filters
     const [searchTerm, setSearchTerm] = useState('');
     const [gradeFilter, setGradeFilter] = useState('All');
+    const [userTypeFilter, setUserTypeFilter] = useState('All'); // 'All', 'parent', 'guest'
     const [dateFilter, setDateFilter] = useState('');
 
     const fetchRegistrations = async () => {
@@ -43,7 +44,9 @@ const LotteryManager = () => {
                 const data = snapshot.val();
                 const formattedData = Object.entries(data).map(([key, val]) => ({
                     id: key,
-                    ...val
+                    ...val,
+                    // Ensure userType exists for older records (default to parent if missing)
+                    userType: val.userType || 'parent'
                 })).sort((a, b) => b.timestamp - a.timestamp); // Newest first
                 setRegistrations(formattedData);
                 setFilteredRegistrations(formattedData);
@@ -82,7 +85,12 @@ const LotteryManager = () => {
             result = result.filter(item => String(item.studentGrade) === String(gradeFilter));
         }
 
-        // 3. Date Filter
+        // 3. User Type Filter
+        if (userTypeFilter !== 'All') {
+            result = result.filter(item => item.userType === userTypeFilter);
+        }
+
+        // 4. Date Filter
         if (dateFilter) {
             result = result.filter(item => {
                 const itemDate = new Date(item.timestamp).toISOString().split('T')[0];
@@ -91,7 +99,7 @@ const LotteryManager = () => {
         }
 
         setFilteredRegistrations(result);
-    }, [searchTerm, gradeFilter, dateFilter, registrations]);
+    }, [searchTerm, gradeFilter, userTypeFilter, dateFilter, registrations]);
 
     const handleDelete = async (id) => {
         if (confirm("Are you sure you want to delete this entry?")) {
@@ -108,11 +116,12 @@ const LotteryManager = () => {
     };
 
     const handleExport = () => {
-        const headers = ["Ticket Code", "Student Name", "Parent Name", "Phone", "Grade", "Date"];
+        const headers = ["Ticket Code", "User Type", "Student Name", "Parent Name", "Phone", "Grade", "Date"];
         const csvContent = [
             headers.join(","),
             ...filteredRegistrations.map(row => [
                 row.ticketCode,
+                row.userType,
                 `"${row.studentName}"`,
                 `"${row.parentName}"`,
                 row.phoneNumber,
@@ -180,6 +189,19 @@ const LotteryManager = () => {
 
                     <TextField
                         select
+                        label="User Type"
+                        size="small"
+                        value={userTypeFilter}
+                        onChange={(e) => setUserTypeFilter(e.target.value)}
+                        sx={{ minWidth: 120, bgcolor: 'white' }}
+                    >
+                        <MenuItem value="All">All Users</MenuItem>
+                        <MenuItem value="parent">Parent</MenuItem>
+                        <MenuItem value="guest">Guest</MenuItem>
+                    </TextField>
+
+                    <TextField
+                        select
                         label="Grade"
                         size="small"
                         value={gradeFilter}
@@ -202,7 +224,7 @@ const LotteryManager = () => {
                         sx={{ minWidth: 150, bgcolor: 'white' }}
                     />
 
-                    {(searchTerm || gradeFilter !== 'All' || dateFilter) && (
+                    {(searchTerm || gradeFilter !== 'All' || userTypeFilter !== 'All' || dateFilter) && (
                         <Button
                             variant="text"
                             color="error"
@@ -210,6 +232,7 @@ const LotteryManager = () => {
                             onClick={() => {
                                 setSearchTerm('');
                                 setGradeFilter('All');
+                                setUserTypeFilter('All');
                                 setDateFilter('');
                             }}
                         >
@@ -233,6 +256,7 @@ const LotteryManager = () => {
                         <TableHead>
                             <TableRow>
                                 <TableCell sx={{ fontWeight: 'bold' }}>Ticket Code</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold' }}>User Type</TableCell>
                                 <TableCell sx={{ fontWeight: 'bold' }}>Student Name</TableCell>
                                 <TableCell sx={{ fontWeight: 'bold' }}>Parent Name</TableCell>
                                 <TableCell sx={{ fontWeight: 'bold' }}>Phone</TableCell>
@@ -254,6 +278,14 @@ const LotteryManager = () => {
                                                 fontWeight: 'bold',
                                                 fontFamily: 'monospace'
                                             }}
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Chip
+                                            label={row.userType === 'guest' ? 'Guest' : 'Parent'}
+                                            size="small"
+                                            color={row.userType === 'guest' ? 'secondary' : 'default'}
+                                            variant="outlined"
                                         />
                                     </TableCell>
                                     <TableCell>{row.studentName}</TableCell>
