@@ -18,15 +18,6 @@ const LotteryPage = () => {
     const [registrationType, setRegistrationType] = useState('parent'); // 'parent' | 'guest'
     const ticketRef = useRef(null);
 
-    const generateTicketCode = () => {
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let result = 'LGS-'; // Prefix for Learners Global School
-        for (let i = 0; i < 6; i++) {
-            result += characters.charAt(Math.floor(Math.random() * characters.length));
-        }
-        return result;
-    };
-
     const onSubmit = async (data) => {
         // Prepare payload based on type
         const payload = {
@@ -39,24 +30,27 @@ const LotteryPage = () => {
                 studentName: data.studentName,
                 studentGrade: data.studentGrade
             } : {
-                // For guest, we can map "Name" to studentName in DB for compatibility 
-                // or use a new field 'guestName'. Let's use 'studentName' as 'Name' for simplicity in admin view
-                // asking for "Name" -> saving as studentName (or we can add guestName property)
                 studentName: data.guestName,
                 parentName: "N/A", // Placeholder
                 studentGrade: "Guest"
             })
         };
 
-        // Check if phone number already exists
+        let newCode;
+
+        // Check if phone number already exists and get count
         try {
             const registrationsRef = ref(firebaseDatabase, 'Lottery/Registrations');
             // Index not defined on server, so we fetch all and filter client-side
             const snapshot = await get(registrationsRef);
 
+            let count = 0;
             if (snapshot.exists()) {
                 const allRegs = snapshot.val();
-                const existingEntry = Object.values(allRegs).find(reg => reg.phoneNumber === data.phoneNumber);
+                const regsArray = Object.values(allRegs);
+                count = regsArray.length;
+
+                const existingEntry = regsArray.find(reg => reg.phoneNumber === data.phoneNumber);
 
                 if (existingEntry) {
                     setTicketCode(existingEntry.ticketCode);
@@ -64,11 +58,19 @@ const LotteryPage = () => {
                     return;
                 }
             }
+
+            // Generate sequential code starting from 1000
+            newCode = `LGS-${1000 + count + 1}`;
+
         } catch (error) {
             console.error("Error checking for duplicates:", error);
+            // Fallback random if read fails, though unlikely to proceed well
+            const characters = '0123456789';
+            let randomSuffix = '';
+            for (let i = 0; i < 4; i++) randomSuffix += characters.charAt(Math.floor(Math.random() * characters.length));
+            newCode = `LGS-${randomSuffix}`;
         }
 
-        const newCode = generateTicketCode();
         setTicketCode(newCode);
 
         // Save to Firebase
@@ -117,15 +119,28 @@ const LotteryPage = () => {
             <main className="flex-grow container mx-auto px-4 py-12 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24">
                 <div className="text-center md:text-left flex-1 animate-in fade-in slide-in-from-left duration-700 max-w-2xl">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 font-semibold text-sm mb-6 border border-blue-200">
-                        <Sparkles className="w-4 h-4" /> LEARNERS GLOBAL SCHOOL AND PU COLLEGE
+                        <Sparkles className="w-4 h-4" /> LEARNERS GLOBAL SCHOOL & PU COLLEGE
                     </div>
 
-                    <h1 className="text-5xl md:text-7xl font-extrabold mb-6 text-slate-900 leading-tight tracking-tight">
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Annual Day Celebration!</span>
+                    {/* <h1 className="text-5xl md:text-7xl font-extrabold mb-6 text-slate-900 leading-tight tracking-tight">
+                        Lucky Parent Lottery
+                        <span className="block text-3xl md:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mt-2">
+                            Annual Day Celebration!
+                        </span>
+                    </h1> */}
+
+                    <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight tracking-tight
+               text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+                        Lucky Parent Lottery
+                        <span className="block text-3xl md:text-5xl mt-2">
+                            Annual Day Celebration!
+                        </span>
                     </h1>
 
+
                     <p className="text-lg text-slate-600 mb-8 leading-relaxed font-medium">
-                        "Education is the passport to the future, for tomorrow belongs to those who prepare for it today."
+                        "All registered parents will be included in a computerized random draw.
+                        Selected parents will be announced live during the celebration."
                         <br />
                         <span className="text-sm text-slate-500 mt-2 block">Join us in celebrating a year of brilliance, creativity, and mathematical wonders!</span>
                     </p>
