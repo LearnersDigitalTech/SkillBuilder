@@ -223,6 +223,31 @@ const TypeFactorTree = ({
             </div>
 
 
+
+            {showNavigation && (
+                <div className={Styles.navigationContainer}>
+                    <div className={Styles.leftButtons}>
+                        {activeQuestionIndex > 0 && (
+                            <Button
+                                onClick={onPrevious}
+                                size="large"
+                                startIcon={<ArrowLeft />}
+                                className={Styles.previousButton}
+                            >
+                                Previous
+                            </Button>
+                        )}
+                    </div>
+                    <Button
+                        onClick={handleSubmit}
+                        size="large"
+                        endIcon={isLastQuestion ? <Check /> : <ArrowRight />}
+                        className={isLastQuestion ? Styles.submitButton : Styles.nextButton}
+                    >
+                        {isLastQuestion ? 'Submit' : 'Next'}
+                    </Button>
+                </div>
+            )}
         </div>
     );
 };
