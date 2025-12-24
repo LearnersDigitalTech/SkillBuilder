@@ -4,6 +4,9 @@ import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
+// Note: Since this is a client component, we'll need to handle metadata differently
+// We'll create a separate layout.js file for this route to handle metadata
+
 export default function SkillBuilderLaunchPage() {
 
     return (
