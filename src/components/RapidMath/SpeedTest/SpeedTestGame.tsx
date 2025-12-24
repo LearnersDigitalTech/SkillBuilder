@@ -5,6 +5,7 @@ import { SpeedTestQuestionCard } from "./SpeedTestQuestionCard"
 import { SpeedTestLeaderboard } from "./SpeedTestLeaderboard"
 import { Button } from "@/components/ui/button"
 import { Play, Timer as TimerIcon, BarChart2, StopCircle, Trophy } from "lucide-react"
+import { SecureTestEnvironment } from "@/components/Security"
 import { db, auth, googleProvider } from "@/backend/firebaseHandler"
 import { collection, addDoc, serverTimestamp, query, where, getDocs, updateDoc, doc, getCountFromServer } from "firebase/firestore"
 import { useAuth } from "@/context/AuthContext"
@@ -573,45 +574,53 @@ export function SpeedTestGame() {
     }
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-900">
-            {/* Header Stats */}
-            <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 sticky top-0 z-10">
-                <div className="max-w-4xl mx-auto flex items-center justify-between">
-                    <div className="flex items-center gap-6">
-                        <div className="flex flex-col">
-                            <span className="text-xs text-slate-500 font-bold uppercase">Avg Time</span>
-                            <span className="text-2xl font-mono font-bold text-slate-800 dark:text-slate-200">
-                                {stats.avgTime.toFixed(1)}s
-                            </span>
+        <SecureTestEnvironment
+            testType="speed-test"
+            testId={`speed-test-${Date.now()}`}
+            testName="Speed Test"
+            maxTabSwitches={3}
+            onAutoSubmit={finishGame}
+        >
+            <div className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-900">
+                {/* Header Stats */}
+                <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 sticky top-0 z-10">
+                    <div className="max-w-4xl mx-auto flex items-center justify-between">
+                        <div className="flex items-center gap-6">
+                            <div className="flex flex-col">
+                                <span className="text-xs text-slate-500 font-bold uppercase">Avg Time</span>
+                                <span className="text-2xl font-mono font-bold text-slate-800 dark:text-slate-200">
+                                    {stats.avgTime.toFixed(1)}s
+                                </span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-xs text-slate-500 font-bold uppercase">Solved</span>
+                                <span className="text-2xl font-mono font-bold text-blue-600">
+                                    {stats.totalQuestions}
+                                </span>
+                            </div>
                         </div>
-                        <div className="flex flex-col">
-                            <span className="text-xs text-slate-500 font-bold uppercase">Solved</span>
-                            <span className="text-2xl font-mono font-bold text-blue-600">
-                                {stats.totalQuestions}
-                            </span>
-                        </div>
-                    </div>
 
-                    <Button
-                        onClick={finishGame}
-                        variant="ghost"
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                    >
-                        <StopCircle className="mr-2" size={20} /> Finish
-                    </Button>
+                        <Button
+                            onClick={finishGame}
+                            variant="ghost"
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        >
+                            <StopCircle className="mr-2" size={20} /> Finish
+                        </Button>
+                    </div>
+                </div>
+
+                <div className="flex-1 flex items-center justify-center p-4">
+                    {currentQuestion && (
+                        <SpeedTestQuestionCard
+                            key={currentQuestion.id}
+                            question={currentQuestion}
+                            onSubmit={handleAnswerObject}
+                            questionNumber={stats.totalQuestions + 1}
+                        />
+                    )}
                 </div>
             </div>
-
-            <div className="flex-1 flex items-center justify-center p-4">
-                {currentQuestion && (
-                    <SpeedTestQuestionCard
-                        key={currentQuestion.id}
-                        question={currentQuestion}
-                        onSubmit={handleAnswerObject}
-                        questionNumber={stats.totalQuestions + 1}
-                    />
-                )}
-            </div>
-        </div>
+        </SecureTestEnvironment>
     )
 }

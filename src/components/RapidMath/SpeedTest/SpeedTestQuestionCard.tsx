@@ -35,6 +35,33 @@ export function SpeedTestQuestionCard({
         setSubmitted(false)
     }, [question.id])
 
+    // Keyboard input handler
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Ignore if already submitted
+            if (submitted || feedback === "correct") return
+
+            // Handle number keys (0-9)
+            if (e.key >= '0' && e.key <= '9') {
+                e.preventDefault()
+                handleAnswerChange(userAnswer + e.key)
+            }
+            // Handle backspace or delete
+            else if (e.key === 'Backspace' || e.key === 'Delete') {
+                e.preventDefault()
+                handleAnswerChange(userAnswer.slice(0, -1))
+            }
+            // Handle minus sign for negative numbers
+            else if (e.key === '-' && userAnswer === '') {
+                e.preventDefault()
+                handleAnswerChange('-')
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [userAnswer, submitted, feedback])
+
     useEffect(() => {
         if (userAnswer && !submitted) {
             const answer = Number(userAnswer)
