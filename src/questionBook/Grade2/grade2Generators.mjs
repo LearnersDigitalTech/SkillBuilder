@@ -259,7 +259,7 @@ export const generateNumberNames = () => {
   };
 };
 
-export const generateSkipCounting = (step) => {
+export const generateSkipCounting = (step = getRandomInt(2, 5)) => {
   const start = getRandomInt(1, 20) * step;
   const sequence = [start, start + step, start + 2 * step, start + 3 * step];
   const answer = start + 4 * step;
