@@ -10,7 +10,9 @@ import { MarksBarChart, StudentsAreaChart } from './Charts';
 import StudentList from './StudentList';
 import PuzzleManager from './PuzzleManager';
 import SecurityDashboard from './SecurityDashboard';
-import LotteryManager from './LotteryManager';
+import dynamic from 'next/dynamic';
+
+const LotteryManager = dynamic(() => import('./LotteryManager'), { ssr: false });
 
 const DashboardContent = ({ logoutAction }) => {
     const [view, setView] = useState('overview'); // 'overview' | 'students'
@@ -467,7 +469,7 @@ const DashboardContent = ({ logoutAction }) => {
             </Box>
 
             {/* Navigation Tabs */}
-            <Stack direction="row" spacing={2} mb={4}>
+            <Stack direction="row" spacing={2} mb={4} justifyContent="center" flexWrap="wrap">
                 <Button
                     variant={view === 'overview' ? 'contained' : 'outlined'}
                     startIcon={<LayoutDashboard size={20} />}

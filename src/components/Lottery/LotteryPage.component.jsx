@@ -85,58 +85,65 @@ const LotteryPage = () => {
         try {
             const registrationsRef = ref(firebaseDatabase, 'Lottery/Registrations');
             const snapshot = await get(registrationsRef);
+            const allRegs = snapshot.exists() ? snapshot.val() : {};
+            const regsArray = Object.values(allRegs);
 
-            let typeCount = 0;
-            let offset = 1000;
-            let prefix = 'P';
-
-            // Determine Prefix and Offset
             if (registrationType === 'student') {
-                offset = 2000;
-                prefix = 'S';
-            } else if (registrationType === 'teacher') {
-                offset = 3000;
-                prefix = 'T';
-            } else if (registrationType === 'other') {
-                offset = 5000;
-                prefix = 'O';
-            } else if (registrationType === 'parent') {
-                if (!hasChildren) {
-                    // Parent with NO children -> Treat as "Other" (Community)
-                    offset = 5000;
-                    prefix = 'O';
-                } else {
-                    // Parent WITH children -> Standard Parent ticket
-                    offset = 1000;
-                    prefix = 'P';
+                const prefix = 'S';
+                let offset = 0;
+                const grade = data.studentGrade;
+
+                if (grade === "Pre-KG") offset = 100;
+                else if (grade === "LKG") offset = 300;
+                else if (grade === "UKG") offset = 600;
+                else {
+                    const match = String(grade).match(/(\d+)/);
+                    if (match) {
+                        offset = parseInt(match[1]) * 1000;
+                    } else {
+                        offset = 9000; // Fallback
+                    }
                 }
+
+                // Count existing students of THIS specific grade to generate sequential number
+                const countInGrade = regsArray.filter(reg =>
+                    reg.userType === 'student' && reg.studentGrade === grade
+                ).length;
+
+                newCode = `${prefix}${offset + countInGrade + 1}`;
+
+            } else {
+                // Non-Student Logic
+                let offset = 1000;
+                let prefix = 'P';
+
+                if (registrationType === 'teacher') {
+                    offset = 3000;
+                    prefix = 'T';
+                } else if (registrationType === 'Guest') {
+                    offset = 5000;
+                    prefix = 'G';
+                } else if (registrationType === 'parent') {
+                    if (!hasChildren) {
+                        offset = 5000; // Treat as Guest if no children
+                        prefix = 'G';
+                    } else {
+                        offset = 1000;
+                        prefix = 'P';
+                    }
+                }
+
+                const typeCount = regsArray.filter(reg =>
+                    reg.ticketCode && reg.ticketCode.startsWith(prefix)
+                ).length;
+
+                newCode = `${prefix}${offset + typeCount + 1}`;
             }
-
-            if (snapshot.exists()) {
-                const allRegs = snapshot.val();
-                const regsArray = Object.values(allRegs);
-
-                // Check for duplicate phone number
-                // const existingEntry = regsArray.find(reg => reg.phoneNumber === data.phoneNumber && reg.userType === registrationType);
-                // if (existingEntry) {
-                //     setTicketCode(existingEntry.ticketCode);
-                //     setSubmitted(true);
-                //     return; // Stop execution, show existing ticket
-                // }
-
-                // Count existing tickets with the SAME PREFIX to ensure sequence
-                // This handles the case where Parent-No-Child joins the 'O' queue
-                typeCount = regsArray.filter(reg => reg.ticketCode && reg.ticketCode.startsWith(prefix)).length;
-            }
-
-            // Generate sequential code: Prefix - (Offset + Count + 1)
-            // Example: Student #1 -> S-2001
-            newCode = `${prefix}-${offset + typeCount + 1}`;
 
         } catch (error) {
             console.error("Error generating ticket:", error);
             // Fallback
-            newCode = `${prefix}-${Date.now().toString().slice(-4)}`;
+            newCode = `${registrationType.charAt(0).toUpperCase()}${Date.now().toString().slice(-4)}`;
         }
 
         setTicketCode(newCode);
@@ -193,7 +200,7 @@ const LotteryPage = () => {
 
                     <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight tracking-tight
                text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-                        {registrationType === 'student' ? 'Student' : registrationType === 'teacher' ? 'Teacher' : registrationType === 'parent' ? 'Parent' : 'Community'} Lottery
+                        {registrationType === 'student' ? 'Lucky Student' : registrationType === 'teacher' ? 'Lucky Teacher' : registrationType === 'parent' ? 'Lucky Parent' : 'Lucky Guest'} Lottery
                         <span className="block text-3xl md:text-5xl mt-2 text-slate-800">
                             Annual Day Celebration!
                         </span>
@@ -211,7 +218,7 @@ const LotteryPage = () => {
 
                         {/* Role Tabs */}
                         <div className="flex flex-wrap gap-2 p-1 bg-slate-100 rounded-lg mb-6">
-                            {['parent', 'student', 'teacher', 'other'].map((role) => (
+                            {['parent', 'student', 'teacher', 'Guest'].map((role) => (
                                 <button
                                     key={role}
                                     type="button"

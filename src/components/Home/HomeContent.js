@@ -25,6 +25,7 @@ import Curtain from "@/components/Launch/Curtain";
 import Balloons from "@/components/Launch/Balloons";
 import FloatingLottery from "@/components/Lottery/FloatingLottery.component";
 
+
 const HomeContent = () => {
     const router = useRouter();
     const searchParams = useSearchParams(); // Get query params
@@ -39,6 +40,7 @@ const HomeContent = () => {
     const [authModalOpen, setAuthModalOpen] = useState(false);
     const [alreadyAttemptedModalOpen, setAlreadyAttemptedModalOpen] = useState(false);
     const [gradeModalOpen, setGradeModalOpen] = useState(false);
+
 
     // Launch Effect
     useEffect(() => {
@@ -257,6 +259,7 @@ const HomeContent = () => {
                         >
                             Start Assessment
                         </Button>
+
                     </div>
 
                     {/* <div className={Styles.featuresContainer}>
@@ -473,6 +476,8 @@ const HomeContent = () => {
                     </div>
                 }
             />
+
+
         </div>
     );
 }
