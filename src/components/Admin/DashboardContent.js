@@ -11,6 +11,10 @@ import StudentList from './StudentList';
 import PuzzleManager from './PuzzleManager';
 import SecurityDashboard from './SecurityDashboard';
 import LotteryManager from './LotteryManager';
+import InviteSection from '../SchoolAdminDashboard/InviteSection';
+import RoleSnapshot from '../SchoolAdminDashboard/RoleSnapshot';
+import SupportSessionLogger from '../Tracking/SupportSessionLogger';
+import { School, HeartHandshake } from 'lucide-react';
 
 const DashboardContent = ({ logoutAction }) => {
     const [view, setView] = useState('overview'); // 'overview' | 'students'
@@ -516,6 +520,14 @@ const DashboardContent = ({ logoutAction }) => {
                 >
                     Lottery
                 </Button>
+                <Button
+                    variant={view === 'school_community' ? 'contained' : 'outlined'}
+                    startIcon={<School size={20} />} // Or HeartHandshake
+                    onClick={() => setView('school_community')}
+                    sx={{ borderRadius: 2, textTransform: 'none', px: 3 }}
+                >
+                    School & Community
+                </Button>
             </Stack>
 
             {view === 'overview' ? (
@@ -576,6 +588,14 @@ const DashboardContent = ({ logoutAction }) => {
                 <SecurityDashboard />
             ) : view === 'lottery' ? (
                 <LotteryManager />
+            ) : view === 'school_community' ? (
+                <div className="space-y-8">
+                    <InviteSection />
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <RoleSnapshot />
+                        <SupportSessionLogger />
+                    </div>
+                </div>
             ) : (
                 <StudentList
                     students={studentList}
