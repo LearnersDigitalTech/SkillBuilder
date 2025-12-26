@@ -72,7 +72,7 @@ const LotteryDrawPage = () => {
                     }}
                     variant="outlined"
                 >
-                    Back to Dashboard
+                    Back
                 </Button>
 
                 <div style={{ width: '100%', maxWidth: '1000px', padding: '20px' }}>
