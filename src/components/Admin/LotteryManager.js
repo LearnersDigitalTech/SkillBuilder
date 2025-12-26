@@ -17,11 +17,13 @@ import {
     TextField,
     MenuItem,
     Stack,
-    InputAdornment
+    InputAdornment,
+    Grid
 } from '@mui/material';
 import { RefreshCw, Download, Trash2, Search, Filter, Calendar } from 'lucide-react';
 import { ref, get, remove } from 'firebase/database';
 import { firebaseDatabase } from '@/backend/firebaseHandler';
+
 
 const LotteryManager = () => {
     const [registrations, setRegistrations] = useState([]);
@@ -32,6 +34,10 @@ const LotteryManager = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [userTypeFilter, setUserTypeFilter] = useState('All'); // 'All', 'parent', 'student', 'teacher', 'other'
     const [dateFilter, setDateFilter] = useState('');
+
+    // Random Picker State
+    // (Moved to dedicated LotteryDraw component)
+
 
     const fetchRegistrations = async () => {
         setLoading(true);
@@ -45,10 +51,13 @@ const LotteryManager = () => {
                     // Normalize data for display
                     let details = "N/A";
 
-                    // Determine effective user type for display (Parents with 'O' tickets -> 'other')
-                    let effectiveUserType = val.userType || 'parent';
-                    if (val.ticketCode && String(val.ticketCode).toUpperCase().startsWith('O')) {
-                        effectiveUserType = 'other';
+                    // Determine effective user type for display
+                    let effectiveUserType = (val.userType || 'parent').toLowerCase();
+
+                    if (val.ticketCode) {
+                        const code = String(val.ticketCode).toUpperCase();
+                        if (code.startsWith('O')) effectiveUserType = 'other';
+                        else if (code.startsWith('G')) effectiveUserType = 'guest';
                     }
 
                     if (val.userType === 'parent') {
@@ -251,6 +260,44 @@ const LotteryManager = () => {
                     )}
                 </Stack>
             </Box>
+
+            {/* Live Draw Link */}
+            <Paper
+                sx={{
+                    mb: 4,
+                    p: 4,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    borderRadius: 3
+                }}
+            >
+                <Typography variant="h4" fontWeight="bold" gutterBottom>
+                    🎉 Ready for the Grand Draw?
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 3, opacity: 0.9 }}>
+                    Access the dedicated full-screen interface for the live lottery ceremony.
+                </Typography>
+                <Button
+                    variant="contained"
+                    size="large"
+                    href="/lottery-draw"
+                    target="_blank"
+                    sx={{
+                        bgcolor: 'white',
+                        color: '#764ba2',
+                        fontWeight: 'bold',
+                        px: 4,
+                        py: 1.5,
+                        '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' }
+                    }}
+                >
+                    Open Live Draw Page 🚀
+                </Button>
+            </Paper>
 
             {loading ? (
                 <Box display="flex" justifyContent="center" py={8}>
