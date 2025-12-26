@@ -370,8 +370,8 @@ const numberToWords = (num) => {
 };
 
 export const generateNumberToWords = () => {
-    // Generate a random number between 1 and 100
-    const number = getRandomInt(1, 100);
+    // Generate a random number between 1 and 99 (100 not supported by helper)
+    const number = getRandomInt(1, 99);
     const numberInWords = numberToWords(number);
 
     // The question asks for the number name, given the numeral
@@ -380,9 +380,9 @@ export const generateNumberToWords = () => {
     // Create options as number names (words)
     const options = shuffleArray([
         { value: numberInWords, label: numberInWords }, // correct number name
-        { value: numberToWords(getRandomInt(1, 100)), label: numberToWords(getRandomInt(1, 100)) }, // random number name
-        { value: numberToWords(getRandomInt(1, 100)), label: numberToWords(getRandomInt(1, 100)) }, // random number name
-        { value: numberToWords(getRandomInt(1, 100)), label: numberToWords(getRandomInt(1, 100)) } // random number name
+        { value: numberToWords(getRandomInt(1, 99)), label: numberToWords(getRandomInt(1, 99)) }, // random number name
+        { value: numberToWords(getRandomInt(1, 99)), label: numberToWords(getRandomInt(1, 99)) }, // random number name
+        { value: numberToWords(getRandomInt(1, 99)), label: numberToWords(getRandomInt(1, 99)) } // random number name
     ]);
 
     return {
@@ -437,10 +437,10 @@ export const generateDoublingQuestion = () => {
 
     // Create the options with the correct answer and 3 random incorrect answers
     const options = shuffleArray([
-        { value: correctAnswer, label: correctAnswer.toString() },
-        { value: generateRandomIncorrectAnswer(), label: generateRandomIncorrectAnswer().toString() },
-        { value: generateRandomIncorrectAnswer(), label: generateRandomIncorrectAnswer().toString() },
-        { value: generateRandomIncorrectAnswer(), label: generateRandomIncorrectAnswer().toString() }
+        { value: correctAnswer.toString(), label: correctAnswer.toString() },
+        { value: generateRandomIncorrectAnswer().toString(), label: generateRandomIncorrectAnswer().toString() },
+        { value: generateRandomIncorrectAnswer().toString(), label: generateRandomIncorrectAnswer().toString() },
+        { value: generateRandomIncorrectAnswer().toString(), label: generateRandomIncorrectAnswer().toString() }
     ]);
 
     return {
@@ -475,10 +475,10 @@ export const generateHalvingQuestion = () => {
     const wrong3 = generateRandomIncorrectAnswer();
 
     const options = shuffleArray([
-        { value: correctAnswer, label: correctAnswer.toString() },
-        { value: wrong1, label: wrong1.toString() },
-        { value: wrong2, label: wrong2.toString() },
-        { value: wrong3, label: wrong3.toString() }
+        { value: correctAnswer.toString(), label: correctAnswer.toString() },
+        { value: wrong1.toString(), label: wrong1.toString() },
+        { value: wrong2.toString(), label: wrong2.toString() },
+        { value: wrong3.toString(), label: wrong3.toString() }
     ]);
 
     return {

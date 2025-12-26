@@ -30,8 +30,7 @@ const LotteryManager = () => {
 
     // Filters
     const [searchTerm, setSearchTerm] = useState('');
-    const [gradeFilter, setGradeFilter] = useState('All');
-    const [userTypeFilter, setUserTypeFilter] = useState('All'); // 'All', 'parent', 'guest'
+    const [userTypeFilter, setUserTypeFilter] = useState('All'); // 'All', 'parent', 'student', 'teacher', 'other'
     const [dateFilter, setDateFilter] = useState('');
 
     const fetchRegistrations = async () => {
@@ -42,12 +41,41 @@ const LotteryManager = () => {
 
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                const formattedData = Object.entries(data).map(([key, val]) => ({
-                    id: key,
-                    ...val,
-                    // Ensure userType exists for older records (default to parent if missing)
-                    userType: val.userType || 'parent'
-                })).sort((a, b) => b.timestamp - a.timestamp); // Newest first
+                const formattedData = Object.entries(data).map(([key, val]) => {
+                    // Normalize data for display
+                    let details = "N/A";
+
+                    // Determine effective user type for display (Parents with 'O' tickets -> 'other')
+                    let effectiveUserType = val.userType || 'parent';
+                    if (val.ticketCode && String(val.ticketCode).toUpperCase().startsWith('O')) {
+                        effectiveUserType = 'other';
+                    }
+
+                    if (val.userType === 'parent') {
+                        if (val.children && Array.isArray(val.children)) {
+                            details = val.children.map(c => `${c.name} (Gr ${c.grade})`).join(", ");
+                        } else if (val.studentName && val.studentName !== "N/A") {
+                            // Backward compatibility or flat structure
+                            details = `${val.studentName} (${val.studentGrade || 'N/A'})`;
+                        } else {
+                            details = "No children listed";
+                        }
+                    } else if (val.userType === 'student') {
+                        details = `Grade ${val.studentGrade} | ${val.schoolName || 'N/A'}`;
+                    } else if (val.userType === 'teacher') {
+                        details = `School: ${val.schoolName || 'N/A'}`;
+                    }
+
+                    return {
+                        id: key,
+                        ...val,
+                        userType: val.userType || 'parent', // Keep original for logic if needed
+                        effectiveUserType: effectiveUserType, // Use this for display/export
+                        displayDetails: details,
+                        displayName: val.name || val.parentName || val.studentName || "Unknown"
+                    };
+                }).sort((a, b) => b.timestamp - a.timestamp); // Newest first
+
                 setRegistrations(formattedData);
                 setFilteredRegistrations(formattedData);
             } else {
@@ -69,28 +97,24 @@ const LotteryManager = () => {
     useEffect(() => {
         let result = registrations;
 
-        // 1. Search (Name, Phone, Ticket)
+        // 1. Search (Name, Phone, Ticket, Email)
         if (searchTerm) {
             const lowerTerm = searchTerm.toLowerCase();
             result = result.filter(item =>
-                (item.studentName && item.studentName.toLowerCase().includes(lowerTerm)) ||
-                (item.parentName && item.parentName.toLowerCase().includes(lowerTerm)) ||
+                (item.displayName && item.displayName.toLowerCase().includes(lowerTerm)) ||
+                (item.email && item.email.toLowerCase().includes(lowerTerm)) ||
                 (item.phoneNumber && item.phoneNumber.includes(lowerTerm)) ||
-                (item.ticketCode && item.ticketCode.toLowerCase().includes(lowerTerm))
+                (item.ticketCode && item.ticketCode.toLowerCase().includes(lowerTerm)) ||
+                (item.displayDetails && item.displayDetails.toLowerCase().includes(lowerTerm))
             );
         }
 
-        // 2. Grade Filter
-        if (gradeFilter !== 'All') {
-            result = result.filter(item => String(item.studentGrade) === String(gradeFilter));
-        }
-
-        // 3. User Type Filter
+        // 2. User Type Filter (Use effective type)
         if (userTypeFilter !== 'All') {
-            result = result.filter(item => item.userType === userTypeFilter);
+            result = result.filter(item => item.effectiveUserType === userTypeFilter);
         }
 
-        // 4. Date Filter
+        // 3. Date Filter
         if (dateFilter) {
             result = result.filter(item => {
                 const itemDate = new Date(item.timestamp).toISOString().split('T')[0];
@@ -99,7 +123,7 @@ const LotteryManager = () => {
         }
 
         setFilteredRegistrations(result);
-    }, [searchTerm, gradeFilter, userTypeFilter, dateFilter, registrations]);
+    }, [searchTerm, userTypeFilter, dateFilter, registrations]);
 
     const handleDelete = async (id) => {
         if (confirm("Are you sure you want to delete this entry?")) {
@@ -108,7 +132,6 @@ const LotteryManager = () => {
                 await remove(itemRef);
                 const newRegs = registrations.filter(item => item.id !== id);
                 setRegistrations(newRegs);
-                // Filtering effect will auto-update filteredRegistrations
             } catch (error) {
                 console.error("Error deleting entry:", error);
             }
@@ -116,16 +139,16 @@ const LotteryManager = () => {
     };
 
     const handleExport = () => {
-        const headers = ["Ticket Code", "User Type", "Student Name", "Parent Name", "Phone", "Grade", "Date"];
+        const headers = ["Ticket Code", "Users", "User Name", "Phone", "Email", "Details (School/Children)", "Date"];
         const csvContent = [
             headers.join(","),
             ...filteredRegistrations.map(row => [
                 row.ticketCode,
-                row.userType,
-                `"${row.studentName}"`,
-                `"${row.parentName}"`,
+                row.effectiveUserType, // Export effective type
+                `"${row.displayName}"`,
                 row.phoneNumber,
-                row.studentGrade,
+                row.email || "N/A",
+                `"${row.displayDetails}"`,
                 new Date(row.timestamp).toLocaleString()
             ].join(","))
         ].join("\n");
@@ -172,7 +195,7 @@ const LotteryManager = () => {
             <Box sx={{ mb: 4, p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
                 <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="center">
                     <TextField
-                        placeholder="Search Name, Phone, Ticket..."
+                        placeholder="Search Name, Phone, Email..."
                         size="small"
                         variant="outlined"
                         value={searchTerm}
@@ -197,21 +220,9 @@ const LotteryManager = () => {
                     >
                         <MenuItem value="All">All Users</MenuItem>
                         <MenuItem value="parent">Parent</MenuItem>
-                        <MenuItem value="guest">Guest</MenuItem>
-                    </TextField>
-
-                    <TextField
-                        select
-                        label="Grade"
-                        size="small"
-                        value={gradeFilter}
-                        onChange={(e) => setGradeFilter(e.target.value)}
-                        sx={{ minWidth: 120, bgcolor: 'white' }}
-                    >
-                        <MenuItem value="All">All Grades</MenuItem>
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(g => (
-                            <MenuItem key={g} value={g}>Grade {g}</MenuItem>
-                        ))}
+                        <MenuItem value="student">Student</MenuItem>
+                        <MenuItem value="teacher">Teacher</MenuItem>
+                        <MenuItem value="other">Other</MenuItem>
                     </TextField>
 
                     <TextField
@@ -224,14 +235,13 @@ const LotteryManager = () => {
                         sx={{ minWidth: 150, bgcolor: 'white' }}
                     />
 
-                    {(searchTerm || gradeFilter !== 'All' || userTypeFilter !== 'All' || dateFilter) && (
+                    {(searchTerm || userTypeFilter !== 'All' || dateFilter) && (
                         <Button
                             variant="text"
                             color="error"
                             size="small"
                             onClick={() => {
                                 setSearchTerm('');
-                                setGradeFilter('All');
                                 setUserTypeFilter('All');
                                 setDateFilter('');
                             }}
@@ -256,11 +266,11 @@ const LotteryManager = () => {
                         <TableHead>
                             <TableRow>
                                 <TableCell sx={{ fontWeight: 'bold' }}>Ticket Code</TableCell>
-                                <TableCell sx={{ fontWeight: 'bold' }}>User Type</TableCell>
-                                <TableCell sx={{ fontWeight: 'bold' }}>Student Name</TableCell>
-                                <TableCell sx={{ fontWeight: 'bold' }}>Parent Name</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold' }}>Users</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold' }}>User Name</TableCell>
                                 <TableCell sx={{ fontWeight: 'bold' }}>Phone</TableCell>
-                                <TableCell sx={{ fontWeight: 'bold' }}>Grade</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold' }}>Email</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold', width: '30%' }}>Details (School/Children)</TableCell>
                                 <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
                                 <TableCell align="right" sx={{ fontWeight: 'bold' }}>Actions</TableCell>
                             </TableRow>
@@ -270,7 +280,7 @@ const LotteryManager = () => {
                                 <TableRow key={row.id} hover>
                                     <TableCell>
                                         <Chip
-                                            label={row.ticketCode}
+                                            label={row.ticketCode || "N/A"}
                                             size="small"
                                             sx={{
                                                 bgcolor: 'rgba(37, 99, 235, 0.1)',
@@ -282,18 +292,27 @@ const LotteryManager = () => {
                                     </TableCell>
                                     <TableCell>
                                         <Chip
-                                            label={row.userType === 'guest' ? 'Guest' : 'Parent'}
+                                            label={row.effectiveUserType} // Use effective type
                                             size="small"
-                                            color={row.userType === 'guest' ? 'secondary' : 'default'}
+                                            color={
+                                                row.effectiveUserType === 'student' ? 'primary' :
+                                                    row.effectiveUserType === 'teacher' ? 'warning' :
+                                                        row.effectiveUserType === 'parent' ? 'success' : 'default'
+                                            }
                                             variant="outlined"
+                                            sx={{ textTransform: 'capitalize' }}
                                         />
                                     </TableCell>
-                                    <TableCell>{row.studentName}</TableCell>
-                                    <TableCell>{row.parentName}</TableCell>
+                                    <TableCell sx={{ fontWeight: 500 }}>{row.displayName}</TableCell>
                                     <TableCell>{row.phoneNumber}</TableCell>
-                                    <TableCell>Grade {row.studentGrade}</TableCell>
+                                    <TableCell>{row.email || "N/A"}</TableCell>
+                                    <TableCell>
+                                        <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'text.secondary' }}>
+                                            {row.displayDetails}
+                                        </Typography>
+                                    </TableCell>
                                     <TableCell sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
-                                        {new Date(row.timestamp).toLocaleDateString()} {new Date(row.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        {new Date(row.timestamp).toLocaleDateString()}
                                     </TableCell>
                                     <TableCell align="right">
                                         <IconButton size="small" color="error" onClick={() => handleDelete(row.id)}>
