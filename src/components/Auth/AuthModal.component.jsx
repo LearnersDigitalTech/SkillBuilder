@@ -77,7 +77,11 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
 
     const [registrationData, setRegistrationData] = useState({
         name: "",
-        grade: ""
+        grade: "",
+        role: "",
+        schoolName: "",
+        phone: "",
+        extraRoles: {}
     });
 
 
@@ -159,10 +163,30 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
 
     // ==================== GOOGLE REGISTRATION (Complete Profile) ====================
     const handleGoogleRegister = async () => {
-        const { grade } = registrationData;
+        const { grade, role, schoolName, phone, name, extraRoles } = registrationData;
 
-        if (!grade) {
+        if (!name) {
+            toast.error("Please enter your name");
+            return;
+        }
+
+        if (!schoolName) {
+            toast.error("Please enter your school name");
+            return;
+        }
+
+        if (!role) {
+            toast.error("Please select a role");
+            return;
+        }
+
+        if (role === 'Student' && !grade) {
             toast.error("Please select a grade");
+            return;
+        }
+
+        if (!phone || phone.length !== 10) {
+            toast.error("Please enter a valid 10-digit phone number");
             return;
         }
 
@@ -175,17 +199,43 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
             }
 
             const childId = `student_${Date.now()}`;
-            const childProfile = {
-                name: "", // Name will be collected on first quiz submit
+            // Construct the selected sub-roles list
+            const selectedExtraRoles = extraRoles ? Object.keys(extraRoles).filter(k => extraRoles[k]) : [];
+
+            // Main User Profile Data
+            const userProfileData = {
+                name: name,
                 email: user.email,
-                grade,
+                phone: phone, // Save phone at top level
+                schoolName: schoolName,
+                role: role,
+                extraRoles: selectedExtraRoles,
+                createdAt: new Date().toISOString(),
+                authProvider: "google",
+                parentEmail: user.email,
+            };
+
+            const childProfile = {
+                name: name,
+                email: user.email,
+                grade: role === 'Student' ? grade : 'N/A', // Only relevant if student
+                schoolName: schoolName,
+                role: role,
                 createdAt: new Date().toISOString()
             };
 
+
+            // If it's a student, we add them as a 'child' under the main user to keep existing flow
+            // If it's another role, we still might need this structure for the app to function (quiz/dashboard)
+            // For now, we'll create a child profile for everyone so they can 'take the test' or enter dashboard.
+
             const userDataUpdate = {
-                [`NMD_2025/Registrations/${getUserDatabaseKey(user)}/children/${childId}`]: childProfile,
-                [`NMD_2025/Registrations/${getUserDatabaseKey(user)}/authProvider`]: "google",
-                [`NMD_2025/Registrations/${getUserDatabaseKey(user)}/parentEmail`]: user.email,
+                [`NMD_2025/Registrations/${getUserDatabaseKey(user)}`]: {
+                    ...userProfileData,
+                    children: {
+                        [childId]: childProfile
+                    }
+                }
             };
 
             await update(ref(firebaseDatabase), userDataUpdate);
@@ -476,8 +526,8 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                         {step === "SELECT_PROFILE" && "Select Profile"}
                         {step === "REGISTER" && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <GraduationCap size={28} className={Styles.headerIcon} />
-                                <span>Select Your Grade</span>
+                                {/* <GraduationCap size={28} className={Styles.headerIcon} /> */}
+                                <span>Complete Registration</span>
                             </div>
                         )}
                     </div>
@@ -653,47 +703,133 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                     {/* ==================== REGISTER (Complete Profile) ==================== */}
                     {step === "REGISTER" && (
                         <div className={Styles.stepContainer}>
-                            {/* <div className={Styles.welcomeText}>
-                                Welcome! Let's get started with your math assessment.
-                            </div> */}
+                            {/* <h3 style={{ textAlign: "center", marginBottom: "16px" }}>Complete Registration</h3> */}
 
-                            <form className={Styles.formGrid}>
-                                {/* <div className={Styles.inputGroup}>
-                                    <User className={Styles.inputIcon} size={20} />
+                            <form className={Styles.formGrid} style={{ gap: '16px', display: 'flex', flexDirection: 'column' }}>
+
+                                {/* Name Field */}
+                                <TextField
+                                    fullWidth
+                                    label="Name"
+                                    variant="outlined"
+                                    required
+                                    value={registrationData.name}
+                                    onChange={(e) => setRegistrationData({ ...registrationData, name: e.target.value })}
+                                />
+
+                                {/* Phone Field (If not already provided via phone auth) */}
+                                {auth.currentUser?.providerData[0]?.providerId === 'google.com' && (
                                     <TextField
                                         fullWidth
-                                        placeholder="Enter student name"
+                                        label="Phone Number"
                                         variant="outlined"
-                                        value={registrationData.name}
-                                        onChange={(e) => setRegistrationData({ ...registrationData, name: e.target.value })}
-                                        className={Styles.textField}
-                                        autoFocus
+                                        type="tel"
+                                        required
+                                        inputProps={{ maxLength: 10 }}
+                                        value={registrationData.phone || ""}
+                                        onChange={(e) => setRegistrationData({ ...registrationData, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                                        InputProps={{
+                                            startAdornment: <InputAdornment position="start">+91</InputAdornment>,
+                                        }}
                                     />
-                                </div> */}
+                                )}
 
-                                <div className={Styles.gradeSection}>
-                                    {/* <label className={Styles.gradeLabel}>Which grade are you in?</label> */}
-                                    <FormControl fullWidth variant="outlined" className={Styles.gradeSelect}>
+                                {/* School Name */}
+                                <TextField
+                                    fullWidth
+                                    label="School Name"
+                                    variant="outlined"
+                                    required
+                                    value={registrationData.schoolName || ""}
+                                    onChange={(e) => setRegistrationData({ ...registrationData, schoolName: e.target.value })}
+                                />
+
+                                {/* Role Selection */}
+                                <FormControl component="fieldset">
+                                    <span className={Styles.label}>I am a:</span>
+                                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '8px' }}>
+                                        {['Student', 'Parent', 'Teacher', 'Other'].map((role) => (
+                                            <div
+                                                key={role}
+                                                onClick={() => setRegistrationData({ ...registrationData, role: role, extraRoles: {} })}
+                                                style={{
+                                                    padding: '8px 16px',
+                                                    borderRadius: '20px',
+                                                    border: registrationData.role === role ? '2px solid #2563eb' : '1px solid #e0e0e0',
+                                                    backgroundColor: registrationData.role === role ? '#eff6ff' : 'transparent',
+                                                    color: registrationData.role === role ? '#2563eb' : 'inherit',
+                                                    cursor: 'pointer',
+                                                    fontWeight: registrationData.role === role ? 600 : 400,
+                                                    transition: 'all 0.2s'
+                                                }}
+                                            >
+                                                {role}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </FormControl>
+
+
+                                {/* Conditional Fields based on Role */}
+
+                                {/* STUDENT: Grade Selection */}
+                                {registrationData.role === 'Student' && (
+                                    <FormControl fullWidth variant="outlined">
+                                        <InputLabel>Grade</InputLabel>
                                         <Select
-                                            value={registrationData.grade}
-                                            displayEmpty
+                                            value={registrationData.grade || ""}
                                             onChange={(e) => setRegistrationData({ ...registrationData, grade: e.target.value })}
-                                            renderValue={(selected) => {
-                                                if (!selected) {
-                                                    return <span style={{ color: '#9ca3af' }}>Grade</span>;
-                                                }
-                                                return selected;
-                                            }}
+                                            label="Grade"
                                         >
-                                            <MenuItem disabled value="">
-                                                <em>Grade</em>
-                                            </MenuItem>
                                             {[...Array(10)].map((_, i) => (
                                                 <MenuItem key={i + 1} value={`Grade ${i + 1}`}>Grade {i + 1}</MenuItem>
                                             ))}
                                         </Select>
                                     </FormControl>
-                                </div>
+                                )}
+
+                                {/* PARENT or OTHER: Checkboxes */}
+                                {(registrationData.role === 'Parent' || registrationData.role === 'Other') && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        <span className={Styles.label}>Interested in contributing as:</span>
+                                        {['Math Connector', 'Math Companion', 'Math Mentor'].map((subRole) => (
+                                            <label key={subRole} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={!!registrationData.extraRoles?.[subRole]}
+                                                    onChange={(e) => {
+                                                        const newExtraRoles = { ...registrationData.extraRoles, [subRole]: e.target.checked };
+                                                        setRegistrationData({ ...registrationData, extraRoles: newExtraRoles });
+                                                    }}
+                                                    style={{ width: '18px', height: '18px' }}
+                                                />
+                                                {subRole}
+                                            </label>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* TEACHER: Checkboxes */}
+                                {registrationData.role === 'Teacher' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        <span className={Styles.label}>Teaching Role:</span>
+                                        {['Class Teacher', 'Math Teacher'].map((subRole) => (
+                                            <label key={subRole} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={!!registrationData.extraRoles?.[subRole]}
+                                                    onChange={(e) => {
+                                                        const newExtraRoles = { ...registrationData.extraRoles, [subRole]: e.target.checked };
+                                                        setRegistrationData({ ...registrationData, extraRoles: newExtraRoles });
+                                                    }}
+                                                    style={{ width: '18px', height: '18px' }}
+                                                />
+                                                {subRole}
+                                            </label>
+                                        ))}
+                                    </div>
+                                )}
+
                             </form>
                             <Button
                                 fullWidth
@@ -701,8 +837,9 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                                 onClick={auth.currentUser?.providerData[0]?.providerId === 'google.com' ? handleGoogleRegister : handlePhoneRegister}
                                 disabled={loading}
                                 className={Styles.actionButton}
+                                sx={{ marginTop: '20px' }}
                             >
-                                {loading ? <CircularProgress size={24} color="inherit" /> : "Start Assessment →"}
+                                {loading ? <CircularProgress size={24} color="inherit" /> : "Complete Registration →"}
                             </Button>
                         </div>
                     )}

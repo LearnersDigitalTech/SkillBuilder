@@ -14,7 +14,8 @@ import LotteryManager from './LotteryManager';
 import InviteSection from '../SchoolAdminDashboard/InviteSection';
 import RoleSnapshot from '../SchoolAdminDashboard/RoleSnapshot';
 import SupportSessionLogger from '../Tracking/SupportSessionLogger';
-import { School, HeartHandshake } from 'lucide-react';
+import { School, HeartHandshake, UserPlus } from 'lucide-react';
+import RegistrationsTable from './RegistrationsTable.component';
 
 const DashboardContent = ({ logoutAction }) => {
     const [view, setView] = useState('overview'); // 'overview' | 'students'
@@ -528,6 +529,14 @@ const DashboardContent = ({ logoutAction }) => {
                 >
                     School & Community
                 </Button>
+                <Button
+                    variant={view === 'registrations' ? 'contained' : 'outlined'}
+                    startIcon={<UserPlus size={20} />}
+                    onClick={() => setView('registrations')}
+                    sx={{ borderRadius: 2, textTransform: 'none', px: 3 }}
+                >
+                    Registrations
+                </Button>
             </Stack>
 
             {view === 'overview' ? (
@@ -591,11 +600,12 @@ const DashboardContent = ({ logoutAction }) => {
             ) : view === 'school_community' ? (
                 <div className="space-y-8">
                     <InviteSection />
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
                         <RoleSnapshot />
-                        <SupportSessionLogger />
                     </div>
                 </div>
+            ) : view === 'registrations' ? (
+                <RegistrationsTable />
             ) : (
                 <StudentList
                     students={studentList}

@@ -131,7 +131,7 @@ const LotteryPage = () => {
 
                     <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight tracking-tight
                text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-                        Lucky Parent Lottery
+                        Lucky  Lottery
                         <span className="block text-3xl md:text-5xl mt-2">
                             Annual Day Celebration!
                         </span>
@@ -139,7 +139,7 @@ const LotteryPage = () => {
 
 
                     <p className="text-lg text-slate-600 mb-8 leading-relaxed font-medium">
-                        "All registered parents will be included in a computerized random draw.
+                        "All registered users will be included in a computerized random draw.
                         Selected parents will be announced live during the celebration."
                         <br />
                         <span className="text-sm text-slate-500 mt-2 block">Join us in celebrating a year of brilliance, creativity, and mathematical wonders!</span>
