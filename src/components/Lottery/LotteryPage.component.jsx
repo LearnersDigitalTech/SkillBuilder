@@ -11,6 +11,9 @@ import Navigation from "@/components/Navigation/Navigation.component";
 import Footer from "@/components/Footer/Footer.component";
 
 
+import { toast } from 'react-toastify';
+
+
 const LotteryPage = () => {
     const { register, control, handleSubmit, formState: { errors }, reset, watch, unregister } = useForm({
         defaultValues: {
@@ -44,45 +47,8 @@ const LotteryPage = () => {
     const SCHOOL_OPTIONS = ["Learners Global School ", "Learners PU College-Sathagalli", "Learners PU College-Vijayanagar", "Others"];
 
     const onSubmit = async (data) => {
-        // Base payload
-        const payload = {
-            phoneNumber: data.phoneNumber,
-            email: data.email,
-            userType: registrationType,
-            name: data.name,
-            ticketCode: null, // to be generated
-            createdAt: new Date().toISOString(),
-            timestamp: Date.now(),
-        };
-
-        // Role-specific payload details
-        if (registrationType === 'parent') {
-            payload.hasChildren = hasChildren;
-            if (hasChildren && data.students && data.students.length > 0) {
-                // Save structured data
-                payload.children = data.students;
-                // Save flat strings for admin table compatibility
-                payload.studentName = data.students.map(s => s.name).join(", ");
-                payload.studentGrade = data.students.map(s => s.grade).join(", ");
-                // Also save schools if needed for CSV
-                payload.studentSchool = data.students.map(s => s.school).join(", ");
-            } else {
-                payload.studentName = "N/A";
-                payload.studentGrade = "N/A";
-                payload.profession = data.profession;
-            }
-        } else if (registrationType === 'student') {
-            payload.studentGrade = data.studentGrade;
-            payload.schoolName = data.schoolName;
-        } else if (registrationType === 'teacher') {
-            payload.schoolName = data.schoolName;
-        } else if (registrationType === 'Guest') {
-            payload.profession = data.profession;
-        } else {
-            // Other - nothing extra
-        }
-
         let newCode;
+        let createdUserUid = null;
 
         // Ticket Generation Logic
         try {
@@ -108,7 +74,6 @@ const LotteryPage = () => {
                     }
                 }
 
-                // Count existing students of THIS specific grade to generate sequential number
                 const countInGrade = regsArray.filter(reg =>
                     reg.userType === 'student' && reg.studentGrade === grade
                 ).length;
@@ -116,7 +81,6 @@ const LotteryPage = () => {
                 newCode = `${prefix}${offset + countInGrade + 1}`;
 
             } else {
-                // Non-Student Logic
                 let offset = 1000;
                 let prefix = 'P';
 
@@ -128,7 +92,7 @@ const LotteryPage = () => {
                     prefix = 'G';
                 } else if (registrationType === 'parent') {
                     if (!hasChildren) {
-                        offset = 1000; // Treat as Guest if no children
+                        offset = 1000;
                         prefix = 'G';
                     } else {
                         offset = 1000;
@@ -145,13 +109,77 @@ const LotteryPage = () => {
 
         } catch (error) {
             console.error("Error generating ticket:", error);
-            // Fallback
             newCode = `${registrationType.charAt(0).toUpperCase()}${Date.now().toString().slice(-4)}`;
         }
 
-        setTicketCode(newCode);
+        // Create User in Firebase Auth with Ticket Code as Password AND UserID (dummy email)
+        try {
+            const { createUserWithEmailAndPassword } = await import("firebase/auth");
+            const { auth } = await import("@/backend/firebaseHandler");
 
-        // Save to Firebase
+            // User ID: S1001 -> S1001@lgs.com
+            // Password: LGS + S1001 -> LGSS1001
+            const authEmail = `${newCode}@lgs.com`;
+            const authPassword = `LGS${newCode}`;
+
+            const userCredential = await createUserWithEmailAndPassword(auth, authEmail, authPassword);
+            createdUserUid = userCredential.user.uid;
+
+        } catch (authError) {
+            if (authError.code === 'auth/email-already-in-use') {
+                // Valid case: User might have registered before or UserID collision (unlikely with our logic but possible)
+                // We don't block them, but we notify them
+                toast.info(`User ID ${newCode} already exists. Please login with suffix password.`, {
+                    position: "top-center",
+                    autoClose: 5000,
+                });
+            } else if (authError.code === 'auth/operation-not-allowed') {
+                console.error("Firebase Auth Error: Email/Password provider disabled.");
+                toast.error("System Error: Login provider disabled. Contact support.");
+                return;
+            } else {
+                console.error("User creation failed:", authError);
+                toast.error(`Registration failed: ${authError.message}`);
+                return;
+            }
+        }
+
+
+        // Prepare Payload
+        const payload = {
+            phoneNumber: data.phoneNumber,
+            email: data.email,
+            userType: registrationType,
+            name: data.name,
+            ticketCode: newCode,
+            createdAt: new Date().toISOString(),
+            timestamp: Date.now(),
+        };
+
+        // Role-specific payload details
+        if (registrationType === 'parent') {
+            payload.hasChildren = hasChildren;
+            if (hasChildren && data.students && data.students.length > 0) {
+                payload.children = data.students;
+                payload.studentName = data.students.map(s => s.name).join(", ");
+                payload.studentGrade = data.students.map(s => s.grade).join(", ");
+                payload.studentSchool = data.students.map(s => s.school).join(", ");
+            } else {
+                payload.studentName = "N/A";
+                payload.studentGrade = "N/A";
+                payload.profession = data.profession;
+            }
+        } else if (registrationType === 'student') {
+            payload.studentGrade = data.studentGrade;
+            payload.schoolName = data.schoolName;
+        } else if (registrationType === 'teacher') {
+            payload.schoolName = data.schoolName;
+        } else if (registrationType === 'Guest') {
+            payload.profession = data.profession;
+        }
+
+
+        // Save to Lottery Registrations (Admin View)
         try {
             const registrationsRef = ref(firebaseDatabase, 'Lottery/Registrations');
             const newRegRef = push(registrationsRef);
@@ -162,6 +190,60 @@ const LotteryPage = () => {
         } catch (error) {
             console.error("Error saving registration:", error);
         }
+
+        // Sync to NMD_2025/Registrations (Login Access)
+        if (createdUserUid) {
+            try {
+                // Construct structure compatible with AuthModal
+                let authPayload = {
+                    authProvider: "email",
+                    parentEmail: data.email,
+                    parentPhone: data.phoneNumber, // Good to have
+                    createdAt: new Date().toISOString()
+                };
+
+                if (registrationType === 'parent' && hasChildren && data.students) {
+                    const childrenObj = {};
+                    data.students.forEach((child, idx) => {
+                        const childId = `student_${Date.now()}_${idx}`;
+                        childrenObj[childId] = {
+                            name: child.name,
+                            grade: child.grade,
+                            school: child.school,
+                            email: data.email
+                        };
+                    });
+                    authPayload.children = childrenObj;
+                } else if (registrationType === 'student') {
+                    const childId = `student_${Date.now()}`;
+                    authPayload.children = {
+                        [childId]: {
+                            name: data.name,
+                            grade: data.studentGrade,
+                            school: data.schoolName,
+                            email: data.email
+                        }
+                    };
+                } else {
+                    const profileId = `user_${Date.now()}`;
+                    authPayload.children = {
+                        [profileId]: {
+                            name: data.name,
+                            grade: "N/A",
+                            role: registrationType,
+                            email: data.email
+                        }
+                    };
+                }
+
+                await set(ref(firebaseDatabase, `NMD_2025/Registrations/${createdUserUid}`), authPayload);
+
+            } catch (syncError) {
+                console.error("Error syncing to NMD_2025:", syncError);
+            }
+        }
+
+        setTicketCode(newCode);
 
         Confetti({
             particleCount: 150,
@@ -545,8 +627,21 @@ const LotteryPage = () => {
                                 </p>
                             </div>
 
+                            {/* Credentials Display */}
+                            <div className="bg-white/10 rounded-xl p-3 mb-4 text-left border border-white/20">
+                                <p className="text-xs text-blue-200 uppercase tracking-wider font-semibold mb-2 text-center border-b border-white/10 pb-1">Login Credentials</p>
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-sm text-slate-300">User ID:</span>
+                                    <span className="font-mono font-bold text-white text-lg">{ticketCode}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-sm text-slate-300">Password:</span>
+                                    <span className="font-mono font-bold text-white text-lg">LGS{ticketCode}</span>
+                                </div>
+                            </div>
+
                             <p className="text-sm text-blue-100">
-                                Keep this code safe! We will announce the winners soon.
+                                Please keep this code secure. The winners will be announced shortly.
                             </p>
                         </div>
 
