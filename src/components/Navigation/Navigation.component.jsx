@@ -16,7 +16,7 @@ const Navigation = ({ forceWhite = false }) => {
     const [authModalOpen, setAuthModalOpen] = useState(false);
     const [hasSession, setHasSession] = useState(false);
     const [isSATLoading, setIsSATLoading] = useState(false);
-    const { user, userData } = useAuth();
+    const { user, userData, isTeacher } = useAuth();
     const router = useRouter();
     const [quizContext, setQuizContext] = useContext(QuizSessionContext) || [null, () => { }];
 
@@ -67,115 +67,126 @@ const Navigation = ({ forceWhite = false }) => {
                         </div>
                     </div>
                     <div className={Styles.navActionContainer}>
-                        <Tooltip title="Take Test" arrow>
-                            <button
-                                onClick={async () => {
-                                    if (user) {
-                                        try {
-                                            let userKey = null;
+                        {/* Hide Take Test and Rapid Math for teachers */}
+                        {!isTeacher && (
+                            <>
+                                <Tooltip title="Take Test" arrow>
+                                    <button
+                                        onClick={async () => {
                                             if (user) {
-                                                userKey = getUserDatabaseKey(user);
-                                            }
-                                            if (!userKey && userData) {
-                                                userKey = userData.userKey || userData.phoneNumber || userData.parentPhone || userData.parentEmail;
-                                            }
+                                                try {
+                                                    let userKey = null;
+                                                    if (user) {
+                                                        userKey = getUserDatabaseKey(user);
+                                                    }
+                                                    if (!userKey && userData) {
+                                                        userKey = userData.userKey || userData.phoneNumber || userData.parentPhone || userData.parentEmail;
+                                                    }
 
-                                            if (!userKey) {
-                                                console.warn("Navigation: No userKey found, cannot start test correctly.");
-                                            }
+                                                    if (!userKey) {
+                                                        console.warn("Navigation: No userKey found, cannot start test correctly.");
+                                                    }
 
-                                            const children = userData?.children || null;
-                                            const childKeys = children ? Object.keys(children) : [];
-                                            let activeChildId = childKeys[0] || null;
+                                                    const children = userData?.children || null;
+                                                    const childKeys = children ? Object.keys(children) : [];
+                                                    let activeChildId = childKeys[0] || null;
 
-                                            if (typeof window !== "undefined") {
-                                                const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
-                                                const lastActiveChild = window.localStorage.getItem('lastActiveChild');
+                                                    if (typeof window !== "undefined") {
+                                                        const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
+                                                        const lastActiveChild = window.localStorage.getItem('lastActiveChild');
 
-                                                if (storedChildId && childKeys.includes(storedChildId)) {
-                                                    activeChildId = storedChildId;
-                                                } else if (lastActiveChild && childKeys.includes(lastActiveChild)) {
-                                                    activeChildId = lastActiveChild;
-                                                }
-                                            }
+                                                        if (storedChildId && childKeys.includes(storedChildId)) {
+                                                            activeChildId = storedChildId;
+                                                        } else if (lastActiveChild && childKeys.includes(lastActiveChild)) {
+                                                            activeChildId = lastActiveChild;
+                                                        }
+                                                    }
 
-                                            if (children && activeChildId) {
-                                                const activeChild = children[activeChildId];
-                                                const userDetails = {
-                                                    ...activeChild,
-                                                    phoneNumber: userKey,
-                                                    childId: activeChildId,
-                                                    activeChildId: activeChildId,
-                                                };
+                                                    if (children && activeChildId) {
+                                                        const activeChild = children[activeChildId];
+                                                        const userDetails = {
+                                                            ...activeChild,
+                                                            phoneNumber: userKey,
+                                                            childId: activeChildId,
+                                                            activeChildId: activeChildId,
+                                                        };
 
-                                                if (setQuizContext) {
-                                                    setQuizContext({ userDetails, questionPaper: null });
-                                                }
-                                                if (typeof window !== "undefined") {
-                                                    window.localStorage.removeItem("quizSession");
-                                                }
-                                            } else {
-                                                if (typeof window !== "undefined" && activeChildId) {
-                                                    try {
-                                                        const storedSession = window.localStorage.getItem("quizSession");
-                                                        if (storedSession) {
-                                                            const parsed = JSON.parse(storedSession);
-                                                            if (parsed?.userDetails?.childId && parsed.userDetails.childId !== activeChildId) {
+                                                        if (setQuizContext) {
+                                                            setQuizContext({ userDetails, questionPaper: null });
+                                                        }
+                                                        if (typeof window !== "undefined") {
+                                                            window.localStorage.removeItem("quizSession");
+                                                        }
+                                                    } else {
+                                                        if (typeof window !== "undefined" && activeChildId) {
+                                                            try {
+                                                                const storedSession = window.localStorage.getItem("quizSession");
+                                                                if (storedSession) {
+                                                                    const parsed = JSON.parse(storedSession);
+                                                                    if (parsed?.userDetails?.childId && parsed.userDetails.childId !== activeChildId) {
+                                                                        window.localStorage.removeItem("quizSession");
+                                                                    }
+                                                                }
+                                                            } catch (e) {
                                                                 window.localStorage.removeItem("quizSession");
                                                             }
                                                         }
-                                                    } catch (e) {
-                                                        window.localStorage.removeItem("quizSession");
                                                     }
+                                                } catch (e) {
+                                                    console.error("Navigation start test error:", e);
                                                 }
+                                                router.push("/quiz");
+                                            } else if (hasSession) {
+                                                router.push("/quiz");
+                                            } else {
+                                                setAuthModalOpen(true);
                                             }
-                                        } catch (e) {
-                                            console.error("Navigation start test error:", e);
+                                        }}
+                                        style={{ backgroundColor: "#3c91f3ff", color: "white" }}
+                                        className={Styles.navButton}
+                                    >
+                                        <Play size={16} />
+                                        <span className={Styles.buttonText}>Take Test</span>
+                                    </button>
+                                </Tooltip>
+
+                                <Tooltip title="Rapid Math" arrow>
+                                    <button onClick={() => router.push("/rapid-math")} className={`${Styles.navButton} ${Styles.outlined}`}>
+                                        <Zap size={16} />
+                                        <span className={Styles.buttonText}>Rapid Math</span>
+                                    </button>
+                                </Tooltip>
+                            </>
+                        )}
+
+                        {/* Hide SAT for teachers */}
+                        {!isTeacher && (
+                            <Tooltip title="SAT Practice" arrow>
+                                <button
+                                    onClick={() => {
+                                        if (user) {
+                                            setIsSATLoading(true);
+                                            router.push("/practice?grade=SAT");
+                                        } else {
+                                            setAuthModalOpen(true);
                                         }
-                                        router.push("/quiz");
-                                    } else if (hasSession) {
-                                        router.push("/quiz");
-                                    } else {
-                                        setAuthModalOpen(true);
-                                    }
-                                }}
-                                style={{ backgroundColor: "#3c91f3ff", color: "white" }}
-                                className={Styles.navButton}
-                            >
-                                <Play size={16} />
-                                <span className={Styles.buttonText}>Take Test</span>
-                            </button>
-                        </Tooltip>
-
-                        <Tooltip title="Rapid Math" arrow>
-                            <button onClick={() => router.push("/rapid-math")} className={`${Styles.navButton} ${Styles.outlined}`}>
-                                <Zap size={16} />
-                                <span className={Styles.buttonText}>Rapid Math</span>
-                            </button>
-                        </Tooltip>
-
-                        <Tooltip title="SAT Practice" arrow>
-                            <button
-                                onClick={() => {
-                                    if (user) {
-                                        setIsSATLoading(true);
-                                        router.push("/practice?grade=SAT");
-                                    } else {
-                                        setAuthModalOpen(true);
-                                    }
-                                }}
-                                className={`${Styles.navButton} ${Styles.outlined}`}
-                            >
-                                <GraduationCap size={16} />
-                                <span className={Styles.buttonText}>SAT</span>
-                            </button>
-                        </Tooltip>
+                                    }}
+                                    className={`${Styles.navButton} ${Styles.outlined}`}
+                                >
+                                    <GraduationCap size={16} />
+                                    <span className={Styles.buttonText}>SAT</span>
+                                </button>
+                            </Tooltip>
+                        )}
 
                         {user || hasSession ? (
-                            <Tooltip title="View Dashboard" arrow>
-                                <button onClick={() => router.push("/dashboard")} className={`${Styles.navButton} ${Styles.outlined}`}>
+                            <Tooltip title={isTeacher ? "Teacher Dashboard" : "View Dashboard"} arrow>
+                                <button
+                                    onClick={() => router.push(isTeacher ? "/teacher-dashboard" : "/dashboard")}
+                                    className={`${Styles.navButton} ${Styles.outlined}`}
+                                >
                                     <User size={16} />
-                                    <span className={Styles.buttonText}>Profile</span>
+                                    <span className={Styles.buttonText}>{isTeacher ? "Dashboard" : "Profile"}</span>
                                 </button>
                             </Tooltip>
                         ) : (

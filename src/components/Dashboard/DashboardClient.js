@@ -84,6 +84,18 @@ const DashboardClient = () => {
         setActiveTab(newValue);
     };
 
+    // Redirect teachers to teacher dashboard
+    useEffect(() => {
+        if (!loading && user && userData) {
+            // Check if user is a teacher
+            if (userData.userType === 'teacher' || userData.isTeacher) {
+                console.log("👨‍🏫 Teacher detected, redirecting to teacher dashboard");
+                router.replace("/teacher-dashboard");
+                return;
+            }
+        }
+    }, [user, userData, loading, router]);
+
     // Check for local quiz session before redirecting
     useEffect(() => {
         if (!loading && !user) {
