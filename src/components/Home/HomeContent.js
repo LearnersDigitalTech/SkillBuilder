@@ -108,6 +108,12 @@ const HomeContent = () => {
         }
 
         if (user) {
+            // Check if user is a teacher - route to teacher dashboard
+            if (userData?.isTeacher || userData?.userType === 'teacher') {
+                router.push("/teacher-dashboard");
+                return;
+            }
+
             // Get user key (works for phone, Google, and email auth)
             // Robust user key retrieval
             let userKey = null;

@@ -198,7 +198,11 @@ const LotteryPage = () => {
                 let authPayload = {
                     authProvider: "email",
                     parentEmail: data.email,
-                    parentPhone: data.phoneNumber, // Good to have
+                    parentPhone: data.phoneNumber,
+                    phoneNumber: data.phoneNumber,
+                    userType: registrationType, // CRITICAL: Include userType for teacher detection
+                    name: data.name,
+                    ticketCode: newCode,
                     createdAt: new Date().toISOString()
                 };
 
@@ -224,7 +228,12 @@ const LotteryPage = () => {
                             email: data.email
                         }
                     };
+                } else if (registrationType === 'teacher') {
+                    // Teachers don't have children - store teacher-specific data
+                    authPayload.schoolName = data.schoolName;
+                    // Do NOT create children object for teachers
                 } else {
+                    // Other user types (if any)
                     const profileId = `user_${Date.now()}`;
                     authPayload.children = {
                         [profileId]: {
@@ -240,6 +249,19 @@ const LotteryPage = () => {
 
             } catch (syncError) {
                 console.error("Error syncing to NMD_2025:", syncError);
+            }
+        }
+
+        // For teachers, sign them out immediately so they have to manually log in
+        // This ensures proper routing to teacher dashboard with correct navbar
+        if (registrationType === 'teacher') {
+            try {
+                const { signOut } = await import("firebase/auth");
+                const { auth } = await import("@/backend/firebaseHandler");
+                await signOut(auth);
+                console.log("👨‍🏫 Teacher signed out after registration - must login manually");
+            } catch (signOutError) {
+                console.error("Error signing out teacher:", signOutError);
             }
         }
 
