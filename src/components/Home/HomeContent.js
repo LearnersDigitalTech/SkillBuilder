@@ -212,7 +212,13 @@ const HomeContent = () => {
         };
 
         setQuizContext({ userDetails, questionPaper: null });
-        router.push("/quiz");
+
+        // FIX: Check if grade is present before starting quiz
+        if (activeChild.grade && activeChild.grade !== "Select Grade" && activeChild.grade !== "" && activeChild.grade !== "N/A") {
+            router.push("/quiz");
+        } else {
+            router.push("/dashboard");
+        }
     };
 
     return (

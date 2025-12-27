@@ -37,9 +37,26 @@ export const AuthProvider = ({ children }) => {
             // Get database key based on auth provider
             const userKey = getUserDatabaseKey(currentUser);
             const userRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}`);
-            const snapshot = await get(userRef);
 
-            if (snapshot.exists()) {
+            let snapshot;
+            try {
+                snapshot = await get(userRef);
+            } catch (error) {
+                console.warn("Primary key access failed, trying fallback...", error);
+            }
+
+            // Fallback: If UID access fails or returns empty, try email-based key (e.g., S1001)
+            if ((!snapshot || !snapshot.exists()) && currentUser.email && currentUser.email.endsWith('@lgs.com')) {
+                try {
+                    const shortKey = currentUser.email.split('@')[0].toUpperCase();
+                    const fallbackRef = ref(firebaseDatabase, `NMD_2025/Registrations/${shortKey}`);
+                    snapshot = await get(fallbackRef);
+                } catch (fallbackError) {
+                    console.error("Fallback access also failed:", fallbackError);
+                }
+            }
+
+            if (snapshot && snapshot.exists()) {
                 const rawData = snapshot.val();
 
                 // Check if user is a teacher based on userType field

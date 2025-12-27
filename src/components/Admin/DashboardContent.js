@@ -297,7 +297,9 @@ const DashboardContent = ({ logoutAction }) => {
 
                 students.forEach(student => {
                     // "duplicate rows for the same name merge not same mail"
-                    const key = student.name || student.id; // Group by Name
+                    // FIX: Merge strictly by Name AND Key (or Email) to prevent merging different accounts with same name.
+                    // Using Name + Email ensures distinct users (e.g. Gmail vs LGS) are kept separate.
+                    const key = `${student.name}_${student.email || 'no_email'}`;
 
                     if (!mergedStudentsMap.has(key)) {
                         mergedStudentsMap.set(key, { ...student });

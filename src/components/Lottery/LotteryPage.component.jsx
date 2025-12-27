@@ -6,7 +6,8 @@ import { Button } from "@mui/material";
 import Confetti from "canvas-confetti";
 import { toPng } from 'html-to-image';
 import { ref, push, set, get } from "firebase/database";
-import { firebaseDatabase } from "@/backend/firebaseHandler";
+import { firebaseDatabase, auth } from "@/backend/firebaseHandler";
+import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import Navigation from "@/components/Navigation/Navigation.component";
 import Footer from "@/components/Footer/Footer.component";
 
@@ -114,9 +115,6 @@ const LotteryPage = () => {
 
         // Create User in Firebase Auth with Ticket Code as Password AND UserID (dummy email)
         try {
-            const { createUserWithEmailAndPassword } = await import("firebase/auth");
-            const { auth } = await import("@/backend/firebaseHandler");
-
             // User ID: S1001 -> S1001@lgs.com
             // Password: LGS + S1001 -> LGSS1001
             const authEmail = `${newCode}@lgs.com`;
@@ -224,6 +222,7 @@ const LotteryPage = () => {
                         [childId]: {
                             name: data.name,
                             grade: data.studentGrade,
+                            role: 'student',
                             school: data.schoolName,
                             email: data.email
                         }
@@ -245,7 +244,15 @@ const LotteryPage = () => {
                     };
                 }
 
+                // Store directly under the User ID (e.g., S1001) as requested
+                await set(ref(firebaseDatabase, `NMD_2025/Registrations/${newCode}`), authPayload);
+
+                // ALSO Store under UID to ensure Dashboard and Permissions work correctly
                 await set(ref(firebaseDatabase, `NMD_2025/Registrations/${createdUserUid}`), authPayload);
+
+
+                // Sign out immediately to prevent auto-login
+                await signOut(auth);
 
             } catch (syncError) {
                 console.error("Error syncing to NMD_2025:", syncError);
