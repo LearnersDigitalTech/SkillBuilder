@@ -25,7 +25,7 @@ const LotteryPage = () => {
     const [submitted, setSubmitted] = useState(false);
     const [ticketCode, setTicketCode] = useState(null);
     const [registrationType, setRegistrationType] = useState('parent'); // 'parent' | 'student' | 'teacher' | 'other'
-    const [hasChildren, setHasChildren] = useState(false); // Only for parents
+    const [hasChildren, setHasChildren] = useState(true); // Only for parents
     const ticketRef = useRef(null);
 
     // Watch values for conditional logic if needed
@@ -33,7 +33,7 @@ const LotteryPage = () => {
 
     const handleRoleChange = (role) => {
         setRegistrationType(role);
-        setHasChildren(false); // Reset this
+        setHasChildren(true); // Reset this to true by default
         reset({
             students: [{ name: "", grade: "" }]
         }); // Clear form errors and values when switching roles
@@ -69,12 +69,15 @@ const LotteryPage = () => {
             } else {
                 payload.studentName = "N/A";
                 payload.studentGrade = "N/A";
+                payload.profession = data.profession;
             }
         } else if (registrationType === 'student') {
             payload.studentGrade = data.studentGrade;
             payload.schoolName = data.schoolName;
         } else if (registrationType === 'teacher') {
             payload.schoolName = data.schoolName;
+        } else if (registrationType === 'Guest') {
+            payload.profession = data.profession;
         } else {
             // Other - nothing extra
         }
@@ -118,14 +121,14 @@ const LotteryPage = () => {
                 let prefix = 'P';
 
                 if (registrationType === 'teacher') {
-                    offset = 3000;
+                    offset = 1000;
                     prefix = 'T';
                 } else if (registrationType === 'Guest') {
-                    offset = 5000;
+                    offset = 1000;
                     prefix = 'G';
                 } else if (registrationType === 'parent') {
                     if (!hasChildren) {
-                        offset = 5000; // Treat as Guest if no children
+                        offset = 1000; // Treat as Guest if no children
                         prefix = 'G';
                     } else {
                         offset = 1000;
@@ -398,6 +401,22 @@ const LotteryPage = () => {
                                             </Button>
                                         </div>
                                     )}
+
+                                    {/* If Parent selects NO children -> Show Profession */}
+                                    {!hasChildren && (
+                                        <div className="mt-4 animate-in fade-in slide-in-from-top-2">
+                                            <label className={labelClass}>Profession</label>
+                                            <div className="relative">
+                                                <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                                <input
+                                                    {...register("profession", { required: !hasChildren ? "Profession is required" : false })}
+                                                    className={inputClass}
+                                                    placeholder="Enter your profession"
+                                                />
+                                            </div>
+                                            {errors.profession && <span className="text-red-500 text-xs ml-1 mt-1">{errors.profession.message}</span>}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
@@ -459,6 +478,22 @@ const LotteryPage = () => {
                                 </div>
                             )}
 
+                            {/* GUEST Role Fields */}
+                            {registrationType === 'Guest' && (
+                                <div>
+                                    <label className={labelClass}>Profession</label>
+                                    <div className="relative">
+                                        <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                        <input
+                                            {...register("profession", { required: "Profession is required" })}
+                                            className={inputClass}
+                                            placeholder="Enter your profession"
+                                        />
+                                    </div>
+                                    {errors.profession && <span className="text-red-500 text-xs ml-1 mt-1">{errors.profession.message}</span>}
+                                </div>
+                            )}
+
                             {/* OTHER: No extra fields */}
 
 
@@ -504,7 +539,7 @@ const LotteryPage = () => {
                             <h2 className="text-2xl font-bold mb-2 text-white">Registration Successful!</h2>
 
                             <div className="my-6 p-4 rounded-xl border-2 border-dashed border-yellow-400/50 bg-white/5">
-                                <p className="text-sm mb-2 uppercase tracking-wider font-semibold text-yellow-200">Your Ticket Code</p>
+                                <p className="text-sm mb-2 uppercase tracking-wider font-semibold text-yellow-200">Your Lucky Number</p>
                                 <p className="text-4xl font-mono font-bold tracking-widest drop-shadow-md text-yellow-400">
                                     {ticketCode}
                                 </p>
