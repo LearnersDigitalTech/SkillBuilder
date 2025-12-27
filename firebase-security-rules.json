@@ -1,0 +1,192 @@
+/**
+ * Firebase Security Rules for Multi-Tenant Platform
+ * 
+ * These rules enforce data isolation per organization and role-based access control
+ * Copy this to Firebase Realtime Database Rules
+ */
+{
+    "rules": {
+        "SkillBuilder_Platform": {
+            // Platform Admins - Full access to everything
+            ".read": "auth != null && root.child('SkillBuilder_Platform/PlatformAdmins/' + auth.uid).exists()",
+            ".write": "auth != null && root.child('SkillBuilder_Platform/PlatformAdmins/' + auth.uid).exists()",
+            "Organizations": {
+                "$orgId": {
+                    // Organization-level read access
+                    ".read": "auth != null && (
+            auth.token.orgId == $orgId ||
+            root.child('SkillBuilder_Platform/PlatformAdmins/' + auth.uid).exists()
+          )","orgInfo": {
+                        // Org info read access for all org members
+                        ".read": "auth != null && auth.token.orgId == $orgId",
+                        // Only org admins and platform admins can write
+                        ".write": "auth != null && (
+              (auth.token.orgId == $orgId && auth.token.role == 'org_admin') ||
+              root.child('SkillBuilder_Platform/PlatformAdmins/' + auth.uid).exists()
+            )"
+                    },
+                    "Users": {
+                        "Parents": {
+                            "$parentId": {
+                                // Parents can read their own data
+                                ".read": "auth != null && (
+                  auth.uid == $parentId ||
+                  (auth.token.orgId == $orgId && (
+                    auth.token.role == 'org_admin' ||
+                    auth.token.role == 'teacher'
+                  ))
+                )",
+                                // Parents can write their own data
+                                ".write": "auth != null && (
+                  auth.uid == $parentId ||
+                  (auth.token.orgId == $orgId && auth.token.role == 'org_admin')
+                )","children": {
+                                    "$childId": {
+                                        // Parents can read their children's data
+                                        ".read": "auth != null && (
+                      auth.uid == $parentId ||
+                      (auth.token.orgId == $orgId && (
+                        auth.token.role == 'org_admin' ||
+                        auth.token.role == 'teacher' ||
+                        auth.token.role == 'mentor'
+                      ))
+                    )"
+                                    }
+                                }
+                            }
+                        },
+                        "Teachers": {
+                            "$teacherId": {
+                                ".read": "auth != null && (
+                  auth.uid == $teacherId ||
+                  (auth.token.orgId == $orgId && auth.token.role == 'org_admin')
+                )",".write": "auth != null && auth.token.orgId == $orgId && auth.token.role == 'org_admin'"
+                            }
+                        },
+                        "Mentors": {
+                            "$mentorId": {
+                                ".read": "auth != null && (
+                  auth.uid == $mentorId ||
+                  (auth.token.orgId == $orgId && auth.token.role == 'org_admin')
+                )",".write": "auth != null && auth.token.orgId == $orgId && auth.token.role == 'org_admin'"
+                            }
+                        },
+                        "Companions": {
+                            "$companionId": {
+                                ".read": "auth != null && (
+                  auth.uid == $companionId ||
+                  (auth.token.orgId == $orgId && auth.token.role == 'org_admin')
+                )",".write": "auth != null && auth.token.orgId == $orgId && auth.token.role == 'org_admin'"
+                            }
+                        },
+                        "Champions": {
+                            "$championId": {
+                                ".read": "auth != null && auth.token.orgId == $orgId",
+                                ".write": "auth != null && auth.token.orgId == $orgId && auth.token.role == 'org_admin'"
+                            }
+                        },
+                        "Admins": {
+                            "$adminId": {
+                                ".read": "auth != null && (
+                  auth.uid == $adminId ||
+                  (auth.token.orgId == $orgId && auth.token.role == 'org_admin')
+                )",".write": "auth != null && (
+                  auth.token.orgId == $orgId && auth.token.role == 'org_admin'
+                )"
+                            }
+                        }
+                    },
+                    "Classes": {
+                        "$classId": {
+                            // Teachers and admins can read classes
+                            ".read": "auth != null && auth.token.orgId == $orgId && (
+                auth.token.role == 'org_admin' ||
+                auth.token.role == 'teacher'
+              )",
+                            // Only admins can create/update classes
+                            ".write": "auth != null && auth.token.orgId == $orgId && auth.token.role == 'org_admin'"
+                        }
+                    },
+                    "TestResults": {
+                        "$studentId": {
+                            "$testId": {
+                                // Students can read their own results
+                                // Parents can read their children's results
+                                // Teachers can read assigned students' results
+                                ".read": "auth != null && (
+                  auth.uid == $studentId ||
+                  (auth.token.orgId == $orgId && (
+                    auth.token.role == 'org_admin' ||
+                    auth.token.role == 'teacher' ||
+                    auth.token.role == 'parent'
+                  ))
+                )",
+                                // Only students and teachers can write test results
+                                ".write": "auth != null && (
+                  auth.uid == $studentId ||
+                  (auth.token.orgId == $orgId && auth.token.role == 'teacher')
+                )"
+                            }
+                        }
+                    },
+                    "Leaderboards": {
+                        // Everyone in org can read leaderboards
+                        ".read": "auth != null && auth.token.orgId == $orgId",
+                        ".write": "auth != null && auth.token.orgId == $orgId && auth.token.role == 'org_admin'"
+                    },
+                    "Analytics": {
+                        // Only admins and teachers can read analytics
+                        ".read": "auth != null && auth.token.orgId == $orgId && (
+              auth.token.role == 'org_admin' ||
+              auth.token.role == 'teacher'
+            )",".write": "auth != null && auth.token.orgId == $orgId && auth.token.role == 'org_admin'"
+                    },
+                    "CustomAssessments": {
+                        "$assessmentId": {
+                            // Teachers and admins can read assessments
+                            ".read": "auth != null && auth.token.orgId == $orgId && (
+                auth.token.role == 'org_admin' ||
+                auth.token.role == 'teacher'
+              )",
+                            // Teachers and admins can create assessments
+                            ".write": "auth != null && auth.token.orgId == $orgId && (
+                auth.token.role == 'org_admin' ||
+                auth.token.role == 'teacher'
+              )"
+                        }
+                    },
+                    "Notifications": {
+                        "$userId": {
+                            // Users can read their own notifications
+                            ".read": "auth != null && auth.uid == $userId",
+                            ".write": "auth != null && (
+                auth.uid == $userId ||
+                (auth.token.orgId == $orgId && auth.token.role == 'org_admin')
+              )"
+                        }
+                    },
+                    "AuditLogs": {
+                        // Only org admins can read audit logs
+                        ".read": "auth != null && auth.token.orgId == $orgId && auth.token.role == 'org_admin'",
+                        ".write": "auth != null && auth.token.orgId == $orgId"
+                    }
+                }
+            },
+            "PlatformAdmins": {
+                "$adminId": {
+                    ".read": "auth != null && auth.uid == $adminId",
+                    ".write": "auth != null && root.child('SkillBuilder_Platform/PlatformAdmins/' + auth.uid).exists()"
+                }
+            }
+        },
+        // Legacy data (for backward compatibility)
+        "NMD_2025": {
+            "Registrations": {
+                "$userId": {
+                    ".read": "auth != null && auth.uid == $userId",
+                    ".write": "auth != null && auth.uid == $userId"
+                }
+            }
+        }
+    }
+}

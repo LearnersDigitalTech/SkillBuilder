@@ -5,6 +5,7 @@ import QuizProvider from "./context/QuizSessionContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { OrgProvider } from "@/context/OrgContext";
 
 const roboto = Roboto({
   variable: "--font-geist-sans",
@@ -48,10 +49,12 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning={true}>
       <body className={`${roboto.variable}`}>
         <AuthProvider>
-          <QuizProvider>
-            <MuiProvider>{children}</MuiProvider>
-            <ToastContainer />
-          </QuizProvider>
+          <OrgProvider>
+            <QuizProvider>
+              <MuiProvider>{children}</MuiProvider>
+              <ToastContainer />
+            </QuizProvider>
+          </OrgProvider>
         </AuthProvider>
       </body>
     </html>
