@@ -26,6 +26,8 @@ import {
     IconButton
 } from '@mui/material';
 import { Users, GraduationCap, UserPlus, X, Check, Trash2 } from 'lucide-react';
+import { ref, get, remove } from 'firebase/database';
+import { firebaseDatabase } from '@/backend/firebaseHandler';
 import {
     getAllTeachers,
     getTeacherDetails,
@@ -54,7 +56,7 @@ const TeacherManagement = () => {
     const [savingGrades, setSavingGrades] = useState(false);
 
     // Student assignment state
-    const [selectedGradeForStudents, setSelectedGradeForStudents] = useState('');
+    const [selectedGradesForStudents, setSelectedGradesForStudents] = useState([]); // Changed to array for multi-select
     const [availableStudents, setAvailableStudents] = useState([]);
     const [selectedStudents, setSelectedStudents] = useState([]);
     const [loadingStudents, setLoadingStudents] = useState(false);
@@ -88,7 +90,7 @@ const TeacherManagement = () => {
         setSelectedTeacher(null);
         setTeacherDetails(null);
         setSelectedGrades([]);
-        setSelectedGradeForStudents('');
+        setSelectedGradesForStudents([]); // Reset to empty array
         setAvailableStudents([]);
         setSelectedStudents([]);
     };
@@ -109,12 +111,18 @@ const TeacherManagement = () => {
         setSavingGrades(false);
     };
 
-    const handleGradeSelectForStudents = async (grade) => {
-        setSelectedGradeForStudents(grade);
+    const handleGradesSelectForStudents = async (grades) => {
+        setSelectedGradesForStudents(grades);
         setLoadingStudents(true);
 
-        const students = await getStudentsByGrade(grade);
-        setAvailableStudents(students);
+        // Load students from ALL selected grades
+        const allStudents = [];
+        for (const grade of grades) {
+            const students = await getStudentsByGrade(grade);
+            allStudents.push(...students);
+        }
+
+        setAvailableStudents(allStudents);
 
         // Pre-select already assigned students
         const assignedStudentUids = Object.keys(teacherDetails?.assignments.students || {});
@@ -134,7 +142,7 @@ const TeacherManagement = () => {
     };
 
     const handleSaveStudents = async () => {
-        if (!selectedTeacher || !user || !selectedGradeForStudents) return;
+        if (!selectedTeacher || !user || selectedGradesForStudents.length === 0) return;
 
         setSavingStudents(true);
 
@@ -179,6 +187,62 @@ const TeacherManagement = () => {
             const details = await getTeacherDetails(selectedTeacher.uid);
             setTeacherDetails(details);
             await fetchTeachers();
+        }
+    };
+
+    const handleDeleteTeacher = async (teacher) => {
+        if (!confirm(`Are you sure you want to delete teacher "${teacher.name}"? This will remove them from all systems and they will not be able to log in.`)) {
+            return;
+        }
+
+        try {
+            const ticketCode = teacher.ticketCode;
+            const teacherUid = teacher.uid;
+
+            console.log(`🗑️ Deleting teacher: ${teacher.name} (${ticketCode})`);
+
+            // 1. Delete from NMD_2025/Registrations using UID
+            const uidRef = ref(firebaseDatabase, `NMD_2025/Registrations/${teacherUid}`);
+            const uidSnapshot = await get(uidRef);
+            if (uidSnapshot.exists()) {
+                await remove(uidRef);
+                console.log(`✅ Deleted from NMD_2025/Registrations/${teacherUid}`);
+            }
+
+            // 2. Delete from NMD_2025/Registrations using ticketCode as key
+            if (ticketCode) {
+                const ticketCodeRef = ref(firebaseDatabase, `NMD_2025/Registrations/${ticketCode}`);
+                const ticketSnapshot = await get(ticketCodeRef);
+                if (ticketSnapshot.exists()) {
+                    await remove(ticketCodeRef);
+                    console.log(`✅ Deleted from NMD_2025/Registrations/${ticketCode}`);
+                }
+
+                // 3. Delete from Lottery/Registrations (search by ticketCode)
+                const lotteryRef = ref(firebaseDatabase, 'Lottery/Registrations');
+                const lotterySnapshot = await get(lotteryRef);
+
+                if (lotterySnapshot.exists()) {
+                    const lotteryRegs = lotterySnapshot.val();
+                    for (const [key, value] of Object.entries(lotteryRegs)) {
+                        if (value.ticketCode === ticketCode) {
+                            const itemRef = ref(firebaseDatabase, `Lottery/Registrations/${key}`);
+                            await remove(itemRef);
+                            console.log(`✅ Deleted from Lottery/Registrations/${key}`);
+                        }
+                    }
+                }
+            }
+
+            console.log("✅ Successfully deleted teacher from all locations");
+            alert("Teacher deleted successfully from all systems!");
+
+            // Refresh the teacher list
+            await fetchTeachers();
+
+        } catch (error) {
+            console.error("Error deleting teacher:", error);
+            alert("Failed to delete teacher. Please try again or contact support.");
         }
     };
 
@@ -272,14 +336,24 @@ const TeacherManagement = () => {
                                         />
                                     </TableCell>
                                     <TableCell align="center">
-                                        <Button
-                                            size="small"
-                                            variant="outlined"
-                                            startIcon={<UserPlus size={16} />}
-                                            onClick={() => handleOpenDetails(teacher)}
-                                        >
-                                            Manage
-                                        </Button>
+                                        <Stack direction="row" spacing={1} justifyContent="center">
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                startIcon={<UserPlus size={16} />}
+                                                onClick={() => handleOpenDetails(teacher)}
+                                            >
+                                                Manage
+                                            </Button>
+                                            <IconButton
+                                                size="small"
+                                                color="error"
+                                                onClick={() => handleDeleteTeacher(teacher)}
+                                                title="Delete Teacher"
+                                            >
+                                                <Trash2 size={18} />
+                                            </IconButton>
+                                        </Stack>
                                     </TableCell>
                                 </TableRow>
                             ))
@@ -366,14 +440,32 @@ const TeacherManagement = () => {
                                 <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                                     Assign Students
                                 </Typography>
+                                <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                    Select one or more grades to view and assign students
+                                </Typography>
 
                                 <Autocomplete
+                                    multiple
                                     options={teacherDetails.assignments.assignedGrades}
-                                    value={selectedGradeForStudents}
-                                    onChange={(e, newValue) => handleGradeSelectForStudents(newValue || '')}
+                                    value={selectedGradesForStudents}
+                                    onChange={(e, newValue) => handleGradesSelectForStudents(newValue || [])}
                                     renderInput={(params) => (
-                                        <TextField {...params} placeholder="Select a grade first..." />
+                                        <TextField {...params} placeholder="Select grades to assign students from..." />
                                     )}
+                                    renderTags={(value, getTagProps) =>
+                                        value.map((option, index) => {
+                                            const { key, ...tagProps } = getTagProps({ index });
+                                            return (
+                                                <Chip
+                                                    key={key}
+                                                    label={option}
+                                                    size="small"
+                                                    color="primary"
+                                                    {...tagProps}
+                                                />
+                                            );
+                                        })
+                                    }
                                     sx={{ mb: 2 }}
                                 />
 
@@ -381,7 +473,7 @@ const TeacherManagement = () => {
                                     <Box display="flex" justifyContent="center" py={2}>
                                         <CircularProgress size={24} />
                                     </Box>
-                                ) : selectedGradeForStudents && availableStudents.length > 0 ? (
+                                ) : selectedGradesForStudents.length > 0 && availableStudents.length > 0 ? (
                                     <>
                                         <Paper variant="outlined" sx={{ p: 2, maxHeight: 300, overflow: 'auto' }}>
                                             {availableStudents.map((student) => (
@@ -408,8 +500,8 @@ const TeacherManagement = () => {
                                             Save Student Assignments
                                         </Button>
                                     </>
-                                ) : selectedGradeForStudents ? (
-                                    <Alert severity="info">No students found in {selectedGradeForStudents}</Alert>
+                                ) : selectedGradesForStudents.length > 0 ? (
+                                    <Alert severity="info">No students found in the selected grade(s)</Alert>
                                 ) : null}
                             </Box>
 

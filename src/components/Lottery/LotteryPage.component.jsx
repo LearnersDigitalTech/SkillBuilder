@@ -125,12 +125,25 @@ const LotteryPage = () => {
 
         } catch (authError) {
             if (authError.code === 'auth/email-already-in-use') {
-                // Valid case: User might have registered before or UserID collision (unlikely with our logic but possible)
-                // We don't block them, but we notify them
-                toast.info(`User ID ${newCode} already exists. Please login with suffix password.`, {
-                    position: "top-center",
-                    autoClose: 5000,
-                });
+                // User already exists - try to sign in to get their UID
+                console.log(`User ${newCode} already exists in Firebase Auth. Attempting to sign in...`);
+                try {
+                    const authEmail = `${newCode}@lgs.com`;
+                    const authPassword = `LGS${newCode}`;
+                    const { signInWithEmailAndPassword } = await import("firebase/auth");
+                    const signInResult = await signInWithEmailAndPassword(auth, authEmail, authPassword);
+                    createdUserUid = signInResult.user.uid;
+                    console.log(`✅ Successfully signed in existing user: ${newCode} (UID: ${createdUserUid})`);
+
+                    toast.info(`User ID ${newCode} already exists. Updating registration data.`, {
+                        position: "top-center",
+                        autoClose: 3000,
+                    });
+                } catch (signInError) {
+                    console.error("Failed to sign in existing user:", signInError);
+                    toast.error(`User ${newCode} exists but sign-in failed. Please contact support.`);
+                    return;
+                }
             } else if (authError.code === 'auth/operation-not-allowed') {
                 console.error("Firebase Auth Error: Email/Password provider disabled.");
                 toast.error("System Error: Login provider disabled. Contact support.");
