@@ -1,4 +1,4 @@
-import { Roboto } from "next/font/google";
+import { Roboto, Nunito, Great_Vibes } from "next/font/google";
 import "./globals.css";
 import MuiProvider from "../components/MuiProvider/MuiProvider";
 import QuizProvider from "./context/QuizSessionContext";
@@ -9,8 +9,19 @@ import { AuthProvider } from "@/context/AuthContext";
 const roboto = Roboto({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  weight: ['100', '300', '400', '500', '700', '900'],
 });
 
+const nunito = Nunito({
+  variable: "--font-nunito",
+  subsets: ["latin"],
+});
+
+const greatVibes = Great_Vibes({
+  variable: "--font-great-vibes",
+  subsets: ["latin"],
+  weight: "400",
+});
 
 export const metadata = {
   metadataBase: new URL('https://math-conquest.vercel.app'),
@@ -46,7 +57,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning={true}>
-      <body className={`${roboto.variable}`}>
+      <body className={`${roboto.variable} ${nunito.variable} ${greatVibes.variable}`}>
         <AuthProvider>
           <QuizProvider>
             <MuiProvider>{children}</MuiProvider>
