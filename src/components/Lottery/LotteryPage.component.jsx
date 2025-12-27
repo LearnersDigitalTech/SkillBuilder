@@ -26,6 +26,10 @@ const LotteryPage = () => {
     const [ticketCode, setTicketCode] = useState(null);
     const [registrationType, setRegistrationType] = useState('parent'); // 'parent' | 'student' | 'teacher' | 'other'
     const [hasChildren, setHasChildren] = useState(true); // Only for parents
+    const [emailSending, setEmailSending] = useState(false);
+    const [emailSent, setEmailSent] = useState(false);
+    const [userEmail, setUserEmail] = useState('');
+    const [userName, setUserName] = useState('');
     const ticketRef = useRef(null);
 
     // Watch values for conditional logic if needed
@@ -163,6 +167,10 @@ const LotteryPage = () => {
             console.error("Error saving registration:", error);
         }
 
+        // Store user info for email
+        setUserEmail(data.email);
+        setUserName(data.name);
+
         Confetti({
             particleCount: 150,
             spread: 70,
@@ -170,6 +178,50 @@ const LotteryPage = () => {
         });
 
         setSubmitted(true);
+    };
+
+    // Send email with ticket
+    const sendTicketEmail = async () => {
+        if (!ticketRef.current || !userEmail || !ticketCode) {
+            console.error('Missing required data for email');
+            return;
+        }
+
+        setEmailSending(true);
+
+        try {
+            // Generate image from ticket
+            const imageDataUrl = await toPng(ticketRef.current, { cacheBust: true });
+
+            // Send to API
+            const response = await fetch('/api/send-lottery-ticket', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: userEmail,
+                    name: userName,
+                    ticketCode: ticketCode,
+                    imageDataUrl: imageDataUrl,
+                }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                setEmailSent(true);
+                console.log('Email sent successfully:', result);
+            } else {
+                console.error('Email sending failed:', result.error);
+                alert(`Failed to send email: ${result.error}. Please download your ticket manually.`);
+            }
+        } catch (error) {
+            console.error('Error sending email:', error);
+            alert('Failed to send email. Please download your ticket manually.');
+        } finally {
+            setEmailSending(false);
+        }
     };
 
     const handleDownload = async () => {
@@ -550,8 +602,46 @@ const LotteryPage = () => {
                             </p>
                         </div>
 
+                        {/* Email Status Message */}
+                        {emailSent && (
+                            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-center animate-in fade-in slide-in-from-top-2">
+                                <p className="text-green-700 font-semibold flex items-center justify-center gap-2">
+                                    <Mail className="w-5 h-5" />
+                                    Ticket sent to {userEmail}! ✅
+                                </p>
+                            </div>
+                        )}
+
                         {/* Action Buttons */}
                         <div className="mt-8 flex flex-col gap-4 w-full px-4">
+                            {/* Email Button */}
+                            {!emailSent && (
+                                <Button
+                                    variant="contained"
+                                    startIcon={<Mail />}
+                                    onClick={sendTicketEmail}
+                                    disabled={emailSending}
+                                    sx={{
+                                        background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                                        color: 'white',
+                                        padding: '12px',
+                                        fontWeight: 'bold',
+                                        textTransform: 'none',
+                                        borderRadius: '8px',
+                                        '&:hover': {
+                                            background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                                            boxShadow: '0 0 15px rgba(59, 130, 246, 0.4)'
+                                        },
+                                        '&:disabled': {
+                                            background: '#94a3b8',
+                                            color: 'white'
+                                        }
+                                    }}
+                                >
+                                    {emailSending ? 'Sending Email...' : 'Email Ticket to Me'}
+                                </Button>
+                            )}
+
                             <Button
                                 variant="contained"
                                 startIcon={<Download />}
