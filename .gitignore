@@ -19,7 +19,7 @@
 
 # production
 /build
-/ENV_SETUP.md
+
 # misc
 .DS_Store
 *.pem
