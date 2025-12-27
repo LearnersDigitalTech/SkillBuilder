@@ -581,14 +581,14 @@ const DashboardClient = () => {
                                                 className="py-2 px-3 rounded-lg bg-slate-100 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600 transition-all flex items-center justify-center gap-2 text-sm font-semibold group"
                                             >
                                                 <Users size={16} className="group-hover:scale-110 transition-transform" />
-                                                Switch Child
+                                                Switch Learner
                                             </button>
                                             <button
                                                 onClick={handleOpenAddChild}
                                                 className="py-2 px-3 rounded-lg bg-slate-100 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600 transition-all flex items-center justify-center gap-2 text-sm font-semibold group"
                                             >
                                                 <PlusIcon size={16} className="group-hover:scale-110 transition-transform" />
-                                                Add Child
+                                                Add Learner
                                             </button>
                                         </div>
                                     )}
@@ -896,7 +896,7 @@ const DashboardClient = () => {
                 maxWidth="sm"
                 fullWidth
             >
-                <DialogTitle>Add Child Profile</DialogTitle>
+                <DialogTitle>Add Learner Profile</DialogTitle>
                 <DialogContent>
                     <div className={Styles.addChildForm}>
                         <div className={Styles.inputGroup}>

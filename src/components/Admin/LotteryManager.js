@@ -161,14 +161,72 @@ const LotteryManager = () => {
     }, [searchTerm, userTypeFilter, dateFilter, registrations]);
 
     const handleDelete = async (id) => {
-        if (confirm("Are you sure you want to delete this entry?")) {
+        if (confirm("Are you sure you want to delete this entry? This will remove the user from all systems.")) {
             try {
+                // 1. Get the registration data first to extract ticketCode
                 const itemRef = ref(firebaseDatabase, `Lottery/Registrations/${id}`);
+                const snapshot = await get(itemRef);
+
+                if (!snapshot.exists()) {
+                    console.error("Registration not found");
+                    alert("Entry not found. It may have already been deleted.");
+                    return;
+                }
+
+                const registrationData = snapshot.val();
+                const ticketCode = registrationData.ticketCode;
+
+                console.log(`🗑️ Deleting registration with ticket code: ${ticketCode}`);
+
+                // 2. Delete from Lottery/Registrations
                 await remove(itemRef);
+                console.log("✅ Deleted from Lottery/Registrations");
+
+                // 3. Delete from NMD_2025/Registrations using ticketCode as key
+                if (ticketCode) {
+                    const ticketCodeRef = ref(firebaseDatabase, `NMD_2025/Registrations/${ticketCode}`);
+                    const ticketSnapshot = await get(ticketCodeRef);
+                    if (ticketSnapshot.exists()) {
+                        await remove(ticketCodeRef);
+                        console.log(`✅ Deleted from NMD_2025/Registrations/${ticketCode}`);
+                    }
+
+                    // 4. Also search for and delete UID-based entries with matching ticketCode
+                    const registrationsRef = ref(firebaseDatabase, 'NMD_2025/Registrations');
+                    const allRegsSnapshot = await get(registrationsRef);
+
+                    if (allRegsSnapshot.exists()) {
+                        const allRegs = allRegsSnapshot.val();
+                        let deletedCount = 0;
+
+                        // Find and delete entries with matching ticketCode (but different key)
+                        for (const [key, value] of Object.entries(allRegs)) {
+                            if (value.ticketCode === ticketCode && key !== ticketCode) {
+                                // This is likely the UID-based entry
+                                const uidRef = ref(firebaseDatabase, `NMD_2025/Registrations/${key}`);
+                                await remove(uidRef);
+                                deletedCount++;
+                                console.log(`✅ Deleted from NMD_2025/Registrations/${key} (UID-based entry)`);
+                            }
+                        }
+
+                        if (deletedCount > 0) {
+                            console.log(`✅ Deleted ${deletedCount} additional UID-based entries`);
+                        }
+                    }
+                }
+
+                // 5. Update local state
                 const newRegs = registrations.filter(item => item.id !== id);
                 setRegistrations(newRegs);
+                setFilteredRegistrations(newRegs);
+
+                console.log("✅ Successfully deleted from all locations");
+                alert("Entry deleted successfully from all systems!");
+
             } catch (error) {
                 console.error("Error deleting entry:", error);
+                alert("Failed to delete entry. Please try again or contact support.");
             }
         }
     };

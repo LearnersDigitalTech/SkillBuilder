@@ -15,30 +15,43 @@ export const getAllTeachers = async () => {
         }
 
         const registrations = snapshot.val();
-        const teachers = [];
+        const teachersMap = new Map(); // Use Map to deduplicate by ticketCode
 
         Object.entries(registrations).forEach(([uid, userData]) => {
             if (userData.userType === 'teacher') {
                 const assignments = userData.teacherAssignments || {};
                 const assignedGrades = assignments.assignedGrades || [];
                 const students = assignments.students || {};
+                const ticketCode = userData.ticketCode || 'N/A';
 
-                teachers.push({
+                const teacherData = {
                     uid,
                     name: userData.name || 'Unknown',
                     email: userData.email || userData.parentEmail || 'N/A',
-                    ticketCode: userData.ticketCode || 'N/A',
+                    ticketCode: ticketCode,
                     phoneNumber: userData.phoneNumber || userData.parentPhone || 'N/A',
                     schoolName: userData.schoolName || 'N/A',
                     assignedGradesCount: assignedGrades.length,
                     totalStudents: Object.keys(students).length,
                     assignedGrades,
                     createdAt: userData.createdAt || null
-                });
+                };
+
+                // Deduplicate: If we already have this ticketCode, prefer the UID-based entry
+                // (UID-based entries have more complete data and are the primary reference)
+                if (!teachersMap.has(ticketCode)) {
+                    teachersMap.set(ticketCode, teacherData);
+                } else {
+                    // If the current entry's key is NOT the ticketCode itself, it's a UID
+                    // Prefer UID-based entries over ticketCode-based entries
+                    if (uid !== ticketCode) {
+                        teachersMap.set(ticketCode, teacherData);
+                    }
+                }
             }
         });
 
-        return teachers;
+        return Array.from(teachersMap.values());
     } catch (error) {
         console.error('Error fetching teachers:', error);
         return [];
