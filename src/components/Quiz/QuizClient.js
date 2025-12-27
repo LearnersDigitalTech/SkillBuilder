@@ -221,7 +221,9 @@ const QuizClient = () => {
                 gradeQuestionPaper = { ...GetGrade9Question };
                 break;
             }
-            case "Grade 10": {
+            case "Grade 10":
+            case "Grade 11":
+            case "Grade 12": {
                 gradeQuestionPaper = { ...GetGrade10Question };
                 break;
             }
