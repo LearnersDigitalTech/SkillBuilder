@@ -121,8 +121,28 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
             const snapshot = await get(userRef);
 
             if (snapshot.exists()) {
-                // Existing user - login success
+                // Existing user - check if teacher
                 const rawData = snapshot.val();
+
+                // Check if user is a teacher based on userType field
+                if (rawData.userType === 'teacher') {
+                    // User is a teacher - route directly to teacher dashboard
+                    const normalizedTeacherData = {
+                        ...rawData,
+                        uid: user.uid,
+                        isTeacher: true,
+                        userType: 'teacher'
+                    };
+
+                    setUserData(normalizedTeacherData);
+                    toast.success(`Welcome back, ${rawData.name || 'Teacher'}!`);
+                    onClose();
+                    router.push("/teacher-dashboard");
+                    setLoading(false);
+                    return;
+                }
+
+                // Not a teacher - handle student/parent login
                 let normalizedData;
                 if (rawData && rawData.children) {
                     normalizedData = rawData;
@@ -189,13 +209,38 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
             const result = await signInWithEmailAndPassword(auth, authEmail, password);
             const user = result.user;
 
-            // Check if user profile exists
+            // Check user registration data
             const userKey = getUserDatabaseKey(user);
+            console.log("🔍 Login Debug - UserKey:", userKey);
             const userRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}`);
             const snapshot = await get(userRef);
 
             if (snapshot.exists()) {
                 const rawData = snapshot.val();
+                console.log("🔍 Login Debug - Raw Data:", rawData);
+                console.log("🔍 Login Debug - UserType:", rawData.userType);
+                console.log("🔍 Login Debug - Is Teacher?:", rawData.userType === 'teacher');
+
+                // Check if user is a teacher based on userType field
+                if (rawData.userType === 'teacher') {
+                    // User is a teacher - route directly to teacher dashboard
+                    console.log("✅ Teacher detected! Routing to teacher dashboard...");
+                    const normalizedTeacherData = {
+                        ...rawData,
+                        uid: user.uid,
+                        isTeacher: true,
+                        userType: 'teacher'
+                    };
+
+                    setUserData(normalizedTeacherData);
+                    toast.success(`Welcome back, ${rawData.name || 'Teacher'}!`);
+                    onClose();
+                    router.push("/teacher-dashboard");
+                    setLoading(false);
+                    return;
+                }
+
+                // Not a teacher - handle student/parent login
                 let normalizedData;
                 if (rawData && rawData.children) {
                     normalizedData = rawData;
@@ -516,7 +561,7 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                             <Button
                                 fullWidth
                                 variant="contained"
-                                onClick={auth.currentUser?.providerData[0]?.providerId === 'google.com' ? handleGoogleRegister : handlePhoneRegister}
+                                onClick={() => toast.info("Please register through the Lottery page")}
                                 disabled={loading}
                                 className={Styles.actionButton}
                             >
