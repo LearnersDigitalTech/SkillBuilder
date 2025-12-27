@@ -46,10 +46,17 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
             window.localStorage.setItem(`activeChild_${userKey}`, childId);
         }
 
-        // Initialize Quiz Session
+        // Initialize Quiz Session with correct structure (Flattened Child Object)
         if (typeof window !== "undefined") {
+            const sessionUserDetails = {
+                ...childProfile,
+                phoneNumber: finalUserData.userKey,
+                childId: childId,
+                activeChildId: childId,
+            };
+
             window.localStorage.setItem("quizSession", JSON.stringify({
-                userDetails: finalUserData,
+                userDetails: sessionUserDetails,
                 questionPaper: [],
                 activeQuestionIndex: 0,
                 remainingTime: 1800
@@ -60,7 +67,12 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
         setTimeout(() => {
             toast.success(`Welcome ${childProfile.name}!`);
             onSuccess && onSuccess(finalUserData);
-            router.push("/quiz");
+            // Conditional Navigation: Only auto-start quiz if grade is present
+            if (childProfile.grade && childProfile.grade !== "Select Grade" && childProfile.grade !== "" && childProfile.grade !== "N/A") {
+                router.push("/quiz");
+            } else {
+                router.push("/dashboard");
+            }
             onClose();
             setProfileSelecting(false);
         }, 1500);

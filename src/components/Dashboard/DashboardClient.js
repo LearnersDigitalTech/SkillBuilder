@@ -446,6 +446,20 @@ const DashboardClient = () => {
             return;
         }
 
+        // GUEST/NO-GRADE CHECK: If the user hasn't selected a grade yet, force them to do so.
+        if (!activeChild.grade || activeChild.grade === "Select Grade" || activeChild.grade === "N/A") {
+            // Open the edit modal for this child so they can pick a grade
+            setChildForm({
+                name: activeChild.name,
+                grade: "" // Reset to empty or keep "Select Grade" if logic prefers
+            });
+            setEditingChildId(activeChildId);
+            setEditChildOpen(true);
+            // Optional: alert can be added here, but the modal opening is self-explanatory
+            console.log("Grade missing, opening selection modal...");
+            return;
+        }
+
         // Get user key - works for both authenticated and phone-only users
         let userKey = null;
         if (user) {
