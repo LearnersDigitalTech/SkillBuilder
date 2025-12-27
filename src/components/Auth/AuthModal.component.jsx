@@ -37,6 +37,8 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
         }
 
         setUserData(finalUserData);
+        // Explicitly update context state to trigger immediate UI update
+        if (setActiveChildId) setActiveChildId(childId);
 
         // Store the selected child in localStorage for consistency
         const userKey = phoneNumber || (auth.currentUser ? getUserDatabaseKey(auth.currentUser) : null);
@@ -69,7 +71,7 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
     const [phoneNumber, setPhoneNumber] = useState("");
     const [otp, setOtp] = useState("");
     const [confirmationResult, setConfirmationResult] = useState(null);
-    const { setUserData } = useAuth();
+    const { setUserData, setActiveChildId } = useAuth();
     const router = useRouter();
 
 
@@ -194,6 +196,16 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                 }
 
                 if (normalizedData.children && Object.keys(normalizedData.children).length > 0) {
+                    const childrenKeys = Object.keys(normalizedData.children);
+
+                    // Auto-select if only one profile (e.g., Student or Single User)
+                    if (childrenKeys.length === 1) {
+                        const singleKey = childrenKeys[0];
+                        const singleProfile = normalizedData.children[singleKey];
+                        handleSelectProfile(singleKey, singleProfile);
+                        return;
+                    }
+
                     setUserProfiles(normalizedData.children);
                     setStep("SELECT_PROFILE");
                     toast.success("Welcome back! Select a profile.");
