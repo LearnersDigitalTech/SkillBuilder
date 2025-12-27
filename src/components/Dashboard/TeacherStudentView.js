@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, useSearchParams } from "next/navigation";
-import Navigation from "@/components/Navigation/Navigation.component";
+import Header from "@/app/homepage/Header";
 import Footer from "@/components/Footer/Footer.component";
 import { CircularProgress, Tabs, Tab } from "@mui/material";
 import { ArrowLeft, User, Award, Zap, Clock } from "lucide-react";
@@ -84,7 +84,7 @@ const TeacherStudentView = ({ studentUid }) => {
     if (!studentData) {
         return (
             <div className={Styles.pageWrapper}>
-                <Navigation />
+                <Header />
                 <div className={Styles.dashboardContainer}>
                     <div className="text-center py-16">
                         <h2 className="text-2xl font-bold text-slate-600 mb-4">Student Not Found</h2>
@@ -158,7 +158,7 @@ const TeacherStudentView = ({ studentUid }) => {
 
     return (
         <div className={Styles.pageWrapper}>
-            <Navigation />
+            <Header />
 
             <div className={Styles.dashboardContainer}>
                 {/* Breadcrumb Navigation */}

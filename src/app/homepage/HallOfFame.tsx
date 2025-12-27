@@ -4,9 +4,11 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useRef, useEffect, useState } from "react";
 
 const HallOfFame = () => {
+    const router = useRouter();
     // Curated list of students from validated directories
     const students = [
         { name: "Aditi Manu", grade: "Grade 1", image: "/success/grade1/Aditi Manu.jpeg" },
@@ -45,7 +47,7 @@ const HallOfFame = () => {
                         <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#0B2545]">
                             Join the <span className="text-[#0096FF]">100% Club</span>
                         </h2>
-                        <Link href="/quiz">
+                        <Link href="/lottery">
                             <Button
                                 size="lg"
                                 className="rounded-full bg-[#007AFF] hover:bg-[#0060C9] text-white font-bold px-8 shadow-lg shadow-blue-200"

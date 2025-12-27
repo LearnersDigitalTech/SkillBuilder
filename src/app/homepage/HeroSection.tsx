@@ -2,8 +2,10 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import GearsOfThought from "@/components/ui/GearsOfThought";
+import { useRouter } from "next/navigation";
 
 const HeroSection = () => {
+    const router = useRouter();
     return (
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#F8FBFF] via-[#F0F7FF] to-[#E0F2FE]">
             {/* Decorative floating elements */}
@@ -39,14 +41,14 @@ const HeroSection = () => {
                     transition={{ duration: 0.8, ease: "easeOut" }}
                 >
                     {/* Badge */}
-                    <motion.div
+                    {/* <motion.div
                         className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full bg-white shadow-sm border border-blue-100"
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.2, duration: 0.5 }}
                     >
                         <span className="text-sm font-medium text-[#0B2545]/70">An Initiative by Learners Digital</span>
-                    </motion.div>
+                    </motion.div> */}
 
                     {/* Main headline */}
                     <motion.h1
@@ -125,6 +127,7 @@ const HeroSection = () => {
                             size="xl"
                             className="group bg-[#007AFF] hover:bg-[#0060C9] text-white border-none shadow-lg shadow-blue-500/20"
                             style={{ fontFamily: 'var(--font-nunito)' }}
+                            onClick={() => router.push('/lottery')}
                         >
                             Begin the Journey
                             <motion.span

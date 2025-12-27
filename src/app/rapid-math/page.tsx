@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Sparkles, Brain, Trophy, Zap, GraduationCap, LogIn, ChevronRight, Calculator } from "lucide-react"
 
-import Navigation from "../../components/Navigation/Navigation.component.jsx"
+import Header from "../homepage/Header"
 import {
   Dialog,
   DialogContent,
@@ -107,7 +107,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col font-sans overflow-x-hidden">
-      <Navigation />
+      <Header />
 
       <div className="flex-1 flex flex-col items-center justify-center p-4 py-8 md:p-4 animate-in fade-in duration-500">
         <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">

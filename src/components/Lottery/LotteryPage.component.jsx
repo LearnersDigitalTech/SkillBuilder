@@ -8,7 +8,7 @@ import { toPng } from 'html-to-image';
 import { ref, push, set, get } from "firebase/database";
 import { firebaseDatabase, auth } from "@/backend/firebaseHandler";
 import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
-import Navigation from "@/components/Navigation/Navigation.component";
+import Header from "@/app/homepage/Header";
 import Footer from "@/components/Footer/Footer.component";
 
 
@@ -317,13 +317,13 @@ const LotteryPage = () => {
 
     return (
         <div className="min-h-screen flex flex-col" style={{ background: 'radial-gradient(circle at 70% 50%, #ffffff 0%, #e0f2fe 100%)' }}>
-            <Navigation />
+            <Header />
 
             <main className="flex-grow container mx-auto px-4 py-12 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24">
                 <div className="text-center md:text-left flex-1 animate-in fade-in slide-in-from-left duration-700 max-w-2xl">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 font-semibold text-sm mb-6 border border-blue-200">
+                    {/* <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 font-semibold text-sm mb-6 border border-blue-200">
                         <Sparkles className="w-4 h-4" /> LEARNERS GLOBAL SCHOOL & PU COLLEGE
-                    </div>
+                    </div> */}
 
                     <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight tracking-tight
                text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">

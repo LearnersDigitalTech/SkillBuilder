@@ -12,6 +12,8 @@ import FinalCTASection from './homepage/FinalCTASection';
 import FAQSection from './homepage/FAQSection';
 import Footer from './homepage/Footer';
 
+import SplashScreen from './homepage/SplashScreen';
+
 export const metadata: Metadata = {
     title: "Discover Your Child's Math Superpowers | National Mathematics Day",
     description: "A joyful, pressure-free experience for Grades 1-10 that helps children feel confident about numbers. No stress, no judgment, no competition.",
@@ -24,6 +26,7 @@ export const metadata: Metadata = {
 export default function Home() {
     return (
         <main className="overflow-hidden">
+            <SplashScreen />
             <Header />
             <HeroSection />
             <PositioningSection />

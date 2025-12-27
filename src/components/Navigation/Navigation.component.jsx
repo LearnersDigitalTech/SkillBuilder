@@ -219,7 +219,7 @@ const Navigation = ({ forceWhite = false }) => {
                             exit={{ opacity: 0, y: 10 }}
                             transition={{ duration: 0.2 }}
                         >
-                            <Link href="/quiz">
+                            <Link href="/lottery">
                                 <Button
                                     variant="default"
                                     size="sm"
@@ -259,7 +259,7 @@ const Navigation = ({ forceWhite = false }) => {
                     )}
                 </AnimatePresence>
             </div>
-        </motion.header>
+        </motion.header >
     );
 };
 

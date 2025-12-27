@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, useSearchParams } from "next/navigation";
-import Navigation from "@/components/Navigation/Navigation.component";
+import Header from "@/app/homepage/Header";
 import Footer from "@/components/Footer/Footer.component";
 import { CircularProgress, Card, CardContent, Chip } from "@mui/material";
 import { GraduationCap, Users, LogOut, ChevronRight, BookOpen } from "lucide-react";
@@ -109,7 +109,7 @@ const TeacherDashboard = () => {
 
     return (
         <div className={Styles.pageWrapper}>
-            <Navigation />
+            <Header />
 
             <div className={Styles.dashboardContainer}>
                 {/* Teacher Profile Section */}

@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import Navigation from "@/components/Navigation/Navigation.component";
+import Header from "@/app/homepage/Header";
 import Footer from "@/components/Footer/Footer.component";
 import PhoneNumberDialog from "@/components/Auth/PhoneNumberDialog";
 import { CircularProgress, Button, FormControl, InputLabel, Select, MenuItem, TextField, Dialog, DialogTitle, DialogContent, Card, CardContent, Tabs, Tab } from "@mui/material";
@@ -507,7 +507,7 @@ const DashboardClient = () => {
     };
     return (
         <div className={Styles.pageWrapper}>
-            <Navigation />
+            <Header />
 
             {/* Phone Number Collection Dialog for Google/Email Users */}
             <PhoneNumberDialog

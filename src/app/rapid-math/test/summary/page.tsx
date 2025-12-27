@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { CheckCircle2, XCircle, Clock, Zap, RotateCcw, Home, Trophy, AlertTriangle } from "lucide-react"
-import Navigation from "@/components/Navigation/Navigation.component"
+import Header from "@/app/homepage/Header"
 import { useAuth } from "@/context/AuthContext"
 import { ref, set, get, push } from "firebase/database"
 import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler"
@@ -197,8 +197,8 @@ export default function SummaryPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-900 font-sans">
-      <Navigation />
-      <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8 animate-in fade-in duration-700 slide-in-from-bottom-4 pt-20">
+      <Header />
+      <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8 animate-in fade-in duration-700 slide-in-from-bottom-4">
 
         {/* Header Section */}
         <div className="text-center space-y-4">

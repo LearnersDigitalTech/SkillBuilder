@@ -39,7 +39,7 @@ const HeroChart = ({ summary, notAttempted }) => {
     );
 };
 
-import Navigation from "@/components/Navigation/Navigation.component";
+import Header from "@/app/homepage/Header";
 import MathRenderer from "@/components/MathRenderer/MathRenderer.component";
 import TypeFactorTree from "@/components/QuestionTypes/TypeFactorTree/TypeFactorTree.component";
 import { CheckCircle, XCircle, HelpCircle, Clock, Target, BookOpen, TrendingUp, BarChart3, FileText, X, AlertCircle, Download, ArrowLeft } from "lucide-react";
@@ -1173,7 +1173,7 @@ const QuizResultClient = () => {
     if (loadingReport && !reportState) {
         return (
             <div className={Styles.quizResultContainer}>
-                <Navigation />
+                <Header />
                 <div className={Styles.loadingWrapper}>
                     <CircularProgress />
                     <span>Loading report...</span>
@@ -1185,7 +1185,7 @@ const QuizResultClient = () => {
 
     return (
         <div className={Styles.quizResultContainer}>
-            <Navigation />
+            <Header />
 
             <div className={Styles.quizResultContent}>
 

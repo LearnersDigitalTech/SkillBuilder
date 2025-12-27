@@ -1,5 +1,5 @@
 "use client";
-import Navigation from "@/components/Navigation/Navigation.component";
+import Header from "@/app/homepage/Header";
 import Styles from "../../app/page.module.css";
 import { Button, CircularProgress } from "@mui/material";
 import { Award, Clock, Contact, ArrowRight, Target, Coins, Ticket, School, Medal } from "lucide-react";
@@ -226,7 +226,7 @@ const HomeContent = () => {
             <Curtain open={curtainOpen} />
             <Balloons show={showBalloons} />
             <FloatingLottery />
-            <Navigation />
+            <Header />
             <div className={Styles.heroContainer}>
                 <div className={Styles.contentContainer}>
                     <div className={Styles.titleSection}>

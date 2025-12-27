@@ -4,7 +4,7 @@ import { useActionState } from 'react'
 import { loginAdmin } from '../../app/actions/auth'
 import { TextField, Button, Card, CardContent, Typography, Alert, Box } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import Navigation from '@/components/Navigation/Navigation.component'
+import Header from "@/app/homepage/Header";
 
 const PageContainer = styled('div')({
     display: 'flex',
@@ -54,7 +54,7 @@ export default function AdminLoginClient() {
 
     return (
         <PageContainer>
-            <Navigation />
+            <Header />
             <LoginContainer>
                 <LoginCard elevation={0}>
                     <CardContent>

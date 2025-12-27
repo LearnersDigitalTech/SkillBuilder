@@ -4,7 +4,7 @@ import Styles from "./SATReport.module.css";
 import { ArrowLeft, Clock, CheckCircle, XCircle, AlertCircle, Home } from "lucide-react";
 import { useRouter } from "next/navigation";
 import MathRenderer from "@/components/MathRenderer/MathRenderer.component";
-import Navigation from "@/components/Navigation/Navigation.component";
+import Header from "@/app/homepage/Header";
 
 const SATReport = ({ questions, userAnswers, timeTaken }) => {
     const router = useRouter();
@@ -40,7 +40,7 @@ const SATReport = ({ questions, userAnswers, timeTaken }) => {
 
     return (
         <div className={Styles.reportPage}>
-            <Navigation forceWhite={true} />
+            <Header />
             <div className={Styles.reportContainer}>
                 {/* Header */}
                 <div className={Styles.header}>

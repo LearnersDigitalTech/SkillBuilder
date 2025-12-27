@@ -4,7 +4,7 @@ import { Lightbulb, HeartHandshake, Eye, ShieldCheck } from "lucide-react";
 
 const PositioningSection = () => {
     return (
-        <section className="pt-20 pb-10 md:pt-28 md:pb-12 bg-white">
+        <section className="pt-10 pb-10 md:pt-16 md:pb-12 bg-white">
             <div className="container px-4">
                 <motion.div
                     className="max-w-3xl mx-auto text-center"
