@@ -81,7 +81,6 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
     });
 
 
-
     useEffect(() => {
         if (!open) {
             // Reset state when modal closes
@@ -90,6 +89,8 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
             setOtp("");
             setLoading(false);
             setUserProfiles(null);
+            setEmail("");
+            setPassword("");
         }
     }, [open]);
 
@@ -115,14 +116,10 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                     normalizedData = {
                         authProvider: "google",
                         parentEmail: user.email,
-                        parentEmail: user.email,
                         children: { default: rawData }
                     };
                 }
 
-                // If there are multiple children (or even one), we might want to let them select
-                // But for now, if it's existing Google login, we might follow same pattern as verifyOtp
-                // Let's adapt it to show selection if children exist
                 if (normalizedData.children && Object.keys(normalizedData.children).length > 0) {
                     setUserProfiles(normalizedData.children);
                     setStep("SELECT_PROFILE");
@@ -135,11 +132,11 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                     onClose();
                 }
             } else {
-                // New user - go to registration (only email, name will be collected on quiz submit)
+                // New user - go to registration (only email, name will be collected on first quiz submit)
                 setRegistrationData({
                     ...registrationData,
                     email: user.email,
-                    name: "" // Name will be collected on first quiz submit
+                    name: ""
                 });
                 setStep("REGISTER");
             }
@@ -155,210 +152,51 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
         }
     };
 
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
 
-
-    // ==================== GOOGLE REGISTRATION (Complete Profile) ====================
-    const handleGoogleRegister = async () => {
-        const { grade } = registrationData;
-
-        if (!grade) {
-            toast.error("Please select a grade");
+    // ==================== EMAIL SIGN-IN ====================
+    const handleEmailSignIn = async () => {
+        if (!email || !password) {
+            toast.error("Please enter both User ID and password");
             return;
         }
 
         setLoading(true);
         try {
-            const user = auth.currentUser;
-            if (!user) {
-                toast.error("Authentication error. Please try again.");
-                return;
+            const { signInWithEmailAndPassword } = await import("firebase/auth");
+
+            // Allow login with "S1001" by checking for @
+            let authEmail = email;
+            if (!email.includes('@')) {
+                authEmail = `${email}@lgs.com`;
             }
 
-            const childId = `student_${Date.now()}`;
-            const childProfile = {
-                name: "", // Name will be collected on first quiz submit
-                email: user.email,
-                grade,
-                createdAt: new Date().toISOString()
-            };
-
-            const userDataUpdate = {
-                [`NMD_2025/Registrations/${getUserDatabaseKey(user)}/children/${childId}`]: childProfile,
-                [`NMD_2025/Registrations/${getUserDatabaseKey(user)}/authProvider`]: "google",
-                [`NMD_2025/Registrations/${getUserDatabaseKey(user)}/parentEmail`]: user.email,
-            };
-
-            await update(ref(firebaseDatabase), userDataUpdate);
-
-            // Construct full user object for checking context
-            // We need to fetch fresh data or construct it carefully
-            const snapshot = await get(ref(firebaseDatabase, `NMD_2025/Registrations/${getUserDatabaseKey(user)}`));
-            const fullData = snapshot.val();
-
-            // If we just registered, auto-select this new profile
-            const normalizedData = {
-                authProvider: "google",
-                parentEmail: user.email,
-                children: fullData.children || { [childId]: childProfile }
-            };
-
-            // Select the newly created child
-            const selectedChildData = {
-                ...normalizedData,
-                activeChildId: childId,
-                activeChild: childProfile,
-                userKey: getUserDatabaseKey(user) // Explicitly store the correct DB key (UID for google)
-            };
-
-            setUserData(selectedChildData);
-            toast.success("Profile created successfully!");
-
-            // Store the newly created child as active in localStorage
-            const userKey = getUserDatabaseKey(user);
-            if (typeof window !== "undefined" && userKey) {
-                window.localStorage.setItem(`activeChild_${userKey}`, childId);
-
-                // Initialize Quiz Session
-                window.localStorage.setItem("quizSession", JSON.stringify({
-                    userDetails: selectedChildData,
-                    questionPaper: [],
-                    activeQuestionIndex: 0,
-                    remainingTime: 1800
-                }));
-            }
-
-            onSuccess && onSuccess(selectedChildData);
-            router.push("/quiz");
-            onClose();
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to create profile. Please try again.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-
-
-    // ==================== PHONE AUTH (Existing) ====================
-    const setupRecaptcha = () => {
-        if (!window.recaptchaVerifier) {
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                'size': 'invisible',
-                'callback': (response) => {
-                    // reCAPTCHA solved
-                }
-            });
-        }
-    };
-
-    const handleSendOtp = async () => {
-        if (phoneNumber.length !== 10) {
-            toast.error("Please enter a valid 10-digit phone number");
-            return;
-        }
-
-        setLoading(true);
-
-        try {
-            // CHECK IF USER EXISTS FIRST
-            const userRef = ref(firebaseDatabase, `NMD_2025/Registrations/${phoneNumber}`);
-            const snapshot = await get(userRef);
-
-            if (snapshot.exists()) {
-                // DIRECT LOGIN / PROFILE SELECTION
-                const rawData = snapshot.val();
-                let normalizedData;
-
-                // Normalize data structure (handle legacy vs new)
-                if (rawData && rawData.children) {
-                    normalizedData = rawData;
-                } else if (rawData) {
-                    normalizedData = {
-                        parentPhone: phoneNumber,
-                        authProvider: "phone",
-                        children: {
-                            default: rawData
-                        }
-                    };
-                } else {
-                    // Should not match snapshot.exists() but safety check
-                    normalizedData = null;
-                }
-
-                if (normalizedData && normalizedData.children && Object.keys(normalizedData.children).length > 0) {
-                    setUserProfiles(normalizedData.children);
-                    setStep("SELECT_PROFILE");
-                    toast.success("Welcome back!");
-                } else {
-                    // Direct Login if no children found (unlikely for valid user)
-                    setUserData(normalizedData);
-                    toast.success("Logged in successfully!");
-                    onSuccess && onSuccess(normalizedData);
-                    onClose();
-                }
-                setLoading(false);
-                return; // RETURN EARLY - DO NOT SEND OTP
-            }
-
-            // --- USER DOES NOT EXIST -> PROCEED WITH OTP ---
-            setupRecaptcha();
-            const appVerifier = window.recaptchaVerifier;
-            const formatPh = "+91" + phoneNumber;
-
-            const confirmation = await signInWithPhoneNumber(auth, formatPh, appVerifier);
-            setConfirmationResult(confirmation);
-            setStep("OTP");
-            toast.success("OTP sent successfully!");
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to process request. Please try again.");
-            if (window.recaptchaVerifier) {
-                window.recaptchaVerifier.clear();
-                window.recaptchaVerifier = null;
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleVerifyOtp = async () => {
-        if (otp.length !== 6) {
-            toast.error("Please enter a valid 6-digit OTP");
-            return;
-        }
-
-        setLoading(true);
-        try {
-            const result = await confirmationResult.confirm(otp);
+            const result = await signInWithEmailAndPassword(auth, authEmail, password);
             const user = result.user;
 
             // Check if user profile exists
-            const userRef = ref(firebaseDatabase, `NMD_2025/Registrations/${phoneNumber}`);
+            const userKey = getUserDatabaseKey(user);
+            const userRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}`);
             const snapshot = await get(userRef);
 
             if (snapshot.exists()) {
-                // User exists, login success
                 const rawData = snapshot.val();
                 let normalizedData;
                 if (rawData && rawData.children) {
                     normalizedData = rawData;
-                } else if (rawData) {
-                    normalizedData = {
-                        parentPhone: phoneNumber,
-                        authProvider: "phone",
-                        children: {
-                            default: rawData
-                        }
-                    };
                 } else {
-                    normalizedData = null;
+                    normalizedData = {
+                        authProvider: "email",
+                        parentEmail: user.email,
+                        children: { default: rawData }
+                    };
                 }
 
-                if (normalizedData && normalizedData.children && Object.keys(normalizedData.children).length > 0) {
+                if (normalizedData.children && Object.keys(normalizedData.children).length > 0) {
                     setUserProfiles(normalizedData.children);
                     setStep("SELECT_PROFILE");
-                    toast.success("Verified! Select a profile.");
+                    toast.success("Welcome back! Select a profile.");
                 } else {
                     setUserData(normalizedData);
                     toast.success("Logged in successfully!");
@@ -366,88 +204,24 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                     onClose();
                 }
             } else {
-                // User does not exist, move to registration
+                // New user via email/pass - potentially need registration flow here or just error if registration is restricted
+                // For now, let's assume they need to register if not found, similar to Google flow
+                setRegistrationData({
+                    ...registrationData,
+                    email: user.email,
+                    name: ""
+                });
                 setStep("REGISTER");
             }
+
         } catch (error) {
             console.error(error);
-            toast.error("Invalid OTP. Please try again.");
+            toast.error("Login failed. Check your User ID and password.");
         } finally {
             setLoading(false);
         }
     };
 
-    const handlePhoneRegister = async () => {
-        const { grade } = registrationData;
-        if (!grade) {
-            toast.error("Please select a grade");
-            return;
-        }
-
-        setLoading(true);
-        try {
-            // Generate unique child ID
-            const childId = `student_${Date.now()}`;
-            const childProfile = {
-                name: "", // Name will be collected on first quiz submit
-                grade,
-                phoneNumber: phoneNumber,
-                createdAt: new Date().toISOString()
-            };
-
-            const userDataUpdate = {
-                [`NMD_2025/Registrations/${phoneNumber}/children/${childId}`]: childProfile,
-                [`NMD_2025/Registrations/${phoneNumber}/parentPhone`]: phoneNumber,
-                [`NMD_2025/Registrations/${phoneNumber}/authProvider`]: "phone",
-            };
-
-            await update(ref(firebaseDatabase), userDataUpdate);
-
-            // Fetch updated data to ensure consistency
-            const snapshot = await get(ref(firebaseDatabase, `NMD_2025/Registrations/${phoneNumber}`));
-            const fullData = snapshot.val();
-
-            const normalizedData = {
-                parentPhone: phoneNumber,
-                authProvider: "phone",
-                children: fullData.children || { [childId]: childProfile }
-            };
-
-            // Select the newly created child
-            const selectedChildData = {
-                ...normalizedData,
-                activeChildId: childId,
-                activeChild: childProfile,
-                userKey: phoneNumber // Explicitly store
-            };
-
-
-            setUserData(selectedChildData);
-            toast.success("Profile created successfully!");
-
-            // Store the newly created child as active in localStorage
-            if (typeof window !== "undefined") {
-                window.localStorage.setItem(`activeChild_${phoneNumber}`, childId);
-
-                // Initialize Quiz Session
-                window.localStorage.setItem("quizSession", JSON.stringify({
-                    userDetails: selectedChildData,
-                    questionPaper: [],
-                    activeQuestionIndex: 0,
-                    remainingTime: 1800
-                }));
-            }
-
-            onSuccess && onSuccess(selectedChildData);
-            router.push("/quiz");
-            onClose();
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to create profile. Please try again.");
-        } finally {
-            setLoading(false);
-        }
-    };
 
     return (
         <>
@@ -471,8 +245,6 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                 <DialogTitle className={Styles.modalHeader}>
                     <div className={Styles.headerContent}>
                         {step === "CHOOSE_METHOD" && "Sign In / Register"}
-                        {/* {step === "PHONE" && "Phone Authentication"} */}
-                        {/* {step === "OTP" && "Verify OTP"} */}
                         {step === "SELECT_PROFILE" && "Select Profile"}
                         {step === "REGISTER" && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -494,37 +266,59 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                         <div className={Styles.stepContainer}>
                             <p className={Styles.stepDescription}>Click here to sign in or register</p>
 
-                            {/* Google Sign-In */}
+                            {/* Email/Password Login */}
+                            <div className={Styles.emailLoginContainer}>
+                                <TextField
+                                    label="User ID"
+                                    placeholder="e.g. S1001"
+                                    type="text"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    size="medium"
+                                    fullWidth
+                                    margin="dense"
+                                    className={Styles.textField}
+                                />
+                                <TextField
+                                    label="Password"
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    size="medium"
+                                    fullWidth
+                                    margin="dense"
+                                    className={Styles.textField}
+                                />
+                                <Button
+                                    onClick={handleEmailSignIn}
+                                    className={Styles.actionButton}
+                                    fullWidth
+                                    disabled={loading}
+                                >
+                                    Sign In
+                                </Button>
+                            </div>
+
+                            {/* OR Divider */}
+                            <div className={Styles.divider}>
+                                <span>OR</span>
+                            </div>
+
                             <Button
-                                fullWidth
-                                variant="outlined"
                                 onClick={handleGoogleSignIn}
-                                disabled={loading}
                                 className={Styles.googleButton}
                                 startIcon={
-                                    <svg width="18" height="18" viewBox="0 0 18 18">
-                                        <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" />
-                                        <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" />
-                                        <path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707 0-.593.102-1.17.282-1.709V4.958H.957C.347 6.173 0 7.548 0 9c0 1.452.348 2.827.957 4.042l3.007-2.335z" />
-                                        <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" />
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M23.52 12.29C23.52 11.43 23.44 10.61 23.29 9.81H12V14.41H18.45C18.17 15.89 17.33 17.15 16.06 18H16.07L19.92 20.98C22.18 18.9 23.52 15.82 23.52 12.29Z" fill="#4285F4" />
+                                        <path d="M12 24C15.24 24 17.96 22.92 19.93 21.01L16.08 18.03C15 18.75 13.62 19.19 12 19.19C8.87 19.19 6.22 17.07 5.27 14.22H1.28V17.31C3.25 21.23 7.31 24 12 24Z" fill="#34A853" />
+                                        <path d="M5.27 14.22C5.03 13.5 4.9 12.75 4.9 12C4.9 11.25 5.03 10.5 5.27 9.77V6.69H1.28C0.46 8.31 0 10.11 0 12C0 13.89 0.46 15.68 1.28 17.31L5.27 14.22Z" fill="#FBBC05" />
+                                        <path d="M12 4.81C13.76 4.81 15.34 5.42 16.59 6.61L20.01 3.2C17.95 1.28 15.23 0 12 0C7.31 0 3.25 2.77 1.28 6.69L5.27 9.77C6.22 6.93 8.87 4.81 12 4.81Z" fill="#EA4335" />
                                     </svg>
                                 }
+                                disabled={loading}
                             >
                                 Sign in with Google
                             </Button>
-
-                            {/* Phone Sign-In */}
-                            {/* <Button
-                            fullWidth
-                            variant="outlined"
-                            onClick={() => setStep("PHONE")}
-                            disabled={loading}
-                            className={Styles.phoneButton}
-                            startIcon={<Phone size={18} />}
-                            sx={{ mt: 2 }}
-                        >
-                            Continue with Phone
-                        </Button> */}
 
 
                         </div>
