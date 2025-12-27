@@ -44,8 +44,33 @@ const DashboardClient = () => {
     const [showPhoneDialog, setShowPhoneDialog] = useState(false);
 
     const [addChildOpen, setAddChildOpen] = useState(false);
+
     const [editChildOpen, setEditChildOpen] = useState(false);
-    const [editingChildId, setEditingChildId] = useState(null);
+    // Sync activeChildId from localStorage if context is empty
+    useEffect(() => {
+        if (!activeChildId && typeof window !== "undefined") {
+            try {
+                const storedUser = JSON.parse(window.localStorage.getItem("quizSession") || "{}")?.userDetails;
+
+                // Fallback to quizSession activeChildId if available
+                if (storedUser?.activeChildId) {
+                    setActiveChildId(storedUser.activeChildId);
+                    return;
+                }
+
+                // Try to get from localStorage using userKey
+                const userKey = user ? getUserDatabaseKey(user) : (storedUser?.userKey || null);
+                if (userKey) {
+                    const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
+                    if (storedChildId) {
+                        setActiveChildId(storedChildId);
+                    }
+                }
+            } catch (e) {
+                console.error("Error syncing activeChildId:", e);
+            }
+        }
+    }, [activeChildId, setActiveChildId, user]);
     const [childForm, setChildForm] = useState({
         name: "",
         grade: ""
@@ -58,6 +83,18 @@ const DashboardClient = () => {
     const handleTabChange = (event, newValue) => {
         setActiveTab(newValue);
     };
+
+    // Redirect teachers to teacher dashboard
+    useEffect(() => {
+        if (!loading && user && userData) {
+            // Check if user is a teacher
+            if (userData.userType === 'teacher' || userData.isTeacher) {
+                console.log("👨‍🏫 Teacher detected, redirecting to teacher dashboard");
+                router.replace("/teacher-dashboard");
+                return;
+            }
+        }
+    }, [user, userData, loading, router]);
 
     // Check for local quiz session before redirecting
     useEffect(() => {
@@ -95,6 +132,12 @@ const DashboardClient = () => {
                 return;
             }
 
+            // Phone collection is no longer required as it is collected during registration
+            setShowPhoneDialog(false);
+            return;
+
+            /* 
+            // OLD LOGIC - Preserved for reference but disabled
             // Check localStorage flag - if user EVER provided phone, never ask again
             const userKey = getUserDatabaseKey(user);
             const phoneProvided = typeof window !== "undefined"
@@ -110,22 +153,14 @@ const DashboardClient = () => {
             // Check if phone exists in database
             const hasPhoneInDB = userData.phoneNumber || userData.parentPhone;
 
-            // console.log("🔍 Checking phone in database:", {
-            //     hasPhoneInDB,
-            //     phoneNumber: userData.phoneNumber,
-            //     parentPhone: userData.parentPhone,
-            //     userDataKeys: Object.keys(userData)
-            // });
-
             if (hasPhoneInDB) {
                 // Phone exists in database - don't show dialog
-                // console.log("✅ Phone found in database:", hasPhoneInDB);
                 setShowPhoneDialog(false);
             } else {
                 // Brand new user with no phone - show dialog
-                // console.log("📱 Brand new user - showing phone dialog");
                 setShowPhoneDialog(true);
             }
+            */
         }
     }, [user, userData, loading]);
 
@@ -209,7 +244,24 @@ const DashboardClient = () => {
         }
     }, [user, activeChildId]);
 
-    const effectiveUserData = userData || (typeof window !== "undefined" ? JSON.parse(window.localStorage.getItem("quizSession") || "{}")?.userDetails : null);
+    // Hydration-safe local storage fallback
+    const [fallbackData, setFallbackData] = useState(null);
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const session = window.localStorage.getItem("quizSession");
+            if (session) {
+                try {
+                    const parsed = JSON.parse(session);
+                    setFallbackData(parsed?.userDetails || null);
+                } catch (e) {
+                    console.error("Error parsing quizSession:", e);
+                }
+            }
+        }
+    }, []);
+
+    const effectiveUserData = userData || fallbackData;
     const children = effectiveUserData?.children || null;
 
     // Robust active child resolution
@@ -233,12 +285,40 @@ const DashboardClient = () => {
         }
     }
 
+    // AUTO-REFRESH WORKAROUND: Force a reload once if profile data is missing
+    useEffect(() => {
+        // Condition: We have an Active ID (e.g., student_123) but NO matching profile in 'children'
+        // FIX: Check if children object is null OR if the specific child ID is missing
+        const isProfileMissing = activeChildId && (!children || !children[activeChildId]);
+
+        if (isProfileMissing) {
+            // Check if we already tried reloading to avoid infinite loop
+            const hasRetried = window.sessionStorage.getItem("dashboard_retry_v1");
+
+            if (!hasRetried) {
+                console.log("⚠️ Profile missing, forcing auto-refresh...");
+                window.sessionStorage.setItem("dashboard_retry_v1", "true");
+                window.location.reload();
+            }
+        } else {
+            // Data loaded successfully, clear the retry flag
+            if (activeChildId && children && children[activeChildId]) {
+                window.sessionStorage.removeItem("dashboard_retry_v1");
+            }
+        }
+    }, [activeChildId, children]);
+
+    // Set fallback child ID in useEffect to avoid setState during render
     // Set fallback child ID in useEffect to avoid setState during render
     useEffect(() => {
-        if (fallbackChildId && !activeChildId) {
-            setActiveChildId(fallbackChildId);
+        if (fallbackChildId) {
+            // Force update if no active ID OR if active ID is invalid (not in children)
+            if (!activeChildId || (children && !children[activeChildId])) {
+                console.log("Fixing activeChildId mismatch:", activeChildId, "->", fallbackChildId); // Debug
+                setActiveChildId(fallbackChildId);
+            }
         }
-    }, [fallbackChildId, activeChildId, setActiveChildId]);
+    }, [fallbackChildId, activeChildId, children, setActiveChildId]);
 
     if (loading) {
         return (
@@ -378,6 +458,20 @@ const DashboardClient = () => {
             return;
         }
 
+        // GUEST/NO-GRADE CHECK: If the user hasn't selected a grade yet, force them to do so.
+        if (!activeChild.grade || activeChild.grade === "Select Grade" || activeChild.grade === "N/A") {
+            // Open the edit modal for this child so they can pick a grade
+            setChildForm({
+                name: activeChild.name,
+                grade: "" // Reset to empty or keep "Select Grade" if logic prefers
+            });
+            setEditingChildId(activeChildId);
+            setEditChildOpen(true);
+            // Optional: alert can be added here, but the modal opening is self-explanatory
+            console.log("Grade missing, opening selection modal...");
+            return;
+        }
+
         // Get user key - works for both authenticated and phone-only users
         let userKey = null;
         if (user) {
@@ -479,23 +573,25 @@ const DashboardClient = () => {
                                         Take New Test
                                     </button>
 
-                                    {/* CHILD MANAGEMENT BUTTONS */}
-                                    <div className="grid grid-cols-2 gap-2 mt-3">
-                                        <button
-                                            onClick={() => setShowProfileList(!showProfileList)}
-                                            className="py-2 px-3 rounded-lg bg-slate-100 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600 transition-all flex items-center justify-center gap-2 text-sm font-semibold group"
-                                        >
-                                            <Users size={16} className="group-hover:scale-110 transition-transform" />
-                                            Switch Child
-                                        </button>
-                                        <button
-                                            onClick={handleOpenAddChild}
-                                            className="py-2 px-3 rounded-lg bg-slate-100 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600 transition-all flex items-center justify-center gap-2 text-sm font-semibold group"
-                                        >
-                                            <PlusIcon size={16} className="group-hover:scale-110 transition-transform" />
-                                            Add Child
-                                        </button>
-                                    </div>
+                                    {/* CHILD MANAGEMENT BUTTONS - Hidden for Students */}
+                                    {!(user?.email?.endsWith('@lgs.com') && user?.email?.toUpperCase().startsWith('S')) && (
+                                        <div className="grid grid-cols-2 gap-2 mt-3">
+                                            <button
+                                                onClick={() => setShowProfileList(!showProfileList)}
+                                                className="py-2 px-3 rounded-lg bg-slate-100 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600 transition-all flex items-center justify-center gap-2 text-sm font-semibold group"
+                                            >
+                                                <Users size={16} className="group-hover:scale-110 transition-transform" />
+                                                Switch Learner
+                                            </button>
+                                            <button
+                                                onClick={handleOpenAddChild}
+                                                className="py-2 px-3 rounded-lg bg-slate-100 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600 transition-all flex items-center justify-center gap-2 text-sm font-semibold group"
+                                            >
+                                                <PlusIcon size={16} className="group-hover:scale-110 transition-transform" />
+                                                Add Learner
+                                            </button>
+                                        </div>
+                                    )}
 
                                     {/* PUZZLE OF THE DAY Card */}
                                     <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
@@ -800,7 +896,7 @@ const DashboardClient = () => {
                 maxWidth="sm"
                 fullWidth
             >
-                <DialogTitle>Add Child Profile</DialogTitle>
+                <DialogTitle>Add Learner Profile</DialogTitle>
                 <DialogContent>
                     <div className={Styles.addChildForm}>
                         <div className={Styles.inputGroup}>

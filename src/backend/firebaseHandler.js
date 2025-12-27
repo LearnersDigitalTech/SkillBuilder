@@ -30,9 +30,6 @@ googleProvider.setCustomParameters({
 export const getUserDatabaseKey = (user) => {
     if (!user) return null;
     // For backward compatibility with phone auth users
-    if (user.phoneNumber) {
-        return user.phoneNumber.slice(-10);
-    }
     // For Google/Email auth users, use Firebase UID
     return user.uid;
 };

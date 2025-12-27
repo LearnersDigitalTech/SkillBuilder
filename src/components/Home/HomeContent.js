@@ -108,6 +108,12 @@ const HomeContent = () => {
         }
 
         if (user) {
+            // Check if user is a teacher - route to teacher dashboard
+            if (userData?.isTeacher || userData?.userType === 'teacher') {
+                router.push("/teacher-dashboard");
+                return;
+            }
+
             // Get user key (works for phone, Google, and email auth)
             // Robust user key retrieval
             let userKey = null;
@@ -206,7 +212,13 @@ const HomeContent = () => {
         };
 
         setQuizContext({ userDetails, questionPaper: null });
-        router.push("/quiz");
+
+        // FIX: Check if grade is present before starting quiz
+        if (activeChild.grade && activeChild.grade !== "Select Grade" && activeChild.grade !== "" && activeChild.grade !== "N/A") {
+            router.push("/quiz");
+        } else {
+            router.push("/dashboard");
+        }
     };
 
     return (

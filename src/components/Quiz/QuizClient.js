@@ -99,6 +99,20 @@ const QuizClient = () => {
         return () => clearTimeout(timer);
     }, []);
 
+    // GRADE GATEKEEPER: Final safety check
+    // If user somehow reaches here without a grade, kick them back to dashboard
+    useEffect(() => {
+        if (hydrationDone && quizContext?.userDetails) {
+            const userGrade = quizContext.userDetails.grade;
+            // Add "N/A" to invalid list logic
+            if (!userGrade || userGrade === "Select Grade" || userGrade === "" || userGrade === "N/A") {
+                console.warn("QuizClient: Invalid grade detected:", userGrade);
+                toast.warn("Please select a grade first.");
+                router.replace("/dashboard");
+            }
+        }
+    }, [hydrationDone, quizContext, router]);
+
     // Fetch attempt count if not provided in context
     useEffect(() => {
         const fetchAttemptCount = async () => {
@@ -221,7 +235,9 @@ const QuizClient = () => {
                 gradeQuestionPaper = { ...GetGrade9Question };
                 break;
             }
-            case "Grade 10": {
+            case "Grade 10":
+            case "Grade 11":
+            case "Grade 12": {
                 gradeQuestionPaper = { ...GetGrade10Question };
                 break;
             }

@@ -633,6 +633,7 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
                     <TableHead sx={{ bgcolor: '#f5f5f5' }}>
                         <TableRow>
                             <TableCell sx={{ fontWeight: 'bold' }}>Student Name</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold' }}>User ID</TableCell>
                             {/* Standard Columns */}
                             {viewMode === 'standard' && <TableCell sx={{ fontWeight: 'bold' }}>Grade</TableCell>}
                             {viewMode === 'standard' && <TableCell sx={{ fontWeight: 'bold' }}>Phone Number</TableCell>}
@@ -660,6 +661,12 @@ const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
                                     >
                                         <TableCell component="th" scope="row" sx={{ fontWeight: 500 }}>
                                             {student.name}
+                                        </TableCell>
+                                        <TableCell>
+                                            {student.email?.toLowerCase().endsWith('@lgs.com')
+                                                ? student.email.split('@')[0].toUpperCase()
+                                                : (student.id.length > 12 ? `${student.id.substring(0, 8)}...` : student.id)
+                                            }
                                         </TableCell>
 
                                         {viewMode === 'standard' && <TableCell>{student.grade}</TableCell>}
