@@ -18,9 +18,17 @@ import {
     MenuItem,
     Stack,
     InputAdornment,
-    Grid
+    Grid,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    List,
+    ListItem,
+    ListItemText,
+    Divider
 } from '@mui/material';
-import { RefreshCw, Download, Trash2, Search, Filter, Calendar } from 'lucide-react';
+import { RefreshCw, Download, Trash2, Search, Filter, Calendar, Eye, User, Phone, Mail, School, Briefcase, Star, Gift, Users } from 'lucide-react';
 import { ref, get, remove } from 'firebase/database';
 import { firebaseDatabase } from '@/backend/firebaseHandler';
 
@@ -29,6 +37,20 @@ const LotteryManager = () => {
     const [registrations, setRegistrations] = useState([]);
     const [filteredRegistrations, setFilteredRegistrations] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    // Modal State
+    const [openModal, setOpenModal] = useState(false);
+    const [selectedRegistration, setSelectedRegistration] = useState(null);
+
+    const handleView = (registration) => {
+        setSelectedRegistration(registration);
+        setOpenModal(true);
+    };
+
+    const handleClose = () => {
+        setOpenModal(false);
+        setSelectedRegistration(null);
+    };
 
     // Filters
     const [searchTerm, setSearchTerm] = useState('');
@@ -66,6 +88,8 @@ const LotteryManager = () => {
                         } else if (val.studentName && val.studentName !== "N/A") {
                             // Backward compatibility or flat structure
                             details = `${val.studentName} (${val.studentGrade || 'N/A'})`;
+                        } else if (effectiveUserType === 'guest') {
+                            details = `Profession: ${val.profession || 'N/A'}`;
                         } else {
                             details = "No children listed";
                         }
@@ -73,6 +97,8 @@ const LotteryManager = () => {
                         details = `Grade ${val.studentGrade} | ${val.schoolName || 'N/A'}`;
                     } else if (val.userType === 'teacher') {
                         details = `School: ${val.schoolName || 'N/A'}`;
+                    } else if (effectiveUserType === 'guest') {
+                        details = `Profession: ${val.profession || 'N/A'}`;
                     }
 
                     return {
@@ -157,7 +183,7 @@ const LotteryManager = () => {
                 `"${row.displayName}"`,
                 row.phoneNumber,
                 row.email || "N/A",
-                `"${row.displayDetails}"`,
+                `"${row.displayDetails}"`, // This will now include Profession for Guests
                 new Date(row.timestamp).toLocaleString()
             ].join(","))
         ].join("\n");
@@ -362,6 +388,9 @@ const LotteryManager = () => {
                                         {new Date(row.timestamp).toLocaleDateString()}
                                     </TableCell>
                                     <TableCell align="right">
+                                        <IconButton size="small" color="primary" onClick={() => handleView(row)} sx={{ mr: 1 }}>
+                                            <Eye size={18} />
+                                        </IconButton>
                                         <IconButton size="small" color="error" onClick={() => handleDelete(row.id)}>
                                             <Trash2 size={18} />
                                         </IconButton>
@@ -372,6 +401,153 @@ const LotteryManager = () => {
                     </Table>
                 </TableContainer>
             )}
+
+            {/* Details Modal */}
+            {/* Details Modal */}
+            <Dialog
+                open={openModal}
+                onClose={handleClose}
+                maxWidth="md"
+                fullWidth
+                PaperProps={{
+                    sx: { borderRadius: 3, overflow: 'hidden' }
+                }}
+            >
+                <Box sx={{ background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 100%)', p: 3, borderBottom: '1px solid #e2e8f0' }}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                        <Typography variant="h6" fontWeight="bold" color="text.primary">
+                            Registration Details
+                        </Typography>
+                        {selectedRegistration && (
+                            <Chip
+                                label={selectedRegistration.effectiveUserType.toUpperCase()}
+                                color={
+                                    selectedRegistration.effectiveUserType === 'student' ? 'primary' :
+                                        selectedRegistration.effectiveUserType === 'teacher' ? 'warning' :
+                                            selectedRegistration.effectiveUserType === 'parent' ? 'success' : 'default'
+                                }
+                                size="small"
+                                sx={{ fontWeight: 'bold' }}
+                            />
+                        )}
+                    </Box>
+                </Box>
+
+                <DialogContent sx={{ p: 4 }}>
+                    {selectedRegistration && (
+                        <Grid container spacing={3}>
+                            {/* Ticket Card - Prominent */}
+                            <Grid item xs={12}>
+                                <Paper
+                                    elevation={0}
+                                    sx={{
+                                        p: 3,
+                                        bgcolor: '#eff6ff',
+                                        border: '1px dashed #bfdbfe',
+                                        borderRadius: 2,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexDirection: 'column',
+                                        gap: 1
+                                    }}
+                                >
+                                    <Typography variant="caption" color="text.secondary" fontWeight="bold" letterSpacing={1}>
+                                        LUCKY TICKET NUMBER
+                                    </Typography>
+                                    <Typography variant="h3" fontWeight="bold" color="primary" sx={{ fontFamily: 'monospace' }}>
+                                        {selectedRegistration.ticketCode}
+                                    </Typography>
+                                </Paper>
+                            </Grid>
+
+                            {/* Personal Details */}
+                            <Grid item xs={12} md={6}>
+                                <Typography variant="subtitle2" color="text.secondary" mb={2} fontWeight="bold">
+                                    PERSONAL INFO
+                                </Typography>
+                                <Stack spacing={2}>
+                                    <Box display="flex" gap={2} alignItems="center">
+                                        <Box sx={{ p: 1, bgcolor: '#f1f5f9', borderRadius: 1 }}><User size={18} color="#64748b" /></Box>
+                                        <Box>
+                                            <Typography variant="body2" color="text.secondary">Name</Typography>
+                                            <Typography variant="body1" fontWeight={500}>{selectedRegistration.displayName}</Typography>
+                                        </Box>
+                                    </Box>
+                                    <Box display="flex" gap={2} alignItems="center">
+                                        <Box sx={{ p: 1, bgcolor: '#f1f5f9', borderRadius: 1 }}><Phone size={18} color="#64748b" /></Box>
+                                        <Box>
+                                            <Typography variant="body2" color="text.secondary">Phone</Typography>
+                                            <Typography variant="body1" fontWeight={500}>{selectedRegistration.phoneNumber}</Typography>
+                                        </Box>
+                                    </Box>
+                                    <Box display="flex" gap={2} alignItems="center">
+                                        <Box sx={{ p: 1, bgcolor: '#f1f5f9', borderRadius: 1 }}><Mail size={18} color="#64748b" /></Box>
+                                        <Box>
+                                            <Typography variant="body2" color="text.secondary">Email</Typography>
+                                            <Typography variant="body1" fontWeight={500}>{selectedRegistration.email || "N/A"}</Typography>
+                                        </Box>
+                                    </Box>
+                                </Stack>
+                            </Grid>
+
+                            {/* Role Details */}
+                            <Grid item xs={12} md={6}>
+                                <Typography variant="subtitle2" color="text.secondary" mb={2} fontWeight="bold">
+                                    ROLE DETAILS
+                                </Typography>
+                                <Stack spacing={2}>
+                                    {selectedRegistration.effectiveUserType === 'parent' && (
+                                        <Box display="flex" gap={2} alignItems="flex-start">
+                                            <Box sx={{ p: 1, bgcolor: '#f0fdf4', borderRadius: 1 }}><Users size={18} color="#16a34a" /></Box>
+                                            <Box>
+                                                <Typography variant="body2" color="text.secondary">Total Children</Typography>
+                                                <Typography variant="body1" fontWeight={500}>{selectedRegistration.displayDetails}</Typography>
+                                            </Box>
+                                        </Box>
+                                    )}
+
+                                    {selectedRegistration.effectiveUserType === 'guest' && (
+                                        <Box display="flex" gap={2} alignItems="center">
+                                            <Box sx={{ p: 1, bgcolor: '#fefce8', borderRadius: 1 }}><Briefcase size={18} color="#ca8a04" /></Box>
+                                            <Box>
+                                                <Typography variant="body2" color="text.secondary">Profession</Typography>
+                                                <Typography variant="body1" fontWeight={500}>{selectedRegistration.profession || selectedRegistration.displayDetails.replace('Profession: ', '')}</Typography>
+                                            </Box>
+                                        </Box>
+                                    )}
+
+                                    {(selectedRegistration.effectiveUserType === 'student' || selectedRegistration.effectiveUserType === 'teacher') && (
+                                        <Box display="flex" gap={2} alignItems="center">
+                                            <Box sx={{ p: 1, bgcolor: '#fff7ed', borderRadius: 1 }}><School size={18} color="#ea580c" /></Box>
+                                            <Box>
+                                                <Typography variant="body2" color="text.secondary">School & Info</Typography>
+                                                <Typography variant="body1" fontWeight={500}>{selectedRegistration.displayDetails}</Typography>
+                                            </Box>
+                                        </Box>
+                                    )}
+
+                                    <Box display="flex" gap={2} alignItems="center">
+                                        <Box sx={{ p: 1, bgcolor: '#fef2f2', borderRadius: 1 }}><Calendar size={18} color="#ef4444" /></Box>
+                                        <Box>
+                                            <Typography variant="body2" color="text.secondary">Registered On</Typography>
+                                            <Typography variant="body1" fontWeight={500}>
+                                                {new Date(selectedRegistration.timestamp).toLocaleString(undefined, {
+                                                    dateStyle: 'medium',
+                                                    timeStyle: 'short'
+                                                })}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                </Stack>
+                            </Grid>
+                        </Grid>
+                    )}
+                </DialogContent>
+                <DialogActions sx={{ p: 3, bgcolor: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
+                    <Button onClick={handleClose} variant="outlined" color="inherit">Close</Button>
+                </DialogActions>
+            </Dialog>
         </Paper>
     );
 };
