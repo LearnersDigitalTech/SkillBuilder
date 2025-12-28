@@ -15,6 +15,19 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
 
     // Helper to handle final profile selection
     const handleSelectProfile = (childId, childProfile) => {
+        // Validation: Ensure valid grade exists
+        if (!childProfile.grade || childProfile.grade === "Select Grade" || childProfile.grade === "0") {
+            // Force update flow
+            setPendingProfileUpdate({ childId, childProfile });
+            setRegistrationData({
+                name: childProfile.name || "",
+                grade: ""
+            });
+            setStep("REGISTER");
+            toast.info("Please select your grade to continue.");
+            return;
+        }
+
         // Show loading screen immediately
         setProfileSelecting(true);
 
@@ -105,6 +118,8 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
 
 
     const [userProfiles, setUserProfiles] = useState(null); // To store existing profiles (children)
+    // New state to track if we are updating an existing profile
+    const [pendingProfileUpdate, setPendingProfileUpdate] = useState(null);
 
     const [registrationData, setRegistrationData] = useState({
         name: "",
@@ -122,6 +137,7 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
             setUserProfiles(null);
             setEmail("");
             setPassword("");
+            setPendingProfileUpdate(null);
         }
     }, [open]);
 
@@ -164,11 +180,18 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
                 if (rawData && rawData.children) {
                     normalizedData = rawData;
                 } else {
-                    normalizedData = {
-                        authProvider: "google",
-                        parentEmail: user.email,
-                        children: { default: rawData }
-                    };
+                    // If rawData has a grade, it's a legacy Single Student account
+                    if (rawData.grade) {
+                        normalizedData = {
+                            authProvider: "google",
+                            parentEmail: user.email,
+                            children: { default: rawData }
+                        };
+                    } else {
+                        // No children and No grade -> It's a Parent/User shell. Not a student.
+                        // Pass as-is (no children prop) to trigger REGISTER flow.
+                        normalizedData = rawData;
+                    }
                 }
 
                 if (normalizedData.children && Object.keys(normalizedData.children).length > 0) {
@@ -186,11 +209,15 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
                     setStep("SELECT_PROFILE");
                     toast.success("Welcome back! Select a profile.");
                 } else {
-                    // Fallback for old data or immediate login
-                    setUserData(normalizedData);
-                    toast.success("Logged in successfully!");
-                    onSuccess && onSuccess(normalizedData);
-                    onClose();
+                    // Existing User BUT No Children (Rare, but possible)
+                    // Treat as New User flow to add a child/grade
+                    console.log("Existing user but no children found. Redirecting to Register.");
+                    setRegistrationData({
+                        ...registrationData,
+                        email: user.email,
+                        name: ""
+                    });
+                    setStep("REGISTER");
                 }
             } else {
                 // New user - go to registration (only email, name will be collected on first quiz submit)
@@ -272,11 +299,17 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
                 if (rawData && rawData.children) {
                     normalizedData = rawData;
                 } else {
-                    normalizedData = {
-                        authProvider: "email",
-                        parentEmail: user.email,
-                        children: { default: rawData }
-                    };
+                    // If rawData has a grade, it's a legacy Single Student account
+                    if (rawData.grade) {
+                        normalizedData = {
+                            authProvider: "email",
+                            parentEmail: user.email,
+                            children: { default: rawData }
+                        };
+                    } else {
+                        // No children and No grade -> It's a Parent/User shell. Not a student.
+                        normalizedData = rawData;
+                    }
                 }
 
                 if (normalizedData.children && Object.keys(normalizedData.children).length > 0) {
@@ -294,10 +327,15 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
                     setStep("SELECT_PROFILE");
                     toast.success("Welcome back! Select a profile.");
                 } else {
-                    setUserData(normalizedData);
-                    toast.success("Logged in successfully!");
-                    onSuccess && onSuccess(normalizedData);
-                    onClose();
+                    // Existing User BUT No Children (Rare, but possible)
+                    // Treat as New User flow to add a child/grade
+                    console.log("Existing user but no children found. Redirecting to Register.");
+                    setRegistrationData({
+                        ...registrationData,
+                        email: user.email,
+                        name: ""
+                    });
+                    setStep("REGISTER");
                 }
             } else {
                 // New user via email/pass - potentially need registration flow here or just error if registration is restricted
@@ -318,6 +356,93 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
         }
     };
 
+
+    const handleRegisterStart = async () => {
+        if (!registrationData.grade) {
+            toast.error("Please select a grade to continue");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            // Determine User Key
+            const currentUser = auth.currentUser;
+            if (!currentUser && !phoneNumber) {
+                // Should not happen if flow is correct, but safety check
+                toast.error("Authentication check failed. Please try signing in again.");
+                setStep("CHOOSE_METHOD");
+                return;
+            }
+
+            const userKey = phoneNumber || getUserDatabaseKey(currentUser);
+            const parentEmail = currentUser?.email || "";
+            const parentPhone = phoneNumber || "";
+
+            // Check if we are updating an existing profile
+            if (pendingProfileUpdate) {
+                const { childId, childProfile } = pendingProfileUpdate;
+
+                // Update only grade (and name if changed)
+                const updatedChildData = {
+                    ...childProfile,
+                    grade: registrationData.grade,
+                    // If name was blank before, update it. If it existed, keep it (unless we want to allow edits)
+                    // For now, let's allow name updates if it was empty, or just stick to grade.
+                    // Let's assume name comes from registrationData if profile had none.
+                    name: registrationData.name || childProfile.name || "Student 1"
+                };
+
+                const childRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}/children/${childId}`);
+                await update(childRef, {
+                    grade: registrationData.grade,
+                    name: updatedChildData.name
+                });
+
+                toast.success("Profile updated successfully!");
+                handleSelectProfile(childId, updatedChildData);
+                setPendingProfileUpdate(null); // Clear pending state
+                return;
+            }
+
+            // --- CREATE NEW PROFILE FLOW ---
+
+            // Create Child ID (simple timestamp-based or random)
+            const childId = `child_${Date.now()}`;
+            const childName = registrationData.name || "Student 1"; // Default name if empty
+
+            // New Child Data
+            const newChildData = {
+                name: childName, // Name is optional at this stage, can be collected later
+                grade: registrationData.grade,
+                parentEmail: parentEmail,
+                parentPhone: parentPhone,
+                uid: userKey, // Link back to parent
+            };
+
+            // Save to Firebase
+            // Location: NMD_2025/Registrations/{userKey}/children/{childId}
+            const childRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}/children/${childId}`);
+            await set(childRef, newChildData);
+
+            // Also update main user record if needed (e.g., ensure user exists)
+            const userRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}`);
+            await update(userRef, {
+                lastLogin: new Date().toISOString(),
+                // partial update to ensure parent record exists if completely new
+                authProvider: phoneNumber ? 'phone' : (parentEmail ? 'google' : 'unknown')
+            });
+
+            // Proceed to Start Assessment
+            toast.success("Registration Successful!");
+            handleSelectProfile(childId, newChildData);
+
+        } catch (error) {
+            console.error("Registration Error:", error);
+            toast.error("Failed to start assessment. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <>
@@ -588,7 +713,7 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
                             <Button
                                 fullWidth
                                 variant="contained"
-                                onClick={() => toast.info("Please register through the Lottery page")}
+                                onClick={handleRegisterStart}
                                 disabled={loading}
                                 className={Styles.actionButton}
                             >

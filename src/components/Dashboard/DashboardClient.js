@@ -46,6 +46,7 @@ const DashboardClient = () => {
     const [addChildOpen, setAddChildOpen] = useState(false);
 
     const [editChildOpen, setEditChildOpen] = useState(false);
+    const [editingChildId, setEditingChildId] = useState(null);
     // Sync activeChildId from localStorage if context is empty
     useEffect(() => {
         if (!activeChildId && typeof window !== "undefined") {
@@ -320,6 +321,26 @@ const DashboardClient = () => {
         }
     }, [fallbackChildId, activeChildId, children, setActiveChildId]);
 
+    // FORCE GRADE SELECTION: If active child has no grade, open edit modal automatically
+    useEffect(() => {
+        if (!loading && activeChildId && children && children[activeChildId]) {
+            const child = children[activeChildId];
+            if (!child.grade || child.grade === "Select Grade" || child.grade === "N/A" || child.grade === "0" || child.grade === "") {
+                // Check if modal is already open to avoid loop
+                // using a ref or just checking state
+                if (!editChildOpen) {
+                    console.log("⚠️ Grade missing for active profile, compelling selection...");
+                    setChildForm({
+                        name: child.name,
+                        grade: ""
+                    });
+                    setEditingChildId(activeChildId);
+                    setEditChildOpen(true);
+                }
+            }
+        }
+    }, [activeChildId, children, loading, editChildOpen]);
+
     if (loading) {
         return (
             <div className={Styles.loadingContainer}>
@@ -423,7 +444,7 @@ const DashboardClient = () => {
 
         const updatedProfile = {
             ...childForm,
-            createdAt: activeChild.createdAt // Preserve original creation date
+            createdAt: activeChild.createdAt || new Date().toISOString() // Preserve original or set new
         };
 
         try {
@@ -787,7 +808,7 @@ const DashboardClient = () => {
                                                         <Button
                                                             variant="contained"
                                                             className={Styles.startBtn}
-                                                            onClick={() => router.push("/quiz")}
+                                                            onClick={() => handleStartAssessment('ASSESSMENT', 0)}
                                                         >
                                                             Start Assessment
                                                         </Button>
