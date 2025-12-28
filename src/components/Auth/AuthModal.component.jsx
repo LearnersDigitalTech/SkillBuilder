@@ -66,7 +66,14 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
         // Show loading screen for a smooth transition
         setTimeout(() => {
             toast.success(`Welcome ${childProfile.name}!`);
-            // onSuccess && onSuccess(finalUserData);
+            onSuccess && onSuccess(finalUserData);
+
+            // Special Case: Deferred Redirect (e.g. show Grade Selector after)
+            if (redirectPath === "NONE") {
+                onClose();
+                setProfileSelecting(false);
+                return;
+            }
 
             // Priority Redirect: If a specific path was requested (e.g. from Practice button)
             if (redirectPath) {
@@ -333,7 +340,7 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
             >
                 <DialogTitle className={Styles.modalHeader}>
                     <div className={Styles.headerContent}>
-                        {step === "CHOOSE_METHOD" && "Sign In / Register"}
+                        {step === "CHOOSE_METHOD" && "Sign In"}
                         {step === "SELECT_PROFILE" && "Select Profile"}
                         {step === "REGISTER" && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -353,7 +360,7 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
                     {/* ==================== CHOOSE METHOD ==================== */}
                     {step === "CHOOSE_METHOD" && (
                         <div className={Styles.stepContainer}>
-                            <p className={Styles.stepDescription}>Click here to sign in or register</p>
+                            {/* <p className={Styles.stepDescription}>Click here to sign in</p> */}
 
                             {/* Email/Password Login */}
                             <div className={Styles.emailLoginContainer}>

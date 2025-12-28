@@ -3,9 +3,11 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Sparkles, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const FinalCTASection = () => {
     const [isHovered, setIsHovered] = useState(false);
+    const router = useRouter();
 
     return (
         <section className="py-24 md:py-32 bg-gradient-to-br from-[#F8FBFF] via-[#F0F7FF] to-[#E0F2FE] relative overflow-hidden">
@@ -64,8 +66,8 @@ const FinalCTASection = () => {
                             size="xl"
                             className="group w-full sm:w-auto bg-[#007AFF] hover:bg-[#0060C9] text-white border-none shadow-lg shadow-blue-500/20 transition-all duration-300 min-w-[200px]"
                             style={{ fontFamily: 'var(--font-nunito)' }}
-                            onMouseEnter={() => setIsHovered(true)}
-                            onMouseLeave={() => setIsHovered(false)}
+                            onClick={() => router.push("/lottery")}
+
                         >
                             Start Now
                             <ArrowRight className="w-5 h-5" />

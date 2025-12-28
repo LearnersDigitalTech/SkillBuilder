@@ -1,7 +1,8 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, User } from "lucide-react";
+import { ArrowRight, User, X } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle, IconButton, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useContext } from "react";
@@ -16,6 +17,8 @@ const Header = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [authModalOpen, setAuthModalOpen] = useState(false);
     const [redirectPath, setRedirectPath] = useState<string | null>(null);
+    const [showGradeSelector, setShowGradeSelector] = useState(false);
+    const [selectedGrade, setSelectedGrade] = useState("");
     const [hasSession, setHasSession] = useState(false);
     const [fallbackData, setFallbackData] = useState(null);
     const { user, userData, isTeacher, activeChildId } = useAuth();
@@ -63,96 +66,12 @@ const Header = () => {
     }, []);
 
     const handleTakeTest = async () => {
-        if (user) {
-            try {
-                let userKey = null;
-                if (user) {
-                    userKey = getUserDatabaseKey(user);
-                }
-                if (!userKey && userData) {
-                    userKey = userData.userKey || userData.phoneNumber || userData.parentPhone || userData.parentEmail;
-                }
-
-                if (!userKey) {
-                    console.warn("Navigation: No userKey found, cannot start test correctly.");
-                }
-
-                const children = userData?.children || null;
-                const childKeys = children ? Object.keys(children) : [];
-                let activeChildId = childKeys[0] || null;
-
-                if (typeof window !== "undefined") {
-                    const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
-                    const lastActiveChild = window.localStorage.getItem('lastActiveChild');
-
-                    if (storedChildId && childKeys.includes(storedChildId)) {
-                        activeChildId = storedChildId;
-                    } else if (lastActiveChild && childKeys.includes(lastActiveChild)) {
-                        activeChildId = lastActiveChild;
-                    }
-                }
-
-                if (children && activeChildId) {
-                    const activeChild = children[activeChildId];
-                    const userDetails = {
-                        ...activeChild,
-                        phoneNumber: userKey,
-                        childId: activeChildId,
-                        activeChildId: activeChildId,
-                    };
-
-                    if (setQuizContext) {
-                        setQuizContext({ userDetails, questionPaper: null });
-                    }
-                    if (typeof window !== "undefined") {
-                        window.localStorage.removeItem("quizSession");
-                    }
-                } else {
-                    if (typeof window !== "undefined" && activeChildId) {
-                        try {
-                            const storedSession = window.localStorage.getItem("quizSession");
-                            if (storedSession) {
-                                const parsed = JSON.parse(storedSession);
-                                if (parsed?.userDetails?.childId && parsed.userDetails.childId !== activeChildId) {
-                                    window.localStorage.removeItem("quizSession");
-                                }
-                            }
-                        } catch (e) {
-                            window.localStorage.removeItem("quizSession");
-                        }
-                    }
-                    if (children && activeChildId) {
-                        const activeChild = children[activeChildId];
-                        // Direct redirect if logged in
-                        if (activeChild.grade) {
-                            const gradeDigit = activeChild.grade.replace(/\D/g, '');
-                            router.push(`/practice?grade=${gradeDigit}`);
-                            return;
-                        }
-                    }
-                }
-            } catch (e) {
-                console.error("Navigation start test error:", e);
-            }
-            router.push("/practice"); // Fallback if no specific child/grade found but user is user
-        } else if (hasSession) {
-            // Try to recover grade from session if possible, otherwise just push to practice
-            try {
-                if (typeof window !== "undefined") {
-                    const quizSession = window.localStorage.getItem("quizSession");
-                    if (quizSession) {
-                        const parsed = JSON.parse(quizSession);
-                        if (parsed?.userDetails?.grade) {
-                            const gradeDigit = parsed.userDetails.grade.replace(/\D/g, '');
-                            router.push(`/practice?grade=${gradeDigit}`);
-                            return;
-                        }
-                    }
-                }
-            } catch (e) { }
-            router.push("/practice");
+        // ALWAYS Show Grade Selector, but check auth first
+        if (user || hasSession) {
+            setShowGradeSelector(true);
         } else {
-            setRedirectPath("/practice");
+            // Not logged in -> Login First, then show Grade Selector
+            setRedirectPath("NONE"); // Special flag to prevent auto-redirect
             setAuthModalOpen(true);
         }
     };
@@ -291,10 +210,70 @@ const Header = () => {
                 }}
                 onSuccess={() => {
                     setAuthModalOpen(false);
-                    setRedirectPath(null);
-                    window.location.reload(); // Reload to update session state
+                    // Check if we need to show grade selector immediately after login
+                    if (redirectPath === "NONE") {
+                        setShowGradeSelector(true);
+                        setRedirectPath(null);
+                        // Do NOT reload here, let the user pick a grade
+                    } else {
+                        setRedirectPath(null);
+                        window.location.reload(); // Reload to update session state for other cases
+                    }
                 }}
             />
+
+            {/* Grade Selection Dialog */}
+            <Dialog
+                open={showGradeSelector}
+                onClose={() => setShowGradeSelector(false)}
+                maxWidth="xs"
+                fullWidth
+                PaperProps={{
+                    style: { borderRadius: 20, padding: 10 }
+                }}
+            >
+                <DialogTitle className="flex justify-between items-center text-[#0B2545] font-bold pb-2 border-b border-gray-100">
+                    Select Your Grade
+                    <IconButton onClick={() => setShowGradeSelector(false)} size="small">
+                        <X size={20} />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent className="pt-6 pb-2">
+                    <div className="mt-4">
+                        <FormControl fullWidth>
+                            <InputLabel id="grade-select-label">Select Grade</InputLabel>
+                            <Select
+                                labelId="grade-select-label"
+                                value={selectedGrade}
+                                label="Select Grade"
+                                onChange={(e) => setSelectedGrade(e.target.value)}
+                            >
+                                {[...Array(10)].map((_, i) => (
+                                    <MenuItem key={i + 1} value={(i + 1).toString()}>
+                                        Grade {i + 1}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+
+                        <button
+                            onClick={() => {
+                                if (selectedGrade) {
+                                    setShowGradeSelector(false);
+                                    router.push(`/practice?grade=${selectedGrade}`);
+                                }
+                            }}
+                            disabled={!selectedGrade}
+                            className={`w-full mt-6 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${selectedGrade
+                                    ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md"
+                                    : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                                }`}
+                        >
+                            Start Practice
+                        </button>
+                    </div>
+                </DialogContent>
+            </Dialog>
             {/* Spacer to prevent content overlap with fixed header */}
             <div className="h-14 md:h-12" />
         </>
