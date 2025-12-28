@@ -1,4 +1,5 @@
 import TeacherStudentView from "@/components/Dashboard/TeacherStudentView";
+import { Suspense } from "react";
 
 export const metadata = {
     title: "Student Performance - Teacher Dashboard",
@@ -7,5 +8,9 @@ export const metadata = {
 
 export default async function TeacherStudentPage({ params }) {
     const { studentId } = await params;
-    return <TeacherStudentView studentUid={studentId} />;
+    return (
+        <Suspense fallback={<div>Loading student data...</div>}>
+            <TeacherStudentView studentUid={studentId} />
+        </Suspense>
+    );
 }

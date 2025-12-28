@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Timer } from "@/components/RapidMath/timer"
 import { QuestionCard } from "@/components/RapidMath/question-card"
@@ -28,7 +28,7 @@ interface TestResult {
   skipped: boolean
 }
 
-export default function TestPage() {
+function TestContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -228,5 +228,20 @@ export default function TestPage() {
         )}
       </div>
     </main>
+  )
+}
+
+export default function TestPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-4 text-slate-500 animate-pulse">
+          <Loader2 size={48} className="animate-spin text-blue-500" />
+          <span className="text-xl font-medium">Loading test...</span>
+        </div>
+      </div>
+    }>
+      <TestContent />
+    </Suspense>
   )
 }

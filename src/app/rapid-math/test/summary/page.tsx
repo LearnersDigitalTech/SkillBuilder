@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -22,7 +22,7 @@ interface TestResult {
   skipped: boolean
 }
 
-export default function SummaryPage() {
+function SummaryContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const reportId = searchParams.get("reportId")
@@ -342,6 +342,21 @@ export default function SummaryPage() {
 
       </div>
     </main>
+  )
+}
+
+export default function SummaryPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-4 text-slate-500 animate-pulse">
+          <div className="w-12 h-12 rounded-full border-4 border-t-blue-500 animate-spin"></div>
+          <span className="text-xl font-medium">Loading Summary...</span>
+        </div>
+      </div>
+    }>
+      <SummaryContent />
+    </Suspense>
   )
 }
 
