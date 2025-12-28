@@ -4,6 +4,16 @@ const nextConfig = {
   reactCompiler: true,
   // Enable standalone output for Docker deployment
   output: 'standalone',
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'img.youtube.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

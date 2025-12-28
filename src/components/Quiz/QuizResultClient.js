@@ -39,7 +39,7 @@ const HeroChart = ({ summary, notAttempted }) => {
     );
 };
 
-import Navigation from "@/components/Navigation/Navigation.component";
+import Header from "@/app/homepage/Header";
 import MathRenderer from "@/components/MathRenderer/MathRenderer.component";
 import TypeFactorTree from "@/components/QuestionTypes/TypeFactorTree/TypeFactorTree.component";
 import { CheckCircle, XCircle, HelpCircle, Clock, Target, BookOpen, TrendingUp, BarChart3, FileText, X, AlertCircle, Download, ArrowLeft } from "lucide-react";
@@ -184,6 +184,7 @@ const QuizResultClient = () => {
     const [showCelebration, setShowCelebration] = useState(false);
     const [floatingEmojis, setFloatingEmojis] = useState([]);
     const [isAdminView, setIsAdminView] = useState(false);
+    const [studentInfo, setStudentInfo] = useState(null); // For teacher view
 
     useEffect(() => {
         const loadReport = async () => {
@@ -302,65 +303,142 @@ const QuizResultClient = () => {
 
                 // Case 1: If reportId is provided in URL, fetch that specific report from Firebase
                 // This takes priority over in-memory quizSession to show the correct historical report
-                if (reportId && user && userData?.children) {
-                    // Fetch specific report from Firebase
-                    const userKey = getUserDatabaseKey(user);
-                    const children = userData.children;
-                    const childKeys = Object.keys(children);
-                    if (childKeys.length === 0) return;
+                if (reportId) {
+                    // Check if this is teacher view
+                    const teacherView = searchParams.get("teacherView");
+                    const studentUidParam = searchParams.get("studentUid");
+                    const childIdParam = searchParams.get("childId");
 
-                    let activeChildId = childKeys[0];
-                    if (childKeys.length > 1 && typeof window !== "undefined") {
-                        const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
-                        if (storedChildId && childKeys.includes(storedChildId)) {
-                            activeChildId = storedChildId;
+                    if (teacherView === 'true' && studentUidParam && childIdParam) {
+                        // Teacher viewing student's report
+                        console.log('👨‍🏫 Teacher View - Loading student report:', { studentUidParam, childIdParam, reportId });
+
+                        // Fetch student profile data
+                        const studentRef = ref(firebaseDatabase, `NMD_2025/Registrations/${studentUidParam}`);
+                        const studentSnapshot = await get(studentRef);
+
+                        if (studentSnapshot.exists()) {
+                            const studentData = studentSnapshot.val();
+                            const childData = studentData.children?.[childIdParam];
+
+                            setStudentInfo({
+                                name: childData?.name || studentData.name || 'Student',
+                                grade: childData?.grade || studentData.grade || 'Grade',
+                                email: studentData.email || studentData.parentEmail || ''
+                            });
+                            console.log('✅ Student info loaded:', {
+                                name: childData?.name || studentData.name,
+                                grade: childData?.grade || studentData.grade
+                            });
                         }
-                    }
 
-                    const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${userKey}/${activeChildId}`);
-                    const snapshot = await get(reportRef);
-                    if (!snapshot.exists()) {
-                        return;
-                    }
+                        const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${studentUidParam}/${childIdParam}`);
+                        const snapshot = await get(reportRef);
 
-                    const data = snapshot.val();
-                    let targetReport = null;
+                        if (!snapshot.exists()) {
+                            console.log('❌ No reports found for student');
+                            setLoadingReport(false);
+                            return;
+                        }
 
-                    if (reportId === 'root') {
-                        targetReport = data;
-                    } else if (data[reportId]) {
-                        targetReport = data[reportId];
-                    }
+                        const data = snapshot.val();
+                        let targetReport = null;
 
-                    if (targetReport) {
-                        // Handle both old format (generalFeedbackStringified) and new format (direct fields)
-                        let topicFeedback = targetReport.topicFeedback;
-                        let perQuestionReport = targetReport.perQuestionReport;
-                        let learningPlanSummary = targetReport.learningPlanSummary;
-                        let learningPlan = targetReport.learningPlan;
+                        if (reportId === 'root') {
+                            targetReport = data;
+                        } else if (data[reportId]) {
+                            targetReport = data[reportId];
+                        }
 
-                        // Backward compatibility: parse old format if needed
-                        if (!topicFeedback && targetReport.generalFeedbackStringified) {
-                            try {
-                                const parsed = JSON.parse(targetReport.generalFeedbackStringified);
-                                topicFeedback = parsed.topicFeedback || {};
-                                perQuestionReport = parsed.perQuestionReport || [];
-                                learningPlanSummary = parsed.learningPlanSummary || "";
-                            } catch (e) {
-                                topicFeedback = {};
-                                perQuestionReport = [];
-                                learningPlanSummary = "";
+                        if (targetReport) {
+                            let topicFeedback = targetReport.topicFeedback;
+                            let perQuestionReport = targetReport.perQuestionReport;
+                            let learningPlanSummary = targetReport.learningPlanSummary;
+                            let learningPlan = targetReport.learningPlan;
+
+                            if (!topicFeedback && targetReport.generalFeedbackStringified) {
+                                try {
+                                    const parsed = JSON.parse(targetReport.generalFeedbackStringified);
+                                    topicFeedback = parsed.topicFeedback || {};
+                                    perQuestionReport = parsed.perQuestionReport || [];
+                                    learningPlanSummary = parsed.learningPlanSummary || "";
+                                } catch (e) {
+                                    topicFeedback = {};
+                                    perQuestionReport = [];
+                                    learningPlanSummary = "";
+                                }
+                            }
+
+                            setReportState({
+                                summary: targetReport.summary,
+                                topicFeedback: topicFeedback || {},
+                                perQuestionReport: perQuestionReport || [],
+                                learningPlanSummary: learningPlanSummary || "",
+                                learningPlan: learningPlan || [],
+                            });
+                            setLoadingReport(false);
+                            return;
+                        }
+                    } else if (user && userData?.children) {
+                        // Regular user viewing their own report
+                        const userKey = getUserDatabaseKey(user);
+                        const children = userData.children;
+                        const childKeys = Object.keys(children);
+                        if (childKeys.length === 0) return;
+
+                        let activeChildId = childKeys[0];
+                        if (childKeys.length > 1 && typeof window !== "undefined") {
+                            const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
+                            if (storedChildId && childKeys.includes(storedChildId)) {
+                                activeChildId = storedChildId;
                             }
                         }
 
-                        setReportState({
-                            summary: targetReport.summary,
-                            topicFeedback: topicFeedback || {},
-                            perQuestionReport: perQuestionReport || [],
-                            learningPlanSummary: learningPlanSummary || "",
-                            learningPlan: learningPlan || [], // NEW: Include learning plan array
-                        });
-                        return;
+                        const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${userKey}/${activeChildId}`);
+                        const snapshot = await get(reportRef);
+                        if (!snapshot.exists()) {
+                            return;
+                        }
+
+                        const data = snapshot.val();
+                        let targetReport = null;
+
+                        if (reportId === 'root') {
+                            targetReport = data;
+                        } else if (data[reportId]) {
+                            targetReport = data[reportId];
+                        }
+
+                        if (targetReport) {
+                            // Handle both old format (generalFeedbackStringified) and new format (direct fields)
+                            let topicFeedback = targetReport.topicFeedback;
+                            let perQuestionReport = targetReport.perQuestionReport;
+                            let learningPlanSummary = targetReport.learningPlanSummary;
+                            let learningPlan = targetReport.learningPlan;
+
+                            // Backward compatibility: parse old format if needed
+                            if (!topicFeedback && targetReport.generalFeedbackStringified) {
+                                try {
+                                    const parsed = JSON.parse(targetReport.generalFeedbackStringified);
+                                    topicFeedback = parsed.topicFeedback || {};
+                                    perQuestionReport = parsed.perQuestionReport || [];
+                                    learningPlanSummary = parsed.learningPlanSummary || "";
+                                } catch (e) {
+                                    topicFeedback = {};
+                                    perQuestionReport = [];
+                                    learningPlanSummary = "";
+                                }
+                            }
+
+                            setReportState({
+                                summary: targetReport.summary,
+                                topicFeedback: topicFeedback || {},
+                                perQuestionReport: perQuestionReport || [],
+                                learningPlanSummary: learningPlanSummary || "",
+                                learningPlan: learningPlan || [], // NEW: Include learning plan array
+                            });
+                            return;
+                        }
                     }
                 }
 
@@ -809,9 +887,11 @@ const QuizResultClient = () => {
         yPos += 7;
 
         doc.setFont(undefined, 'normal');
-        doc.text(`Name: ${displayName || 'Student'}`, 14, yPos);
+        const pdfStudentName = quizSession?.userDetails?.name || userData?.children?.[quizSession?.userDetails?.activeChildId]?.name || userData?.name || 'Student';
+        const pdfStudentGrade = quizSession?.userDetails?.grade || userData?.children?.[quizSession?.userDetails?.activeChildId]?.grade || userData?.grade || 'Grade';
+        doc.text(`Name: ${pdfStudentName}`, 14, yPos);
         yPos += 6;
-        doc.text(`${displayGrade}`, 14, yPos);
+        doc.text(`${pdfStudentGrade}`, 14, yPos);
         yPos += 6;
         doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, yPos);
         yPos += 12;
@@ -1042,8 +1122,10 @@ const QuizResultClient = () => {
         // Add student info
         doc.setFontSize(12);
         doc.setTextColor(0, 0, 0);
-        doc.text(`Student: ${displayName}`, 20, 35);
-        doc.text(`Grade: ${displayGrade}`, 20, 42);
+        const planStudentName = quizSession?.userDetails?.name || userData?.children?.[quizSession?.userDetails?.activeChildId]?.name || userData?.name || 'Student';
+        const planStudentGrade = quizSession?.userDetails?.grade || userData?.children?.[quizSession?.userDetails?.activeChildId]?.grade || userData?.grade || 'Grade';
+        doc.text(`Student: ${planStudentName}`, 20, 35);
+        doc.text(`Grade: ${planStudentGrade}`, 20, 42);
         doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 49);
         doc.text(`Powered by Learners Digital Tech`, 20, 56);
 
@@ -1083,14 +1165,15 @@ const QuizResultClient = () => {
         });
 
         // Save PDF
-        const fileName = `Learning_Plan_${displayName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+        const fileStudentName = quizSession?.userDetails?.name || userData?.children?.[quizSession?.userDetails?.activeChildId]?.name || userData?.name || 'Student';
+        const fileName = `Learning_Plan_${fileStudentName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
         doc.save(fileName);
     };
 
     if (loadingReport && !reportState) {
         return (
             <div className={Styles.quizResultContainer}>
-                <Navigation />
+                <Header />
                 <div className={Styles.loadingWrapper}>
                     <CircularProgress />
                     <span>Loading report...</span>
@@ -1102,7 +1185,7 @@ const QuizResultClient = () => {
 
     return (
         <div className={Styles.quizResultContainer}>
-            <Navigation />
+            <Header />
 
             <div className={Styles.quizResultContent}>
 
@@ -1135,9 +1218,13 @@ const QuizResultClient = () => {
                 <header className={Styles.heroSection}>
                     <div className={Styles.heroContent}>
                         <div className={Styles.userInfo}>
-                            <span className={Styles.userName}>{displayName}</span>
+                            <span className={Styles.userName}>
+                                {studentInfo?.name || quizSession?.userDetails?.name || userData?.children?.[quizSession?.userDetails?.activeChildId]?.name || userData?.name || 'Student'}
+                            </span>
                             <span className={Styles.divider}>•</span>
-                            <span>{displayGrade}</span>
+                            <span>
+                                {studentInfo?.grade || quizSession?.userDetails?.grade || userData?.children?.[quizSession?.userDetails?.activeChildId]?.grade || userData?.grade || 'Grade'}
+                            </span>
                         </div>
                         <h1 className={Styles.mainTitle}>Quiz Results</h1>
                         <p className={Styles.subtitle}>Math Skill Report - Powered by Learners</p>

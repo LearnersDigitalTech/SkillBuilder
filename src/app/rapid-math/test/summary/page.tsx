@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { CheckCircle2, XCircle, Clock, Zap, RotateCcw, Home, Trophy, AlertTriangle } from "lucide-react"
-import Navigation from "@/components/Navigation/Navigation.component"
+import Header from "@/app/homepage/Header"
 import { useAuth } from "@/context/AuthContext"
 import { ref, set, get, push } from "firebase/database"
 import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler"
@@ -40,53 +40,56 @@ export default function SummaryPage() {
       // Mode 1: Viewing past report
       if (reportId && user) {
         try {
-          const userKey = getUserDatabaseKey(user)
-          // Since we typically sanitize in the dashboard, let's look there first.
-          // Or if the key is just correct from the helper. 
-          // Note: DashboardClient uses `userKey.replace('.', '_')`. Let's match that just in case.
-          const sanitizedKey = userKey?.replace('.', '_');
+          // Check if this is teacher view
+          const teacherView = searchParams.get("teacherView")
+          const studentUidParam = searchParams.get("studentUid")
+          const childIdParam = searchParams.get("childId")
 
-          // We need to find where the report is located. 
-          // Try user root and children.
+          let userKey: string | null = null
+          let childId = "default"
 
-          let foundReport = null;
+          if (teacherView === 'true' && studentUidParam && childIdParam) {
+            // Teacher viewing student's report
+            console.log('👨‍🏫 Teacher View - Loading student rapid math report:', { studentUidParam, childIdParam, reportId })
+            userKey = studentUidParam
+            childId = childIdParam
+          } else {
+            // Regular user viewing their own report
+            userKey = getUserDatabaseKey(user)
+            const sanitizedKey = userKey?.replace('.', '_')
+            userKey = sanitizedKey
 
-          // Try sanitized path first (standard for this app apparently)
-          if (sanitizedKey) {
-            const reportsRef = ref(firebaseDatabase, `NMD_2025/Reports/${sanitizedKey}`)
-            const snapshot = await get(reportsRef);
-            if (snapshot.exists()) {
-              const data = snapshot.val();
-              if (data[reportId]) foundReport = data[reportId]; // Check root
-              else {
-                Object.values(data).forEach((childData: any) => {
-                  if (childData && childData[reportId]) {
-                    foundReport = childData[reportId];
-                  }
-                })
+            // Determine active child
+            if (userData && userData.children) {
+              const childKeys = Object.keys(userData.children)
+              if (childKeys.length > 0) {
+                childId = childKeys[0]
+                if (typeof window !== "undefined") {
+                  const storedId = window.localStorage.getItem(`activeChild_${userKey}`)
+                  if (storedId && childKeys.includes(storedId)) childId = storedId
+                }
               }
             }
           }
 
-          // If not found, maybe try raw key? (Just in case)
-          if (!foundReport && userKey && userKey !== sanitizedKey) {
-            const reportsRef = ref(firebaseDatabase, `NMD_2025/Reports/${userKey}`)
-            const snapshot = await get(reportsRef);
+          let foundReport = null
+
+          // Try to find the report
+          if (userKey) {
+            const reportsRef = ref(firebaseDatabase, `NMD_2025/Reports/${userKey}/${childId}`)
+            const snapshot = await get(reportsRef)
             if (snapshot.exists()) {
-              const data = snapshot.val();
-              if (data[reportId]) foundReport = data[reportId];
-              else {
-                Object.values(data).forEach((childData: any) => {
-                  if (childData && childData[reportId]) {
-                    foundReport = childData[reportId];
-                  }
-                })
+              const data = snapshot.val()
+              if (data[reportId]) {
+                foundReport = data[reportId]
               }
             }
           }
 
           if (foundReport && foundReport.questions) {
             setResults(foundReport.questions)
+          } else {
+            console.log('❌ Rapid math report not found')
           }
 
         } catch (e) {
@@ -194,8 +197,8 @@ export default function SummaryPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-900 font-sans">
-      <Navigation />
-      <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8 animate-in fade-in duration-700 slide-in-from-bottom-4 pt-20">
+      <Header />
+      <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8 animate-in fade-in duration-700 slide-in-from-bottom-4">
 
         {/* Header Section */}
         <div className="text-center space-y-4">

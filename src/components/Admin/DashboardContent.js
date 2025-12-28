@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Box, Grid, Typography, CircularProgress, Container, Button, Stack } from '@mui/material';
-import { Users, CheckCircle, XCircle, FileText, LayoutDashboard, List, Trophy, AlertTriangle, Gift } from 'lucide-react';
+import { Users, CheckCircle, XCircle, FileText, LayoutDashboard, List, Trophy, AlertTriangle, Gift, GraduationCap } from 'lucide-react';
 import { ref, get, remove } from 'firebase/database';
 import { firebaseDatabase, db } from '@/backend/firebaseHandler';
 import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
@@ -10,6 +10,7 @@ import { MarksBarChart, StudentsAreaChart } from './Charts';
 import StudentList from './StudentList';
 import PuzzleManager from './PuzzleManager';
 import SecurityDashboard from './SecurityDashboard';
+import TeacherManagement from './TeacherManagement';
 import dynamic from 'next/dynamic';
 
 const LotteryManager = dynamic(() => import('./LotteryManager'), { ssr: false });
@@ -296,7 +297,9 @@ const DashboardContent = ({ logoutAction }) => {
 
                 students.forEach(student => {
                     // "duplicate rows for the same name merge not same mail"
-                    const key = student.name || student.id; // Group by Name
+                    // FIX: Merge strictly by Name AND Key (or Email) to prevent merging different accounts with same name.
+                    // Using Name + Email ensures distinct users (e.g. Gmail vs LGS) are kept separate.
+                    const key = `${student.name}_${student.email || 'no_email'}`;
 
                     if (!mergedStudentsMap.has(key)) {
                         mergedStudentsMap.set(key, { ...student });
@@ -518,6 +521,14 @@ const DashboardContent = ({ logoutAction }) => {
                 >
                     Lottery
                 </Button>
+                <Button
+                    variant={view === 'teachers' ? 'contained' : 'outlined'}
+                    startIcon={<GraduationCap size={20} />}
+                    onClick={() => setView('teachers')}
+                    sx={{ borderRadius: 2, textTransform: 'none', px: 3 }}
+                >
+                    Teachers
+                </Button>
             </Stack>
 
             {view === 'overview' ? (
@@ -578,6 +589,8 @@ const DashboardContent = ({ logoutAction }) => {
                 <SecurityDashboard />
             ) : view === 'lottery' ? (
                 <LotteryManager />
+            ) : view === 'teachers' ? (
+                <TeacherManagement />
             ) : (
                 <StudentList
                     students={studentList}

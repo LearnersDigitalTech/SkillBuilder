@@ -9,6 +9,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [userData, setUserData] = useState(null);
+    const [userType, setUserType] = useState(null); // 'student', 'parent', 'teacher'
     const [activeChildId, setActiveChildId] = useState(null);
     const [activeChildLoading, setActiveChildLoading] = useState(true);
     const [loading, setLoading] = useState(true);
@@ -19,10 +20,16 @@ export const AuthProvider = ({ children }) => {
         return userData.children[activeChildId] || null;
     }, [userData, activeChildId]);
 
+    // Compute if user is a teacher
+    const isTeacher = useMemo(() => {
+        return userType === 'teacher';
+    }, [userType]);
+
     // Function to fetch and normalize user data from Firebase
     const fetchUserData = async (currentUser) => {
         if (!currentUser) {
             setUserData(null);
+            setUserType(null);
             return;
         }
 
@@ -30,11 +37,40 @@ export const AuthProvider = ({ children }) => {
             // Get database key based on auth provider
             const userKey = getUserDatabaseKey(currentUser);
             const userRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}`);
-            const snapshot = await get(userRef);
 
-            if (snapshot.exists()) {
+            let snapshot;
+            try {
+                snapshot = await get(userRef);
+            } catch (error) {
+                console.warn("Primary key access failed, trying fallback...", error);
+            }
+
+            // Fallback: If UID access fails or returns empty, try email-based key (e.g., S1001)
+            if ((!snapshot || !snapshot.exists()) && currentUser.email && currentUser.email.endsWith('@lgs.com')) {
+                try {
+                    const shortKey = currentUser.email.split('@')[0].toUpperCase();
+                    const fallbackRef = ref(firebaseDatabase, `NMD_2025/Registrations/${shortKey}`);
+                    snapshot = await get(fallbackRef);
+                } catch (fallbackError) {
+                    console.error("Fallback access also failed:", fallbackError);
+                }
+            }
+
+            if (snapshot && snapshot.exists()) {
                 const rawData = snapshot.val();
 
+                // Check if user is a teacher based on userType field
+                if (rawData.userType === 'teacher') {
+                    setUserType('teacher');
+                    setUserData({
+                        ...rawData,
+                        uid: currentUser.uid,
+                        isTeacher: true
+                    });
+                    return;
+                }
+
+                // Not a teacher - normalize student/parent data
                 // Normalize to support multiple child profiles per user.
                 // Legacy shape: a single profile object at the root.
                 // New shape: { parentPhone/parentEmail, authProvider, children: { childId: { ...profile } } }
@@ -63,13 +99,18 @@ export const AuthProvider = ({ children }) => {
                     normalizedData = null;
                 }
 
+                // Determine user type from registration data
+                const detectedUserType = rawData?.userType || 'parent'; // Default to parent for legacy users
+                setUserType(detectedUserType);
                 setUserData(normalizedData);
             } else {
                 setUserData(null); // User authenticated but profile not created yet
+                setUserType(null);
             }
         } catch (error) {
             console.error("Error fetching user data:", error);
             setUserData(null);
+            setUserType(null);
         }
     };
 
@@ -131,6 +172,7 @@ export const AuthProvider = ({ children }) => {
             await signOut(auth);
             setUser(null);
             setUserData(null);
+            setUserType(null);
             setActiveChildId(null);
         } catch (error) {
             console.error("Error signing out:", error);
@@ -141,6 +183,8 @@ export const AuthProvider = ({ children }) => {
         <AuthContext.Provider value={{
             user,
             userData,
+            userType,
+            isTeacher,
             activeChild,
             activeChildId,
             activeChildLoading,

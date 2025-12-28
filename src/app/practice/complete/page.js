@@ -2,7 +2,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { Award, RefreshCcw, Home } from "lucide-react";
-import Navigation from "@/components/Navigation/Navigation.component";
+import Header from "@/app/homepage/Header";
 import Styles from "./complete.module.css";
 
 export default function PracticeCompletePage() {
@@ -10,7 +10,7 @@ export default function PracticeCompletePage() {
 
     return (
         <div className={Styles.pageContainer}>
-            <Navigation />
+            <Header />
 
             <div className={Styles.contentWrapper}>
                 <div className={Styles.card}>

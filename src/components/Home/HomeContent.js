@@ -1,5 +1,5 @@
 "use client";
-import Navigation from "@/components/Navigation/Navigation.component";
+import Header from "@/app/homepage/Header";
 import Styles from "../../app/page.module.css";
 import { Button, CircularProgress } from "@mui/material";
 import { Award, Clock, Contact, ArrowRight, Target, Coins, Ticket, School, Medal } from "lucide-react";
@@ -108,6 +108,12 @@ const HomeContent = () => {
         }
 
         if (user) {
+            // Check if user is a teacher - route to teacher dashboard
+            if (userData?.isTeacher || userData?.userType === 'teacher') {
+                router.push("/teacher-dashboard");
+                return;
+            }
+
             // Get user key (works for phone, Google, and email auth)
             // Robust user key retrieval
             let userKey = null;
@@ -206,7 +212,13 @@ const HomeContent = () => {
         };
 
         setQuizContext({ userDetails, questionPaper: null });
-        router.push("/quiz");
+
+        // FIX: Check if grade is present before starting quiz
+        if (activeChild.grade && activeChild.grade !== "Select Grade" && activeChild.grade !== "" && activeChild.grade !== "N/A") {
+            router.push("/quiz");
+        } else {
+            router.push("/dashboard");
+        }
     };
 
     return (
@@ -214,7 +226,7 @@ const HomeContent = () => {
             <Curtain open={curtainOpen} />
             <Balloons show={showBalloons} />
             <FloatingLottery />
-            <Navigation />
+            <Header />
             <div className={Styles.heroContainer}>
                 <div className={Styles.contentContainer}>
                     <div className={Styles.titleSection}>

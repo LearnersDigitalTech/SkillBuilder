@@ -523,3 +523,34 @@
 .profileList::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
+
+/* ============ DIVIDER ============ */
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin: 10px 0;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.divider span {
+    padding: 0 12px;
+}
+
+/* ============ EMAIL LOGIN CONTAINER ============ */
+.emailLoginContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 8px;
+    animation: fadeInUp 0.5s ease-out forwards;
+}

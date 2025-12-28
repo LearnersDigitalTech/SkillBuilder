@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Timer } from "@/components/RapidMath/timer"
 import { QuestionCard } from "@/components/RapidMath/question-card"
 import { Loader2 } from "lucide-react"
-import Navigation from "@/components/Navigation/Navigation.component"
+import Header from "@/app/homepage/Header"
 
 interface Question {
   id: number
@@ -189,7 +189,7 @@ export default function TestPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex flex-col font-sans overflow-hidden">
-      <Navigation />
+      <Header />
 
       {/* Floating Header */}
       <div className="fixed top-20 left-0 right-0 z-10 px-4 md:px-8 pointer-events-none">
@@ -206,7 +206,7 @@ export default function TestPage() {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex items-center justify-center p-4 pt-20">
+      <div className="flex-1 flex items-center justify-center p-4">
         {isLoading ? (
           <div className="flex flex-col items-center gap-4 text-slate-500 animate-pulse">
             <Loader2 size={48} className="animate-spin text-blue-500" />
