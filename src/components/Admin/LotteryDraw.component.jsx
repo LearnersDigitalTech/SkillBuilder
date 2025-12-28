@@ -8,7 +8,9 @@ import {
     Button,
     Grid,
     Chip,
-    Container
+    Container,
+    TextField,
+    MenuItem
 } from '@mui/material';
 import { ref, get } from 'firebase/database';
 import { firebaseDatabase } from '@/backend/firebaseHandler';
@@ -22,11 +24,14 @@ const LotteryDraw = ({ isModal = false }) => {
     // Grand Draw State
     const [grandDrawState, setGrandDrawState] = useState('idle'); // 'idle', 'drawing', 'completed'
     const [currentReveal, setCurrentReveal] = useState(''); // 'parent', 'student', 'teacher', 'guest'
+    const [roundName, setRoundName] = useState('Round 1');
+    const [drawFilter, setDrawFilter] = useState('All');
+    const [winnerCount, setWinnerCount] = useState(1);
     const [grandWinners, setGrandWinners] = useState({
-        parent: null,
-        student: null,
-        teacher: null,
-        guest: null
+        parent: [],
+        student: [],
+        teacher: [],
+        guest: []
     });
 
     const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -41,42 +46,111 @@ const LotteryDraw = ({ isModal = false }) => {
         });
     };
 
+    const [previousWinners, setPreviousWinners] = useState(new Set());
+    const BLACKLIST = ['P1121', 'S12011', 'T1005', 'G1005'];
+
+    useEffect(() => {
+        const fetchWinners = async () => {
+            try {
+                const winnersRef = ref(firebaseDatabase, 'Lottery/Winners');
+                const snapshot = await get(winnersRef);
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const codes = new Set(Object.values(data).map(w => w.ticketCode));
+                    setPreviousWinners(codes);
+                }
+            } catch (error) {
+                console.error("Error fetching winners for exclusion:", error);
+            }
+        };
+        fetchWinners();
+    }, []);
+
     const handleGrandDraw = async () => {
         if (registrations.length === 0) return;
 
         setGrandDrawState('drawing');
-        setGrandWinners({ parent: null, student: null, teacher: null, guest: null });
+        setGrandWinners({ parent: [], student: [], teacher: [], guest: [] });
         setCurrentReveal('initiating');
 
-        // Select Winners
-        const parents = registrations.filter(r => r.effectiveUserType === 'parent');
-        const students = registrations.filter(r => r.effectiveUserType === 'student');
-        const teachers = registrations.filter(r => r.effectiveUserType === 'teacher');
-        const guests = registrations.filter(r => ['guest', 'other'].includes(r.effectiveUserType));
-
-        const selected = {
-            parent: parents.length > 0 ? parents[Math.floor(Math.random() * parents.length)] : null,
-            student: students.length > 0 ? students[Math.floor(Math.random() * students.length)] : null,
-            teacher: teachers.length > 0 ? teachers[Math.floor(Math.random() * teachers.length)] : null,
-            guest: guests.length > 0 ? guests[Math.floor(Math.random() * guests.length)] : null,
+        // Helper to get random unique items
+        const getRandomUnique = (pool, count) => {
+            if (pool.length === 0) return [];
+            const shuffled = [...pool].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, Math.min(count, pool.length));
         };
 
-        // Sequence: Parent -> Student -> Teacher -> Guest
-        const sequence = [
-            { role: 'parent', label: 'Lucky Parent', color: '#4caf50' },
-            { role: 'student', label: 'Lucky Student', color: '#2196f3' },
-            { role: 'teacher', label: 'Lucky Teacher', color: '#ff9800' },
-            { role: 'guest', label: 'Lucky Guest', color: '#9c27b0' }
-        ];
+        // EXCLUSION LOGIC: Filter out Blacklist and Previous Winners
+        const eligibleRegistrations = registrations.filter(r =>
+            !BLACKLIST.includes(r.ticketCode) &&
+            !previousWinners.has(r.ticketCode)
+        );
 
-        for (const step of sequence) {
-            setCurrentReveal(step.role);
+        console.log(`Pool Size: ${registrations.length} -> Eligible: ${eligibleRegistrations.length}`);
+
+        const pools = {
+            parent: eligibleRegistrations.filter(r => r.effectiveUserType === 'parent'),
+            student: eligibleRegistrations.filter(r => r.effectiveUserType === 'student'),
+            teacher: eligibleRegistrations.filter(r => r.effectiveUserType === 'teacher'),
+            guest: eligibleRegistrations.filter(r => ['guest', 'other'].includes(r.effectiveUserType))
+        };
+
+        // Determine Sequence of Draws
+        let drawSequence = [];
+
+        if (drawFilter === 'All') {
+            // Standard flow: 1 of each
+            ['parent', 'student', 'teacher', 'guest'].forEach(role => {
+                const winner = getRandomUnique(pools[role], 1)[0];
+                drawSequence.push({ role, winner, label: `Lucky ${role.charAt(0).toUpperCase() + role.slice(1)}` });
+            });
+        } else {
+            // Filtered flow: N of specific role
+            const winners = getRandomUnique(pools[drawFilter], winnerCount);
+            winners.forEach((w, i) => {
+                drawSequence.push({
+                    role: drawFilter,
+                    winner: w,
+                    label: `Lucky ${drawFilter.charAt(0).toUpperCase() + drawFilter.slice(1)} #${i + 1}`
+                });
+            });
+        }
+
+        const { push } = await import('firebase/database');
+        const winnersRef = ref(firebaseDatabase, 'Lottery/Winners');
+
+        for (const step of drawSequence) {
+            setCurrentReveal(step.role); // For loading state
             await wait(2000); // Suspense
 
-            if (selected[step.role]) {
-                setGrandWinners(prev => ({ ...prev, [step.role]: selected[step.role] }));
+            if (step.winner) {
+                // Update state to show card
+                setGrandWinners(prev => ({
+                    ...prev,
+                    [step.role]: [...(prev[step.role] || []), step.winner]
+                }));
+
                 triggerConfetti();
-                await wait(3000); // Celebrate
+
+                // Save to Firebase
+                try {
+                    const winnerData = {
+                        ...step.winner,
+                        role: step.role,
+                        round: roundName || 'Round 1',
+                        timestamp: Date.now(),
+                        wonAt: new Date().toISOString()
+                    };
+                    await push(winnersRef, winnerData);
+
+                    // Update local exclusion list immediately
+                    setPreviousWinners(prev => new Set(prev).add(step.winner.ticketCode));
+
+                } catch (e) {
+                    console.error("Error saving winner:", e);
+                }
+
+                await wait(2000); // Celebrate (shorter wait for multiple)
             } else {
                 await wait(1000);
             }
@@ -86,9 +160,10 @@ const LotteryDraw = ({ isModal = false }) => {
         setCurrentReveal('');
     };
 
-    const renderWinnerCard = (role, title, color, count) => {
-        const winner = grandWinners[role];
-        const isRevealing = currentReveal === role;
+    const renderWinnerCard = (role, title, color, count, index = 0) => {
+        const winnersList = grandWinners[role] || [];
+        const winner = winnersList[index];
+        const isRevealing = currentReveal === role && winnersList.length === index;
 
         let content;
         if (winner) {
@@ -293,22 +368,96 @@ const LotteryDraw = ({ isModal = false }) => {
                         boxShadow: '0 20px 40px -10px rgba(0,0,0,0.1)'
                     }}
                 >
-                    <Grid container spacing={4} sx={{ pt: 2 }}>
-                        <Grid item xs={12} sm={6} md={3}>
-                            {renderWinnerCard('parent', 'Lucky Parent', '#059669', parentCount)}
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={3}>
-                            {renderWinnerCard('student', 'Lucky Student', '#2563eb', studentCount)}
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={3}>
-                            {renderWinnerCard('teacher', 'Lucky Teacher', '#d97706', teacherCount)}
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={3}>
-                            {renderWinnerCard('guest', 'Lucky Guest', '#7c3aed', guestCount)}
-                        </Grid>
+                    <Grid container spacing={4} sx={{ pt: 2, justifyContent: 'center' }}>
+                        {drawFilter === 'All' ? (
+                            <>
+                                <Grid item xs={12} sm={6} md={3}>
+                                    {renderWinnerCard('parent', 'Lucky Parent', '#059669', parentCount)}
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={3}>
+                                    {renderWinnerCard('student', 'Lucky Student', '#2563eb', studentCount)}
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={3}>
+                                    {renderWinnerCard('teacher', 'Lucky Teacher', '#d97706', teacherCount)}
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={3}>
+                                    {renderWinnerCard('guest', 'Lucky Guest', '#7c3aed', guestCount)}
+                                </Grid>
+                            </>
+                        ) : (
+                            // Render N cards for the selected filter
+                            Array.from({ length: winnerCount }).map((_, idx) => {
+                                const labels = {
+                                    parent: 'Lucky Parent',
+                                    student: 'Lucky Student',
+                                    teacher: 'Lucky Teacher',
+                                    guest: 'Lucky Guest'
+                                };
+                                const colors = {
+                                    parent: '#059669',
+                                    student: '#2563eb',
+                                    teacher: '#d97706',
+                                    guest: '#7c3aed'
+                                };
+                                const counts = {
+                                    parent: parentCount,
+                                    student: studentCount,
+                                    teacher: teacherCount,
+                                    guest: guestCount
+                                };
+                                return (
+                                    <Grid item xs={12} sm={6} md={Math.max(3, 12 / winnerCount)} key={idx}>
+                                        {renderWinnerCard(drawFilter, `${labels[drawFilter]} #${idx + 1}`, colors[drawFilter], counts[drawFilter], idx)}
+                                    </Grid>
+                                );
+                            })
+                        )}
                     </Grid>
 
-                    <Box display="flex" justifyContent="center" mt={5}>
+                    <Box display="flex" flexDirection="column" alignItems="center" mt={5} gap={3}>
+                        <Box display="flex" gap={2} flexWrap="wrap" justifyContent="center">
+                            <TextField
+                                label="Round Name"
+                                variant="outlined"
+                                value={roundName}
+                                onChange={(e) => setRoundName(e.target.value)}
+                                sx={{ bgcolor: 'rgba(255,255,255,0.8)', borderRadius: 1, minWidth: 200 }}
+                                disabled={grandDrawState === 'drawing'}
+                            />
+                            <TextField
+                                select
+                                label="Filter Category"
+                                value={drawFilter}
+                                onChange={(e) => {
+                                    setDrawFilter(e.target.value);
+                                    if (e.target.value === 'All') setWinnerCount(1);
+                                }}
+                                sx={{ bgcolor: 'rgba(255,255,255,0.8)', borderRadius: 1, minWidth: 200 }}
+                                disabled={grandDrawState === 'drawing'}
+                            >
+                                <MenuItem value="All">All Categories</MenuItem>
+                                <MenuItem value="student">Student</MenuItem>
+                                <MenuItem value="parent">Parent</MenuItem>
+                                <MenuItem value="teacher">Teacher</MenuItem>
+                                <MenuItem value="guest">Guest</MenuItem>
+                            </TextField>
+
+                            {drawFilter !== 'All' && (
+                                <TextField
+                                    select
+                                    label="Winner Count"
+                                    value={winnerCount}
+                                    onChange={(e) => setWinnerCount(Number(e.target.value))}
+                                    sx={{ bgcolor: 'rgba(255,255,255,0.8)', borderRadius: 1, minWidth: 150 }}
+                                    disabled={grandDrawState === 'drawing'}
+                                >
+                                    {[1, 2, 3, 4].map(n => (
+                                        <MenuItem key={n} value={n}>{n} Winner{n > 1 ? 's' : ''}</MenuItem>
+                                    ))}
+                                </TextField>
+                            )}
+                        </Box>
+
                         <Button
                             variant="contained"
                             size="large"

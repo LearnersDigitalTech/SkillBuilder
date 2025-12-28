@@ -14,6 +14,7 @@ import TeacherManagement from './TeacherManagement';
 import dynamic from 'next/dynamic';
 
 const LotteryManager = dynamic(() => import('./LotteryManager'), { ssr: false });
+const LuckyDrawWinners = dynamic(() => import('./LuckyDrawWinners'), { ssr: false });
 
 const DashboardContent = ({ logoutAction }) => {
     const [view, setView] = useState('overview'); // 'overview' | 'students'
@@ -522,6 +523,14 @@ const DashboardContent = ({ logoutAction }) => {
                     Lottery
                 </Button>
                 <Button
+                    variant={view === 'lucky_winners' ? 'contained' : 'outlined'}
+                    startIcon={<Trophy size={20} />}
+                    onClick={() => setView('lucky_winners')}
+                    sx={{ borderRadius: 2, textTransform: 'none', px: 3 }}
+                >
+                    Lucky Draw Winners
+                </Button>
+                <Button
                     variant={view === 'teachers' ? 'contained' : 'outlined'}
                     startIcon={<GraduationCap size={20} />}
                     onClick={() => setView('teachers')}
@@ -589,6 +598,8 @@ const DashboardContent = ({ logoutAction }) => {
                 <SecurityDashboard />
             ) : view === 'lottery' ? (
                 <LotteryManager />
+            ) : view === 'lucky_winners' ? (
+                <LuckyDrawWinners />
             ) : view === 'teachers' ? (
                 <TeacherManagement />
             ) : (
