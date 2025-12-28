@@ -15,8 +15,10 @@ import Tooltip from "@mui/material/Tooltip";
 const Header = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [authModalOpen, setAuthModalOpen] = useState(false);
+    const [redirectPath, setRedirectPath] = useState<string | null>(null);
     const [hasSession, setHasSession] = useState(false);
-    const { user, userData, isTeacher } = useAuth();
+    const [fallbackData, setFallbackData] = useState(null);
+    const { user, userData, isTeacher, activeChildId } = useAuth();
     const router = useRouter();
     // Context might be null if not wrapped, but usually is
     const quizContextVal = useContext(QuizSessionContext);
@@ -31,6 +33,7 @@ const Header = () => {
                         const parsed = JSON.parse(quizSession);
                         if (parsed?.userDetails) {
                             setHasSession(true);
+                            setFallbackData(parsed.userDetails);
                             return;
                         }
                     } catch (e) { }
@@ -40,6 +43,14 @@ const Header = () => {
         };
         checkSession();
     }, [user]);
+
+    useEffect(() => {
+        // AuthContext now handles activeChildId initialization
+        // This effect is kept for any dashboard-specific logic if needed
+    }, [user, userData, activeChildId]);
+
+    const effectiveUserData = userData || fallbackData;
+    const children = effectiveUserData?.children || null;
 
     useEffect(() => {
         const handleScroll = () => {
@@ -110,14 +121,38 @@ const Header = () => {
                             window.localStorage.removeItem("quizSession");
                         }
                     }
+                    if (children && activeChildId) {
+                        const activeChild = children[activeChildId];
+                        // Direct redirect if logged in
+                        if (activeChild.grade) {
+                            const gradeDigit = activeChild.grade.replace(/\D/g, '');
+                            router.push(`/practice?grade=${gradeDigit}`);
+                            return;
+                        }
+                    }
                 }
             } catch (e) {
                 console.error("Navigation start test error:", e);
             }
-            router.push("/quiz");
+            router.push("/practice"); // Fallback if no specific child/grade found but user is user
         } else if (hasSession) {
-            router.push("/quiz");
+            // Try to recover grade from session if possible, otherwise just push to practice
+            try {
+                if (typeof window !== "undefined") {
+                    const quizSession = window.localStorage.getItem("quizSession");
+                    if (quizSession) {
+                        const parsed = JSON.parse(quizSession);
+                        if (parsed?.userDetails?.grade) {
+                            const gradeDigit = parsed.userDetails.grade.replace(/\D/g, '');
+                            router.push(`/practice?grade=${gradeDigit}`);
+                            return;
+                        }
+                    }
+                }
+            } catch (e) { }
+            router.push("/practice");
         } else {
+            setRedirectPath("/practice");
             setAuthModalOpen(true);
         }
     };
@@ -249,9 +284,14 @@ const Header = () => {
 
             <AuthModal
                 open={authModalOpen}
-                onClose={() => setAuthModalOpen(false)}
+                redirectPath={redirectPath}
+                onClose={() => {
+                    setAuthModalOpen(false);
+                    setRedirectPath(null);
+                }}
                 onSuccess={() => {
                     setAuthModalOpen(false);
+                    setRedirectPath(null);
                     window.location.reload(); // Reload to update session state
                 }}
             />

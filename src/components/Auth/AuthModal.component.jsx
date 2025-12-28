@@ -11,7 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import Styles from "./AuthModal.module.css";
 import LoadingScreen from "@/components/LoadingScreen/LoadingScreen.component";
 
-const AuthModal = ({ open, onClose, onSuccess }) => {
+const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
 
     // Helper to handle final profile selection
     const handleSelectProfile = (childId, childProfile) => {
@@ -66,9 +66,19 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
         // Show loading screen for a smooth transition
         setTimeout(() => {
             toast.success(`Welcome ${childProfile.name}!`);
-            onSuccess && onSuccess(finalUserData);
-            // Conditional Navigation: Only auto-start quiz if grade is present
-            if (childProfile.grade && childProfile.grade !== "Select Grade" && childProfile.grade !== "" && childProfile.grade !== "N/A") {
+            // onSuccess && onSuccess(finalUserData);
+
+            // Priority Redirect: If a specific path was requested (e.g. from Practice button)
+            if (redirectPath) {
+                if (redirectPath === "/practice" && childProfile.grade) {
+                    const gradeDigit = childProfile.grade.replace(/\D/g, '');
+                    router.push(`/practice?grade=${gradeDigit}`);
+                } else {
+                    router.push(redirectPath);
+                }
+            }
+            // Default Redirect: Only auto-start quiz if grade is present
+            else if (childProfile.grade && childProfile.grade !== "Select Grade" && childProfile.grade !== "" && childProfile.grade !== "N/A") {
                 router.push("/quiz");
             } else {
                 router.push("/dashboard");
@@ -155,6 +165,16 @@ const AuthModal = ({ open, onClose, onSuccess }) => {
                 }
 
                 if (normalizedData.children && Object.keys(normalizedData.children).length > 0) {
+                    const childrenKeys = Object.keys(normalizedData.children);
+
+                    // Auto-select if only one profile (e.g., Student or Single User)
+                    if (childrenKeys.length === 1) {
+                        const singleKey = childrenKeys[0];
+                        const singleProfile = normalizedData.children[singleKey];
+                        handleSelectProfile(singleKey, singleProfile);
+                        return;
+                    }
+
                     setUserProfiles(normalizedData.children);
                     setStep("SELECT_PROFILE");
                     toast.success("Welcome back! Select a profile.");
