@@ -47,7 +47,7 @@ const LotteryDraw = ({ isModal = false }) => {
     };
 
     const [previousWinners, setPreviousWinners] = useState(new Set());
-    const BLACKLIST = ['P1121', 'S12011', 'T1005', 'G1005'];
+    const BLACKLIST = ['P1121', 'S12011', 'T1005', 'G1005', 'P1119', 'P1001', 'P1120', 'P1121', 'S10001', 'T1001', 'G1001'];
 
     useEffect(() => {
         const fetchWinners = async () => {
