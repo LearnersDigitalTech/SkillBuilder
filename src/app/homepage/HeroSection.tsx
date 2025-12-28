@@ -116,8 +116,9 @@ const HeroSection = () => {
                         ))}
                     </motion.div>
 
-                    {/* Primary CTA */}
+                    {/* Primary CTA (Desktop) */}
                     <motion.div
+                        className="hidden md:block" // Hidden on mobile
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.7, duration: 0.5 }}
@@ -154,6 +155,30 @@ const HeroSection = () => {
                     />
                 </svg>
             </div>
+            {/* Sticky Mobile CTA */}
+            <motion.div
+                className="fixed bottom-6 left-4 right-4 z-50 md:hidden"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1, duration: 0.5 }}
+            >
+                <Button
+                    variant="hero"
+                    size="lg"
+                    className="w-full bg-[#007AFF] hover:bg-[#0060C9] text-white border-none shadow-2xl shadow-blue-500/40 rounded-xl"
+                    style={{ fontFamily: 'var(--font-nunito)' }}
+                    onClick={() => router.push('/lottery')}
+                >
+                    Get Your Lucky Number
+                    <motion.span
+                        className="inline-block ml-2"
+                        animate={{ x: [0, 4, 0] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                        →
+                    </motion.span>
+                </Button>
+            </motion.div>
         </section>
     );
 };

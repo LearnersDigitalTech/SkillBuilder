@@ -1,11 +1,11 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, User, X } from "lucide-react";
+import { ArrowRight, User, X, Menu } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, IconButton, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { QuizSessionContext } from "@/app/context/QuizSessionContext";
@@ -21,6 +21,10 @@ const Header = () => {
     const [selectedGrade, setSelectedGrade] = useState("");
     const [hasSession, setHasSession] = useState(false);
     const [fallbackData, setFallbackData] = useState(null);
+    const [isMobile, setIsMobile] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+    const hamburgerRef = useRef<HTMLButtonElement>(null);
     const { user, userData, isTeacher, activeChildId } = useAuth();
     const router = useRouter();
     // Context might be null if not wrapped, but usually is
@@ -65,6 +69,40 @@ const Header = () => {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
+    useEffect(() => {
+        const checkMobile = () => {
+            const isMob = window.innerWidth < 768; // md breakpoint
+            setIsMobile(isMob);
+            if (!isMob) {
+                setMenuOpen(false); // Close menu if switching to desktop
+            }
+        };
+
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
+
+    }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                menuOpen &&
+                menuRef.current &&
+                !menuRef.current.contains(event.target as Node) &&
+                hamburgerRef.current &&
+                !hamburgerRef.current.contains(event.target as Node)
+            ) {
+                setMenuOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [menuOpen]);
+
     const handleTakeTest = async () => {
         // ALWAYS Show Grade Selector, but check auth first
         if (user || hasSession) {
@@ -80,6 +118,7 @@ const Header = () => {
         if (user) {
             router.push("/practice?grade=SAT");
         } else {
+            setRedirectPath("/practice?grade=SAT");
             setAuthModalOpen(true);
         }
     };
@@ -103,7 +142,7 @@ const Header = () => {
                             priority
                         />
                         <span
-                            className="text-xl font-bold text-[#0d3773]"
+                            className="text-xl font-bold text-[#0096FF]"
                             style={{ fontFamily: 'var(--font-nunito)' }}
                         >
                             Skill Builder
@@ -138,7 +177,7 @@ const Header = () => {
 
                     <div className="flex items-center gap-4">
                         <AnimatePresence mode="wait">
-                            {isScrolled ? (
+                            {isScrolled && !isMobile ? (
                                 <motion.div
                                     key="journey"
                                     initial={{ opacity: 0, y: -10 }}
@@ -198,7 +237,65 @@ const Header = () => {
                             )}
                         </AnimatePresence>
                     </div>
+
+                    {/* Hamburger Menu Toggle */}
+                    <button
+                        ref={hamburgerRef}
+                        className="md:hidden ml-2 text-[#0B2545] p-1"
+                        onClick={() => setMenuOpen(!menuOpen)}
+                    >
+                        {menuOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
                 </div>
+
+                {/* Mobile Menu Dropdown */}
+                <AnimatePresence>
+                    {menuOpen && (
+                        <motion.div
+                            ref={menuRef}
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="md:hidden bg-white/95 backdrop-blur-md border-t border-gray-100 overflow-hidden shadow-lg absolute left-0 right-0 top-full"
+                        >
+                            <nav className="flex flex-col p-4 gap-4 items-center">
+                                {!isTeacher && (
+                                    <button
+                                        onClick={() => {
+                                            handleTakeTest();
+                                            setMenuOpen(false);
+                                        }}
+                                        className="text-lg font-semibold text-[#0B2545] hover:text-[#0096FF] transition-colors bg-transparent border-none cursor-pointer w-full text-center py-2"
+                                    >
+                                        Practice
+                                    </button>
+                                )}
+
+                                {!isTeacher && (
+                                    <Link
+                                        href="/rapid-math"
+                                        className="text-lg font-semibold text-[#0B2545] hover:text-[#0096FF] transition-colors w-full text-center py-2"
+                                        onClick={() => setMenuOpen(false)}
+                                    >
+                                        Rapid Math
+                                    </Link>
+                                )}
+
+                                {!isTeacher && (
+                                    <button
+                                        onClick={() => {
+                                            handleSatPractice();
+                                            setMenuOpen(false);
+                                        }}
+                                        className="text-lg font-semibold text-[#0B2545] hover:text-[#0096FF] transition-colors bg-transparent border-none cursor-pointer w-full text-center py-2"
+                                    >
+                                        SAT
+                                    </button>
+                                )}
+                            </nav>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </motion.header>
 
             <AuthModal
@@ -216,8 +313,7 @@ const Header = () => {
                         setRedirectPath(null);
                         // Do NOT reload here, let the user pick a grade
                     } else {
-                        setRedirectPath(null);
-                        window.location.reload(); // Reload to update session state for other cases
+                        // Let AuthModal handle the redirect
                     }
                 }}
             />
@@ -265,8 +361,8 @@ const Header = () => {
                             }}
                             disabled={!selectedGrade}
                             className={`w-full mt-6 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${selectedGrade
-                                    ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md"
-                                    : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                                ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md"
+                                : "bg-slate-100 text-slate-400 cursor-not-allowed"
                                 }`}
                         >
                             Start Practice
