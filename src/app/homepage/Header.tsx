@@ -136,9 +136,9 @@ const Header = () => {
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.5 }}
-                className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-blue-100/50"
+                className="fixed top-0 left-0 right-0 z-50 bg-white/60 backdrop-blur-md"
             >
-                <div className="container mx-auto px-4 py-3 flex items-center justify-between relative">
+                <div className="container mx-auto px-4 py-2 flex items-center justify-between relative">
                     <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.push("/")}>
                         <Image
                             src="/LearnersLogoTransparent.png"
@@ -256,7 +256,7 @@ const Header = () => {
                 }}
             />
             {/* Spacer to prevent content overlap with fixed header */}
-            <div className="h-16 md:h-20" />
+            <div className="h-14 md:h-12" />
         </>
     );
 };

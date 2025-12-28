@@ -12,17 +12,29 @@ const nunito = Nunito({
 });
 
 const SplashScreen = ({ onComplete }: { onComplete?: () => void }) => {
-    const [isVisible, setIsVisible] = useState(true);
+    // Start invisible to prevent flash if already seen
+    const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsVisible(false);
+        // Check if splash screen has already been shown in this session
+        const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
+
+        if (!hasSeenSplash) {
+            setIsVisible(true);
+            const timer = setTimeout(() => {
+                setIsVisible(false);
+                sessionStorage.setItem('hasSeenSplash', 'true');
+                if (onComplete) {
+                    onComplete();
+                }
+            }, 1500); // Show for 1.5 seconds
+
+            return () => clearTimeout(timer);
+        } else {
             if (onComplete) {
                 onComplete();
             }
-        }, 1500); // Show for 2.5 seconds
-
-        return () => clearTimeout(timer);
+        }
     }, [onComplete]);
 
     return (

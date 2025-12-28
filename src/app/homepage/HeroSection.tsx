@@ -33,7 +33,7 @@ const HeroSection = () => {
                 />
             </div>
 
-            <div className="container relative z-10 px-4 py-20">
+            <div className="container relative z-10 px-4 pt-0 pb-20">
                 <motion.div
                     className="max-w-4xl mx-auto text-center"
                     initial={{ opacity: 0, y: 30 }}
