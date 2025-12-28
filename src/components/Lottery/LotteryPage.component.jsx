@@ -51,6 +51,43 @@ const LotteryPage = () => {
         let newCode;
         let createdUserUid = null;
 
+        // Check for duplicate phone number AND email within the SAME ROLE
+        try {
+            const registrationsRef = ref(firebaseDatabase, 'Lottery/Registrations');
+            const snapshot = await get(registrationsRef);
+            const allRegs = snapshot.exists() ? snapshot.val() : {};
+            const regsArray = Object.values(allRegs);
+
+            // Check if phone number OR email already exists for THIS ROLE
+            const existingRegistration = regsArray.find(reg =>
+                reg.userType === registrationType &&
+                (reg.phoneNumber === data.phoneNumber || reg.email === data.email)
+            );
+
+            if (existingRegistration) {
+                // Show existing ticket instead of blocking
+                setTicketCode(existingRegistration.ticketCode);
+                setSubmitted(true);
+
+                toast.info(`You are already registered as ${registrationType}! Here's your existing ticket.`, {
+                    position: "top-center",
+                    autoClose: 5000,
+                });
+
+                Confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+
+                return; // Stop here and show existing ticket
+            }
+        } catch (error) {
+            console.error("Error checking registration uniqueness:", error);
+            toast.error("Unable to verify registration. Please try again.");
+            return;
+        }
+
         // Ticket Generation Logic
         try {
             const registrationsRef = ref(firebaseDatabase, 'Lottery/Registrations');
