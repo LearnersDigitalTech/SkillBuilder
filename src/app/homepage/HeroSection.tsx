@@ -129,7 +129,7 @@ const HeroSection = () => {
                             style={{ fontFamily: 'var(--font-nunito)' }}
                             onClick={() => router.push('/lottery')}
                         >
-                            Begin the Journey
+                            Get Your Lucky Number
                             <motion.span
                                 className="inline-block ml-1"
                                 animate={{ x: [0, 4, 0] }}
