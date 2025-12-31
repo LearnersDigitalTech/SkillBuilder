@@ -1,7 +1,7 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Play, Zap, Atom, Check, ChevronDown, User, LogOut, GraduationCap, Phone } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -146,8 +146,16 @@ const Navigation = ({ forceWhite = false }) => {
                                         <span className={Styles.buttonText}>Rapid Math</span>
                                     </button>
                                 </Tooltip>
+
                             </>
                         )}
+
+                        <Tooltip title="NEET Exam" arrow>
+                            <button onClick={() => router.push("/neet")} className={`${Styles.navButton} ${Styles.outlined}`}>
+                                <Atom size={16} />
+                                <span className={Styles.buttonText}>NEET Exam</span>
+                            </button>
+                        </Tooltip>
 
                         {/* Hide SAT for teachers */}
                         {!isTeacher && (
@@ -208,6 +216,9 @@ const Navigation = ({ forceWhite = false }) => {
                     <a href="#faq" className="text-sm font-semibold text-[#0B2545]/80 hover:text-[#0096FF] transition-colors">
                         SAT
                     </a>
+                    <Link href="/neet" className="text-sm font-semibold text-[#0B2545]/80 hover:text-[#0096FF] transition-colors">
+                        NEET Exam
+                    </Link>
                 </nav>
 
                 <AnimatePresence mode="wait">
@@ -259,7 +270,7 @@ const Navigation = ({ forceWhite = false }) => {
                     )}
                 </AnimatePresence>
             </div>
-        </motion.header >
+        </>
     );
 };
 

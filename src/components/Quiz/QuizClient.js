@@ -127,7 +127,8 @@ const QuizClient = () => {
                 try {
                     const userKey = getUserDatabaseKey(user);
                     const childId = quizContext.userDetails?.activeChildId || quizContext.userDetails?.childId || "default";
-                    const finalUserKey = userKey.replace('.', '_');
+                    const finalUserKey = userKey.replace(/\./g, '_');
+                    console.log("[QuizClient] Fetching reports for:", finalUserKey, childId);
                     const reportsRef = ref(firebaseDatabase, `NMD_2025/Reports/${finalUserKey}/${childId}`);
 
                     const { get } = await import("firebase/database");
@@ -135,9 +136,25 @@ const QuizClient = () => {
                     let count = 0;
                     if (snapshot.exists()) {
                         const data = snapshot.val();
+                        console.log("[QuizClient] Found reports data:", data);
+                        const currentTestType = quizContext.userDetails?.testType || 'ASSESSMENT';
+
+                        // 1. Check legacy root-level report
+                        if (data.summary) {
+                            const reportType = data.type || (data.summary?.grade?.startsWith('NEET') ? 'NEET' : 'ASSESSMENT');
+                            if (reportType === currentTestType) count++;
+                        }
+
+                        // 2. Check sub-node reports
                         Object.values(data).forEach(r => {
-                            if (r.summary && (!r.type || r.type === 'ASSESSMENT')) count++;
+                            if (r && typeof r === 'object' && r.summary) {
+                                const reportType = r.type || (r.summary?.grade?.startsWith('NEET') ? 'NEET' : 'ASSESSMENT');
+                                if (reportType === currentTestType) count++;
+                            }
                         });
+                        console.log("[QuizClient] Counted attempts for", currentTestType, ":", count);
+                    } else {
+                        console.log("[QuizClient] No reports found at path");
                     }
                     // Always show intro, default attempt is count + 1
                     setAttemptCount(count + 1);
@@ -407,7 +424,8 @@ const QuizClient = () => {
             }
         }
 
-        return "";
+        // 4. Ultimate fallback to Google display name or Email prefix
+        return user?.displayName || (user?.email ? user.email.split('@')[0] : "");
     };
 
     const handleTimerFinished = (time) => {

@@ -192,342 +192,138 @@ const QuizResultClient = () => {
                 const userGrade = quizSession?.userDetails?.activeChild?.grade || quizSession?.userDetails?.grade;
                 const phoneParam = searchParams.get("phone");
                 const adminView = searchParams.get("adminView");
+                const teacherView = searchParams.get("teacherView");
+                const studentUidParam = searchParams.get("studentUid");
+                const childIdParam = searchParams.get("childId");
 
-                // Admin View: Load report by phone number
+                let targetReport = null;
+
+                // Case 0: Admin View
                 if (phoneParam && adminView === 'true') {
                     console.log('🔍 Admin View Detected - Loading report for phone:', phoneParam);
-                    try {
-                        // Normalize phone number (last 10 digits)
-                        const normalizedPhone = phoneParam.replace(/\D/g, '').slice(-10);
-                        const parentKey = searchParams.get("parentKey");
+                    const normalizedPhone = phoneParam.replace(/\D/g, '').slice(-10);
+                    const parentKey = searchParams.get("parentKey");
+                    const dbKey = parentKey || normalizedPhone;
+                    const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${dbKey}`);
+                    const snapshot = await get(reportRef);
 
-                        console.log('📱 Normalized phone:', normalizedPhone);
-                        if (parentKey) console.log('🔑 Using provided Parent Key:', parentKey);
-
-                        // Fetch reports for this phone number (use parentKey if available, else fallback to normalized)
-                        const dbKey = parentKey || normalizedPhone;
-                        const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${dbKey}`);
-                        console.log('🔥 Firebase path:', `NMD_2025/Reports/${dbKey}`);
-                        const snapshot = await get(reportRef);
-
-                        if (!snapshot.exists()) {
-                            console.log('❌ No reports found for phone:', normalizedPhone);
-                            setLoadingReport(false);
-                            return;
-                        }
-
+                    if (snapshot.exists()) {
                         const reportsData = snapshot.val();
-                        console.log('📊 Reports data:', reportsData);
-
-                        // Get all child reports
                         let allReports = [];
                         Object.entries(reportsData).forEach(([childId, childReports]) => {
-                            console.log(`👶 Processing child ${childId}:`, childReports);
                             if (typeof childReports === 'object' && childReports !== null) {
-                                // Check if it's a single report or multiple reports
                                 if (childReports.summary) {
-                                    console.log('✅ Found single report with summary');
                                     allReports.push({ ...childReports, reportId: childId });
                                 } else {
-                                    // Multiple reports - get all
-                                    console.log('📚 Found multiple reports, extracting...');
-                                    Object.entries(childReports).forEach(([reportId, report]) => {
+                                    Object.entries(childReports).forEach(([rid, report]) => {
                                         if (report && typeof report === 'object' && report.summary) {
-                                            allReports.push({ ...report, reportId });
+                                            allReports.push({ ...report, reportId: rid });
                                         }
                                     });
                                 }
                             }
                         });
-
-                        console.log(`📋 Total reports found: ${allReports.length}`);
-
-                        // Sort by timestamp and get latest
-                        allReports.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-
+                        allReports.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
                         if (allReports.length > 0) {
-                            let latestReport = allReports[0];
-
-                            // If reportId is provided, find that specific report
-                            if (reportId) {
-                                const specificReport = allReports.find(r => r.reportId === reportId || r.timestamp?.toString() === reportId); // Handle possible ID formats
-                                if (specificReport) {
-                                    latestReport = specificReport;
-                                    console.log('🎯 Found specific report by ID:', latestReport);
-                                }
-                            }
-
-                            console.log('🎯 Final report to show:', latestReport);
-
-                            // Handle both old and new format
-                            let topicFeedback = latestReport.topicFeedback;
-                            let perQuestionReport = latestReport.perQuestionReport;
-                            let learningPlanSummary = latestReport.learningPlanSummary;
-                            let learningPlan = latestReport.learningPlan;
-
-                            if (!topicFeedback && latestReport.generalFeedbackStringified) {
-                                try {
-                                    const parsed = JSON.parse(latestReport.generalFeedbackStringified);
-                                    topicFeedback = parsed.topicFeedback || {};
-                                    perQuestionReport = parsed.perQuestionReport || [];
-                                    learningPlanSummary = parsed.learningPlanSummary || "";
-                                } catch (e) {
-                                    topicFeedback = {};
-                                    perQuestionReport = [];
-                                    learningPlanSummary = "";
-                                }
-                            }
-
-                            const reportStateData = {
-                                summary: latestReport.summary,
-                                topicFeedback: topicFeedback || {},
-                                perQuestionReport: perQuestionReport || [],
-                                learningPlanSummary: learningPlanSummary || "",
-                                learningPlan: learningPlan || [],
-                            };
-
-                            console.log('✅ Setting report state:', reportStateData);
-                            setReportState(reportStateData);
-                            setLoadingReport(false);
-                            return;
-                        } else {
-                            console.log('⚠️ No valid reports found after processing');
-                            setLoadingReport(false);
-                        }
-                    } catch (error) {
-                        console.error('❌ Error loading admin report:', error);
-                        setLoadingReport(false);
-                    }
-                    return; // Exit early for admin view
-                }
-
-                // Case 1: If reportId is provided in URL, fetch that specific report from Firebase
-                // This takes priority over in-memory quizSession to show the correct historical report
-                if (reportId) {
-                    // Check if this is teacher view
-                    const teacherView = searchParams.get("teacherView");
-                    const studentUidParam = searchParams.get("studentUid");
-                    const childIdParam = searchParams.get("childId");
-
-                    if (teacherView === 'true' && studentUidParam && childIdParam) {
-                        // Teacher viewing student's report
-                        console.log('👨‍🏫 Teacher View - Loading student report:', { studentUidParam, childIdParam, reportId });
-
-                        // Fetch student profile data
-                        const studentRef = ref(firebaseDatabase, `NMD_2025/Registrations/${studentUidParam}`);
-                        const studentSnapshot = await get(studentRef);
-
-                        if (studentSnapshot.exists()) {
-                            const studentData = studentSnapshot.val();
-                            const childData = studentData.children?.[childIdParam];
-
-                            setStudentInfo({
-                                name: childData?.name || studentData.name || 'Student',
-                                grade: childData?.grade || studentData.grade || 'Grade',
-                                email: studentData.email || studentData.parentEmail || ''
-                            });
-                            console.log('✅ Student info loaded:', {
-                                name: childData?.name || studentData.name,
-                                grade: childData?.grade || studentData.grade
-                            });
-                        }
-
-                        const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${studentUidParam}/${childIdParam}`);
-                        const snapshot = await get(reportRef);
-
-                        if (!snapshot.exists()) {
-                            console.log('❌ No reports found for student');
-                            setLoadingReport(false);
-                            return;
-                        }
-
-                        const data = snapshot.val();
-                        let targetReport = null;
-
-                        if (reportId === 'root') {
-                            targetReport = data;
-                        } else if (data[reportId]) {
-                            targetReport = data[reportId];
-                        }
-
-                        if (targetReport) {
-                            let topicFeedback = targetReport.topicFeedback;
-                            let perQuestionReport = targetReport.perQuestionReport;
-                            let learningPlanSummary = targetReport.learningPlanSummary;
-                            let learningPlan = targetReport.learningPlan;
-
-                            if (!topicFeedback && targetReport.generalFeedbackStringified) {
-                                try {
-                                    const parsed = JSON.parse(targetReport.generalFeedbackStringified);
-                                    topicFeedback = parsed.topicFeedback || {};
-                                    perQuestionReport = parsed.perQuestionReport || [];
-                                    learningPlanSummary = parsed.learningPlanSummary || "";
-                                } catch (e) {
-                                    topicFeedback = {};
-                                    perQuestionReport = [];
-                                    learningPlanSummary = "";
-                                }
-                            }
-
-                            setReportState({
-                                summary: targetReport.summary,
-                                topicFeedback: topicFeedback || {},
-                                perQuestionReport: perQuestionReport || [],
-                                learningPlanSummary: learningPlanSummary || "",
-                                learningPlan: learningPlan || [],
-                            });
-                            setLoadingReport(false);
-                            return;
-                        }
-                    } else if (user && userData?.children) {
-                        // Regular user viewing their own report
-                        const userKey = getUserDatabaseKey(user);
-                        const children = userData.children;
-                        const childKeys = Object.keys(children);
-                        if (childKeys.length === 0) return;
-
-                        let activeChildId = childKeys[0];
-                        if (childKeys.length > 1 && typeof window !== "undefined") {
-                            const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
-                            if (storedChildId && childKeys.includes(storedChildId)) {
-                                activeChildId = storedChildId;
-                            }
-                        }
-
-                        const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${userKey}/${activeChildId}`);
-                        const snapshot = await get(reportRef);
-                        if (!snapshot.exists()) {
-                            return;
-                        }
-
-                        const data = snapshot.val();
-                        let targetReport = null;
-
-                        if (reportId === 'root') {
-                            targetReport = data;
-                        } else if (data[reportId]) {
-                            targetReport = data[reportId];
-                        }
-
-                        if (targetReport) {
-                            // Handle both old format (generalFeedbackStringified) and new format (direct fields)
-                            let topicFeedback = targetReport.topicFeedback;
-                            let perQuestionReport = targetReport.perQuestionReport;
-                            let learningPlanSummary = targetReport.learningPlanSummary;
-                            let learningPlan = targetReport.learningPlan;
-
-                            // Backward compatibility: parse old format if needed
-                            if (!topicFeedback && targetReport.generalFeedbackStringified) {
-                                try {
-                                    const parsed = JSON.parse(targetReport.generalFeedbackStringified);
-                                    topicFeedback = parsed.topicFeedback || {};
-                                    perQuestionReport = parsed.perQuestionReport || [];
-                                    learningPlanSummary = parsed.learningPlanSummary || "";
-                                } catch (e) {
-                                    topicFeedback = {};
-                                    perQuestionReport = [];
-                                    learningPlanSummary = "";
-                                }
-                            }
-
-                            setReportState({
-                                summary: targetReport.summary,
-                                topicFeedback: topicFeedback || {},
-                                perQuestionReport: perQuestionReport || [],
-                                learningPlanSummary: learningPlanSummary || "",
-                                learningPlan: learningPlan || [], // NEW: Include learning plan array
-                            });
-                            return;
+                            targetReport = reportId ? allReports.find(r => r.reportId === reportId || r.timestamp?.toString() === reportId) : allReports[0];
                         }
                     }
                 }
-
-                // Case 2: We have an in-memory quizSession with questionPaper (coming directly from quiz)
-                // Only use this if no reportId is specified
-                if (quizSession?.questionPaper && userGrade && !reportId) {
+                // Case 1: Teacher/Specific Report View
+                else if (reportId && teacherView === 'true' && studentUidParam && childIdParam) {
+                    console.log('👨‍🏫 Teacher View - Loading student report:', { studentUidParam, childIdParam, reportId });
+                    const studentRef = ref(firebaseDatabase, `NMD_2025/Registrations/${studentUidParam}`);
+                    const studentSnapshot = await get(studentRef);
+                    if (studentSnapshot.exists()) {
+                        const studentData = studentSnapshot.val();
+                        const childData = studentData.children?.[childIdParam];
+                        setStudentInfo({
+                            name: childData?.name || studentData.name || user?.displayName || (user?.email ? user.email.split('@')[0] : 'Student'),
+                            grade: childData?.grade || studentData.grade || 'Grade',
+                            email: studentData.email || studentData.parentEmail || ''
+                        });
+                    }
+                    const sanitizedStudentUid = studentUidParam.replace(/\./g, '_');
+                    const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${sanitizedStudentUid}/${childIdParam}`);
+                    const snapshot = await get(reportRef);
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        targetReport = (reportId === 'root') ? data : data[reportId];
+                    }
+                }
+                // Case 2: Immediate Quiz Results
+                else if (quizSession?.questionPaper && userGrade && !reportId) {
                     const computed = analyzeResponses(quizSession.questionPaper, userGrade);
                     setReportState({
                         summary: computed.summary,
                         topicFeedback: computed.topicFeedback,
                         perQuestionReport: computed.perQuestionReport,
                         learningPlanSummary: computed.learningPlanSummary,
-                        learningPlan: computed.learningPlan, // NEW: Include learning plan array
+                        learningPlan: computed.learningPlan,
                     });
                     return;
                 }
-
-                // Case 2: Revisit results later: fetch stored report for active child from Firebase
-                if (!user || !userData?.children) {
-                    return;
-                }
-
-                // Get user key (works for phone, Google, and email auth)
-                const userKey = getUserDatabaseKey(user);
-                const children = userData.children;
-                const childKeys = Object.keys(children);
-                if (childKeys.length === 0) return;
-
-                let activeChildId = childKeys[0];
-                if (childKeys.length > 1 && typeof window !== "undefined") {
-                    const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
-                    if (storedChildId && childKeys.includes(storedChildId)) {
-                        activeChildId = storedChildId;
-                    }
-                }
-
-                const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${userKey}/${activeChildId}`);
-                const snapshot = await get(reportRef);
-                if (!snapshot.exists()) {
-                    return;
-                }
-
-                const data = snapshot.val();
-                let targetReport = data;
-
-                // Handle multiple reports (list) vs single report (legacy)
-                // If reportId is provided, look for that specific report
-                if (reportId === 'root') {
-                    targetReport = data;
-                } else if (reportId && data[reportId]) {
-                    targetReport = data[reportId];
-                } else {
-                    // No reportId provided (or invalid). Find the LATEST report.
-                    // This handles Hybrid (Root + Children) and New (Children only).
-
-                    let allReports = [];
-
-                    // 1. Root Legacy
-                    if (data.summary) {
-                        allReports.push(data);
-                    }
-
-                    // 2. Children New
-                    Object.entries(data).forEach(([key, val]) => {
-                        if (key !== 'summary' && val && typeof val === 'object' && val.summary) {
-                            allReports.push(val);
+                // Case 3: Standard User History/Latest Report
+                else if (user && userData?.children) {
+                    const userKey = getUserDatabaseKey(user);
+                    const childKeys = Object.keys(userData.children);
+                    if (childKeys.length > 0) {
+                        let activeChildId = childKeys[0];
+                        if (childKeys.length > 1 && typeof window !== "undefined") {
+                            const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
+                            if (storedChildId && childKeys.includes(storedChildId)) activeChildId = storedChildId;
                         }
-                    });
-
-                    if (allReports.length > 0) {
-                        // Sort by timestamp descending
-                        allReports.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
-                        targetReport = allReports[0];
+                        const sanitizedUserKey = userKey.replace(/\./g, '_');
+                        const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${sanitizedUserKey}/${activeChildId}`);
+                        const snapshot = await get(reportRef);
+                        if (snapshot.exists()) {
+                            const data = snapshot.val();
+                            if (reportId) {
+                                targetReport = (reportId === 'root') ? data : data[reportId];
+                            } else {
+                                let allReports = [];
+                                if (data.summary) allReports.push(data);
+                                Object.entries(data).forEach(([key, val]) => {
+                                    if (key !== 'summary' && val && typeof val === 'object' && val.summary) allReports.push(val);
+                                });
+                                if (allReports.length > 0) {
+                                    allReports.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+                                    targetReport = allReports[0];
+                                }
+                            }
+                        }
                     }
                 }
 
-                let parsed = {};
-                try {
-                    parsed = targetReport.generalFeedbackStringified ? JSON.parse(targetReport.generalFeedbackStringified) : {};
-                } catch (e) {
-                    parsed = {};
-                }
+                if (targetReport) {
+                    let topicFeedback = targetReport.topicFeedback;
+                    let perQuestionReport = targetReport.perQuestionReport;
+                    let learningPlanSummary = targetReport.learningPlanSummary;
+                    let learningPlan = targetReport.learningPlan;
 
-                setReportState({
-                    summary: targetReport.summary,
-                    topicFeedback: parsed.topicFeedback || {},
-                    perQuestionReport: parsed.perQuestionReport || [],
-                    learningPlanSummary: parsed.learningPlanSummary || "",
-                });
+                    if (!topicFeedback && targetReport.generalFeedbackStringified) {
+                        try {
+                            const parsed = JSON.parse(targetReport.generalFeedbackStringified);
+                            topicFeedback = parsed.topicFeedback || {};
+                            perQuestionReport = parsed.perQuestionReport || [];
+                            learningPlanSummary = parsed.learningPlanSummary || "";
+                        } catch (e) {
+                            topicFeedback = {};
+                            perQuestionReport = [];
+                            learningPlanSummary = "";
+                        }
+                    }
+
+                    setReportState({
+                        summary: targetReport.summary,
+                        topicFeedback: topicFeedback || {},
+                        perQuestionReport: perQuestionReport || [],
+                        learningPlanSummary: learningPlanSummary || "",
+                        learningPlan: learningPlan || [],
+                    });
+                }
+            } catch (error) {
+                console.error('❌ Error loading report:', error);
             } finally {
                 setLoadingReport(false);
             }
@@ -668,16 +464,18 @@ const QuizResultClient = () => {
 
         // Compute the report to validate it has actual data
         const computed = analyzeResponses(quizSession.questionPaper, userGrade);
+        console.log("[QuizResultClient] Computed report summary:", computed.summary);
 
         // Don't save if there's no actual quiz data
         if (!computed.summary || computed.summary.totalQuestions === 0) {
-            console.log("Skipping save: no valid quiz data");
+            console.log("[QuizResultClient] Skipping save: no valid quiz data (totalQuestions == 0)");
             return;
         }
 
         // Get user key from quizSession (already set correctly in Start Assessment)
         // For multi-profile, we need the parent key and the child key
         const userKey = quizSession?.userDetails?.userKey || quizSession?.userDetails?.parentPhone || quizSession?.userDetails?.parentEmail || quizSession?.userDetails?.phoneNumber;
+        console.log("[QuizResultClient] Using userKey:", userKey);
         // fallback to phoneNumber if parentPhone is missing (legacy single user) uses phoneNumber as key
 
         const childId = quizSession?.userDetails?.activeChildId || quizSession?.userDetails?.childId || "default";
@@ -687,7 +485,8 @@ const QuizResultClient = () => {
         // Correct path: NMD_2025/Reports/{parentKey}/{childId}
         // If it's a legacy user (no activeChildId), they might be stored at root or default? 
         // Let's stick to the new structure: Reports/ParentKey/ChildKey
-        const finalParentKey = userKey.replace('.', '_'); // sanitize email if needed, though phone is preferred
+        const finalParentKey = userKey.replace(/\./g, '_'); // sanitize email if needed, though phone is preferred
+        console.log("[QuizResultClient] Saving report to:", finalParentKey, childId);
 
         // Check if we already saved this session
         if (hasSavedRef.current) return;
@@ -695,8 +494,9 @@ const QuizResultClient = () => {
 
         const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${finalParentKey}/${childId}`);
         // Use unique ID with random suffix to ensure each attempt is separate
-        const reportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        const newReportRef = ref(firebaseDatabase, `NMD_2025/Reports/${finalParentKey}/${childId}/${reportId}`);
+        const generatedReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const newReportRef = ref(firebaseDatabase, `NMD_2025/Reports/${finalParentKey}/${childId}/${generatedReportId}`);
+        console.log("[QuizResultClient] Attempting to save report with ID:", generatedReportId);
 
         // Sanitize topicFeedback keys to remove Firebase-forbidden characters
         const sanitizedTopicFeedback = {};
@@ -706,17 +506,21 @@ const QuizResultClient = () => {
             sanitizedTopicFeedback[sanitizedKey] = feedback;
         });
 
-        set(newReportRef, {
+        const reportData = {
             summary: computed.summary,
             topicFeedback: sanitizedTopicFeedback, // Use sanitized version
             perQuestionReport: computed.perQuestionReport,
             learningPlanSummary: computed.learningPlanSummary,
             learningPlan: computed.learningPlan, // NEW: Save the structured learning plan array
             timestamp: new Date().toISOString(),
-        }).then(() => {
-            console.log("Report saved successfully with ID:", reportId);
+            type: quizSession.userDetails.testType || 'ASSESSMENT',
+        };
+        console.log("[QuizResultClient] Report payload:", reportData);
+
+        set(newReportRef, reportData).then(() => {
+            console.log("[QuizResultClient] Report saved successfully with ID:", generatedReportId);
         }).catch((error) => {
-            console.error("Error saving report:", error);
+            console.error("[QuizResultClient] Error saving report:", error);
             // Reset flag on error to allow retry
             hasSavedRef.current = false;
         });
@@ -887,7 +691,7 @@ const QuizResultClient = () => {
         yPos += 7;
 
         doc.setFont(undefined, 'normal');
-        const pdfStudentName = quizSession?.userDetails?.name || userData?.children?.[quizSession?.userDetails?.activeChildId]?.name || userData?.name || 'Student';
+        const pdfStudentName = quizSession?.userDetails?.name || userData?.children?.[quizSession?.userDetails?.activeChildId]?.name || userData?.name || user?.displayName || (user?.email ? user.email.split('@')[0] : 'Student');
         const pdfStudentGrade = quizSession?.userDetails?.grade || userData?.children?.[quizSession?.userDetails?.activeChildId]?.grade || userData?.grade || 'Grade';
         doc.text(`Name: ${pdfStudentName}`, 14, yPos);
         yPos += 6;
@@ -1122,7 +926,7 @@ const QuizResultClient = () => {
         // Add student info
         doc.setFontSize(12);
         doc.setTextColor(0, 0, 0);
-        const planStudentName = quizSession?.userDetails?.name || userData?.children?.[quizSession?.userDetails?.activeChildId]?.name || userData?.name || 'Student';
+        const planStudentName = quizSession?.userDetails?.name || userData?.children?.[quizSession?.userDetails?.activeChildId]?.name || userData?.name || user?.displayName || (user?.email ? user.email.split('@')[0] : 'Student');
         const planStudentGrade = quizSession?.userDetails?.grade || userData?.children?.[quizSession?.userDetails?.activeChildId]?.grade || userData?.grade || 'Grade';
         doc.text(`Student: ${planStudentName}`, 20, 35);
         doc.text(`Grade: ${planStudentGrade}`, 20, 42);
@@ -1130,14 +934,6 @@ const QuizResultClient = () => {
         doc.text(`Powered by Learners Digital Tech`, 20, 56);
 
         // Add table
-        const tableData = reportState.learningPlan.map((item, index) => [
-            index + 1,
-            `Day ${item.day}`,
-            item.skillCategory,
-            item.learnWithTutor,
-            item.selfLearn
-        ]);
-
         doc.autoTable({
             startY: 65,
             head: [['Sl.No', 'Day', 'Skill Category', 'Learn with Tutor', 'Self Learn']],
@@ -1219,7 +1015,7 @@ const QuizResultClient = () => {
                     <div className={Styles.heroContent}>
                         <div className={Styles.userInfo}>
                             <span className={Styles.userName}>
-                                {studentInfo?.name || quizSession?.userDetails?.name || userData?.children?.[quizSession?.userDetails?.activeChildId]?.name || userData?.name || 'Student'}
+                                {studentInfo?.name || quizSession?.userDetails?.name || userData?.children?.[quizSession?.userDetails?.activeChildId]?.name || userData?.name || user?.displayName || (user?.email ? user.email.split('@')[0] : 'Student')}
                             </span>
                             <span className={Styles.divider}>•</span>
                             <span>
