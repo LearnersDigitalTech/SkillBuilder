@@ -23,11 +23,45 @@ import {
     FormControlLabel,
     Stack,
     Alert,
-    IconButton
+    IconButton,
+    Avatar,
+    Grid,
+    Divider,
+    Tooltip,
+    List,
+    ListItem,
+    ListItemAvatar,
+    ListItemButton,
+    ListItemIcon,
+    ListItemText,
+    ListItemSecondaryAction,
+    Card,
+    InputAdornment,
+    Switch
 } from '@mui/material';
-import { Users, GraduationCap, UserPlus, X, Check, Trash2 } from 'lucide-react';
+import {
+    ChevronRight,
+    Search,
+    Filter,
+    Save,
+    Trash2,
+    Users,
+    BookOpen,
+    School,
+    GraduationCap,
+    Clock,
+    Mail,
+    Phone,
+    MapPin,
+    Hash,
+    Check,
+    X,
+    UserPlus,
+    AlertCircle
+} from 'lucide-react';
+import { toast } from "react-toastify";
 import { ref, get, remove } from 'firebase/database';
-import { firebaseDatabase } from '@/backend/firebaseHandler';
+import { firebaseDatabase, auth } from '@/backend/firebaseHandler';
 import {
     getAllTeachers,
     getTeacherDetails,
@@ -35,7 +69,9 @@ import {
     assignStudentsToTeacher,
     getStudentsByGrade,
     removeGradeFromTeacher,
-    removeStudentFromTeacher
+    removeStudentFromTeacher,
+    getStudentDetailsBatch,
+    resetTeacherAssignments
 } from '@/services/adminTeacherService';
 import { useAuth } from '@/context/AuthContext';
 
@@ -61,11 +97,80 @@ const TeacherManagement = () => {
     const [selectedStudents, setSelectedStudents] = useState([]);
     const [loadingStudents, setLoadingStudents] = useState(false);
     const [savingStudents, setSavingStudents] = useState(false);
+    const [studentSearchTerm, setStudentSearchTerm] = useState('');
+    const [selectedSchool, setSelectedSchool] = useState(null);
+    const [showSelectedOnly, setShowSelectedOnly] = useState(false);
+
+    // Assigned Students List State
+    const [assignedStudentDetails, setAssignedStudentDetails] = useState([]);
+    const [loadingAssignedStudents, setLoadingAssignedStudents] = useState(false);
+    const [assignedSearchTerm, setAssignedSearchTerm] = useState('');
+
+    // Derived unique schools from available students
+    const availableSchools = [...new Set(availableStudents.map(s => s.schoolName || 'Unknown School'))].sort();
+
+    // Derived state for filtered students
+    const filteredStudents = availableStudents.filter(student => {
+        const matchesSearch = (student.name?.toLowerCase() || '').includes(studentSearchTerm.toLowerCase()) ||
+            (student.email?.toLowerCase() || '').includes(studentSearchTerm.toLowerCase());
+        const matchesSchool = selectedSchool ? (student.schoolName || 'Unknown School') === selectedSchool : true;
+        const matchesFilter = showSelectedOnly ? selectedStudents.includes(student.uid) : true;
+        return matchesSearch && matchesFilter && matchesSchool;
+        return matchesSearch && matchesFilter && matchesSchool;
+    });
+
+    // Derived state for filtered ASSIGNED students
+    const filteredAssignedStudents = assignedStudentDetails.filter(student =>
+        (student.name?.toLowerCase() || '').includes(assignedSearchTerm.toLowerCase()) ||
+        (student.email?.toLowerCase() || '').includes(assignedSearchTerm.toLowerCase()) ||
+        (student.schoolName?.toLowerCase() || '').includes(assignedSearchTerm.toLowerCase())
+    );
+
+    // Select All / Deselect All Handler
+    const handleSelectAll = (checked) => {
+        if (checked) {
+            // Select all currently visible (filtered) students
+            const newSelected = new Set([...selectedStudents, ...filteredStudents.map(s => s.uid)]);
+            setSelectedStudents(Array.from(newSelected));
+        } else {
+            // Deselect all currently visible students
+            const visibleIds = filteredStudents.map(s => s.uid);
+            setSelectedStudents(selectedStudents.filter(id => !visibleIds.includes(id)));
+        }
+    };
 
     // Fetch all teachers on mount
     useEffect(() => {
         fetchTeachers();
     }, []);
+
+    // Hydrate assigned students when teacher details change
+    useEffect(() => {
+        const fetchAssignedDetails = async () => {
+            if (!teacherDetails?.assignments?.students) {
+                setAssignedStudentDetails([]);
+                return;
+            }
+
+            const studentsMap = teacherDetails.assignments.students;
+            const studentsList = Object.entries(studentsMap).map(([uid, data]) => ({
+                uid,
+                childId: data.childId || 'default'
+            }));
+
+            if (studentsList.length === 0) {
+                setAssignedStudentDetails([]);
+                return;
+            }
+
+            setLoadingAssignedStudents(true);
+            const details = await getStudentDetailsBatch(studentsList);
+            setAssignedStudentDetails(details);
+            setLoadingAssignedStudents(false);
+        };
+
+        fetchAssignedDetails();
+    }, [teacherDetails]);
 
     const fetchTeachers = async () => {
         setLoading(true);
@@ -115,13 +220,20 @@ const TeacherManagement = () => {
         setSelectedGradesForStudents(grades);
         setLoadingStudents(true);
 
-        // Load students from ALL selected grades
-        const allStudents = [];
+        // Load students from ALL selected grades with deduplication
+        const studentMap = new Map();
         for (const grade of grades) {
             const students = await getStudentsByGrade(grade);
-            allStudents.push(...students);
+            students.forEach(student => {
+                // Use the same composite key as list rendering to ensure uniqueness based on what React uses
+                const key = `${student.uid}_${student.childId}`;
+                if (!studentMap.has(key)) {
+                    studentMap.set(key, student);
+                }
+            });
         }
 
+        const allStudents = Array.from(studentMap.values());
         setAvailableStudents(allStudents);
 
         // Pre-select already assigned students
@@ -142,9 +254,30 @@ const TeacherManagement = () => {
     };
 
     const handleSaveStudents = async () => {
-        if (!selectedTeacher || !user || selectedGradesForStudents.length === 0) return;
+        // Fallback to direct auth check if context is slow/missing
+        // Since Admin Dashboard uses cookies, client-side Firebase Auth might be null.
+        // We allow the operation to proceed with a placeholder ID if DB rules allow it.
+        const currentUser = user || auth.currentUser;
+        const adminUid = currentUser?.uid || 'admin';
+
+        console.log('Save Students Clicked', { selectedTeacher, currentUser, adminUid, grades: selectedGradesForStudents });
+
+        if (!selectedTeacher) {
+            toast.error("Error: No teacher selected.");
+            return;
+        }
+
+        // Removed strict check for !currentUser because Admin might have cookie session only
+
+        if (selectedGradesForStudents.length === 0) {
+            toast.warning("Please select at least one grade to assign students from.");
+            return;
+        }
 
         setSavingStudents(true);
+
+        // Ensure grades are saved first to maintain consistency
+        await assignGradesToTeacher(selectedTeacher.uid, selectedGrades, adminUid);
 
         // Build students array with required fields
         const studentsToAssign = availableStudents
@@ -155,16 +288,45 @@ const TeacherManagement = () => {
                 grade: student.grade
             }));
 
-        const success = await assignStudentsToTeacher(selectedTeacher.uid, studentsToAssign, user.uid);
+        const success = await assignStudentsToTeacher(selectedTeacher.uid, studentsToAssign, adminUid);
 
         if (success) {
             // Refresh teacher details and list
             const details = await getTeacherDetails(selectedTeacher.uid);
             setTeacherDetails(details);
             await fetchTeachers();
+            toast.success("Assignment saved successfully!");
+        } else {
+            toast.error("Failed to save assignments. Please try again.");
         }
 
         setSavingStudents(false);
+    };
+
+    const handleResetAssignments = async () => {
+        if (!selectedTeacher) return;
+
+        if (confirm('Are you sure you want to remove ALL assigned grades and students from this teacher? This action cannot be undone.')) {
+            const adminUid = user?.uid || 'admin'; // Fallback
+            const success = await resetTeacherAssignments(selectedTeacher.uid, adminUid);
+
+            if (success) {
+                toast.success("All assignments reset successfully.");
+                // Clear local state
+                setSelectedGrades([]);
+                setSelectedStudents([]);
+                setAvailableStudents([]);
+                setSelectedGradesForStudents([]);
+                setAssignedStudentDetails([]);
+
+                // Refresh data
+                const details = await getTeacherDetails(selectedTeacher.uid);
+                setTeacherDetails(details);
+                await fetchTeachers();
+            } else {
+                toast.error("Failed to reset assignments.");
+            }
+        }
     };
 
     const handleRemoveGrade = async (grade) => {
@@ -366,186 +528,483 @@ const TeacherManagement = () => {
             <Dialog
                 open={detailModalOpen}
                 onClose={handleCloseDetails}
-                maxWidth="md"
+                maxWidth="lg"
                 fullWidth
+                PaperProps={{
+                    sx: { borderRadius: 3, overflow: 'hidden' }
+                }}
             >
-                <DialogTitle>
-                    <Box display="flex" justifyContent="space-between" alignItems="center">
-                        <Typography variant="h6">Manage Teacher Assignments</Typography>
-                        <IconButton onClick={handleCloseDetails} size="small">
-                            <X size={20} />
-                        </IconButton>
+                {/* Modal Header */}
+                <Box
+                    sx={{
+                        p: 3,
+                        background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                        color: 'white',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start'
+                    }}
+                >
+                    <Box display="flex" alignItems="center" gap={2}>
+                        <Avatar
+                            sx={{
+                                width: 64,
+                                height: 64,
+                                bgcolor: 'white',
+                                color: 'primary.main',
+                                fontWeight: 'bold',
+                                fontSize: '1.5rem',
+                                boxShadow: 3
+                            }}
+                        >
+                            {teacherDetails?.name?.charAt(0).toUpperCase()}
+                        </Avatar>
+                        <Box>
+                            <Typography variant="h5" fontWeight="bold">
+                                {teacherDetails?.name}
+                            </Typography>
+                            <Box display="flex" gap={2} mt={0.5} opacity={0.9}>
+                                <Box display="flex" alignItems="center" gap={0.5}>
+                                    <Mail size={14} />
+                                    <Typography variant="body2">{teacherDetails?.email}</Typography>
+                                </Box>
+                                <Box display="flex" alignItems="center" gap={0.5}>
+                                    <Hash size={14} />
+                                    <Typography variant="body2">{teacherDetails?.ticketCode}</Typography>
+                                </Box>
+                            </Box>
+                        </Box>
                     </Box>
-                </DialogTitle>
-                <DialogContent dividers>
+                    <IconButton
+                        onClick={handleCloseDetails}
+                        sx={{ color: 'white', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
+                    >
+                        <X size={24} />
+                    </IconButton>
+                </Box>
+
+                <DialogContent sx={{ p: 4, bgcolor: '#f8fafc' }}>
                     {loadingDetails ? (
-                        <Box display="flex" justifyContent="center" py={4}>
-                            <CircularProgress />
+                        <Box display="flex" justifyContent="center" py={8}>
+                            <CircularProgress size={40} />
                         </Box>
                     ) : teacherDetails ? (
-                        <Stack spacing={3}>
-                            {/* Teacher Info */}
-                            <Box>
-                                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                    Teacher Information
-                                </Typography>
-                                <Paper variant="outlined" sx={{ p: 2 }}>
-                                    <Typography><strong>Name:</strong> {teacherDetails.name}</Typography>
-                                    <Typography><strong>Email:</strong> {teacherDetails.email}</Typography>
-                                    <Typography><strong>Ticket Code:</strong> {teacherDetails.ticketCode}</Typography>
-                                    <Typography><strong>School:</strong> {teacherDetails.schoolName}</Typography>
-                                </Paper>
-                            </Box>
+                        <Grid container spacing={4}>
+                            {/* Left Column: School Info & Stats */}
+                            <Grid item xs={12} md={3}>
+                                <Stack spacing={3}>
+                                    <Paper elevation={0} variant="outlined" sx={{ p: 3, borderRadius: 2, bgcolor: 'white' }}>
+                                        <Typography variant="subtitle2" color="text.secondary" fontWeight="bold" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <School size={16} /> SCHOOL DETAILS
+                                        </Typography>
+                                        <Typography variant="body1" fontWeight="500" gutterBottom>
+                                            {teacherDetails.schoolName}
+                                        </Typography>
+                                        <Divider sx={{ my: 2 }} />
 
-                            {/* Grade Assignment */}
-                            <Box>
-                                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                    Assign Grades
-                                </Typography>
-                                <Autocomplete
-                                    multiple
-                                    options={GRADE_OPTIONS}
-                                    value={selectedGrades}
-                                    onChange={(e, newValue) => setSelectedGrades(newValue)}
-                                    renderInput={(params) => (
-                                        <TextField {...params} placeholder="Select grades..." />
-                                    )}
-                                    renderTags={(value, getTagProps) =>
-                                        value.map((option, index) => {
-                                            const { key, ...tagProps } = getTagProps({ index });
-                                            return (
-                                                <Chip
-                                                    key={key}
-                                                    label={option}
-                                                    {...tagProps}
-                                                    onDelete={() => handleRemoveGrade(option)}
-                                                />
-                                            );
-                                        })
-                                    }
-                                />
-                                <Button
-                                    variant="contained"
-                                    startIcon={savingGrades ? <CircularProgress size={16} /> : <Check size={16} />}
-                                    onClick={handleSaveGrades}
-                                    disabled={savingGrades}
-                                    sx={{ mt: 2 }}
-                                >
-                                    Save Grades
-                                </Button>
-                            </Box>
-
-                            {/* Student Assignment */}
-                            <Box>
-                                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                    Assign Students
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                    Select one or more grades to view and assign students
-                                </Typography>
-
-                                <Autocomplete
-                                    multiple
-                                    options={teacherDetails.assignments.assignedGrades}
-                                    value={selectedGradesForStudents}
-                                    onChange={(e, newValue) => handleGradesSelectForStudents(newValue || [])}
-                                    renderInput={(params) => (
-                                        <TextField {...params} placeholder="Select grades to assign students from..." />
-                                    )}
-                                    renderTags={(value, getTagProps) =>
-                                        value.map((option, index) => {
-                                            const { key, ...tagProps } = getTagProps({ index });
-                                            return (
-                                                <Chip
-                                                    key={key}
-                                                    label={option}
-                                                    size="small"
-                                                    color="primary"
-                                                    {...tagProps}
-                                                />
-                                            );
-                                        })
-                                    }
-                                    sx={{ mb: 2 }}
-                                />
-
-                                {loadingStudents ? (
-                                    <Box display="flex" justifyContent="center" py={2}>
-                                        <CircularProgress size={24} />
-                                    </Box>
-                                ) : selectedGradesForStudents.length > 0 && availableStudents.length > 0 ? (
-                                    <>
-                                        <Paper variant="outlined" sx={{ p: 2, maxHeight: 300, overflow: 'auto' }}>
-                                            {availableStudents.map((student) => (
-                                                <FormControlLabel
-                                                    key={`${student.uid}-${student.childId}`}
-                                                    control={
-                                                        <Checkbox
-                                                            checked={selectedStudents.includes(student.uid)}
-                                                            onChange={() => handleToggleStudent(student.uid)}
-                                                        />
-                                                    }
-                                                    label={`${student.name} (${student.email})`}
-                                                    sx={{ display: 'block' }}
-                                                />
-                                            ))}
-                                        </Paper>
-                                        <Button
-                                            variant="contained"
-                                            startIcon={savingStudents ? <CircularProgress size={16} /> : <Check size={16} />}
-                                            onClick={handleSaveStudents}
-                                            disabled={savingStudents}
-                                            sx={{ mt: 2 }}
-                                        >
-                                            Save Student Assignments
-                                        </Button>
-                                    </>
-                                ) : selectedGradesForStudents.length > 0 ? (
-                                    <Alert severity="info">No students found in the selected grade(s)</Alert>
-                                ) : null}
-                            </Box>
-
-                            {/* Currently Assigned Students */}
-                            {Object.keys(teacherDetails.assignments.students).length > 0 && (
-                                <Box>
-                                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                        Currently Assigned Students
-                                    </Typography>
-                                    <Paper variant="outlined" sx={{ p: 2 }}>
-                                        <Stack spacing={1}>
-                                            {Object.entries(teacherDetails.assignments.students).map(([uid, data]) => (
-                                                <Box
-                                                    key={uid}
-                                                    display="flex"
-                                                    justifyContent="space-between"
-                                                    alignItems="center"
-                                                >
-                                                    <Typography variant="body2">
-                                                        {data.grade} - Student UID: {uid.substring(0, 8)}...
-                                                    </Typography>
-                                                    <IconButton
-                                                        size="small"
-                                                        color="error"
-                                                        onClick={() => handleRemoveStudent(uid)}
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </IconButton>
-                                                </Box>
-                                            ))}
+                                        <Typography variant="subtitle2" color="text.secondary" fontWeight="bold" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Users size={16} /> ASSIGNMENT STATS
+                                        </Typography>
+                                        <Stack spacing={1.5}>
+                                            <Box display="flex" justifyContent="space-between">
+                                                <Typography variant="body2" color="text.secondary">Grades Assigned</Typography>
+                                                <Chip label={selectedGrades.length} size="small" color="primary" sx={{ height: 24 }} />
+                                            </Box>
+                                            <Box display="flex" justifyContent="space-between">
+                                                <Typography variant="body2" color="text.secondary">Students Assigned</Typography>
+                                                <Chip label={Object.keys(teacherDetails.assignments.students || {}).length} size="small" color="success" sx={{ height: 24 }} />
+                                            </Box>
                                         </Stack>
                                     </Paper>
-                                </Box>
-                            )}
-                        </Stack>
+
+                                    {/* Grade Assignment (Moved to Left) */}
+                                    <Box>
+                                        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.primary', fontWeight: 600 }}>
+                                            <BookOpen size={20} color="#1976d2" /> Assign Grades
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                            Select the grades this teacher is responsible for.
+                                        </Typography>
+
+                                        <Paper elevation={0} variant="outlined" sx={{ p: 2.5, borderRadius: 2, bgcolor: 'white' }}>
+                                            <Autocomplete
+                                                multiple
+                                                options={GRADE_OPTIONS}
+                                                value={selectedGrades}
+                                                onChange={(e, newValue) => setSelectedGrades(newValue)}
+                                                renderInput={(params) => (
+                                                    <TextField {...params} placeholder={selectedGrades.length === 0 ? "Select grades..." : ""} variant="standard" />
+                                                )}
+                                                renderTags={(value, getTagProps) =>
+                                                    value.map((option, index) => {
+                                                        const { key, ...tagProps } = getTagProps({ index });
+                                                        return (
+                                                            <Chip
+                                                                key={key}
+                                                                label={option}
+                                                                {...tagProps}
+                                                                color="primary"
+                                                                variant="filled"
+                                                                onDelete={() => handleRemoveGrade(option)}
+                                                                sx={{ m: 0.5 }}
+                                                            />
+                                                        );
+                                                    })
+                                                }
+                                            />
+                                            <Box display="flex" justifyContent="flex-end" mt={2}>
+                                                <Button
+                                                    variant="contained"
+                                                    size="small"
+                                                    startIcon={savingGrades ? <CircularProgress size={16} color="inherit" /> : <Check size={16} />}
+                                                    onClick={handleSaveGrades}
+                                                    disabled={savingGrades}
+                                                    disableElevation
+                                                >
+                                                    Update Grades
+                                                </Button>
+                                            </Box>
+                                        </Paper>
+                                    </Box>
+
+                                    {/* Action Buttons */}
+                                    <Paper elevation={0} variant="outlined" sx={{ p: 2, borderRadius: 2, bgcolor: 'error.50', borderColor: 'error.200' }}>
+                                        <Typography variant="subtitle2" color="error.main" fontWeight="bold" gutterBottom>
+                                            Danger Zone
+                                        </Typography>
+                                        <Button
+                                            fullWidth
+                                            color="error"
+                                            size="small"
+                                            startIcon={<Trash2 size={16} />}
+                                            onClick={handleResetAssignments}
+                                        >
+                                            Reset All Assignments
+                                        </Button>
+                                    </Paper>
+                                </Stack>
+                            </Grid>
+
+                            {/* Right Column: Assignments */}
+                            <Grid item xs={12} md={9}>
+                                <Stack spacing={4}>
+                                    {/* Student Assignment */}
+                                    <Box>
+                                        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.primary', fontWeight: 600 }}>
+                                            <UserPlus size={20} color="#2e7d32" /> Assign Students
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                            Filter by grade and select students to assign.
+                                        </Typography>
+
+                                        <Paper elevation={0} variant="outlined" sx={{ p: 2.5, borderRadius: 2, bgcolor: 'white' }}>
+                                            <Autocomplete
+                                                fullWidth
+                                                multiple
+                                                key={`student-assign-grades-${selectedGrades.length}`}
+                                                options={selectedGrades || []}
+                                                value={selectedGradesForStudents}
+                                                onChange={(e, newValue) => handleGradesSelectForStudents(newValue || [])}
+                                                noOptionsText={selectedGrades.length === 0 ? "⚠️ Select grades above first" : "No grades available"}
+                                                renderInput={(params) => (
+                                                    <TextField
+                                                        {...params}
+                                                        fullWidth
+                                                        placeholder="Which grades to load students from?"
+                                                        helperText="Select one or more grades to populate the student list below"
+                                                    />
+                                                )}
+                                                renderTags={(value, getTagProps) =>
+                                                    value.map((option, index) => {
+                                                        const { key, ...tagProps } = getTagProps({ index });
+                                                        return (
+                                                            <Chip
+                                                                key={key}
+                                                                label={option}
+                                                                size="small"
+                                                                color="info"
+                                                                variant="outlined"
+                                                                {...tagProps}
+                                                            />
+                                                        );
+                                                    })
+                                                }
+                                                sx={{ mb: 3 }}
+                                            />
+
+                                            {loadingStudents ? (
+                                                <Box display="flex" justifyContent="center" py={4} bgcolor="grey.50" borderRadius={2}>
+                                                    <Stack alignItems="center" spacing={1}>
+                                                        <CircularProgress size={24} />
+                                                        <Typography variant="caption" color="text.secondary">Loading students...</Typography>
+                                                    </Stack>
+                                                </Box>
+                                            ) : selectedGradesForStudents.length > 0 && availableStudents.length > 0 ? (
+                                                <>
+                                                    {/* Controls: Search & Select All */}
+                                                    <Box display="flex" flexDirection="column" gap={2} mb={2}>
+                                                        <Box display="flex" gap={2}>
+                                                            <TextField
+                                                                fullWidth
+                                                                size="small"
+                                                                placeholder="Search students by name or email..."
+                                                                value={studentSearchTerm}
+                                                                onChange={(e) => setStudentSearchTerm(e.target.value)}
+                                                                InputProps={{
+                                                                    startAdornment: (
+                                                                        <InputAdornment position="start">
+                                                                            <Search size={18} color="#9e9e9e" />
+                                                                        </InputAdornment>
+                                                                    ),
+                                                                }}
+                                                            />
+                                                            <Autocomplete
+                                                                size="small"
+                                                                options={availableSchools}
+                                                                value={selectedSchool}
+                                                                onChange={(e, newValue) => setSelectedSchool(newValue)}
+                                                                renderInput={(params) => <TextField {...params} placeholder="Filter by School" sx={{ minWidth: 200 }} />}
+                                                                renderOption={(props, option) => {
+                                                                    const { key, ...otherProps } = props;
+                                                                    return (
+                                                                        <li key={key} {...otherProps} style={{ fontSize: '0.85rem' }}>
+                                                                            <School size={14} style={{ marginRight: 8, opacity: 0.6 }} />
+                                                                            {option}
+                                                                        </li>
+                                                                    );
+                                                                }}
+                                                            />
+                                                        </Box>
+                                                        <Box display="flex" justifyContent="space-between" alignItems="center" px={1}>
+                                                            <FormControlLabel
+                                                                control={
+                                                                    <Checkbox
+                                                                        checked={filteredStudents.length > 0 && filteredStudents.every(s => selectedStudents.includes(s.uid))}
+                                                                        indeterminate={
+                                                                            filteredStudents.some(s => selectedStudents.includes(s.uid)) &&
+                                                                            !filteredStudents.every(s => selectedStudents.includes(s.uid))
+                                                                        }
+                                                                        onChange={(e) => handleSelectAll(e.target.checked)}
+                                                                        size="small"
+                                                                    />
+                                                                }
+                                                                label={<Typography variant="body2" color="text.primary">Select All ({filteredStudents.length})</Typography>}
+                                                            />
+
+                                                            <FormControlLabel
+                                                                control={
+                                                                    <Switch
+                                                                        size="small"
+                                                                        checked={showSelectedOnly}
+                                                                        onChange={(e) => setShowSelectedOnly(e.target.checked)}
+                                                                    />
+                                                                }
+                                                                label={<Typography variant="body2" color="text.secondary">Show Selected Only ({selectedStudents.length})</Typography>}
+                                                            />
+                                                            <Box flexGrow={1} />
+                                                            <Button
+                                                                variant="contained"
+                                                                size="small"
+                                                                startIcon={savingStudents ? <CircularProgress size={16} color="inherit" /> : <Check size={16} />}
+                                                                onClick={handleSaveStudents}
+                                                                disabled={savingStudents}
+                                                                disableElevation
+                                                            >
+                                                                Save Assignments
+                                                            </Button>
+                                                        </Box>
+                                                    </Box>
+
+                                                    <Box
+                                                        sx={{
+                                                            maxHeight: 400,
+                                                            overflowY: 'auto',
+                                                            border: '1px solid #e0e0e0',
+                                                            borderRadius: 2,
+                                                            mb: 2,
+                                                            bgcolor: 'white'
+                                                        }}
+                                                    >
+                                                        <List dense disablePadding>
+                                                            {filteredStudents.length === 0 ? (
+                                                                <Box py={4} textAlign="center">
+                                                                    <Typography variant="body2" color="text.secondary">
+                                                                        No students match your search
+                                                                    </Typography>
+                                                                </Box>
+                                                            ) : (
+                                                                filteredStudents.map((student) => {
+                                                                    const isSelected = selectedStudents.includes(student.uid);
+                                                                    return (
+                                                                        <ListItem
+                                                                            key={`${student.uid}_${student.childId}`}
+                                                                            disablePadding
+                                                                        >
+                                                                            <ListItemButton
+                                                                                onClick={() => handleToggleStudent(student.uid)}
+                                                                                sx={{
+                                                                                    bgcolor: isSelected ? 'primary.50' : 'transparent',
+                                                                                    borderBottom: '1px solid #f0f0f0',
+                                                                                    '&:hover': { bgcolor: isSelected ? 'primary.100' : 'grey.50' }
+                                                                                }}
+                                                                            >
+                                                                                <ListItemIcon sx={{ minWidth: 40 }}>
+                                                                                    <Checkbox
+                                                                                        edge="start"
+                                                                                        checked={isSelected}
+                                                                                        disableRipple
+                                                                                        size="small"
+                                                                                    />
+                                                                                </ListItemIcon>
+                                                                                <ListItemText
+                                                                                    primary={
+                                                                                        <Typography variant="body2" fontWeight={isSelected ? 600 : 400}>
+                                                                                            {student.name}
+                                                                                        </Typography>
+                                                                                    }
+                                                                                    secondary={student.email}
+                                                                                />
+                                                                                <Box display="flex" flexDirection="column" alignItems="flex-end" gap={0.5}>
+                                                                                    <Chip
+                                                                                        label={student.grade}
+                                                                                        size="small"
+                                                                                        variant="outlined"
+                                                                                        sx={{ fontSize: '0.7rem', height: 20 }}
+                                                                                    />
+                                                                                    {(student.schoolName && student.schoolName !== 'Unknown School' && student.schoolName !== 'N/A') && (
+                                                                                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                                                                                            {student.schoolName}
+                                                                                        </Typography>
+                                                                                    )}
+                                                                                </Box>
+                                                                            </ListItemButton>
+                                                                        </ListItem>
+                                                                    );
+                                                                })
+                                                            )}
+                                                        </List>
+                                                    </Box>
+
+                                                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                                                        <Typography variant="caption" color="text.secondary">
+                                                            {selectedStudents.length} students selected
+                                                        </Typography>
+                                                    </Box>
+                                                </>
+                                            ) : selectedGradesForStudents.length > 0 ? (
+                                                <Alert severity="info" variant="outlined">No students found in the selected grade(s)</Alert>
+                                            ) : (
+                                                <Box p={3} bgcolor="grey.50" borderRadius={2} textAlign="center">
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        Select a grade above to see available students
+                                                    </Typography>
+                                                </Box>
+                                            )}
+                                        </Paper>
+                                    </Box>
+
+                                    {/* Currently Assigned Students Quick View */}
+                                    {assignedStudentDetails.length > 0 && (
+                                        <Box>
+                                            <Stack direction="row" spacing={2} alignItems="center" mb={1} justifyContent="space-between">
+                                                <Typography variant="subtitle2" sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
+                                                    Currently Assigned ({assignedStudentDetails.length})
+                                                </Typography>
+                                                <TextField
+                                                    size="small"
+                                                    placeholder="Search assigned students..."
+                                                    value={assignedSearchTerm}
+                                                    onChange={(e) => setAssignedSearchTerm(e.target.value)}
+                                                    InputProps={{
+                                                        startAdornment: (
+                                                            <InputAdornment position="start">
+                                                                <Search size={14} />
+                                                            </InputAdornment>
+                                                        ),
+                                                    }}
+                                                    sx={{ width: 200, '& .MuiInputBase-root': { fontSize: '0.8rem' } }}
+                                                />
+                                            </Stack>
+
+                                            <Paper elevation={0} variant="outlined" sx={{ borderRadius: 2, bgcolor: 'grey.50', maxHeight: 300, overflow: 'auto' }}>
+                                                {loadingAssignedStudents ? (
+                                                    <Box p={3} display="flex" justifyContent="center">
+                                                        <CircularProgress size={24} />
+                                                    </Box>
+                                                ) : filteredAssignedStudents.length > 0 ? (
+                                                    <List dense disablePadding>
+                                                        {filteredAssignedStudents.map((student) => (
+                                                            <ListItem
+                                                                key={`${student.uid}_${student.childId}`}
+                                                                divider
+                                                                secondaryAction={
+                                                                    <IconButton
+                                                                        edge="end"
+                                                                        aria-label="delete"
+                                                                        size="small"
+                                                                        onClick={() => handleRemoveStudent(student.uid)}
+                                                                        color="error"
+                                                                    >
+                                                                        <X size={16} />
+                                                                    </IconButton>
+                                                                }
+                                                                sx={{ bgcolor: 'white' }}
+                                                            >
+                                                                <ListItemAvatar>
+                                                                    <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main', fontSize: '0.8rem' }}>
+                                                                        {student.name?.charAt(0) || '?'}
+                                                                    </Avatar>
+                                                                </ListItemAvatar>
+                                                                <ListItemText
+                                                                    primary={
+                                                                        <Box display="flex" alignItems="center" gap={1}>
+                                                                            <Typography variant="body2" fontWeight={600}>
+                                                                                {student.name}
+                                                                            </Typography>
+                                                                            <Chip label={student.grade} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />
+                                                                        </Box>
+                                                                    }
+                                                                    secondary={
+                                                                        <Box display="flex" flexDirection="column">
+                                                                            <Typography variant="caption" color="text.secondary">
+                                                                                {student.email}
+                                                                            </Typography>
+                                                                            {student.schoolName && student.schoolName !== 'Unknown School' && (
+                                                                                <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                                                                                    {student.schoolName}
+                                                                                </Typography>
+                                                                            )}
+                                                                        </Box>
+                                                                    }
+                                                                    secondaryTypographyProps={{ component: 'div' }}
+                                                                />
+                                                            </ListItem>
+                                                        ))}
+                                                    </List>
+                                                ) : (
+                                                    <Box p={2} textAlign="center">
+                                                        <Typography variant="caption" color="text.secondary">
+                                                            No matching students found.
+                                                        </Typography>
+                                                    </Box>
+                                                )}
+                                            </Paper>
+                                        </Box>
+                                    )}
+
+                                </Stack>
+                            </Grid>
+                        </Grid >
                     ) : (
                         <Alert severity="error">Failed to load teacher details</Alert>
                     )}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseDetails}>Close</Button>
+                </DialogContent >
+                <Divider />
+                <DialogActions sx={{ p: 2, bgcolor: 'grey.50' }}>
+                    <Button onClick={handleCloseDetails} color="inherit">Close</Button>
                 </DialogActions>
-            </Dialog>
-        </Box>
+            </Dialog >
+        </Box >
     );
 };
 

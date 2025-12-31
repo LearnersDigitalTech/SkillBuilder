@@ -214,6 +214,31 @@ export const removeStudentFromTeacher = async (teacherUid, studentUid) => {
         console.error('Error removing student from teacher:', error);
         return false;
     }
+}
+
+
+/**
+ * Reset all assignments for a teacher
+ * @param {string} teacherUid - Teacher's Firebase UID
+ * @param {string} adminUid - Admin's Firebase UID
+ * @returns {Promise<boolean>} Success status
+ */
+export const resetTeacherAssignments = async (teacherUid, adminUid) => {
+    try {
+        const timestamp = new Date().toISOString();
+        const updates = {
+            [`NMD_2025/Registrations/${teacherUid}/teacherAssignments/assignedGrades`]: [],
+            [`NMD_2025/Registrations/${teacherUid}/teacherAssignments/students`]: null,
+            [`NMD_2025/Registrations/${teacherUid}/teacherAssignments/lastUpdated`]: timestamp,
+            [`NMD_2025/Registrations/${teacherUid}/teacherAssignments/updatedBy`]: adminUid
+        };
+
+        await update(ref(firebaseDatabase), updates);
+        return true;
+    } catch (error) {
+        console.error('Error resetting teacher assignments:', error);
+        return false;
+    }
 };
 
 /**
@@ -237,25 +262,113 @@ export const getStudentsByGrade = async (grade) => {
             // Skip teachers
             if (userData.userType === 'teacher') return;
 
+            // Helper to normalize grade for comparison
+            const normalize = (g) => (g || '').toLowerCase().replace(/\s+/g, '');
+            const targetGrade = normalize(grade);
+
+            // 1. Check for modern "children" structure
             if (userData.children) {
                 Object.entries(userData.children).forEach(([childId, child]) => {
-                    if (child.grade === grade) {
+                    const childGrade = normalize(child.grade);
+                    // Match if normalized grades are equal
+                    // Also check if target is just number "1" and child is "Grade 1" or vice-versa
+                    if (childGrade === targetGrade || childGrade.includes(targetGrade) || targetGrade.includes(childGrade)) {
                         students.push({
                             uid,
                             childId,
                             name: child.name || 'Unknown',
                             grade: child.grade,
+                            schoolName: userData.schoolName || userData.school || child.schoolName || child.school || 'Unknown School',
                             email: child.email || userData.parentEmail || 'N/A',
                             phoneNumber: userData.parentPhone || userData.phoneNumber || 'N/A'
                         });
                     }
                 });
             }
+            // 2. Check for legacy/single-user structure (no children node, grade at root)
+            else if (userData.grade) {
+                const userGrade = normalize(userData.grade);
+                if (userGrade === targetGrade || userGrade.includes(targetGrade) || targetGrade.includes(userGrade)) {
+                    students.push({
+                        uid,
+                        childId: 'default', // Legacy users don't have childId
+                        name: userData.name || 'Unknown',
+                        grade: userData.grade,
+                        schoolName: userData.schoolName || userData.school || 'Unknown School',
+                        email: userData.email || userData.parentEmail || 'N/A',
+                        phoneNumber: userData.phoneNumber || userData.parentPhone || 'N/A'
+                    });
+                }
+            }
         });
 
         return students;
     } catch (error) {
         console.error('Error fetching students by grade:', error);
+        return [];
+    }
+};
+
+/**
+ * Get details for a batch of students by UID/ChildID
+ * @param {Array<{uid: string, childId: string}>} studentsList 
+ * @returns {Promise<Array<Object>>} Hydrated student details
+ */
+export const getStudentDetailsBatch = async (studentsList) => {
+    if (!studentsList || studentsList.length === 0) return [];
+
+    try {
+        const registrationsRef = ref(firebaseDatabase, 'NMD_2025/Registrations');
+        const snapshot = await get(registrationsRef);
+
+        if (!snapshot.exists()) return [];
+
+        const registrations = snapshot.val();
+        const hydratedStudents = [];
+
+        studentsList.forEach(({ uid, childId }) => {
+            const userData = registrations[uid];
+            if (!userData) return;
+
+            let studentDetails = null;
+
+            // 1. Try to find in children (Modern)
+            if (userData.children && userData.children[childId]) {
+                const child = userData.children[childId];
+                studentDetails = {
+                    uid,
+                    childId,
+                    name: child.name || 'Unknown',
+                    grade: child.grade,
+                    schoolName: userData.schoolName || userData.school || child.schoolName || child.school || 'Unknown School',
+                    email: child.email || userData.parentEmail || 'N/A',
+                    phoneNumber: userData.parentPhone || userData.phoneNumber || 'N/A'
+                };
+            }
+            // 2. Try root level (Legacy) if childId matches or is 'default'
+            else if (!userData.children && (childId === 'default' || !childId)) {
+                studentDetails = {
+                    uid,
+                    childId: 'default',
+                    name: userData.name || 'Unknown',
+                    grade: userData.grade,
+                    schoolName: userData.schoolName || userData.school || 'Unknown School',
+                    email: userData.email || userData.parentEmail || 'N/A',
+                    phoneNumber: userData.phoneNumber || userData.parentPhone || 'N/A'
+                };
+            }
+            // 3. Fallback: If childId exists but not found in children (deleted?), or hybrid case
+            // We skip if we strictly can't find the referenced child.
+
+            if (studentDetails) {
+                hydratedStudents.push(studentDetails);
+            }
+        });
+
+        return hydratedStudents;
+
+    } catch (error) {
+        console.error('Error fetching student batch details:', error);
         return [];
     }
 };
