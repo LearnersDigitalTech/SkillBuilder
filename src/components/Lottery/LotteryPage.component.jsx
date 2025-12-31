@@ -27,6 +27,7 @@ const LotteryPage = () => {
     });
 
     const [submitted, setSubmitted] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [ticketCode, setTicketCode] = useState(null);
     const [registrationType, setRegistrationType] = useState('parent'); // 'parent' | 'student' | 'teacher' | 'other'
     const [hasChildren, setHasChildren] = useState(true); // Only for parents
@@ -48,6 +49,7 @@ const LotteryPage = () => {
     const SCHOOL_OPTIONS = ["Learners Global School ", "Learners PU College-Sathagalli", "Learners PU College-Vijayanagar", "Others"];
 
     const onSubmit = async (data) => {
+        setIsSubmitting(true);
         let newCode;
         let createdUserUid = null;
 
@@ -80,11 +82,13 @@ const LotteryPage = () => {
                     origin: { y: 0.6 }
                 });
 
+                setIsSubmitting(false);
                 return; // Stop here and show existing ticket
             }
         } catch (error) {
             console.error("Error checking registration uniqueness:", error);
             toast.error("Unable to verify registration. Please try again.");
+            setIsSubmitting(false);
             return;
         }
 
@@ -179,15 +183,18 @@ const LotteryPage = () => {
                 } catch (signInError) {
                     console.error("Failed to sign in existing user:", signInError);
                     toast.error(`User ${newCode} exists but sign-in failed. Please contact support.`);
+                    setIsSubmitting(false);
                     return;
                 }
             } else if (authError.code === 'auth/operation-not-allowed') {
                 console.error("Firebase Auth Error: Email/Password provider disabled.");
                 toast.error("System Error: Login provider disabled. Contact support.");
+                setIsSubmitting(false);
                 return;
             } else {
                 console.error("User creation failed:", authError);
                 toast.error(`Registration failed: ${authError.message}`);
+                setIsSubmitting(false);
                 return;
             }
         }
@@ -331,6 +338,7 @@ const LotteryPage = () => {
         });
 
         setSubmitted(true);
+        setIsSubmitting(false);
     };
 
     const handleDownload = async () => {
@@ -661,11 +669,12 @@ const LotteryPage = () => {
 
                             <Button
                                 type="submit"
+                                disabled={isSubmitting} // Disable while submitting
                                 variant="contained"
                                 fullWidth
                                 sx={{
                                     mt: 2,
-                                    background: 'linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%)',
+                                    background: isSubmitting ? '#94a3b8' : 'linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%)',
                                     color: 'white',
                                     padding: '12px',
                                     fontWeight: 'bold',
@@ -673,12 +682,12 @@ const LotteryPage = () => {
                                     textTransform: 'none',
                                     borderRadius: '8px',
                                     '&:hover': {
-                                        background: 'linear-gradient(135deg, #1d4ed8 0%, #0369a1 100%)',
-                                        boxShadow: '0 10px 15px -3px rgba(37, 99, 235, 0.3)'
+                                        background: isSubmitting ? '#94a3b8' : 'linear-gradient(135deg, #1d4ed8 0%, #0369a1 100%)',
+                                        boxShadow: isSubmitting ? 'none' : '0 10px 15px -3px rgba(37, 99, 235, 0.3)'
                                     }
                                 }}
                             >
-                                Get Ticket
+                                {isSubmitting ? 'Generating Ticket...' : 'Get Ticket'}
                             </Button>
                         </form>
                     </div>
