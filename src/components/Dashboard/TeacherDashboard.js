@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Header from "@/app/homepage/Header";
 import Footer from "@/components/Footer/Footer.component";
 import { CircularProgress, Card, CardContent, Chip } from "@mui/material";
-import { GraduationCap, Users, LogOut, ChevronRight, BookOpen } from "lucide-react";
+import { GraduationCap, Users, LogOut, ChevronRight, BookOpen, Upload } from "lucide-react";
 import { getAssignedGrades, getStudentsByGrade, getStudentCountsByGrade } from "@/services/teacherDataService";
 import Styles from "../../app/dashboard/Dashboard.module.css";
 
@@ -167,6 +167,17 @@ const TeacherDashboard = () => {
                                 </p>
                             </div>
                         </div>
+
+                        {/* NEET Upload Action */}
+                        {userData?.neetUploadEnabled && (
+                            <button
+                                onClick={() => router.push('/teacher-dashboard/neet-upload')}
+                                className="w-full mt-4 py-2.5 px-4 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-100 hover:text-orange-700 border border-orange-200 dark:border-orange-800 transition-all duration-200 text-xs font-bold flex items-center justify-center gap-2 group"
+                            >
+                                <Upload size={14} />
+                                Upload NEET Questions
+                            </button>
+                        )}
 
                         {/* Sign Out */}
                         <button

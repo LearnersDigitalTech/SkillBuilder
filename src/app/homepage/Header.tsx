@@ -173,6 +173,21 @@ const Header = () => {
                                 SAT
                             </button>
                         )}
+                        {!isTeacher && (
+                            <button
+                                onClick={() => {
+                                    if (user || hasSession) {
+                                        router.push("/neet");
+                                    } else {
+                                        setRedirectPath("/neet");
+                                        setAuthModalOpen(true);
+                                    }
+                                }}
+                                className="text-sm font-semibold text-[#0B2545]/80 hover:text-[#0096FF] transition-colors bg-transparent border-none cursor-pointer"
+                            >
+                                NEET Exam
+                            </button>
+                        )}
                     </nav>
 
                     <div className="flex items-center gap-4">
@@ -290,6 +305,23 @@ const Header = () => {
                                         className="text-lg font-semibold text-[#0B2545] hover:text-[#0096FF] transition-colors bg-transparent border-none cursor-pointer w-full text-center py-2"
                                     >
                                         SAT
+                                    </button>
+                                )}
+
+                                {!isTeacher && (
+                                    <button
+                                        onClick={() => {
+                                            if (user || hasSession) {
+                                                router.push("/neet");
+                                            } else {
+                                                setRedirectPath("/neet");
+                                                setAuthModalOpen(true);
+                                            }
+                                            setMenuOpen(false);
+                                        }}
+                                        className="text-lg font-semibold text-[#0B2545] hover:text-[#0096FF] transition-colors w-full text-center py-2 bg-transparent border-none cursor-pointer"
+                                    >
+                                        NEET Exam
                                     </button>
                                 )}
                             </nav>
