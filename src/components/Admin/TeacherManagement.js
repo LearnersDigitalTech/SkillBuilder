@@ -57,7 +57,9 @@ import {
     Check,
     X,
     UserPlus,
-    AlertCircle
+    AlertCircle,
+    Zap,
+    Shield
 } from 'lucide-react';
 import { toast } from "react-toastify";
 import { ref, get, remove } from 'firebase/database';
@@ -71,7 +73,8 @@ import {
     removeGradeFromTeacher,
     removeStudentFromTeacher,
     getStudentDetailsBatch,
-    resetTeacherAssignments
+    resetTeacherAssignments,
+    updateTeacherPermissions
 } from '@/services/adminTeacherService';
 import { useAuth } from '@/context/AuthContext';
 
@@ -86,6 +89,8 @@ const TeacherManagement = () => {
     const [detailModalOpen, setDetailModalOpen] = useState(false);
     const [teacherDetails, setTeacherDetails] = useState(null);
     const [loadingDetails, setLoadingDetails] = useState(false);
+    const [neetPermission, setNeetPermission] = useState(false);
+    const [savingPermissions, setSavingPermissions] = useState(false);
 
     // Grade assignment state
     const [selectedGrades, setSelectedGrades] = useState([]);
@@ -187,6 +192,7 @@ const TeacherManagement = () => {
         const details = await getTeacherDetails(teacher.uid);
         setTeacherDetails(details);
         setSelectedGrades(details?.assignments.assignedGrades || []);
+        setNeetPermission(details?.neetUploadEnabled || false);
         setLoadingDetails(false);
     };
 
@@ -198,6 +204,7 @@ const TeacherManagement = () => {
         setSelectedGradesForStudents([]); // Reset to empty array
         setAvailableStudents([]);
         setSelectedStudents([]);
+        setNeetPermission(false);
     };
 
     const handleSaveGrades = async () => {
@@ -667,6 +674,7 @@ const TeacherManagement = () => {
                                         </Paper>
                                     </Box>
 
+
                                     {/* Action Buttons */}
                                     <Paper elevation={0} variant="outlined" sx={{ p: 2, borderRadius: 2, bgcolor: 'error.50', borderColor: 'error.200' }}>
                                         <Typography variant="subtitle2" color="error.main" fontWeight="bold" gutterBottom>
@@ -688,6 +696,57 @@ const TeacherManagement = () => {
                             {/* Right Column: Assignments */}
                             <Grid item xs={12} md={9}>
                                 <Stack spacing={4}>
+                                    {/* Permissions Section */}
+                                    <Box>
+                                        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.primary', fontWeight: 600 }}>
+                                            <Shield size={20} color="#e65100" /> Permissions
+                                        </Typography>
+                                        <Paper elevation={0} variant="outlined" sx={{ p: 2, borderRadius: 2, bgcolor: 'white' }}>
+                                            <Box display="flex" alignItems="center" justifyContent="space-between">
+                                                <FormControlLabel
+                                                    control={
+                                                        <Switch
+                                                            checked={neetPermission}
+                                                            onChange={(e) => setNeetPermission(e.target.checked)}
+                                                            color="warning"
+                                                        />
+                                                    }
+                                                    label={
+                                                        <Box>
+                                                            <Typography variant="subtitle2" fontWeight="600">Enable NEET Question Upload</Typography>
+                                                            <Typography variant="caption" color="text.secondary">Allows this teacher to access the NEET question upload portal</Typography>
+                                                        </Box>
+                                                    }
+                                                />
+                                                <Button
+                                                    variant="contained"
+                                                    size="small"
+                                                    color="warning"
+                                                    startIcon={savingPermissions ? <CircularProgress size={16} color="inherit" /> : <Save size={16} />}
+                                                    onClick={async () => {
+                                                        if (!selectedTeacher) return;
+                                                        setSavingPermissions(true);
+                                                        const adminUid = user?.uid || 'admin';
+                                                        const success = await updateTeacherPermissions(selectedTeacher.uid, { neetUploadEnabled: neetPermission }, adminUid);
+                                                        if (success) {
+                                                            toast.success("Permissions updated successfully");
+                                                            const details = await getTeacherDetails(selectedTeacher.uid);
+                                                            setTeacherDetails(details);
+                                                            setNeetPermission(details?.neetUploadEnabled || false);
+                                                        } else {
+                                                            toast.error("Failed to update permissions");
+                                                        }
+                                                        setSavingPermissions(false);
+                                                    }}
+                                                    disabled={savingPermissions}
+                                                    disableElevation
+                                                >
+                                                    Save Permissions
+                                                </Button>
+                                            </Box>
+                                        </Paper>
+                                    </Box>
+
                                     {/* Student Assignment */}
                                     <Box>
                                         <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.primary', fontWeight: 600 }}>

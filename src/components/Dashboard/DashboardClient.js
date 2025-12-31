@@ -6,7 +6,7 @@ import Header from "@/app/homepage/Header";
 import Footer from "@/components/Footer/Footer.component";
 import PhoneNumberDialog from "@/components/Auth/PhoneNumberDialog";
 import { CircularProgress, Button, FormControl, InputLabel, Select, MenuItem, TextField, Dialog, DialogTitle, DialogContent, Card, CardContent, Tabs, Tab } from "@mui/material";
-import { User, LogOut, BookOpen, Clock, Award, ChevronRight, Edit2, GraduationCap, Zap, Plus as PlusIcon, Users, X, Flame, Target, TrendingUp, Globe, Lightbulb } from "lucide-react";
+import { User, LogOut, BookOpen, Clock, Award, ChevronRight, Edit2, GraduationCap, Zap, Plus as PlusIcon, Users, X, Flame, Target, TrendingUp, Globe, Lightbulb, Dna } from "lucide-react";
 import { ref, get, set } from "firebase/database";
 import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler";
 import Styles from "../../app/dashboard/Dashboard.module.css";
@@ -80,6 +80,7 @@ const DashboardClient = () => {
     const [activeTab, setActiveTab] = useState(0);
     const [showAllAssessments, setShowAllAssessments] = useState(false);
     const [showAllRapidMath, setShowAllRapidMath] = useState(false);
+    const [showAllNeet, setShowAllNeet] = useState(false);
 
     const handleTabChange = (event, newValue) => {
         setActiveTab(newValue);
@@ -214,12 +215,13 @@ const DashboardClient = () => {
                     }
 
                     if (!userKey) return;
-
-                    const finalUserKey = userKey.replace('.', '_'); // Consistent sanitization with Saver
+                    console.log("[DashboardClient] Fetching reports for:", userKey, activeChildId);
+                    const finalUserKey = userKey.replace(/\./g, '_'); // Consistent sanitization with Saver
                     const reportsRef = ref(firebaseDatabase, `NMD_2025/Reports/${finalUserKey}/${activeChildId}`);
                     const snapshot = await get(reportsRef);
                     if (snapshot.exists()) {
                         const data = snapshot.val();
+                        console.log("[DashboardClient] Found raw reports data:", Object.keys(data));
                         setReports(data);
                         setReportsCache((prev) => ({
                             ...prev,
@@ -563,7 +565,7 @@ const DashboardClient = () => {
                                 {/* Info & Controls */}
                                 <div className="flex-1 flex flex-col justify-center">
                                     <h3 className="text-2xl font-bold text-slate-800 dark:text-white leading-tight mb-1 tracking-tight">
-                                        {children[activeChildId].name.split(' ')[0]}
+                                        {children[activeChildId].name}
                                     </h3>
                                     <div className="flex items-center gap-2 mb-2">
                                         <span className="inline-flex items-center px-2.5 py-0.5 bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[10px] font-bold uppercase tracking-wider rounded-md border border-blue-100 dark:border-blue-800">
@@ -700,12 +702,15 @@ const DashboardClient = () => {
                             {(() => {
                                 let rapidMathReports = [];
                                 let assessmentReports = [];
+                                let neetReports = [];
 
                                 // 1. Collect all reports and split by type
                                 let allReports = [];
 
                                 if (reports.summary) {
-                                    allReports.push({ id: 'root', ...reports });
+                                    // Extract top-level report only, avoiding nested report nodes
+                                    const { summary, topicFeedback, perQuestionReport, timestamp, type } = reports;
+                                    allReports.push({ id: 'legacy_root', summary, topicFeedback, perQuestionReport, timestamp, type });
                                 }
 
                                 Object.entries(reports).forEach(([key, val]) => {
@@ -716,6 +721,7 @@ const DashboardClient = () => {
 
                                 // console.log(allReports);
                                 // 2. Sort all reports first
+                                console.log("[DashboardClient] Total reports collected before sort:", allReports.length);
                                 allReports.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
 
                                 // 3. Deduplicate using IDs and filter invalid reports
@@ -734,13 +740,17 @@ const DashboardClient = () => {
                                 });
 
                                 // 4. Separate
+                                console.log("[DashboardClient] Unique reports count:", uniqueReports.length);
                                 uniqueReports.forEach(report => {
                                     if (report.type === 'RAPID_MATH') {
                                         rapidMathReports.push(report);
+                                    } else if (report.type === 'NEET' || (report.summary?.grade && report.summary.grade.startsWith('NEET'))) {
+                                        neetReports.push(report);
                                     } else {
                                         assessmentReports.push(report);
                                     }
                                 });
+                                console.log("[DashboardClient] NEET reports segregated:", neetReports.length);
 
                                 const handleAssessmentClick = (data) => {
                                     if (data && data.id) {
@@ -776,6 +786,7 @@ const DashboardClient = () => {
                                             >
                                                 <Tab label="Skill Assessments" />
                                                 <Tab label="Rapid Math" />
+                                                <Tab label="Neet Exam" />
                                             </Tabs>
                                         </div>
 
@@ -797,6 +808,13 @@ const DashboardClient = () => {
                                                         data={rapidMathReports}
                                                         type="RAPID_MATH"
                                                         onPointClick={handleRapidMathClick}
+                                                    />
+                                                )}
+                                                {activeTab === 2 && neetReports.length > 0 && (
+                                                    <ProgressChart
+                                                        data={neetReports}
+                                                        type="NEET"
+                                                        onPointClick={handleAssessmentClick}
                                                     />
                                                 )}
 
@@ -827,6 +845,19 @@ const DashboardClient = () => {
                                                         </Button>
                                                     </div>
                                                 )}
+                                                {activeTab === 2 && neetReports.length === 0 && (
+                                                    <div className={Styles.emptyState}>
+                                                        <img src="/empty-state.svg" alt="No neet exam" className={Styles.emptyImage} />
+                                                        <p>You haven't taken any NEET exams yet.</p>
+                                                        <Button
+                                                            variant="contained"
+                                                            className={Styles.startBtn}
+                                                            onClick={() => router.push("/neet")}
+                                                        >
+                                                            Explore NEET Exam
+                                                        </Button>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             {/* RIGHT COLUMN: HISTORY LIST */}
@@ -837,33 +868,43 @@ const DashboardClient = () => {
                                                     <div className="p-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex justify-between items-center">
                                                         <h3 className="font-bold text-slate-800 dark:text-slate-200">Assessment History</h3>
                                                         {/* View All Toggle */}
-                                                        {(activeTab === 0 ? assessmentReports : rapidMathReports).length > 5 && (
+                                                        {(activeTab === 0 ? assessmentReports : activeTab === 1 ? rapidMathReports : neetReports).length > 5 && (
                                                             <button
-                                                                onClick={() => activeTab === 0 ? setShowAllAssessments(!showAllAssessments) : setShowAllRapidMath(!showAllRapidMath)}
+                                                                onClick={() => {
+                                                                    if (activeTab === 0) setShowAllAssessments(!showAllAssessments);
+                                                                    else if (activeTab === 1) setShowAllRapidMath(!showAllRapidMath);
+                                                                    else if (activeTab === 2) setShowAllNeet(!showAllNeet);
+                                                                }}
                                                                 className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
                                                             >
-                                                                {(activeTab === 0 ? showAllAssessments : showAllRapidMath) ? "Collapse" : "View All"}
+                                                                {(activeTab === 0 ? showAllAssessments : activeTab === 1 ? showAllRapidMath : activeTab === 2 ? showAllNeet : false) ? "Collapse" : "View All"}
                                                             </button>
                                                         )}
                                                     </div>
 
                                                     <div className="overflow-y-auto flex-1 p-2 space-y-2">
-                                                        {(activeTab === 0 ? assessmentReports : rapidMathReports).length > 0 ? (
-                                                            (activeTab === 0 ? assessmentReports : rapidMathReports)
-                                                                .slice(0, (activeTab === 0 ? showAllAssessments : showAllRapidMath) ? undefined : 20) // Show more by default in scroll view
+                                                        {(activeTab === 0 ? assessmentReports : activeTab === 1 ? rapidMathReports : neetReports).length > 0 ? (
+                                                            (activeTab === 0 ? assessmentReports : activeTab === 1 ? rapidMathReports : neetReports)
+                                                                .slice(0, (activeTab === 0 ? showAllAssessments : activeTab === 1 ? showAllRapidMath : activeTab === 2 ? showAllNeet : false) ? undefined : 20) // Show more by default in scroll view
                                                                 .map((report, index) => (
                                                                     <div
                                                                         key={report.id || index}
                                                                         className="group flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 border border-transparent hover:border-slate-200 transition-all cursor-pointer"
-                                                                        onClick={() => activeTab === 0 ? router.push(`/quiz/quiz-result?reportId=${report.id}`) : router.push(`/rapid-math/test/summary?reportId=${report.id}`)}
+                                                                        onClick={() => {
+                                                                            if (activeTab === 1) {
+                                                                                router.push(`/rapid-math/test/summary?reportId=${report.id}`);
+                                                                            } else {
+                                                                                router.push(`/quiz/quiz-result?reportId=${report.id}`);
+                                                                            }
+                                                                        }}
                                                                     >
                                                                         <div className="flex items-center gap-3">
-                                                                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${activeTab === 0 ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600'} group-hover:scale-105 transition-transform`}>
-                                                                                {activeTab === 0 ? <Award size={20} /> : <Zap size={20} />}
+                                                                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${activeTab === 0 ? 'bg-blue-100 text-blue-600' : activeTab === 2 ? 'bg-purple-100 text-purple-600' : 'bg-amber-100 text-amber-600'} group-hover:scale-105 transition-transform`}>
+                                                                                {activeTab === 0 ? <Award size={20} /> : activeTab === 2 ? <Dna size={20} /> : <Zap size={20} />}
                                                                             </div>
                                                                             <div>
                                                                                 <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 line-clamp-1">
-                                                                                    {activeTab === 0 ? `Proficiency Test ${assessmentReports.length - index}` : "Rapid Math"}
+                                                                                    {activeTab === 0 ? `Proficiency Test ${assessmentReports.length - index}` : activeTab === 2 ? `NEET ${report.summary?.grade?.split(' ')[1] || 'Exam'}` : "Rapid Math"}
                                                                                 </h4>
                                                                                 <p className="text-[11px] font-medium text-slate-500">
                                                                                     {new Date(report.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} • {new Date(report.timestamp).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
@@ -872,7 +913,7 @@ const DashboardClient = () => {
                                                                         </div>
 
                                                                         <div className="text-right">
-                                                                            <div className={`text-sm font-bold ${activeTab === 0 ? 'text-blue-600' : 'text-amber-600'}`}>
+                                                                            <div className={`text-sm font-bold ${activeTab === 0 ? 'text-blue-600' : activeTab === 2 ? 'text-purple-600' : 'text-amber-600'}`}>
                                                                                 {Math.round(report.summary.accuracyPercent)}%
                                                                             </div>
                                                                         </div>
@@ -950,7 +991,7 @@ const DashboardClient = () => {
                                     <MenuItem disabled value="">
                                         <em>Select Grade</em>
                                     </MenuItem>
-                                    {[...Array(10)].map((_, i) => (
+                                    {[...Array(12)].map((_, i) => (
                                         <MenuItem key={i + 1} value={`Grade ${i + 1}`}>
                                             Grade {i + 1}
                                         </MenuItem>
@@ -1011,7 +1052,7 @@ const DashboardClient = () => {
                                     <MenuItem disabled value="">
                                         <em>Select Grade</em>
                                     </MenuItem>
-                                    {[...Array(10)].map((_, i) => (
+                                    {[...Array(12)].map((_, i) => (
                                         <MenuItem key={i + 1} value={`Grade ${i + 1}`}>
                                             Grade {i + 1}
                                         </MenuItem>

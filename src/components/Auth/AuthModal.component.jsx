@@ -673,7 +673,7 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
                             </div> */}
 
                             <form className={Styles.formGrid}>
-                                {/* <div className={Styles.inputGroup}>
+                                <div className={Styles.inputGroup}>
                                     <User className={Styles.inputIcon} size={20} />
                                     <TextField
                                         fullWidth
@@ -684,7 +684,7 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
                                         className={Styles.textField}
                                         autoFocus
                                     />
-                                </div> */}
+                                </div>
 
                                 <div className={Styles.gradeSection}>
                                     {/* <label className={Styles.gradeLabel}>Which grade are you in?</label> */}
@@ -703,7 +703,7 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
                                             <MenuItem disabled value="">
                                                 <em>Grade</em>
                                             </MenuItem>
-                                            {[...Array(10)].map((_, i) => (
+                                            {[...Array(12)].map((_, i) => (
                                                 <MenuItem key={i + 1} value={`Grade ${i + 1}`}>Grade {i + 1}</MenuItem>
                                             ))}
                                         </Select>

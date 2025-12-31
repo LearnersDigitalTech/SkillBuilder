@@ -88,6 +88,7 @@ export const getTeacherDetails = async (teacherUid) => {
             phoneNumber: userData.phoneNumber || userData.parentPhone || 'N/A',
             schoolName: userData.schoolName || 'N/A',
             createdAt: userData.createdAt || null,
+            neetUploadEnabled: userData.neetUploadEnabled || false,
             assignments: {
                 assignedGrades: assignments.assignedGrades || [],
                 students: assignments.students || {},
@@ -237,6 +238,33 @@ export const resetTeacherAssignments = async (teacherUid, adminUid) => {
         return true;
     } catch (error) {
         console.error('Error resetting teacher assignments:', error);
+        return false;
+    }
+};
+
+/**
+ * Update teacher permissions
+ * @param {string} teacherUid - Teacher's Firebase UID
+ * @param {Object} permissions - Object containing permissions to update
+ * @param {string} adminUid - Admin's Firebase UID
+ * @returns {Promise<boolean>} Success status
+ */
+export const updateTeacherPermissions = async (teacherUid, permissions, adminUid) => {
+    try {
+        const timestamp = new Date().toISOString();
+        const updates = {};
+
+        if (permissions.hasOwnProperty('neetUploadEnabled')) {
+            updates[`NMD_2025/Registrations/${teacherUid}/neetUploadEnabled`] = permissions.neetUploadEnabled;
+        }
+
+        updates[`NMD_2025/Registrations/${teacherUid}/teacherAssignments/lastUpdated`] = timestamp;
+        updates[`NMD_2025/Registrations/${teacherUid}/teacherAssignments/updatedBy`] = adminUid;
+
+        await update(ref(firebaseDatabase), updates);
+        return true;
+    } catch (error) {
+        console.error('Error updating teacher permissions:', error);
         return false;
     }
 };
