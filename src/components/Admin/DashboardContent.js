@@ -46,7 +46,7 @@ const DashboardContent = ({ logoutAction }) => {
 
                 let studentCount = 0;
                 let reportCount = 0;
-                let passedCount = 0;
+                let totalScoreSum = 0;
                 let perfectScoreCount = 0;
 
                 const students = [];
@@ -183,14 +183,10 @@ const DashboardContent = ({ logoutAction }) => {
 
                                             // Aggregate Stats
                                             reportCount += processedHistory.length;
-                                            processedHistory.forEach(rep => {
-                                                if (rep.marks >= 40) passedCount += rep.marks; // Using passedCount specifically for total marks now
-                                                else passedCount += rep.marks; // Just summing all marks, reusing variable for scope simplicity or renaming?
-                                                // Actually, let's fix logic properly below to avoid confusion.
-                                            });
+
                                             // Re-doing the loop properly:
                                             processedHistory.forEach(rep => {
-                                                passedCount += rep.marks; // Accumulate all marks (variable name 'passedCount' acts as 'totalScoreSum')
+                                                totalScoreSum += rep.marks; // Accumulate all marks
                                                 if (rep.marks === 100) perfectScoreCount++;
 
                                                 // Aggregate for Marks Chart
@@ -359,7 +355,7 @@ const DashboardContent = ({ logoutAction }) => {
 
                 setStats({
                     totalStudents: finalStudents.length,
-                    totalPassed: reportCount > 0 ? Math.round(passedCount / reportCount) + '%' : '0%', // passedCount acts as Sum of Scores
+                    totalPassed: reportCount > 0 ? Math.min(Math.round(totalScoreSum / reportCount), 100) + '%' : '0%', // Cap at 100%
                     totalPerfectScores: perfectScoreCount,
                     totalReports: reportCount,
                 });
