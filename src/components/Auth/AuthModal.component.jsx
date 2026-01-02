@@ -148,70 +148,81 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
             const result = await signInWithPopup(auth, googleProvider);
             const user = result.user;
 
-            // Check if user profile exists
-            const userKey = getUserDatabaseKey(user);
-            const userRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}`);
-            const snapshot = await get(userRef);
-
-            if (snapshot.exists()) {
-                // Existing user - check if teacher
-                const rawData = snapshot.val();
-
-                // Check if user is a teacher based on userType field
-                if (rawData.userType === 'teacher') {
-                    // User is a teacher - route directly to teacher dashboard
-                    const normalizedTeacherData = {
-                        ...rawData,
+            try {
+                // 1. Sync User to Postgres
+                await fetch('/api/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
                         uid: user.uid,
-                        isTeacher: true,
-                        userType: 'teacher'
-                    };
+                        email: user.email,
+                        role: 'parent', // Default
+                        phone_number: user.phoneNumber
+                    })
+                });
 
-                    setUserData(normalizedTeacherData);
-                    toast.success(`Welcome back, ${rawData.name || 'Teacher'}!`);
-                    onClose();
-                    router.push("/teacher-dashboard");
-                    setLoading(false);
-                    return;
-                }
+                // 2. Fetch User Data
+                const userRes = await fetch(`/api/users?uid=${user.uid}`);
+                const userDataApi = await userRes.json();
+                const dbUser = userDataApi.users?.[0];
 
-                // Not a teacher - handle student/parent login
-                let normalizedData;
-                if (rawData && rawData.children) {
-                    normalizedData = rawData;
-                } else {
-                    // If rawData has a grade, it's a legacy Single Student account
-                    if (rawData.grade) {
-                        normalizedData = {
-                            authProvider: "google",
-                            parentEmail: user.email,
-                            children: { default: rawData }
+                if (dbUser) {
+                    // Check Teacher
+                    if (dbUser.role === 'teacher') {
+                        const normalizedTeacherData = {
+                            ...dbUser,
+                            isTeacher: true,
+                            userType: 'teacher'
                         };
-                    } else {
-                        // No children and No grade -> It's a Parent/User shell. Not a student.
-                        // Pass as-is (no children prop) to trigger REGISTER flow.
-                        normalizedData = rawData;
-                    }
-                }
-
-                if (normalizedData.children && Object.keys(normalizedData.children).length > 0) {
-                    const childrenKeys = Object.keys(normalizedData.children);
-
-                    // Auto-select if only one profile (e.g., Student or Single User)
-                    if (childrenKeys.length === 1) {
-                        const singleKey = childrenKeys[0];
-                        const singleProfile = normalizedData.children[singleKey];
-                        handleSelectProfile(singleKey, singleProfile);
+                        setUserData(normalizedTeacherData);
+                        toast.success(`Welcome back!`);
+                        onClose();
+                        router.push("/teacher-dashboard");
+                        setLoading(false);
                         return;
                     }
 
-                    setUserProfiles(normalizedData.children);
-                    setStep("SELECT_PROFILE");
-                    toast.success("Welcome back! Select a profile.");
+                    // Parent/Student - Fetch Children
+                    let children = {};
+                    try {
+                        const childRes = await fetch(`/api/users/${user.uid}/children`);
+                        const childData = await childRes.json();
+                        children = childData.children || {};
+                    } catch (e) {
+                        console.error("Error fetching children", e);
+                    }
+
+                    const normalizedData = {
+                        uid: dbUser.uid,
+                        email: dbUser.email,
+                        authProvider: "google",
+                        children: children
+                    };
+
+                    if (Object.keys(children).length > 0) {
+                        const childrenKeys = Object.keys(children);
+                        if (childrenKeys.length === 1) {
+                            const singleKey = childrenKeys[0];
+                            const singleProfile = children[singleKey];
+                            handleSelectProfile(singleKey, singleProfile);
+                            return;
+                        }
+
+                        setUserProfiles(children);
+                        setStep("SELECT_PROFILE");
+                        toast.success("Welcome back! Select a profile.");
+                    } else {
+                        // No children -> Register
+                        console.log("Existing user but no children found. Redirecting to Register.");
+                        setRegistrationData({
+                            ...registrationData,
+                            email: user.email,
+                            name: ""
+                        });
+                        setStep("REGISTER");
+                    }
                 } else {
-                    // Existing User BUT No Children (Rare, but possible)
-                    // Treat as New User flow to add a child/grade
-                    console.log("Existing user but no children found. Redirecting to Register.");
+                    // Should actally be handled by Sync, but fallback
                     setRegistrationData({
                         ...registrationData,
                         email: user.email,
@@ -219,15 +230,14 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
                     });
                     setStep("REGISTER");
                 }
-            } else {
-                // New user - go to registration (only email, name will be collected on first quiz submit)
-                setRegistrationData({
-                    ...registrationData,
-                    email: user.email,
-                    name: ""
-                });
-                setStep("REGISTER");
+
+            } catch (err) {
+                console.error("API Error during login:", err);
+                // Fallback to register if something fails critically?
+                // Or toast error.
+                toast.error("Login verification failed.");
             }
+
         } catch (error) {
             console.error(error);
             if (error.code === 'auth/popup-closed-by-user') {
@@ -263,73 +273,81 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
             const result = await signInWithEmailAndPassword(auth, authEmail, password);
             const user = result.user;
 
-            // Check user registration data
-            const userKey = getUserDatabaseKey(user);
-            console.log("🔍 Login Debug - UserKey:", userKey);
-            const userRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}`);
-            const snapshot = await get(userRef);
-
-            if (snapshot.exists()) {
-                const rawData = snapshot.val();
-                console.log("🔍 Login Debug - Raw Data:", rawData);
-                console.log("🔍 Login Debug - UserType:", rawData.userType);
-                console.log("🔍 Login Debug - Is Teacher?:", rawData.userType === 'teacher');
-
-                // Check if user is a teacher based on userType field
-                if (rawData.userType === 'teacher') {
-                    // User is a teacher - route directly to teacher dashboard
-                    console.log("✅ Teacher detected! Routing to teacher dashboard...");
-                    const normalizedTeacherData = {
-                        ...rawData,
+            try {
+                // 1. Sync User to Postgres
+                await fetch('/api/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
                         uid: user.uid,
-                        isTeacher: true,
-                        userType: 'teacher'
-                    };
+                        email: user.email,
+                        role: 'parent', // Default
+                        phone_number: user.phoneNumber
+                    })
+                });
 
-                    setUserData(normalizedTeacherData);
-                    toast.success(`Welcome back, ${rawData.name || 'Teacher'}!`);
-                    onClose();
-                    router.push("/teacher-dashboard");
-                    setLoading(false);
-                    return;
-                }
+                // 2. Fetch User Data
+                const userRes = await fetch(`/api/users?uid=${user.uid}`);
+                const userDataApi = await userRes.json();
+                const dbUser = userDataApi.users?.[0];
 
-                // Not a teacher - handle student/parent login
-                let normalizedData;
-                if (rawData && rawData.children) {
-                    normalizedData = rawData;
-                } else {
-                    // If rawData has a grade, it's a legacy Single Student account
-                    if (rawData.grade) {
-                        normalizedData = {
-                            authProvider: "email",
-                            parentEmail: user.email,
-                            children: { default: rawData }
+                if (dbUser) {
+                    // Check Teacher
+                    if (dbUser.role === 'teacher') {
+                        const normalizedTeacherData = {
+                            ...dbUser,
+                            isTeacher: true,
+                            userType: 'teacher'
                         };
-                    } else {
-                        // No children and No grade -> It's a Parent/User shell. Not a student.
-                        normalizedData = rawData;
-                    }
-                }
-
-                if (normalizedData.children && Object.keys(normalizedData.children).length > 0) {
-                    const childrenKeys = Object.keys(normalizedData.children);
-
-                    // Auto-select if only one profile (e.g., Student or Single User)
-                    if (childrenKeys.length === 1) {
-                        const singleKey = childrenKeys[0];
-                        const singleProfile = normalizedData.children[singleKey];
-                        handleSelectProfile(singleKey, singleProfile);
+                        setUserData(normalizedTeacherData);
+                        toast.success(`Welcome back!`);
+                        onClose();
+                        router.push("/teacher-dashboard");
+                        setLoading(false);
                         return;
                     }
 
-                    setUserProfiles(normalizedData.children);
-                    setStep("SELECT_PROFILE");
-                    toast.success("Welcome back! Select a profile.");
+                    // Parent/Student - Fetch Children
+                    let children = {};
+                    try {
+                        const childRes = await fetch(`/api/users/${user.uid}/children`);
+                        const childData = await childRes.json();
+                        children = childData.children || {};
+                    } catch (e) {
+                        console.error("Error fetching children", e);
+                    }
+
+                    const normalizedData = {
+                        uid: dbUser.uid,
+                        email: dbUser.email,
+                        authProvider: "email",
+                        children: children
+                    };
+
+                    if (Object.keys(children).length > 0) {
+                        const childrenKeys = Object.keys(children);
+                        if (childrenKeys.length === 1) {
+                            const singleKey = childrenKeys[0];
+                            const singleProfile = children[singleKey];
+                            handleSelectProfile(singleKey, singleProfile);
+                            return;
+                        }
+
+                        setUserProfiles(children);
+                        setStep("SELECT_PROFILE");
+                        toast.success("Welcome back! Select a profile.");
+                    } else {
+                        // No children -> Register
+                        // console.log("Existing user but no children found. Redirecting to Register.");
+                        setRegistrationData({
+                            ...registrationData,
+                            email: user.email,
+                            name: ""
+                        });
+                        setStep("REGISTER");
+                    }
                 } else {
-                    // Existing User BUT No Children (Rare, but possible)
-                    // Treat as New User flow to add a child/grade
-                    console.log("Existing user but no children found. Redirecting to Register.");
+                    // Should actally be handled by Sync, but fallback
                     setRegistrationData({
                         ...registrationData,
                         email: user.email,
@@ -337,15 +355,10 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
                     });
                     setStep("REGISTER");
                 }
-            } else {
-                // New user via email/pass - potentially need registration flow here or just error if registration is restricted
-                // For now, let's assume they need to register if not found, similar to Google flow
-                setRegistrationData({
-                    ...registrationData,
-                    email: user.email,
-                    name: ""
-                });
-                setStep("REGISTER");
+
+            } catch (err) {
+                console.error("API Error during login:", err);
+                toast.error("Login verification failed.");
             }
 
         } catch (error) {
@@ -374,67 +387,76 @@ const AuthModal = ({ open, onClose, onSuccess, redirectPath }) => {
                 return;
             }
 
-            const userKey = phoneNumber || getUserDatabaseKey(currentUser);
-            const parentEmail = currentUser?.email || "";
-            const parentPhone = phoneNumber || "";
+            const userKey = phoneNumber || currentUser.uid;
+
+            // Ensure Parent Exists (Sync again to be safe)
+            if (currentUser) {
+                await fetch('/api/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        uid: currentUser.uid,
+                        email: currentUser.email,
+                        role: 'parent',
+                        phone_number: phoneNumber || currentUser.phoneNumber
+                    })
+                });
+            }
 
             // Check if we are updating an existing profile
             if (pendingProfileUpdate) {
                 const { childId, childProfile } = pendingProfileUpdate;
 
-                // Update only grade (and name if changed)
                 const updatedChildData = {
-                    ...childProfile,
+                    childId: childId,
                     grade: registrationData.grade,
-                    // If name was blank before, update it. If it existed, keep it (unless we want to allow edits)
-                    // For now, let's allow name updates if it was empty, or just stick to grade.
-                    // Let's assume name comes from registrationData if profile had none.
                     name: registrationData.name || childProfile.name || "Student 1"
                 };
 
-                const childRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}/children/${childId}`);
-                await update(childRef, {
-                    grade: registrationData.grade,
-                    name: updatedChildData.name
+                const res = await fetch(`/api/users/${userKey}/children`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedChildData)
                 });
 
+                if (!res.ok) throw new Error("Failed to update profile");
+                const data = await res.json();
+
                 toast.success("Profile updated successfully!");
-                handleSelectProfile(childId, updatedChildData);
+                handleSelectProfile(childId, data.child || updatedChildData);
                 setPendingProfileUpdate(null); // Clear pending state
                 return;
             }
 
             // --- CREATE NEW PROFILE FLOW ---
+            const childName = registrationData.name || "Student 1";
 
-            // Create Child ID (simple timestamp-based or random)
-            const childId = `child_${Date.now()}`;
-            const childName = registrationData.name || "Student 1"; // Default name if empty
-
-            // New Child Data
             const newChildData = {
-                name: childName, // Name is optional at this stage, can be collected later
+                name: childName,
                 grade: registrationData.grade,
-                parentEmail: parentEmail,
-                parentPhone: parentPhone,
-                uid: userKey, // Link back to parent
+                // childId generated by backend or we can support sending one? Backend handles it.
             };
 
-            // Save to Firebase
-            // Location: NMD_2025/Registrations/{userKey}/children/{childId}
-            const childRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}/children/${childId}`);
-            await set(childRef, newChildData);
-
-            // Also update main user record if needed (e.g., ensure user exists)
-            const userRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}`);
-            await update(userRef, {
-                lastLogin: new Date().toISOString(),
-                // partial update to ensure parent record exists if completely new
-                authProvider: phoneNumber ? 'phone' : (parentEmail ? 'google' : 'unknown')
+            const res = await fetch(`/api/users/${userKey}/children`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newChildData)
             });
+
+            if (!res.ok) throw new Error("Failed to create profile");
+            const data = await res.json();
+            const createdChild = data.child;
+
+            // Shim for handleSelectProfile which expects normalized child object
+            const finalChild = {
+                ...createdChild,
+                name: createdChild.name,
+                grade: createdChild.grade
+            };
 
             // Proceed to Start Assessment
             toast.success("Registration Successful!");
-            handleSelectProfile(childId, newChildData);
+            handleSelectProfile(createdChild.child_id, finalChild);
 
         } catch (error) {
             console.error("Registration Error:", error);

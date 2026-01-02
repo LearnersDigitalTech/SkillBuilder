@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { ViolationType, ViolationEvent, ViolationLog, BrowserInfo } from '../types'
-import { db, auth } from '@/backend/firebaseHandler'
-import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore'
 import { useAuth } from '@/context/AuthContext'
 
 interface UseViolationLoggerProps {
@@ -29,34 +27,30 @@ export function useViolationLogger({ testType, testId, enabled }: UseViolationLo
         }
     }, [])
 
-    // Initialize session in Firebase
+    // Initialize session via API
     useEffect(() => {
         if (!enabled || !user) return
 
         const initializeSession = async () => {
             try {
-                const violationLog: Omit<ViolationLog, 'endTime'> & { endTime: null } = {
-                    userId: user.uid,
-                    childId: activeChildId || null,
-                    childName: activeChild?.name || null,
-                    testType,
-                    testId,
-                    sessionId,
-                    startTime,
-                    endTime: null,
-                    violations: [],
-                    browserInfo: getBrowserInfo(),
-                    autoSubmitted: false,
-                    totalViolations: 0
-                }
+                // Use API
+                await fetch('/api/security', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'start',
+                        sessionId,
+                        userId: user.uid,
+                        childId: activeChildId || null,
+                        childName: activeChild?.name || null,
+                        testType,
+                        testId,
+                        startTime,
+                        browserInfo: getBrowserInfo()
+                    })
+                });
 
-                const docRef = await addDoc(collection(db, 'testViolations'), {
-                    ...violationLog,
-                    startTime: serverTimestamp(),
-                    endTime: null
-                })
-
-                setSessionDocId(docRef.id)
+                setSessionDocId(sessionId) // Use sessionId as docId equivalent
                 console.log('📝 Security session initialized:', sessionId)
             } catch (error) {
                 console.error('Error initializing security session:', error)
@@ -84,11 +78,16 @@ export function useViolationLogger({ testType, testId, enabled }: UseViolationLo
         setViolations(prev => {
             const updated = [...prev, violation]
 
-            // Update Firebase - use Date objects instead of serverTimestamp() in arrays
-            updateDoc(doc(db, 'testViolations', sessionDocId), {
-                violations: updated, // Don't transform timestamps - use Date objects directly
-                totalViolations: updated.length
-            }).catch(err => console.error('Error updating violations:', err))
+            // Send to API
+            fetch('/api/security', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'log',
+                    sessionId: sessionDocId,
+                    violation
+                })
+            }).catch(err => console.error('Error logging violation:', err))
 
             return updated
         })
@@ -101,16 +100,20 @@ export function useViolationLogger({ testType, testId, enabled }: UseViolationLo
         if (!enabled || !sessionDocId) return
 
         try {
-            await updateDoc(doc(db, 'testViolations', sessionDocId), {
-                endTime: serverTimestamp(),
-                autoSubmitted,
-                totalViolations: violations.length
-            })
+            await fetch('/api/security', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'end',
+                    sessionId: sessionDocId,
+                    autoSubmitted
+                })
+            });
             console.log('✅ Security session ended:', sessionId)
         } catch (error) {
             console.error('Error ending security session:', error)
         }
-    }, [enabled, sessionDocId, violations.length, sessionId])
+    }, [enabled, sessionDocId, sessionId])
 
     return {
         logViolation,

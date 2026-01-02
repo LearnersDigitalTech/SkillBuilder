@@ -5,8 +5,8 @@ import { Gift, Sparkles, User, BookOpen, Phone, Download, Mail, School, Users, B
 import { Button } from "@mui/material";
 import Confetti from "canvas-confetti";
 import { toPng } from 'html-to-image';
-import { ref, push, set, get } from "firebase/database";
-import { firebaseDatabase, auth } from "@/backend/firebaseHandler";
+// Firebase Auth only needed for account creation
+import { auth } from "@/backend/firebaseHandler";
 import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import Header from "@/app/homepage/Header";
 import Footer from "@/components/Footer/Footer.component";
@@ -54,21 +54,23 @@ const LotteryPage = () => {
         let createdUserUid = null;
 
         // Check for duplicate phone number AND email within the SAME ROLE
+        // Check for duplicate phone number AND email within the SAME ROLE
         try {
-            const registrationsRef = ref(firebaseDatabase, 'Lottery/Registrations');
-            const snapshot = await get(registrationsRef);
-            const allRegs = snapshot.exists() ? snapshot.val() : {};
-            const regsArray = Object.values(allRegs);
+            const checkRes = await fetch('/api/lottery/check', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: data.email,
+                    phoneNumber: data.phoneNumber,
+                    userType: registrationType
+                })
+            });
 
-            // Check if phone number OR email already exists for THIS ROLE
-            const existingRegistration = regsArray.find(reg =>
-                reg.userType === registrationType &&
-                (reg.phoneNumber === data.phoneNumber || reg.email === data.email)
-            );
+            const checkData = await checkRes.json();
 
-            if (existingRegistration) {
+            if (checkData.exists) {
                 // Show existing ticket instead of blocking
-                setTicketCode(existingRegistration.ticketCode);
+                setTicketCode(checkData.ticketCode);
                 setSubmitted(true);
 
                 toast.info(`You are already registered as ${registrationType}! Here's your existing ticket.`, {
@@ -94,11 +96,6 @@ const LotteryPage = () => {
 
         // Ticket Generation Logic
         try {
-            const registrationsRef = ref(firebaseDatabase, 'Lottery/Registrations');
-            const snapshot = await get(registrationsRef);
-            const allRegs = snapshot.exists() ? snapshot.val() : {};
-            const regsArray = Object.values(allRegs);
-
             if (registrationType === 'student') {
                 const prefix = 'S';
                 let offset = 0;
@@ -116,9 +113,9 @@ const LotteryPage = () => {
                     }
                 }
 
-                const countInGrade = regsArray.filter(reg =>
-                    reg.userType === 'student' && reg.studentGrade === grade
-                ).length;
+                const countRes = await fetch(`/api/lottery/count?type=student&grade=${encodeURIComponent(grade)}`);
+                const countData = await countRes.json();
+                const countInGrade = countData.count || 0;
 
                 newCode = `${prefix}${offset + countInGrade + 1}`;
 
@@ -142,9 +139,9 @@ const LotteryPage = () => {
                     }
                 }
 
-                const typeCount = regsArray.filter(reg =>
-                    reg.ticketCode && reg.ticketCode.startsWith(prefix)
-                ).length;
+                const countRes = await fetch(`/api/lottery/count?prefix=${prefix}`);
+                const countData = await countRes.json();
+                const typeCount = countData.count || 0;
 
                 newCode = `${prefix}${offset + typeCount + 1}`;
             }
@@ -234,99 +231,62 @@ const LotteryPage = () => {
         }
 
 
-        // Save to Lottery Registrations (Admin View)
-        try {
-            const registrationsRef = ref(firebaseDatabase, 'Lottery/Registrations');
-            const newRegRef = push(registrationsRef);
-            await set(newRegRef, {
-                ...payload,
-                ticketCode: newCode
-            });
-        } catch (error) {
-            console.error("Error saving registration:", error);
-        }
+        // Prepare API Payload components
+        let childrenObj = {};
 
-        // Sync to NMD_2025/Registrations (Login Access)
+        // Logic to construct children object (reused from previous Firebase sync logic)
+        if (registrationType === 'parent' && hasChildren && data.students) {
+            data.students.forEach((child, idx) => {
+                const childId = `student_${Date.now()}_${idx}`;
+                childrenObj[childId] = {
+                    name: child.name,
+                    grade: child.grade,
+                    school: child.school,
+                    email: data.email
+                };
+            });
+        } else if (registrationType === 'student') {
+            const childId = `student_${Date.now()}`;
+            childrenObj[childId] = {
+                name: data.name,
+                grade: data.studentGrade,
+                role: 'student',
+                school: data.schoolName,
+                email: data.email
+            };
+        }
+        // Teachers/Guests don't have children object usually, but Guest might? No, Guest is role=guest.
+
+        // Sync to Postgres via API
         if (createdUserUid) {
             try {
-                // Construct structure compatible with AuthModal
-                let authPayload = {
-                    authProvider: "email",
-                    parentEmail: data.email,
-                    parentPhone: data.phoneNumber,
-                    phoneNumber: data.phoneNumber,
-                    userType: registrationType, // CRITICAL: Include userType for teacher detection
-                    name: data.name,
-                    ticketCode: newCode,
-                    createdAt: new Date().toISOString()
-                };
-
-                if (registrationType === 'parent' && hasChildren && data.students) {
-                    const childrenObj = {};
-                    data.students.forEach((child, idx) => {
-                        const childId = `student_${Date.now()}_${idx}`;
-                        childrenObj[childId] = {
-                            name: child.name,
-                            grade: child.grade,
-                            school: child.school,
-                            email: data.email
-                        };
-                    });
-                    authPayload.children = childrenObj;
-                } else if (registrationType === 'student') {
-                    const childId = `student_${Date.now()}`;
-                    authPayload.children = {
-                        [childId]: {
-                            name: data.name,
-                            grade: data.studentGrade,
-                            role: 'student',
-                            school: data.schoolName,
-                            email: data.email
-                        }
-                    };
-                } else if (registrationType === 'teacher') {
-                    // Teachers don't have children - store teacher-specific data
-                    authPayload.schoolName = data.schoolName;
-                    // Do NOT create children object for teachers
-                } else {
-                    // Other user types (if any)
-                    const profileId = `user_${Date.now()}`;
-                    authPayload.children = {
-                        [profileId]: {
-                            name: data.name,
-                            grade: "N/A",
-                            role: registrationType,
-                            email: data.email
-                        }
-                    };
-                }
-
-                // Store directly under the User ID (e.g., S1001) as requested
-                await set(ref(firebaseDatabase, `NMD_2025/Registrations/${newCode}`), authPayload);
-
-                // ALSO Store under UID to ensure Dashboard and Permissions work correctly
-                await set(ref(firebaseDatabase, `NMD_2025/Registrations/${createdUserUid}`), authPayload);
-
+                await fetch('/api/lottery/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        uid: createdUserUid,
+                        ticketCode: newCode,
+                        userType: registrationType,
+                        name: data.name,
+                        email: data.email,
+                        phoneNumber: data.phoneNumber,
+                        data: payload, // Send full payload as JSONB data
+                        children: childrenObj
+                    })
+                });
 
                 // Sign out immediately to prevent auto-login
                 await signOut(auth);
 
             } catch (syncError) {
-                console.error("Error syncing to NMD_2025:", syncError);
+                console.error("Error syncing to API:", syncError);
+                toast.error("Account created but failed to save details. Contact support.");
             }
         }
 
-        // For teachers, sign them out immediately so they have to manually log in
-        // This ensures proper routing to teacher dashboard with correct navbar
+        // For teachers, ensure sign out (doubly ensured above)
         if (registrationType === 'teacher') {
-            try {
-                const { signOut } = await import("firebase/auth");
-                const { auth } = await import("@/backend/firebaseHandler");
-                await signOut(auth);
-                console.log("👨‍🏫 Teacher signed out after registration - must login manually");
-            } catch (signOutError) {
-                console.error("Error signing out teacher:", signOutError);
-            }
+            console.log("👨‍🏫 Teacher signed out after registration");
         }
 
         setTicketCode(newCode);

@@ -1,5 +1,3 @@
-import { ref, get, set, update, push } from 'firebase/database';
-import { firebaseDatabase } from '@/backend/firebaseHandler';
 
 /**
  * Save questions for a specific subject
@@ -10,20 +8,12 @@ import { firebaseDatabase } from '@/backend/firebaseHandler';
  */
 export const saveNeetQuestions = async (subject, questions, teacherUid) => {
     try {
-        const timestamp = new Date().toISOString();
-        const updates = {};
-
-        questions.forEach((q) => {
-            const newPostKey = push(ref(firebaseDatabase, `NMD_2025/NEET_Questions/${subject}`)).key;
-            updates[`NMD_2025/NEET_Questions/${subject}/${newPostKey}`] = {
-                ...q,
-                uploadedBy: teacherUid,
-                createdAt: timestamp
-            };
+        const res = await fetch('/api/neet/questions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subject, questions, teacherUid })
         });
-
-        await update(ref(firebaseDatabase), updates);
-        return true;
+        return res.ok;
     } catch (error) {
         console.error(`Error saving NEET ${subject} questions:`, error);
         return false;
@@ -37,17 +27,10 @@ export const saveNeetQuestions = async (subject, questions, teacherUid) => {
  */
 export const getNeetQuestions = async (subject) => {
     try {
-        const questionsRef = ref(firebaseDatabase, `NMD_2025/NEET_Questions/${subject}`);
-        const snapshot = await get(questionsRef);
-
-        if (snapshot.exists()) {
-            const data = snapshot.val();
-            return Object.keys(data).map(key => ({
-                id: key,
-                ...data[key]
-            })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        }
-        return [];
+        const res = await fetch(`/api/neet/questions?subject=${encodeURIComponent(subject)}`);
+        if (!res.ok) return [];
+        const data = await res.json();
+        return data.questions || [];
     } catch (error) {
         console.error(`Error fetching NEET ${subject} questions:`, error);
         return [];
@@ -62,9 +45,10 @@ export const getNeetQuestions = async (subject) => {
  */
 export const deleteNeetQuestion = async (subject, questionId) => {
     try {
-        const questionRef = ref(firebaseDatabase, `NMD_2025/NEET_Questions/${subject}/${questionId}`);
-        await set(questionRef, null);
-        return true;
+        const res = await fetch(`/api/neet/questions?id=${questionId}&subject=${subject}`, {
+            method: 'DELETE'
+        });
+        return res.ok;
     } catch (error) {
         console.error(`Error deleting NEET ${subject} question:`, error);
         return false;
@@ -78,11 +62,13 @@ export const deleteNeetQuestion = async (subject, questionId) => {
  */
 export const clearNeetQuestions = async (subject) => {
     try {
-        const subjectRef = ref(firebaseDatabase, `NMD_2025/NEET_Questions/${subject}`);
-        await set(subjectRef, null);
-        return true;
+        const res = await fetch(`/api/neet/questions?subject=${encodeURIComponent(subject)}&clear=true`, {
+            method: 'DELETE'
+        });
+        return res.ok;
     } catch (error) {
         console.error(`Error clearing NEET ${subject} questions:`, error);
         return false;
     }
 };
+

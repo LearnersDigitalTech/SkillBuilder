@@ -29,8 +29,6 @@ import {
     Divider
 } from '@mui/material';
 import { RefreshCw, Download, Trash2, Search, Filter, Calendar, Eye, User, Phone, Mail, School, Briefcase, Star, Gift, Users } from 'lucide-react';
-import { ref, get, remove } from 'firebase/database';
-import { firebaseDatabase } from '@/backend/firebaseHandler';
 
 
 const LotteryManager = () => {
@@ -64,59 +62,62 @@ const LotteryManager = () => {
     const fetchRegistrations = async () => {
         setLoading(true);
         try {
-            const registrationsRef = ref(firebaseDatabase, 'Lottery/Registrations');
-            const snapshot = await get(registrationsRef);
+            const res = await fetch('/api/lottery/entries');
+            if (!res.ok) throw new Error('Failed to fetch entries');
+            const data = await res.json();
 
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                const formattedData = Object.entries(data).map(([key, val]) => {
-                    // Normalize data for display
-                    let details = "N/A";
+            const formattedData = data.map(val => {
+                // Normalize data for display using logic similar to before
+                let details = "N/A";
+                let effectiveUserType = (val.userType || 'parent').toLowerCase();
 
-                    // Determine effective user type for display
-                    let effectiveUserType = (val.userType || 'parent').toLowerCase();
+                if (val.ticketCode) {
+                    const code = String(val.ticketCode).toUpperCase();
+                    if (code.startsWith('O')) effectiveUserType = 'other';
+                    else if (code.startsWith('G')) effectiveUserType = 'guest';
+                }
 
-                    if (val.ticketCode) {
-                        const code = String(val.ticketCode).toUpperCase();
-                        if (code.startsWith('O')) effectiveUserType = 'other';
-                        else if (code.startsWith('G')) effectiveUserType = 'guest';
-                    }
+                // Logic based on types
+                if (val.userType === 'parent') {
+                    // Check if children is in data
+                    // API returns ...row, ...row.data
+                    // So val.children should be there if existing
+                    // However, 'children' in data was an Object in Firebase (uid -> obj)
+                    // API implementation merged row.data.
+                    // If row.data had 'children' as object, it is here.
 
-                    if (val.userType === 'parent') {
-                        if (val.children && Array.isArray(val.children)) {
-                            details = val.children.map(c => `${c.name} (Gr ${c.grade})`).join(", ");
-                        } else if (val.studentName && val.studentName !== "N/A") {
-                            // Backward compatibility or flat structure
-                            details = `${val.studentName} (${val.studentGrade || 'N/A'})`;
-                        } else if (effectiveUserType === 'guest') {
-                            details = `Profession: ${val.profession || 'N/A'}`;
-                        } else {
-                            details = "No children listed";
-                        }
-                    } else if (val.userType === 'student') {
-                        details = `Grade ${val.studentGrade} | ${val.schoolName || 'N/A'}`;
-                    } else if (val.userType === 'teacher') {
-                        details = `School: ${val.schoolName || 'N/A'}`;
+                    if (val.children && typeof val.children === 'object') {
+                        // Convert object to array values
+                        const childArr = Array.isArray(val.children) ? val.children : Object.values(val.children);
+                        details = childArr.map(c => `${c.name} (Gr ${c.grade})`).join(", ");
+                    } else if (val.studentName && val.studentName !== "N/A") {
+                        details = `${val.studentName} (${val.studentGrade || 'N/A'})`;
                     } else if (effectiveUserType === 'guest') {
                         details = `Profession: ${val.profession || 'N/A'}`;
+                    } else {
+                        details = "No children listed";
                     }
+                } else if (val.userType === 'student') {
+                    // studentGrade, schoolName should be in val (from data)
+                    details = `Grade ${val.studentGrade || val.grade} | ${val.schoolName || val.school_name || 'N/A'}`;
+                } else if (val.userType === 'teacher') {
+                    details = `School: ${val.schoolName || val.school_name || 'N/A'}`;
+                } else if (effectiveUserType === 'guest') {
+                    details = `Profession: ${val.profession || 'N/A'}`;
+                }
 
-                    return {
-                        id: key,
-                        ...val,
-                        userType: val.userType || 'parent', // Keep original for logic if needed
-                        effectiveUserType: effectiveUserType, // Use this for display/export
-                        displayDetails: details,
-                        displayName: val.name || val.parentName || val.studentName || "Unknown"
-                    };
-                }).sort((a, b) => b.timestamp - a.timestamp); // Newest first
+                return {
+                    id: val.id,
+                    ...val,
+                    effectiveUserType,
+                    displayDetails: details,
+                    displayName: val.name || "Unknown"
+                };
+            }); // Sorted by API query order (DESC)
 
-                setRegistrations(formattedData);
-                setFilteredRegistrations(formattedData);
-            } else {
-                setRegistrations([]);
-                setFilteredRegistrations([]);
-            }
+            setRegistrations(formattedData);
+            setFilteredRegistrations(formattedData);
+
         } catch (error) {
             console.error("Error fetching lottery data:", error);
         } finally {
@@ -163,66 +164,18 @@ const LotteryManager = () => {
     const handleDelete = async (id) => {
         if (confirm("Are you sure you want to delete this entry? This will remove the user from all systems.")) {
             try {
-                // 1. Get the registration data first to extract ticketCode
-                const itemRef = ref(firebaseDatabase, `Lottery/Registrations/${id}`);
-                const snapshot = await get(itemRef);
+                const res = await fetch(`/api/lottery/entries?id=${id}`, {
+                    method: 'DELETE'
+                });
 
-                if (!snapshot.exists()) {
-                    console.error("Registration not found");
-                    alert("Entry not found. It may have already been deleted.");
-                    return;
+                if (res.ok) {
+                    const newRegs = registrations.filter(item => item.id !== id);
+                    setRegistrations(newRegs);
+                    setFilteredRegistrations(newRegs);
+                    alert("Entry deleted successfully from all systems!");
+                } else {
+                    throw new Error('Delete failed');
                 }
-
-                const registrationData = snapshot.val();
-                const ticketCode = registrationData.ticketCode;
-
-                console.log(`🗑️ Deleting registration with ticket code: ${ticketCode}`);
-
-                // 2. Delete from Lottery/Registrations
-                await remove(itemRef);
-                console.log("✅ Deleted from Lottery/Registrations");
-
-                // 3. Delete from NMD_2025/Registrations using ticketCode as key
-                if (ticketCode) {
-                    const ticketCodeRef = ref(firebaseDatabase, `NMD_2025/Registrations/${ticketCode}`);
-                    const ticketSnapshot = await get(ticketCodeRef);
-                    if (ticketSnapshot.exists()) {
-                        await remove(ticketCodeRef);
-                        console.log(`✅ Deleted from NMD_2025/Registrations/${ticketCode}`);
-                    }
-
-                    // 4. Also search for and delete UID-based entries with matching ticketCode
-                    const registrationsRef = ref(firebaseDatabase, 'NMD_2025/Registrations');
-                    const allRegsSnapshot = await get(registrationsRef);
-
-                    if (allRegsSnapshot.exists()) {
-                        const allRegs = allRegsSnapshot.val();
-                        let deletedCount = 0;
-
-                        // Find and delete entries with matching ticketCode (but different key)
-                        for (const [key, value] of Object.entries(allRegs)) {
-                            if (value.ticketCode === ticketCode && key !== ticketCode) {
-                                // This is likely the UID-based entry
-                                const uidRef = ref(firebaseDatabase, `NMD_2025/Registrations/${key}`);
-                                await remove(uidRef);
-                                deletedCount++;
-                                console.log(`✅ Deleted from NMD_2025/Registrations/${key} (UID-based entry)`);
-                            }
-                        }
-
-                        if (deletedCount > 0) {
-                            console.log(`✅ Deleted ${deletedCount} additional UID-based entries`);
-                        }
-                    }
-                }
-
-                // 5. Update local state
-                const newRegs = registrations.filter(item => item.id !== id);
-                setRegistrations(newRegs);
-                setFilteredRegistrations(newRegs);
-
-                console.log("✅ Successfully deleted from all locations");
-                alert("Entry deleted successfully from all systems!");
 
             } catch (error) {
                 console.error("Error deleting entry:", error);

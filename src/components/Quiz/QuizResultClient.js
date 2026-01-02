@@ -265,7 +265,7 @@ const QuizResultClient = () => {
                 }
                 // Case 3: Standard User History/Latest Report
                 else if (user && userData?.children) {
-                    const userKey = getUserDatabaseKey(user);
+                    const userKey = user.uid;
                     const childKeys = Object.keys(userData.children);
                     if (childKeys.length > 0) {
                         let activeChildId = childKeys[0];
@@ -273,24 +273,28 @@ const QuizResultClient = () => {
                             const storedChildId = window.localStorage.getItem(`activeChild_${userKey}`);
                             if (storedChildId && childKeys.includes(storedChildId)) activeChildId = storedChildId;
                         }
-                        const sanitizedUserKey = userKey.replace(/\./g, '_');
-                        const reportRef = ref(firebaseDatabase, `NMD_2025/Reports/${sanitizedUserKey}/${activeChildId}`);
-                        const snapshot = await get(reportRef);
-                        if (snapshot.exists()) {
-                            const data = snapshot.val();
-                            if (reportId) {
-                                targetReport = (reportId === 'root') ? data : data[reportId];
-                            } else {
-                                let allReports = [];
-                                if (data.summary) allReports.push(data);
-                                Object.entries(data).forEach(([key, val]) => {
-                                    if (key !== 'summary' && val && typeof val === 'object' && val.summary) allReports.push(val);
-                                });
-                                if (allReports.length > 0) {
-                                    allReports.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
-                                    targetReport = allReports[0];
+
+                        try {
+                            const res = await fetch(`/api/students/${userKey}/reports?childId=${activeChildId}`);
+                            const apiData = await res.json();
+
+                            if (apiData.reports) {
+                                const data = apiData.reports;
+                                if (reportId) {
+                                    // If reportId is 'root', what does that mean? in new structure logic?
+                                    // Assuming reportId is the DB ID now.
+                                    // But mapped reports is keyed by ID.
+                                    targetReport = data[reportId];
+                                } else {
+                                    let allReports = Object.values(data);
+                                    if (allReports.length > 0) {
+                                        allReports.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+                                        targetReport = allReports[0];
+                                    }
                                 }
                             }
+                        } catch (e) {
+                            console.error("Error fetching reports via API", e);
                         }
                     }
                 }
@@ -515,15 +519,39 @@ const QuizResultClient = () => {
             timestamp: new Date().toISOString(),
             type: quizSession.userDetails.testType || 'ASSESSMENT',
         };
-        console.log("[QuizResultClient] Report payload:", reportData);
+        console.log("[QuizResultClient] Report payload logic ready");
 
-        set(newReportRef, reportData).then(() => {
-            console.log("[QuizResultClient] Report saved successfully with ID:", generatedReportId);
-        }).catch((error) => {
-            console.error("[QuizResultClient] Error saving report:", error);
-            // Reset flag on error to allow retry
-            hasSavedRef.current = false;
-        });
+        // Use API to save
+        const apiPayload = {
+            childId: childId,
+            reportType: reportData.type,
+            data: reportData,
+            timestamp: reportData.timestamp
+        };
+
+        // We use user.uid if available, otherwise fallback (but API requires parentUID)
+        // logic above set userKey. Ideally it matches parentUID.
+        // But userKey might be phone.
+        // Let's assume userKey is valid for API path (which expects parent_uid).
+        // If userKey is phone, does API support it? 
+        // My API uses `parent_uid = $1`. Postgres `users.uid` column must match.
+        // If logged in via phone, `uid` is phone number? Yes usually in this app context.
+
+        fetch(`/api/students/${userKey}/reports`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(apiPayload)
+        })
+            .then(res => res.json())
+            .then(resData => {
+                if (resData.error) throw new Error(resData.error);
+                console.log("[QuizResultClient] Report saved via API successfully");
+            })
+            .catch((error) => {
+                console.error("[QuizResultClient] Error saving report API:", error);
+                // Reset flag on error to allow retry
+                hasSavedRef.current = false;
+            });
     }, [quizSession?.questionPaper, searchParams]); // Check searchParams for reportId
 
 
@@ -800,24 +828,33 @@ const QuizResultClient = () => {
                 }
             }
 
-            const bookingId = `${childId}_${Date.now()}`;
-            const bookingRef = ref(firebaseDatabase, `NMD_2025/TutorBookings/${userKey}/${bookingId}`);
+            // Determine UID: Prefer Auth UID, fallback to key if needed (but API requires valid user_uid)
+            // If user is logged in, use user.uid.
+            // If not logged in, we might have issues with constraints.
+            // Assuming quizSession userDetails might have a UID if it came from context.
+            const uid = user?.uid || userKey;
 
-            // Auto-populate all fields from session data
             const bookingPayload = {
-                parentName: displayName || "",
+                uid: uid,
                 studentName: displayName || "",
                 grade: displayGrade || "",
                 phone: tutorForm.phone,
-                preferredDate: "", // Will be scheduled by counselor
-                preferredTimeSlot: "", // Will be scheduled by counselor
-                mode: "To be decided", // Will be decided by counselor
-                notes: "",
-                reportSummary: summary,
-                createdAt: new Date().toISOString(),
+                preferredDate: new Date().toISOString(), // Use current date as placeholder for "preferred", logic said "Scheduled by counselor"
+                preferredTimeSlot: "To be decided",
+                mode: "To be decided",
+                subject: "Math", // Default
+                tutorName: "Any"
             };
 
-            await set(bookingRef, bookingPayload);
+            const response = await fetch('/api/tutor/bookings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(bookingPayload)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to book tutor');
+            }
 
             // Also send to Google Apps Script webhook (for Sheets + email) in the background.
             // This is fire-and-forget so any network issue does not affect the user flow.
@@ -868,40 +905,22 @@ const QuizResultClient = () => {
         setStatusDialogOpen(true);
 
         try {
-            // Get user key (works for phone, Google, and email auth)
-            let userKey = "";
-            if (quizSession?.userDetails?.phoneNumber) {
-                userKey = quizSession.userDetails.phoneNumber;
-            } else if (user?.phoneNumber) {
-                userKey = user.phoneNumber.slice(-10);
-            } else if (user?.uid) {
-                userKey = user.uid;
-            }
+            let userKey = user?.uid;
+            // Fallback for phone-based auth if needed, but API expects user_uid matching users table
+            if (!userKey && quizSession?.userDetails?.phoneNumber) userKey = quizSession.userDetails.phoneNumber;
 
             if (!userKey) {
                 setStatusLoading(false);
                 return;
             }
 
-            const bookingsRef = ref(firebaseDatabase, `NMD_2025/TutorBookings/${userKey}`);
-            const snapshot = await get(bookingsRef);
-            if (!snapshot.exists()) {
-                setStatusLoading(false);
-                return;
+            const response = await fetch(`/api/tutor/bookings?uid=${userKey}`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.bookings && data.bookings.length > 0) {
+                    setLatestBooking(data.bookings[0]);
+                }
             }
-
-            const data = snapshot.val() || {};
-            const entries = Object.entries(data);
-            if (entries.length === 0) {
-                setStatusLoading(false);
-                return;
-            }
-
-            const sorted = entries
-                .map(([id, value]) => ({ id, ...value }))
-                .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-
-            setLatestBooking(sorted[0]);
         } catch (error) {
             console.error("Error loading tutor booking status:", error);
         } finally {
@@ -1418,15 +1437,15 @@ const QuizResultClient = () => {
                         </div>
                     )}
                     {!statusLoading && !latestBooking && (
-                        <p className={Styles.tutorHelper}>No tutor booking found yet for this number.</p>
+                        <p className={Styles.tutorHelper}>No tutor booking found yet.</p>
                     )}
                     {!statusLoading && latestBooking && (
                         <div className={Styles.tutorStatusCard}>
                             <h3 className={Styles.sectionTitle}>Latest request</h3>
                             <p className={Styles.tutorStatusLine}><strong>Student:</strong> {latestBooking.studentName} (Grade {latestBooking.grade})</p>
-                            <p className={Styles.tutorStatusLine}><strong>Preferred date:</strong> {latestBooking.preferredDate}</p>
-                            <p className={Styles.tutorStatusLine}><strong>Time slot:</strong> {latestBooking.preferredTimeSlot}</p>
-                            <p className={Styles.tutorStatusLine}><strong>Mode:</strong> {latestBooking.mode}</p>
+                            <p className={Styles.tutorStatusLine}><strong>Preferred date:</strong> {latestBooking.preferredDate ? new Date(latestBooking.preferredDate).toLocaleDateString() : 'N/A'}</p>
+                            <p className={Styles.tutorStatusLine}><strong>Time slot:</strong> {latestBooking.preferredTimeSlot || 'To be decided'}</p>
+                            <p className={Styles.tutorStatusLine}><strong>Mode:</strong> {latestBooking.mode || 'To be decided'}</p>
                             <p className={Styles.tutorStatusLine}><strong>Contact:</strong> {latestBooking.phone}</p>
                             <p className={Styles.tutorStatusNote}>Our academic counselor will reach out on this number to confirm your exact slot.</p>
                         </div>

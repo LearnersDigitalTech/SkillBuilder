@@ -26,8 +26,7 @@ import QuestionPalette from "@/components/QuestionPalette/QuestionPalette.compon
 import LoadingScreen from "@/components/LoadingScreen/LoadingScreen.component";
 import motivationData from "./Assets/motivation.json";
 import { Dialog, DialogTitle, DialogContent, TextField, Button } from "@mui/material";
-import { ref, update } from "firebase/database";
-import { firebaseDatabase, getUserDatabaseKey } from "@/backend/firebaseHandler";
+import { getUserDatabaseKey } from "@/backend/firebaseHandler";
 import { useAuth } from "@/context/AuthContext";
 import { SecureTestEnvironment } from "@/components/Security";
 
@@ -128,34 +127,21 @@ const QuizClient = () => {
                     const userKey = getUserDatabaseKey(user);
                     const childId = quizContext.userDetails?.activeChildId || quizContext.userDetails?.childId || "default";
                     const finalUserKey = userKey.replace(/\./g, '_');
-                    console.log("[QuizClient] Fetching reports for:", finalUserKey, childId);
-                    const reportsRef = ref(firebaseDatabase, `NMD_2025/Reports/${finalUserKey}/${childId}`);
 
-                    const { get } = await import("firebase/database");
-                    const snapshot = await get(reportsRef);
+                    const res = await fetch(`/api/students/${finalUserKey}/reports?childId=${childId}`);
+                    if (!res.ok) throw new Error('Failed to fetch reports');
+                    const apiData = await res.json();
+
                     let count = 0;
-                    if (snapshot.exists()) {
-                        const data = snapshot.val();
-                        console.log("[QuizClient] Found reports data:", data);
+                    if (apiData.reports) {
                         const currentTestType = quizContext.userDetails?.testType || 'ASSESSMENT';
-
-                        // 1. Check legacy root-level report
-                        if (data.summary) {
-                            const reportType = data.type || (data.summary?.grade?.startsWith('NEET') ? 'NEET' : 'ASSESSMENT');
-                            if (reportType === currentTestType) count++;
-                        }
-
-                        // 2. Check sub-node reports
-                        Object.values(data).forEach(r => {
-                            if (r && typeof r === 'object' && r.summary) {
-                                const reportType = r.type || (r.summary?.grade?.startsWith('NEET') ? 'NEET' : 'ASSESSMENT');
-                                if (reportType === currentTestType) count++;
+                        Object.values(apiData.reports).forEach(r => {
+                            if (r && (r.reportType === currentTestType || r.type === currentTestType)) {
+                                count++;
                             }
                         });
-                        console.log("[QuizClient] Counted attempts for", currentTestType, ":", count);
-                    } else {
-                        console.log("[QuizClient] No reports found at path");
                     }
+
                     // Always show intro, default attempt is count + 1
                     setAttemptCount(count + 1);
                     setShowIntro(true);
@@ -482,10 +468,15 @@ const QuizClient = () => {
             const trimmedName = childNameInput.trim();
 
             if (userKey) {
-                // Update name in Firebase
-                const updatePath = `NMD_2025/Registrations/${userKey}/children/${childId}/name`;
-                await update(ref(firebaseDatabase), {
-                    [updatePath]: trimmedName
+                // Update name via API
+                await fetch('/api/students', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        uid: userKey,
+                        childId: childId,
+                        name: trimmedName
+                    })
                 });
             }
 

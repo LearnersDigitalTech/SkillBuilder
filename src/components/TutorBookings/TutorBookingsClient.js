@@ -5,8 +5,6 @@ import Header from "@/app/homepage/Header";
 import Footer from "@/components/Footer/Footer.component";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { firebaseDatabase } from "@/backend/firebaseHandler";
-import { ref, get } from "firebase/database";
 import { CircularProgress, Table, TableHead, TableRow, TableBody, TableCell, Paper, Typography } from "@mui/material";
 import Styles from "../../app/tutor-bookings/TutorBookings.module.css";
 
@@ -24,24 +22,19 @@ const TutorBookingsClient = () => {
 
     useEffect(() => {
         const fetchBookings = async () => {
-            if (!user?.phoneNumber) {
+            if (!user?.uid) {
                 setLoading(false);
                 return;
             }
 
             try {
-                const phoneKey = user.phoneNumber.slice(-10);
-                const bookingsRef = ref(firebaseDatabase, `NMD_2025/TutorBookings/${phoneKey}`);
-                const snapshot = await get(bookingsRef);
-                if (!snapshot.exists()) {
+                const response = await fetch(`/api/tutor/bookings?uid=${user.uid}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setBookings(data.bookings || []);
+                } else {
                     setBookings([]);
-                    return;
                 }
-
-                const data = snapshot.val() || {};
-                const entries = Object.entries(data).map(([id, value]) => ({ id, ...value }));
-                entries.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-                setBookings(entries);
             } catch (error) {
                 console.error("Error fetching tutor bookings:", error);
             } finally {

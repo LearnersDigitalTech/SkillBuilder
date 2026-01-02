@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
         return userType === 'teacher';
     }, [userType]);
 
-    // Function to fetch and normalize user data from Firebase
+    // Function to fetch and normalize user data from PostgreSQL API
     const fetchUserData = async (currentUser) => {
         if (!currentUser) {
             setUserData(null);
@@ -34,81 +34,78 @@ export const AuthProvider = ({ children }) => {
         }
 
         try {
-            // Get database key based on auth provider
-            const userKey = getUserDatabaseKey(currentUser);
-            const userRef = ref(firebaseDatabase, `NMD_2025/Registrations/${userKey}`);
+            // 1. Try Fetch by UID
+            let items = null;
+            let response = await fetch(`/api/users?uid=${currentUser.uid}`);
 
-            let snapshot;
-            try {
-                snapshot = await get(userRef);
-            } catch (error) {
-                console.warn("Primary key access failed, trying fallback...", error);
-            }
-
-            // Fallback: If UID access fails or returns empty, try email-based key (e.g., S1001)
-            if ((!snapshot || !snapshot.exists()) && currentUser.email && currentUser.email.endsWith('@lgs.com')) {
-                try {
-                    const shortKey = currentUser.email.split('@')[0].toUpperCase();
-                    const fallbackRef = ref(firebaseDatabase, `NMD_2025/Registrations/${shortKey}`);
-                    snapshot = await get(fallbackRef);
-                } catch (fallbackError) {
-                    console.error("Fallback access also failed:", fallbackError);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.users && data.users.length > 0) {
+                    items = data.users[0];
                 }
             }
 
-            if (snapshot && snapshot.exists()) {
-                const rawData = snapshot.val();
-
-                // Check if user is a teacher based on userType field
-                if (rawData.userType === 'teacher') {
-                    setUserType('teacher');
-                    setUserData({
-                        ...rawData,
-                        uid: currentUser.uid,
-                        isTeacher: true
-                    });
-                    return;
+            // 2. Fallback: Try Fetch by Email if not found by UID
+            if (!items && currentUser.email) {
+                response = await fetch(`/api/users?email=${currentUser.email}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.users && data.users.length > 0) {
+                        items = data.users[0];
+                    }
                 }
+            }
 
-                // Not a teacher - normalize student/parent data
-                // Normalize to support multiple child profiles per user.
-                // Legacy shape: a single profile object at the root.
-                // New shape: { parentPhone/parentEmail, authProvider, children: { childId: { ...profile } } }
-                let normalizedData;
-                if (rawData && rawData.children) {
-                    // Even if children exist, ensure we expose parentPhone/phoneNumber at top level
-                    // Fallback: If phoneNumber is missing at root, check if it was saved as parentPhone
-                    const phone = rawData.phoneNumber || rawData.parentPhone || "";
+            if (items) {
+                // Normalize Data from Postgres structure to App structure
+                // Postgres 'teachers' table is separate. We might need to check role.
 
-                    normalizedData = {
-                        ...rawData,
-                        phoneNumber: phone,
-                        parentPhone: phone
-                    };
-                } else if (rawData) {
-                    // Legacy phone auth user - normalize
-                    const phoneNumber = currentUser.phoneNumber ? currentUser.phoneNumber.slice(-10) : "";
-                    normalizedData = {
-                        parentPhone: phoneNumber,
-                        authProvider: "phone",
-                        children: {
-                            default: rawData
+                const role = items.role; // 'teacher', 'parent', 'admin'
+
+                // If teacher, we might need extra details from 'teachers' table?
+                // The /api/users currently returns 'users' table columns.
+                // We might need a separate call for teacher details OR join in the API.
+                // For now, let's set basic data.
+
+                const normalizedData = {
+                    uid: items.uid,
+                    name: items.email ? items.email.split('@')[0] : 'User', // Placeholder if name missing in users table
+                    email: items.email,
+                    phoneNumber: items.phone_number,
+                    parentPhone: items.phone_number, // Legacy support
+                    userType: role,
+                    authProvider: currentUser.providerData?.[0]?.providerId || 'unknown',
+                    children: {}
+                };
+
+                // Fetch Children if parent
+                if (role === 'parent' || role === 'student') {
+                    try {
+                        const childRes = await fetch(`/api/users/${items.uid}/children`);
+                        if (childRes.ok) {
+                            const childData = await childRes.json();
+                            normalizedData.children = childData.children || {};
                         }
-                    };
-                } else {
-                    normalizedData = null;
+                    } catch (e) {
+                        console.error("Error fetching children:", e);
+                    }
                 }
 
-                // Determine user type from registration data
-                const detectedUserType = rawData?.userType || 'parent'; // Default to parent for legacy users
-                setUserType(detectedUserType);
-                setUserData(normalizedData);
+                if (role === 'teacher') {
+                    setUserType('teacher');
+                    setUserData({ ...normalizedData, isTeacher: true });
+                } else {
+                    setUserType(role);
+                    // For now, we unfortunately lack 'children' in this basic fetch.
+                    // I will need to patch this to fetch children!
+                    setUserData(normalizedData);
+                }
             } else {
-                setUserData(null); // User authenticated but profile not created yet
+                setUserData(null);
                 setUserType(null);
             }
         } catch (error) {
-            console.error("Error fetching user data:", error);
+            console.error("Error fetching user data from API:", error);
             setUserData(null);
             setUserType(null);
         }

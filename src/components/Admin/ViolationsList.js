@@ -19,8 +19,6 @@ import {
     Stack
 } from '@mui/material';
 import { AlertTriangle, ChevronDown, Clock, User, FileText } from 'lucide-react';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { db } from '@/backend/firebaseHandler';
 
 const ViolationsList = () => {
     const [violations, setViolations] = useState([]);
@@ -30,19 +28,10 @@ const ViolationsList = () => {
     useEffect(() => {
         const fetchViolations = async () => {
             try {
-                const violationsRef = collection(db, 'testViolations');
-                const q = query(violationsRef, orderBy('startTime', 'desc'));
-                const querySnapshot = await getDocs(q);
-
-                const violationsData = [];
-                querySnapshot.forEach((doc) => {
-                    violationsData.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
-
-                setViolations(violationsData);
+                const res = await fetch('/api/security');
+                if (!res.ok) throw new Error('Failed to fetch security violations');
+                const data = await res.json();
+                setViolations(data.sessions || []);
             } catch (err) {
                 console.error('Error fetching violations:', err);
                 setError(err.message);

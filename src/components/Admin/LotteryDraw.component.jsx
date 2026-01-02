@@ -12,8 +12,6 @@ import {
     TextField,
     MenuItem
 } from '@mui/material';
-import { ref, get } from 'firebase/database';
-import { firebaseDatabase } from '@/backend/firebaseHandler';
 import confetti from 'canvas-confetti';
 import { Users, Trophy } from 'lucide-react';
 
@@ -52,11 +50,10 @@ const LotteryDraw = ({ isModal = false }) => {
     useEffect(() => {
         const fetchWinners = async () => {
             try {
-                const winnersRef = ref(firebaseDatabase, 'Lottery/Winners');
-                const snapshot = await get(winnersRef);
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    const codes = new Set(Object.values(data).map(w => w.ticketCode));
+                const res = await fetch('/api/lottery/winners');
+                if (res.ok) {
+                    const data = await res.json();
+                    const codes = new Set(data.map(w => w.ticketCode));
                     setPreviousWinners(codes);
                 }
             } catch (error) {
@@ -116,8 +113,7 @@ const LotteryDraw = ({ isModal = false }) => {
             });
         }
 
-        const { push } = await import('firebase/database');
-        const winnersRef = ref(firebaseDatabase, 'Lottery/Winners');
+        // const winnersRef = ref(firebaseDatabase, 'Lottery/Winners'); // Removed
 
         for (const step of drawSequence) {
             setCurrentReveal(step.role); // For loading state
@@ -132,16 +128,21 @@ const LotteryDraw = ({ isModal = false }) => {
 
                 triggerConfetti();
 
-                // Save to Firebase
+                // Save to API
                 try {
                     const winnerData = {
-                        ...step.winner,
+                        ticketCode: step.winner.ticketCode,
                         role: step.role,
                         round: roundName || 'Round 1',
-                        timestamp: Date.now(),
-                        wonAt: new Date().toISOString()
+                        rank: 1,
+                        prize: roundName || 'Winner'
                     };
-                    await push(winnersRef, winnerData);
+
+                    await fetch('/api/lottery/winners', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(winnerData)
+                    });
 
                     // Update local exclusion list immediately
                     setPreviousWinners(prev => new Set(prev).add(step.winner.ticketCode));
@@ -150,7 +151,7 @@ const LotteryDraw = ({ isModal = false }) => {
                     console.error("Error saving winner:", e);
                 }
 
-                await wait(2000); // Celebrate (shorter wait for multiple)
+                await wait(2000); // Celebrate
             } else {
                 await wait(1000);
             }
@@ -243,34 +244,32 @@ const LotteryDraw = ({ isModal = false }) => {
     const fetchRegistrations = async () => {
         setLoading(true);
         try {
-            const registrationsRef = ref(firebaseDatabase, 'Lottery/Registrations');
-            const snapshot = await get(registrationsRef);
+            const res = await fetch('/api/lottery/entries');
+            if (!res.ok) throw new Error('Failed to fetch entries');
+            const data = await res.json();
 
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                const formattedData = Object.entries(data).map(([key, val]) => {
-                    // Start of Normalization Logic
-                    let effectiveUserType = (val.userType || 'parent').toLowerCase();
+            const formattedData = data.map(val => {
+                // Start of Normalization Logic
+                let effectiveUserType = (val.userType || 'parent').toLowerCase();
 
-                    if (val.ticketCode) {
-                        const code = String(val.ticketCode).toUpperCase();
-                        if (code.startsWith('O')) effectiveUserType = 'other';
-                        else if (code.startsWith('G')) effectiveUserType = 'guest';
-                    }
+                if (val.ticketCode) {
+                    const code = String(val.ticketCode).toUpperCase();
+                    if (code.startsWith('O')) effectiveUserType = 'other';
+                    else if (code.startsWith('G')) effectiveUserType = 'guest';
+                }
 
-                    return {
-                        id: key,
-                        ...val,
-                        userType: val.userType || 'parent',
-                        effectiveUserType: effectiveUserType,
-                        displayName: val.name || val.parentName || val.studentName || "Unknown"
-                    };
-                });
+                return {
+                    id: val.id,
+                    ...val,
+                    // val contains merged data from API
+                    userType: val.userType || 'parent',
+                    effectiveUserType: effectiveUserType,
+                    displayName: val.name || "Unknown"
+                };
+            });
 
-                setRegistrations(formattedData);
-            } else {
-                setRegistrations([]);
-            }
+            setRegistrations(formattedData);
+
         } catch (error) {
             console.error("Error fetching lottery data:", error);
         } finally {
