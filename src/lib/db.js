@@ -10,22 +10,25 @@ const getPool = () => {
     }
 
     // Check if we have a global pool
-    if (global.postgresPool) {
-      pool = global.postgresPool;
+    // Check if we have a global pool
+    if (global.postgresPool_debug) {
+      pool = global.postgresPool_debug;
     } else {
       console.log("Initializing Postgres Pool (Lazy + Require)...");
       // Move import INSIDE the function to prevent top-level bundling issues with Turbopack
       const { Pool } = require('pg');
 
-      const sslConfig = process.env.DATABASE_URL.includes("localhost")
-        ? false
-        : { rejectUnauthorized: false };
+      // Force SSL false for now since script worked with it
+      const sslConfig = false;
+
+      console.log(`DB Connection: Using SSL=${sslConfig} for host: ${process.env.DATABASE_URL?.split('@')[1]?.split('/')[0]}`);
 
       pool = new Pool({
         connectionString: process.env.DATABASE_URL,
         ssl: sslConfig,
+        connectionTimeoutMillis: 5000,
       });
-      global.postgresPool = pool;
+      global.postgresPool_debug = pool;
     }
   }
   return pool;

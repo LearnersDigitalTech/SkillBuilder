@@ -8,9 +8,6 @@ export async function GET(request) {
         const { searchParams } = new URL(request.url);
         const gradeFilter = searchParams.get('grade');
 
-        console.log("Admin API: Request received...");
-        const client = await db.connect();
-
         // Base query
         let query = `
             SELECT 
@@ -49,8 +46,7 @@ export async function GET(request) {
 
         query += ` GROUP BY s.id, u.uid, u.email, u.phone_number`;
 
-        const result = await client.query(query, values);
-        client.release();
+        const result = await db.query(query, values);
 
         const students = result.rows.map(row => ({
             id: row.internal_id, // Useful for deletion
