@@ -6,9 +6,10 @@ import { firebaseDatabase } from '@/backend/firebaseHandler';
  * @param {string} subject - physics | chemistry | biology
  * @param {Array} questions - Array of question objects
  * @param {string} teacherUid - UID of the teacher uploading
+ * @param {string} uploadMethod - 'excel' | 'ai_document'
  * @returns {Promise<boolean>}
  */
-export const saveNeetQuestions = async (subject, questions, teacherUid) => {
+export const saveNeetQuestions = async (subject, questions, teacherUid, uploadMethod = 'excel') => {
     try {
         const timestamp = new Date().toISOString();
         const updates = {};
@@ -18,7 +19,13 @@ export const saveNeetQuestions = async (subject, questions, teacherUid) => {
             updates[`NMD_2025/NEET_Questions/${subject}/${newPostKey}`] = {
                 ...q,
                 uploadedBy: teacherUid,
-                createdAt: timestamp
+                uploadMethod: uploadMethod,
+                createdAt: timestamp,
+                // Ensure these fields exist
+                imageUrl: q.imageUrl || null,
+                hasFormula: q.hasFormula || false,
+                formulaType: q.formulaType || null,
+                aiConfidence: q.aiConfidence || null
             };
         });
 

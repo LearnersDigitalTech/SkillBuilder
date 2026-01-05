@@ -2,12 +2,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from '@/app/homepage/Header';
 import Footer from '@/components/Footer/Footer.component';
-import { ArrowLeft, UploadCloud, CheckCircle2, AlertCircle, FileSpreadsheet, Loader2, Trash2 } from 'lucide-react';
+import { ArrowLeft, UploadCloud, CheckCircle2, FileSpreadsheet, Loader2, Trash2, FileText, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import * as XLSX from 'xlsx';
 import { saveNeetQuestions, getNeetQuestions, deleteNeetQuestion, clearNeetQuestions } from '@/services/neetQuestionService';
 import { toast } from 'react-toastify';
+import QuestionPreviewModal from '@/components/QuestionPreviewModal';
+import KaTeXRenderer from '@/components/KaTeXRenderer';
 
 const SUBJECTS = [
     { id: 'physics', name: 'Physics', color: 'bg-blue-500', icon: '⚛️' },
@@ -23,6 +25,9 @@ const NeetUploadPage = () => {
     const [loadingQuestions, setLoadingQuestions] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [dragActive, setDragActive] = useState(false);
+    const [uploadMode, setUploadMode] = useState('excel'); // 'excel' or 'ai'
+    const [previewQuestions, setPreviewQuestions] = useState(null);
+    const [aiProgress, setAiProgress] = useState('');
 
     // Redirect if not authorized
     useEffect(() => {
@@ -73,7 +78,8 @@ const NeetUploadPage = () => {
         }
     }, [selectedSubject, fetchQuestions]);
 
-    const handleFile = async (file) => {
+    // Excel Upload Handler
+    const handleExcelFile = async (file) => {
         if (!selectedSubject) {
             toast.warning("Please select a subject first");
             return;
@@ -95,9 +101,7 @@ const NeetUploadPage = () => {
                     return;
                 }
 
-                // Basic validation and mapping
                 const formattedQuestions = jsonData.map((row, index) => {
-                    // Helper to get value from row with multiple possible keys
                     const getVal = (keys) => {
                         const foundKey = Object.keys(row).find(k =>
                             keys.map(key => key.toLowerCase().replace(/\s/g, ''))
@@ -127,7 +131,7 @@ const NeetUploadPage = () => {
                     return;
                 }
 
-                const success = await saveNeetQuestions(selectedSubject.id, formattedQuestions, user.uid);
+                const success = await saveNeetQuestions(selectedSubject.id, formattedQuestions, user.uid, 'excel');
                 if (success) {
                     toast.success(`Successfully uploaded ${formattedQuestions.length} questions!`);
                     fetchQuestions(selectedSubject.id);
@@ -142,6 +146,83 @@ const NeetUploadPage = () => {
             }
         };
         reader.readAsArrayBuffer(file);
+    };
+
+    // AI Document Upload Handler
+    const handleAIDocumentFile = async (file) => {
+        if (!selectedSubject) {
+            toast.warning("Please select a subject first");
+            return;
+        }
+
+        try {
+            setUploading(true);
+            setAiProgress('Uploading document...');
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('subject', selectedSubject.id);
+
+            setAiProgress('Extracting text and images...');
+            const response = await fetch('/api/upload-document', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Upload failed');
+            }
+
+            setAiProgress('AI is analyzing questions...');
+            const result = await response.json();
+
+            if (result.success && result.questions) {
+                setAiProgress('');
+                setPreviewQuestions(result.questions);
+
+                if (result.demoMode) {
+                    toast.info(`🎭 DEMO MODE: Showing ${result.questions.length} sample questions. (Gemini API unavailable)`, {
+                        duration: 5000
+                    });
+                } else {
+                    toast.success(`Extracted ${result.questions.length} questions! Review and save.`);
+                }
+            } else {
+                throw new Error('No questions extracted');
+            }
+
+        } catch (error) {
+            console.error("Error processing document:", error);
+            toast.error(error.message || "Failed to process document");
+            setAiProgress('');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleFile = (file) => {
+        if (uploadMode === 'excel') {
+            handleExcelFile(file);
+        } else {
+            handleAIDocumentFile(file);
+        }
+    };
+
+    const handleSaveAIQuestions = async (editedQuestions) => {
+        try {
+            const success = await saveNeetQuestions(selectedSubject.id, editedQuestions, user.uid, 'ai_document');
+            if (success) {
+                toast.success(`Successfully saved ${editedQuestions.length} questions!`);
+                setPreviewQuestions(null);
+                fetchQuestions(selectedSubject.id);
+            } else {
+                toast.error("Failed to save questions to database.");
+            }
+        } catch (error) {
+            console.error("Error saving questions:", error);
+            toast.error("Failed to save questions");
+        }
     };
 
     const onDragOver = (e) => {
@@ -176,8 +257,9 @@ const NeetUploadPage = () => {
                 </button>
 
                 <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Sidebar / Subject Selection */}
+                    {/* Sidebar */}
                     <div className="w-full lg:w-80 space-y-4">
+                        {/* Subject Selection */}
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                             <h2 className="text-lg font-bold text-slate-800 mb-4">Select Subject</h2>
                             <div className="space-y-3">
@@ -199,37 +281,72 @@ const NeetUploadPage = () => {
                             </div>
                         </div>
 
+                        {/* Upload Mode Selection */}
                         {selectedSubject && (
                             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Upload Template</h3>
-                                <div className="space-y-4">
-                                    <p className="text-xs text-slate-500">
-                                        Use columns: <span className="font-mono bg-slate-100 px-1">Question No</span>,
-                                        <span className="font-mono bg-slate-100 px-1">Question</span>,
-                                        <span className="font-mono bg-slate-100 px-1">Option A</span>,
-                                        <span className="font-mono bg-slate-100 px-1">Option B</span>,
-                                        <span className="font-mono bg-slate-100 px-1">Option C</span>,
-                                        <span className="font-mono bg-slate-100 px-1">Option D</span>,
-                                        <span className="font-mono bg-slate-100 px-1">Correct Answer</span> (A/B/C/D),
-                                        <span className="font-mono bg-slate-100 px-1">Explanation</span>.
-                                    </p>
+                                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Upload Method</h3>
+                                <div className="space-y-3">
                                     <button
-                                        className="w-full py-2 bg-slate-800 text-white text-xs font-bold rounded-lg hover:bg-slate-700 transition"
-                                        onClick={() => {
-                                            const ws = XLSX.utils.json_to_sheet([{ "Question No": 1, Question: "Sample Question?", "Option A": "Choice 1", "Option B": "Choice 2", "Option C": "Choice 3", "Option D": "Choice 4", "Correct Answer": "A", Explanation: "Why A is correct" }]);
-                                            const wb = XLSX.utils.book_new();
-                                            XLSX.utils.book_append_sheet(wb, ws, "Template");
-                                            XLSX.writeFile(wb, `NEET_${selectedSubject.name}_Template.xlsx`);
-                                        }}
+                                        onClick={() => setUploadMode('ai')}
+                                        className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-3 ${uploadMode === 'ai'
+                                            ? 'border-purple-500 bg-purple-50 shadow-sm'
+                                            : 'border-slate-200 hover:border-slate-300'
+                                            }`}
                                     >
-                                        Download Excel Template
+                                        <Sparkles size={20} className={uploadMode === 'ai' ? 'text-purple-600' : 'text-slate-400'} />
+                                        <div className="text-left flex-1">
+                                            <div className={`font-bold text-sm ${uploadMode === 'ai' ? 'text-purple-700' : 'text-slate-700'}`}>
+                                                AI Document Upload
+                                            </div>
+                                            <div className="text-xs text-slate-500">PDF/Word with auto-extraction</div>
+                                        </div>
+                                    </button>
+                                    <button
+                                        onClick={() => setUploadMode('excel')}
+                                        className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-3 ${uploadMode === 'excel'
+                                            ? 'border-green-500 bg-green-50 shadow-sm'
+                                            : 'border-slate-200 hover:border-slate-300'
+                                            }`}
+                                    >
+                                        <FileSpreadsheet size={20} className={uploadMode === 'excel' ? 'text-green-600' : 'text-slate-400'} />
+                                        <div className="text-left flex-1">
+                                            <div className={`font-bold text-sm ${uploadMode === 'excel' ? 'text-green-700' : 'text-slate-700'}`}>
+                                                Excel Upload
+                                            </div>
+                                            <div className="text-xs text-slate-500">Traditional template method</div>
+                                        </div>
                                     </button>
                                 </div>
                             </div>
                         )}
+
+                        {/* Template Download */}
+                        {selectedSubject && uploadMode === 'excel' && (
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Excel Template</h3>
+                                <p className="text-xs text-slate-500 mb-4">
+                                    Use columns: <span className="font-mono bg-slate-100 px-1">Question No</span>,
+                                    <span className="font-mono bg-slate-100 px-1">Question</span>,
+                                    <span className="font-mono bg-slate-100 px-1">Option A-D</span>,
+                                    <span className="font-mono bg-slate-100 px-1">Correct Answer</span>,
+                                    <span className="font-mono bg-slate-100 px-1">Explanation</span>
+                                </p>
+                                <button
+                                    className="w-full py-2 bg-slate-800 text-white text-xs font-bold rounded-lg hover:bg-slate-700 transition"
+                                    onClick={() => {
+                                        const ws = XLSX.utils.json_to_sheet([{ "Question No": 1, Question: "Sample Question?", "Option A": "Choice 1", "Option B": "Choice 2", "Option C": "Choice 3", "Option D": "Choice 4", "Correct Answer": "A", Explanation: "Why A is correct" }]);
+                                        const wb = XLSX.utils.book_new();
+                                        XLSX.utils.book_append_sheet(wb, ws, "Template");
+                                        XLSX.writeFile(wb, `NEET_${selectedSubject.name}_Template.xlsx`);
+                                    }}
+                                >
+                                    Download Template
+                                </button>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Main Content Area */}
+                    {/* Main Content */}
                     <div className="flex-1 space-y-6">
                         {!selectedSubject ? (
                             <div className="bg-white rounded-3xl p-12 shadow-sm border border-slate-200 text-center">
@@ -278,7 +395,7 @@ const NeetUploadPage = () => {
                                 >
                                     <input
                                         type="file"
-                                        accept=".xlsx, .xls, .csv"
+                                        accept={uploadMode === 'excel' ? '.xlsx, .xls, .csv' : '.pdf, .doc, .docx'}
                                         onChange={(e) => e.target.files && handleFile(e.target.files[0])}
                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                         disabled={uploading}
@@ -286,17 +403,33 @@ const NeetUploadPage = () => {
                                     {uploading ? (
                                         <div className="flex flex-col items-center">
                                             <Loader2 size={40} className="text-indigo-600 animate-spin mb-4" />
-                                            <p className="font-bold text-slate-700">Processing File...</p>
+                                            <p className="font-bold text-slate-700">
+                                                {aiProgress || 'Processing File...'}
+                                            </p>
                                         </div>
                                     ) : (
                                         <>
                                             <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
-                                                <UploadCloud size={32} className="text-slate-400" />
+                                                {uploadMode === 'ai' ? (
+                                                    <Sparkles size={32} className="text-purple-500" />
+                                                ) : (
+                                                    <UploadCloud size={32} className="text-slate-400" />
+                                                )}
                                             </div>
-                                            <h3 className="text-lg font-bold text-slate-800 mb-1">Upload Questions</h3>
+                                            <h3 className="text-lg font-bold text-slate-800 mb-1">
+                                                {uploadMode === 'ai' ? 'Upload PDF/Word Document' : 'Upload Excel File'}
+                                            </h3>
                                             <p className="text-slate-500 text-sm max-w-sm">
-                                                Drag and drop your Excel/CSV file here or <span className="text-indigo-600 font-bold underline">browse files</span>
+                                                {uploadMode === 'ai'
+                                                    ? 'AI will automatically extract questions, formulas, and images'
+                                                    : 'Drag and drop your Excel/CSV file here or '}
+                                                <span className="text-indigo-600 font-bold underline">browse files</span>
                                             </p>
+                                            {uploadMode === 'ai' && (
+                                                <div className="mt-4 text-xs text-slate-400">
+                                                    Supports: PDF, Word (.doc, .docx) • Max 10MB
+                                                </div>
+                                            )}
                                         </>
                                     )}
                                 </div>
@@ -324,7 +457,14 @@ const NeetUploadPage = () => {
                                                         </div>
                                                         <div className="flex-1">
                                                             <div className="flex items-start justify-between gap-4 mb-2">
-                                                                <p className="text-slate-800 font-bold">{q.question}</p>
+                                                                <div className="flex-1">
+                                                                    <KaTeXRenderer text={q.question} className="text-slate-800 font-bold" />
+                                                                    {q.uploadMethod === 'ai_document' && (
+                                                                        <span className="ml-2 text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full">
+                                                                            AI
+                                                                        </span>
+                                                                    )}
+                                                                </div>
                                                                 <button
                                                                     onClick={() => handleDeleteQuestion(q.id)}
                                                                     className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-100 rounded-xl transition-all border border-rose-200 bg-rose-50 shadow-sm"
@@ -337,14 +477,14 @@ const NeetUploadPage = () => {
                                                                 {q.options?.map((opt, i) => (
                                                                     <div key={i} className={`p-2 rounded-lg text-sm border ${String.fromCharCode(65 + i) === q.correctAnswer ? 'bg-emerald-50 border-emerald-100 text-emerald-700 font-medium' : 'bg-slate-50 border-slate-100 text-slate-500'}`}>
                                                                         <span className="font-bold mr-2">{String.fromCharCode(65 + i)}.</span>
-                                                                        {opt}
+                                                                        <KaTeXRenderer text={opt} />
                                                                         {String.fromCharCode(65 + i) === q.correctAnswer && <CheckCircle2 size={12} className="inline ml-2" />}
                                                                     </div>
                                                                 ))}
                                                             </div>
                                                             {q.explanation && (
                                                                 <div className="text-xs p-3 bg-indigo-50 rounded-lg text-indigo-700 border border-indigo-100">
-                                                                    <span className="font-bold">Explanation:</span> {q.explanation}
+                                                                    <span className="font-bold">Explanation:</span> <KaTeXRenderer text={q.explanation} />
                                                                 </div>
                                                             )}
                                                         </div>
@@ -360,6 +500,16 @@ const NeetUploadPage = () => {
                 </div>
             </main>
             <Footer />
+
+            {/* AI Preview Modal */}
+            {previewQuestions && (
+                <QuestionPreviewModal
+                    questions={previewQuestions}
+                    onClose={() => setPreviewQuestions(null)}
+                    onSave={handleSaveAIQuestions}
+                    subject={selectedSubject}
+                />
+            )}
         </div>
     );
 };
