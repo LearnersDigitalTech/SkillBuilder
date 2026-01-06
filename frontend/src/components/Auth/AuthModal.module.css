@@ -1,0 +1,382 @@
+.modalPaper {
+    border-radius: 20px !important;
+    padding: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+    max-width: 480px !important;
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+    margin-bottom: 12px;
+}
+
+.headerContent {
+    font-weight: 700;
+    font-size: 1.75rem;
+    color: #1a1a1a;
+    letter-spacing: -0.03em;
+}
+
+.closeButton {
+    color: #999;
+    transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+    background-color: #f5f5f5 !important;
+    color: #333;
+    transform: rotate(90deg);
+}
+
+.modalContent {
+    padding-top: 24px !important;
+    padding-bottom: 12px !important;
+}
+
+.stepContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    animation: fadeInUp 0.4s ease-out forwards;
+}
+
+.stepDescription {
+    text-align: center;
+    color: #6b7280;
+    margin: 0;
+    font-size: 0.95rem;
+    padding-top: 8px;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.welcomeText {
+    color: #4b5563;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.gradeSection {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.gradeLabel {
+    font-weight: 600;
+    color: #111827;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.gradeSelect {
+    margin-top: 8px;
+}
+
+.headerIcon {
+    color: #2563eb;
+}
+
+.inputGroup {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.inputIcon {
+    color: #4b5563;
+    min-width: 24px;
+    display: flex;
+    justify-content: center;
+}
+
+.prefix {
+    color: #666;
+    margin-right: 8px;
+    font-weight: 500;
+}
+
+/* ============ PROFILE SELECTION ============ */
+.profileList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+    overflow-y: auto;
+    padding: 4px;
+    min-height: 100px;
+}
+
+.profileListItem {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    background-color: #ffffff;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.profileListItem:hover {
+    border-color: #2563eb;
+    background-color: #f0f7ff;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+}
+
+.profileListAvatar {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.profileListInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.profileListName {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.95rem;
+    line-height: 1.2;
+}
+
+.profileListGrade {
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.addProfileItem {
+    background-color: #f9fafb;
+    border: 2px dashed #d1d5db;
+}
+
+.addProfileItem:hover {
+    border-color: #2563eb;
+    background-color: #f0f7ff;
+}
+
+.addProfileItem .profileListAvatar {
+    background: #e5e7eb;
+    color: #6b7280;
+}
+
+.addProfileItem:hover .profileListAvatar {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+/* Scrollbar styling */
+.profileList::-webkit-scrollbar {
+    width: 6px;
+}
+
+.profileList::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.profileList::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.profileList::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* ============ PRIMARY ACTION BUTTON ============ */
+.actionButton {
+    background: #2563eb !important;
+    color: white !important;
+    padding: 16px 24px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    border-radius: 8px !important;
+    margin-top: 24px !important;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1), 0 2px 4px -1px rgba(37, 99, 235, 0.06) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    font-size: 1.05rem !important;
+    letter-spacing: 0.01em !important;
+    border: none !important;
+}
+
+.actionButton:hover:not(:disabled) {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5) !important;
+    transform: translateY(-2px);
+}
+
+.actionButton:active:not(:disabled) {
+    transform: translateY(0px);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3) !important;
+}
+
+.actionButton:disabled {
+    background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%) !important;
+    box-shadow: none !important;
+    transform: none !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+}
+
+/* ============ GOOGLE BUTTON ============ */
+.googleButton {
+    border: 2px solid #e5e7eb !important;
+    color: #374151 !important;
+    padding: 14px 20px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    border-radius: 12px !important;
+    transition: all 0.2s ease !important;
+    background-color: white !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    font-size: 1rem !important;
+}
+
+.googleButton:hover {
+    background-color: #f9fafb !important;
+    border-color: #d1d5db !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+    transform: translateY(-1px);
+}
+
+.googleButton:active {
+    transform: translateY(0px);
+}
+
+/* ============ BACK BUTTON ============ */
+.backButton {
+    text-transform: none !important;
+    color: #2563eb !important;
+    margin-top: 12px !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    padding: 10px 18px !important;
+    border-radius: 8px !important;
+    background-color: white !important;
+    border: 2px solid #e5e7eb !important;
+}
+
+.backButton:hover {
+    background-color: #f0f7ff !important;
+    border-color: #2563eb !important;
+    color: #1d4ed8 !important;
+}
+
+/* ============ FORM GRID ============ */
+.formGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* ============ TEXT FIELDS ============ */
+.textField {
+    margin-bottom: 4px !important;
+}
+
+.textField fieldset {
+    border-radius: 8px !important;
+    border-color: #e5e7eb !important;
+    border-width: 2px !important;
+}
+
+.textField:hover fieldset {
+    border-color: #d1d5db !important;
+}
+
+.textField.Mui-focused fieldset {
+    border-color: #2563eb !important;
+    border-width: 2px !important;
+}
+
+.textField input {
+    font-size: 0.95rem !important;
+    padding: 12px 14px !important;
+    color: #1f2937 !important;
+}
+
+.textField label {
+    font-weight: 500 !important;
+    color: #6b7280 !important;
+}
+
+/* ============ DIVIDER ============ */
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin: 10px 0;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.divider span {
+    padding: 0 12px;
+}
+
+/* ============ EMAIL LOGIN CONTAINER ============ */
+.emailLoginContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 8px;
+    animation: fadeInUp 0.5s ease-out forwards;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 600px) {
+    .modalPaper {
+        padding: 20px;
+        border-radius: 16px !important;
+    }
+
+    .headerContent {
+        font-size: 1.5rem;
+    }
+
+    .actionButton {
+        padding: 14px 20px !important;
+        font-size: 1rem !important;
+    }
+}
