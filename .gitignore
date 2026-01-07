@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
-/node_modules
+# dependencies (all directories)
+**/node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -9,6 +9,20 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+ENV/
+*.egg-info/
+dist/
 
 # testing
 /coverage
@@ -19,6 +33,10 @@
 
 # production
 /build
+**/build
+
+# Vite
+**/dist
 
 # misc
 .DS_Store
@@ -32,6 +50,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+**/.env
+**/.env.*
 
 # vercel
 .vercel
@@ -39,3 +59,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDE
+.idea/
+*.swp
+*.swo

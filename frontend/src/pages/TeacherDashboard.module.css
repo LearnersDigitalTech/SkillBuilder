@@ -1,0 +1,551 @@
+/* TeacherDashboard Styles */
+.pageWrapper {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 50%, #faf5ff 100%);
+    padding: 24px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 24px;
+}
+
+.loadingContainer {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e5e7eb;
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Profile Card */
+.profileCard {
+    background: white;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+    position: sticky;
+    top: 24px;
+    overflow: hidden;
+}
+
+.profileGradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    opacity: 0.1;
+}
+
+.profileContent {
+    position: relative;
+    z-index: 1;
+}
+
+.profileHeader {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: white;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.profileInfo {
+    flex: 1;
+    padding-top: 8px;
+}
+
+.profileName {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 8px 0;
+}
+
+.roleBadge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #8b5cf6;
+    color: white;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* Stats Grid */
+.statsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.statCard {
+    padding: 16px;
+    border-radius: 16px;
+    border: 1px solid;
+}
+
+.statCard.indigo {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+}
+
+.statCard.purple {
+    background: #faf5ff;
+    border-color: #e9d5ff;
+}
+
+.statIcon {
+    margin-bottom: 8px;
+}
+
+.statCard.indigo .statIcon {
+    color: #6366f1;
+}
+
+.statCard.purple .statIcon {
+    color: #a855f7;
+}
+
+.statInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.statLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.statCard.indigo .statLabel {
+    color: #6366f1;
+}
+
+.statCard.purple .statLabel {
+    color: #a855f7;
+}
+
+.statValue {
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+.statCard.indigo .statValue {
+    color: #4338ca;
+}
+
+.statCard.purple .statValue {
+    color: #7e22ce;
+}
+
+.logoutButton {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.2s ease;
+}
+
+.logoutButton:hover {
+    background: #fef2f2;
+    color: #ef4444;
+    border-color: #fecaca;
+}
+
+/* Main Content */
+.mainContent {
+    background: white;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+}
+
+.sectionTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 24px 0;
+}
+
+/* Empty State */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 24px;
+    text-align: center;
+    color: #94a3b8;
+}
+
+.emptyState h3 {
+    font-size: 1.25rem;
+    color: #475569;
+    margin: 16px 0 8px 0;
+}
+
+.emptyState p {
+    margin: 0;
+}
+
+/* Grade Grid */
+.gradeGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+}
+
+.gradeCard {
+    position: relative;
+    padding: 24px 16px;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.gradeCard.assigned:hover {
+    border-color: #6366f1;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+}
+
+.gradeCard.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f8fafc;
+}
+
+.gradeIcon {
+    margin-bottom: 8px;
+    color: #94a3b8;
+}
+
+.gradeCard.assigned .gradeIcon {
+    color: #6366f1;
+}
+
+.gradeName {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 4px 0;
+}
+
+.gradeCard.disabled .gradeName {
+    color: #94a3b8;
+}
+
+.gradeCount {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.gradeArrow {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    color: #6366f1;
+}
+
+/* Student List */
+.studentListHeader {
+    margin-bottom: 20px;
+}
+
+.backButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    background: none;
+    border: none;
+    color: #6366f1;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 12px;
+}
+
+.backButton:hover {
+    color: #4f46e5;
+}
+
+/* Filter Bar */
+.filterBar {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    margin-bottom: 20px;
+}
+
+.searchWrapper {
+    flex: 1;
+    position: relative;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 12px 14px 12px 44px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.sortSelect {
+    padding: 12px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    background: white;
+    cursor: pointer;
+    outline: none;
+}
+
+.sortSelect:focus {
+    border-color: #6366f1;
+}
+
+.resultsInfo {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 16px;
+}
+
+/* Student Grid */
+.studentGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.studentCard {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.studentCard:hover {
+    border-color: #6366f1;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+}
+
+.studentAvatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.studentInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.studentName {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 4px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.studentCard:hover .studentName {
+    color: #6366f1;
+}
+
+.studentGrade {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0 0 4px 0;
+}
+
+.studentEmail {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.studentArrow {
+    color: #d1d5db;
+    flex-shrink: 0;
+    margin-top: 12px;
+}
+
+.studentCard:hover .studentArrow {
+    color: #6366f1;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 32px;
+}
+
+.pageButton {
+    padding: 10px 18px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    font-weight: 500;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pageButton:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: #6366f1;
+    color: #6366f1;
+}
+
+.pageButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pageNumbers {
+    display: flex;
+    gap: 4px;
+}
+
+.pageNumber {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    font-weight: 500;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pageNumber:hover {
+    background: #f8fafc;
+    border-color: #6366f1;
+}
+
+.pageNumber.active {
+    background: #6366f1;
+    border-color: #6366f1;
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+
+    .profileCard {
+        position: static;
+    }
+}
+
+@media (max-width: 640px) {
+    .pageWrapper {
+        padding: 16px;
+    }
+
+    .filterBar {
+        flex-direction: column;
+    }
+
+    .statsGrid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,614 @@
+/* Dashboard Styles - Migrated from Next.js */
+.pageWrapper {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f0f7ff 0%, #f8fafc 50%, #faf5ff 100%);
+    padding: 24px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 24px;
+}
+
+.loadingContainer {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e5e7eb;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Profile Card */
+.profileCard {
+    background: white;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+    position: sticky;
+    top: 24px;
+    overflow: hidden;
+}
+
+.profileGradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+    opacity: 0.1;
+}
+
+.profileContent {
+    position: relative;
+    z-index: 1;
+}
+
+.profileHeader {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s ease;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.avatar:hover {
+    transform: scale(1.05);
+}
+
+.avatarStatus {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 14px;
+    height: 14px;
+    background: #22c55e;
+    border-radius: 50%;
+    border: 3px solid white;
+}
+
+.profileInfo {
+    flex: 1;
+    padding-top: 8px;
+}
+
+.profileName {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 8px 0;
+    line-height: 1.2;
+}
+
+.gradeBadge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #eff6ff;
+    color: #2563eb;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.editButton {
+    background: #f1f5f9;
+    border: none;
+    padding: 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.2s ease;
+}
+
+.editButton:hover {
+    background: #e2e8f0;
+    color: #2563eb;
+}
+
+/* Action Buttons */
+.profileActions {
+    margin-top: 16px;
+}
+
+.primaryButton {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.primaryButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+
+.secondaryActions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.secondaryButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.secondaryButton:hover {
+    background: #f1f5f9;
+    border-color: #2563eb;
+    color: #2563eb;
+}
+
+/* Profile List */
+.profileList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.profileListTitle {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+}
+
+.addProfileButton {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px;
+    background: #f0f7ff;
+    color: #2563eb;
+    border: 2px dashed #bfdbfe;
+    border-radius: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.addProfileButton:hover {
+    background: #dbeafe;
+    border-color: #2563eb;
+}
+
+.profileListItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.profileListItem:hover {
+    border-color: #2563eb;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+}
+
+.profileListAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.profileListInfo {
+    flex: 1;
+}
+
+.profileListName {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.profileListGrade {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.logoutButton {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    margin-top: 24px;
+    transition: all 0.2s ease;
+}
+
+.logoutButton:hover {
+    background: #fef2f2;
+    color: #ef4444;
+    border-color: #fecaca;
+}
+
+/* Reports Section */
+.reportsSection {
+    background: white;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+}
+
+.sectionTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 20px 0;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: #f1f5f9;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.tab {
+    flex: 1;
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab:hover {
+    color: #2563eb;
+}
+
+.tab.active {
+    background: white;
+    color: #2563eb;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Reports Content */
+.reportsContent {
+    min-height: 300px;
+}
+
+.loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    gap: 16px;
+    color: #64748b;
+}
+
+.reportsList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.reportCard {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.reportCard:hover {
+    border-color: #2563eb;
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+}
+
+.reportIcon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #d97706;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reportIcon.rapidIcon {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #2563eb;
+}
+
+.reportInfo {
+    flex: 1;
+}
+
+.reportInfo h4 {
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 4px 0;
+}
+
+.reportInfo p {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.reportScore {
+    text-align: right;
+}
+
+.scoreValue {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #059669;
+}
+
+.scoreLabel {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+/* Empty State */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    text-align: center;
+    color: #94a3b8;
+}
+
+.emptyState h3 {
+    font-size: 1.25rem;
+    color: #475569;
+    margin: 16px 0 8px 0;
+}
+
+.emptyState p {
+    margin: 0 0 24px 0;
+}
+
+/* Modal */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    max-width: 400px;
+    width: 100%;
+}
+
+.modal h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 20px 0;
+}
+
+.formGroup {
+    margin-bottom: 16px;
+}
+
+.formGroup label {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.formGroup input,
+.formGroup select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.formGroup input:focus,
+.formGroup select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.modalActions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.cancelButton {
+    flex: 1;
+    padding: 14px;
+    background: #f1f5f9;
+    color: #64748b;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cancelButton:hover {
+    background: #e2e8f0;
+}
+
+.saveButton {
+    flex: 1;
+    padding: 14px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.saveButton:hover {
+    background: #1d4ed8;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+
+    .profileCard {
+        position: static;
+    }
+}
+
+@media (max-width: 640px) {
+    .pageWrapper {
+        padding: 16px;
+    }
+
+    .profileCard,
+    .reportsSection {
+        padding: 20px;
+        border-radius: 20px;
+    }
+
+    .secondaryActions {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .pageWrapper {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+
+    .profileCard,
+    .reportsSection,
+    .modal {
+        background: #1e293b;
+        border-color: #334155;
+    }
+
+    .profileName,
+    .sectionTitle,
+    .modal h3 {
+        color: #f1f5f9;
+    }
+
+    .reportCard {
+        background: #334155;
+        border-color: #475569;
+    }
+}

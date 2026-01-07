@@ -1,0 +1,207 @@
+/* Practice Page Styles */
+.page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f0f7ff 0%, #f8fafc 100%);
+}
+
+.main {
+    padding: 40px 24px 80px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Hero */
+.hero {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.heroIcon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.hero h1 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin: 0 0 8px 0;
+}
+
+.hero p {
+    font-size: 1.1rem;
+    color: #64748b;
+    margin: 0;
+}
+
+/* Grade Grid */
+.gradeGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.gradeCard {
+    position: relative;
+    padding: 24px 16px;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.gradeCard:hover {
+    border-color: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.1);
+}
+
+.gradeCard.selected {
+    border-color: #2563eb;
+    background: linear-gradient(135deg, #eff6ff 0%, #f0f7ff 100%);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.15);
+}
+
+.gradeIcon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.gradeCard h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 6px 0;
+}
+
+.gradeCard p {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.checkmark {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    background: #2563eb;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+/* Start Section */
+.startSection {
+    background: white;
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    text-align: center;
+}
+
+.sessionInfo {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-bottom: 24px;
+}
+
+.infoItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #475569;
+    font-weight: 500;
+}
+
+.startButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 40px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+}
+
+.startButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+}
+
+.startButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Features */
+.features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+@media (max-width: 768px) {
+    .features {
+        grid-template-columns: 1fr;
+    }
+
+    .sessionInfo {
+        flex-direction: column;
+        gap: 12px;
+    }
+}
+
+.featureCard {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.featureIcon {
+    color: #2563eb;
+    margin-bottom: 16px;
+}
+
+.featureCard h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 8px 0;
+}
+
+.featureCard p {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+}

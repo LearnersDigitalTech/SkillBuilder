@@ -1,0 +1,54 @@
+.timer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #f1f5f9;
+    border-radius: 12px;
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #1f2937;
+    transition: all 0.3s ease;
+}
+
+.icon {
+    color: #6b7280;
+}
+
+.time {
+    min-width: 48px;
+    text-align: center;
+}
+
+.lowTime {
+    background: #fef3c7;
+    color: #d97706;
+    animation: pulse 2s infinite;
+}
+
+.lowTime .icon {
+    color: #d97706;
+}
+
+.criticalTime {
+    background: #fee2e2;
+    color: #dc2626;
+    animation: pulse 0.5s infinite;
+}
+
+.criticalTime .icon {
+    color: #dc2626;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+}

@@ -1,0 +1,129 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.questionSection {
+    margin-bottom: 8px;
+}
+
+.questionText {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #1f2937;
+    line-height: 1.6;
+    margin: 0 0 16px 0;
+}
+
+.imageContainer {
+    margin-top: 16px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.image {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    object-fit: contain;
+}
+
+/* Input Area */
+.inputContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input {
+    padding: 20px 24px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1.25rem;
+    color: #1f2937;
+    transition: all 0.2s ease;
+    outline: none;
+    text-align: center;
+    font-weight: 500;
+}
+
+.input:hover {
+    border-color: #d1d5db;
+}
+
+.input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.input::placeholder {
+    color: #9ca3af;
+    font-weight: 400;
+}
+
+.hint {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    text-align: center;
+}
+
+/* Next Button */
+.nextButton {
+    margin-top: 16px;
+    padding: 16px 32px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    align-self: flex-end;
+}
+
+.nextButton:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+.nextButton.submit {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.nextButton.submit:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .input {
+        font-size: 1.1rem;
+        padding: 16px 20px;
+    }
+
+    .nextButton {
+        width: 100%;
+    }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .questionText {
+        color: #f9fafb;
+    }
+
+    .input {
+        background: #374151;
+        border-color: #4b5563;
+        color: #f9fafb;
+    }
+
+    .input:focus {
+        border-color: #2563eb;
+    }
+}

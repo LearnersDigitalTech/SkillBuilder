@@ -1,0 +1,248 @@
+/* Lottery Styles */
+.page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 50%, #fef9c3 100%);
+}
+
+.main {
+    padding: 40px 24px 80px;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Hero */
+.hero {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.heroIcon {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 24px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 10px 40px rgba(245, 158, 11, 0.4);
+}
+
+.heroTitle {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #92400e;
+    margin: 0 0 12px 0;
+}
+
+.heroSubtitle {
+    font-size: 1.1rem;
+    color: #a16207;
+    margin: 0;
+}
+
+/* Content */
+.content {
+    background: white;
+    border-radius: 24px;
+    padding: 40px 32px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    margin-bottom: 32px;
+}
+
+/* Ticket Card */
+.ticketCard {
+    text-align: center;
+}
+
+.ticketHeader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.ticketHeader h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #475569;
+    margin: 0;
+}
+
+.starIcon {
+    color: #f59e0b;
+}
+
+.ticketNumber {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #f59e0b;
+    letter-spacing: 0.1em;
+    padding: 24px 32px;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-radius: 16px;
+    border: 3px dashed #f59e0b;
+    margin-bottom: 24px;
+}
+
+.ticketMessage {
+    color: #64748b;
+    margin: 0 0 32px 0;
+}
+
+.ticketActions {
+    display: flex;
+    justify-content: center;
+}
+
+.dashboardButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dashboardButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+
+/* Form */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.formTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    text-align: center;
+    margin: 0 0 16px 0;
+}
+
+.inputGroup {
+    position: relative;
+}
+
+.inputIcon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    pointer-events: none;
+}
+
+.input,
+.select {
+    width: 100%;
+    padding: 16px 16px 16px 48px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.input:focus,
+.select:focus {
+    border-color: #f59e0b;
+}
+
+.select {
+    cursor: pointer;
+    background: white;
+}
+
+.submitButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 18px 32px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+}
+
+.submitButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(245, 158, 11, 0.5);
+}
+
+.submitButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Features */
+.features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+@media (max-width: 640px) {
+    .features {
+        grid-template-columns: 1fr;
+    }
+}
+
+.featureCard {
+    background: white;
+    border-radius: 16px;
+    padding: 24px 16px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.featureIcon {
+    font-size: 2rem;
+    margin-bottom: 12px;
+}
+
+.featureCard h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 4px 0;
+}
+
+.featureCard p {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .content {
+        padding: 32px 20px;
+    }
+
+    .ticketNumber {
+        font-size: 2.25rem;
+        padding: 20px 24px;
+    }
+}

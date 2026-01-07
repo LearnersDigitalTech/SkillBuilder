@@ -1,0 +1,109 @@
+/* Footer Styles */
+.footer {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: white;
+    padding: 48px 24px 24px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.top {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (min-width: 768px) {
+    .top {
+        grid-template-columns: 1fr 2fr;
+    }
+}
+
+/* Brand */
+.brand {
+    max-width: 280px;
+}
+
+.brandName {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #60a5fa;
+    margin: 0 0 8px 0;
+}
+
+.brandTagline {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Links Grid */
+.linksGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+}
+
+@media (max-width: 640px) {
+    .linksGrid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+}
+
+.linkGroup h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 16px 0;
+}
+
+.linkGroup a {
+    display: block;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    margin-bottom: 10px;
+    transition: color 0.2s ease;
+}
+
+.linkGroup a:hover {
+    color: #60a5fa;
+}
+
+/* Bottom */
+.bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding-top: 24px;
+    text-align: center;
+}
+
+@media (min-width: 640px) {
+    .bottom {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+}
+
+.copyright {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0;
+}
+
+.initiative {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.4);
+    margin: 0;
+}

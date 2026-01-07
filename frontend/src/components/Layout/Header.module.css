@@ -1,0 +1,301 @@
+/* Header Styles */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.logoImage {
+    height: 40px;
+    width: auto;
+}
+
+.logoText {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0096FF;
+}
+
+/* Desktop Navigation */
+.desktopNav {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    gap: 32px;
+    align-items: center;
+}
+
+@media (min-width: 768px) {
+    .desktopNav {
+        display: flex;
+    }
+}
+
+.navLink {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgba(11, 37, 69, 0.8);
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s ease;
+}
+
+.navLink:hover {
+    color: #0096FF;
+}
+
+/* Auth Section */
+.authSection {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.ctaButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    background: #0096FF;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 150, 255, 0.3);
+    transition: all 0.2s ease;
+}
+
+.ctaButton:hover {
+    background: #007AFF;
+    transform: translateY(-1px);
+}
+
+.profileButton,
+.loginButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    background: #007AFF;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
+    transition: all 0.2s ease;
+}
+
+.profileButton:hover,
+.loginButton:hover {
+    background: #0060C9;
+    transform: translateY(-1px);
+}
+
+/* Hamburger */
+.hamburger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background: none;
+    border: none;
+    color: #0B2545;
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+@media (min-width: 768px) {
+    .hamburger {
+        display: none;
+    }
+}
+
+/* Mobile Menu */
+.mobileMenu {
+    display: block;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 768px) {
+    .mobileMenu {
+        display: none;
+    }
+}
+
+.mobileNav {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    gap: 8px;
+    align-items: center;
+}
+
+.mobileNavLink {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0B2545;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 12px;
+    width: 100%;
+    text-align: center;
+    transition: color 0.2s ease;
+}
+
+.mobileNavLink:hover {
+    color: #0096FF;
+}
+
+/* Grade Modal */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+}
+
+.gradeModal {
+    background: white;
+    border-radius: 20px;
+    max-width: 400px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.gradeModalHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 24px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.gradeModalHeader h3 {
+    flex: 1;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0B2545;
+    margin: 0;
+}
+
+.gradeIcon {
+    color: #0096FF;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: #64748b;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+    background: #f1f5f9;
+    color: #1f2937;
+}
+
+.gradeModalContent {
+    padding: 24px;
+}
+
+.gradeSelect {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1rem;
+    color: #1f2937;
+    background: white;
+    cursor: pointer;
+    outline: none;
+    margin-bottom: 16px;
+    transition: border-color 0.2s ease;
+}
+
+.gradeSelect:focus {
+    border-color: #0096FF;
+}
+
+.startButton {
+    width: 100%;
+    padding: 14px 24px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.startButton:hover:not(:disabled) {
+    background: #1d4ed8;
+}
+
+.startButton:disabled {
+    background: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* Header Spacer */
+.headerSpacer {
+    height: 56px;
+}
+
+@media (min-width: 768px) {
+    .headerSpacer {
+        height: 48px;
+    }
+}
