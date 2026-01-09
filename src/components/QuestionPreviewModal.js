@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from 'react';
-import { X, CheckCircle2, AlertCircle, Edit2, Save, Trash2, Image as ImageIcon } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, CheckCircle2, AlertCircle, Edit2, Save, Trash2, Image as ImageIcon, Upload, XCircle } from 'lucide-react';
 import KaTeXRenderer from './KaTeXRenderer';
 
 /**
@@ -65,6 +65,44 @@ export default function QuestionPreviewModal({
             return;
         }
         onSave(editedQuestions);
+    };
+
+    // Handle image upload for a question
+    const handleImageUpload = (index, event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            alert('Please select an image file');
+            return;
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Image size must be less than 5MB');
+            return;
+        }
+
+        // Convert to base64 data URL
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const updated = [...editedQuestions];
+            updated[index].imageUrl = e.target.result;
+            updated[index].hasImage = true;
+            setEditedQuestions(updated);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    // Handle image deletion for a question
+    const handleImageDelete = (index) => {
+        if (confirm('Remove this image from the question?')) {
+            const updated = [...editedQuestions];
+            updated[index].imageUrl = null;
+            updated[index].hasImage = false;
+            setEditedQuestions(updated);
+        }
     };
 
     return (
@@ -142,7 +180,7 @@ export default function QuestionPreviewModal({
                                 />
 
                                 {/* Question Number */}
-                                <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold shrink-0">
+                                <div className="w-10 h-10 rounded-lg bg-purple-600 flex items-center justify-center text-white font-bold shrink-0 shadow-sm">
                                     {q.no}
                                 </div>
 
@@ -231,20 +269,45 @@ export default function QuestionPreviewModal({
                                             </div>
 
 
-                                            {/* Image Preview */}
-                                            {q.imageUrl && (
-                                                <div className="mb-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <ImageIcon size={16} className="text-slate-500" />
-                                                        <span className="text-xs font-medium text-slate-600">Attached Image</span>
+                                            {/* Image Section - Upload or Preview */}
+                                            <div className="mb-3">
+                                                {q.imageUrl ? (
+                                                    // Image exists - show preview with delete option
+                                                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <ImageIcon size={16} className="text-slate-500" />
+                                                                <span className="text-xs font-medium text-slate-600">Attached Image</span>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => handleImageDelete(index)}
+                                                                className="flex items-center gap-1 px-2 py-1 text-xs text-rose-600 hover:bg-rose-100 rounded-lg transition-colors"
+                                                                title="Remove image"
+                                                            >
+                                                                <XCircle size={14} />
+                                                                <span>Remove</span>
+                                                            </button>
+                                                        </div>
+                                                        <img
+                                                            src={q.imageUrl}
+                                                            alt="Question diagram"
+                                                            className="max-w-sm rounded-lg border border-slate-200"
+                                                        />
                                                     </div>
-                                                    <img
-                                                        src={q.imageUrl}
-                                                        alt="Question diagram"
-                                                        className="max-w-sm rounded-lg border border-slate-200"
-                                                    />
-                                                </div>
-                                            )}
+                                                ) : (
+                                                    // No image - show upload option
+                                                    <label className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border-2 border-dashed border-slate-300 hover:border-indigo-400 hover:bg-indigo-50 cursor-pointer transition-colors">
+                                                        <Upload size={18} className="text-slate-400" />
+                                                        <span className="text-sm text-slate-500">Click to upload an image for this question</span>
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            onChange={(e) => handleImageUpload(index, e)}
+                                                            className="hidden"
+                                                        />
+                                                    </label>
+                                                )}
+                                            </div>
 
                                             {/* Options */}
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">

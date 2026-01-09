@@ -50,9 +50,10 @@ const TypeMCQ = ({ onClick, onPrevious, onMarkForReview, onAnswerChange, questio
                 <h3 className={Styles.question}>
                     <MathRenderer content={question} />
                 </h3>
-                {questionPaper[activeQuestionIndex]?.image && (
+                {/* Support both 'image' (standard questions) and 'imageUrl' (NEET questions) */}
+                {(questionPaper[activeQuestionIndex]?.image || questionPaper[activeQuestionIndex]?.imageUrl) && (
                     <img
-                        src={questionPaper[activeQuestionIndex].image}
+                        src={questionPaper[activeQuestionIndex].image || questionPaper[activeQuestionIndex].imageUrl}
                         alt="Question Image"
                         className={Styles.questionImage}
                     />

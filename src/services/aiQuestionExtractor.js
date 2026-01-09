@@ -21,9 +21,20 @@ export async function extractQuestionsWithAI(documentText, subject = 'general') 
 
         const prompt = `You are an expert question extraction assistant for NEET exam preparation. 
 
-🚨 CRITICAL: Extract EVERY SINGLE QUESTION from the document. Do not stop until you've processed the entire text.
+🚨 CRITICAL INSTRUCTION: You MUST extract EVERY SINGLE QUESTION from start to end. Do not stop until you reach the very last question in the document.
 
-Your task is to extract ALL multiple-choice questions (MCQs) from the following document text. The document contains approximately 50+ questions. You MUST extract ALL of them.
+🔍 PRE-SCAN REQUIREMENT:
+Before extracting, scan the document to find the HIGHEST question number (e.g., if questions go 1...58, the highest is 58).
+Then extract EVERY question from 1 to that highest number. DO NOT STOP EARLY!
+
+Your task is to extract ALL multiple-choice questions (MCQs) from the following document text.
+
+📸 IMAGE HANDLING (VERY IMPORTANT):
+The document text contains [IMAGE_X] placeholders (like [IMAGE_0], [IMAGE_1], etc.) which indicate where images appear.
+- If you see [IMAGE_X] appearing AFTER a question number or within question content, that image belongs to THAT question
+- Set hasImage: true AND imageIndex: X (the number from the placeholder) for that question ONLY
+- Do NOT assign any image to questions that don't have [IMAGE_X] nearby in the text
+- If you don't see any [IMAGE_X] near a question, set hasImage: false and imageIndex: null
 
 EXTRACTION RULES:
 1. ✅ Extract EVERY question - scan the ENTIRE document from start to finish
@@ -31,7 +42,7 @@ EXTRACTION RULES:
 3. ✅ Identify the correct answer for each question
 4. ✅ For mathematical formulas, use KaTeX format with $ delimiters
 5. ✅ For chemical formulas, use subscripts (_) and superscripts (^) in KaTeX
-6. ✅ If a question references an image/diagram, set hasImage to true
+6. ✅ If a question has [IMAGE_X] nearby, set hasImage:true AND imageIndex:X
 7. ✅ Extract explanations if provided
 
 OUTPUT FORMAT:
@@ -48,8 +59,22 @@ Return a JSON array with ALL questions. Do NOT truncate or summarize. Extract EV
     "correctAnswer": "A",
     "explanation": "Explanation text (optional)",
     "hasImage": false,
+    "imageIndex": null,
     "hasFormula": true,
     "formulaType": "math"
+  },
+  {
+    "questionNumber": 2,
+    "questionText": "Question with diagram...",
+    "optionA": "...",
+    "optionB": "...",
+    "optionC": "...",
+    "optionD": "...",
+    "correctAnswer": "B",
+    "hasImage": true,
+    "imageIndex": 0,
+    "hasFormula": false,
+    "formulaType": null
   },
   ... (continue for ALL questions in the document)
 ]
@@ -73,19 +98,32 @@ FORMULA CONVERSION EXAMPLES:
 - Δ → $\\Delta$
 - π → $\\pi$
 
+IMAGE ASSOCIATION EXAMPLES:
+Text: "51. The probability distribution... [IMAGE_5] (1) graph (2) graph"
+→ Question 51 has hasImage:true, imageIndex:5
+
+Text: "52. Which of the following... A. option B. option"
+→ Question 52 has hasImage:false, imageIndex:null (no [IMAGE_X] nearby)
+
 IMPORTANT RULES:
 - correctAnswer must be ONLY the letter: "A", "B", "C", or "D"
+- imageIndex must be the exact number from [IMAGE_X] placeholder, or null if no image
 - formulaType can be: "math", "chemistry", or null
 - Return ONLY valid JSON, no markdown code blocks or extra text
 - Process the ENTIRE document - do not stop early
-- If you see "Question 1" through "Question 55", extract ALL 55 questions
 - Keep all text on single lines - do NOT include literal line breaks within string values
 - Use spaces instead of line breaks in question text and explanations
 
 Document text to process:
 ${documentText}
 
-Remember: Extract ALL questions. Count them as you go. Do not stop until you've processed the entire document.`;
+🚨 FINAL VERIFICATION CHECKLIST:
+1. Did you scan to find the HIGHEST question number in the document?
+2. Did you extract EVERY question from 1 to that highest number?
+3. If the highest question number is 58, your output should have 58 questions!
+4. Count your output - if you extracted less than the highest question number, GO BACK and extract the missing ones!
+
+Remember: Extract ALL questions. For images, look for [IMAGE_X] placeholders and assign the correct imageIndex.`;
 
         console.log(`📤 Sending request to Gemini API (v1 endpoint)...`);
         console.log(`📝 Prompt length: ${prompt.length} characters`);
@@ -228,6 +266,7 @@ Remember: Extract ALL questions. Count them as you go. Do not stop until you've 
                 correctAnswer: correctAnswer || 'A',
                 explanation: cleanChemistry(q.explanation || ''),
                 hasImage: q.hasImage || false,
+                imageIndex: typeof q.imageIndex === 'number' ? q.imageIndex : null,
                 hasFormula: q.hasFormula || false,
                 formulaType: q.formulaType || null,
                 imageUrl: null, // Will be populated later if images are uploaded
@@ -236,6 +275,16 @@ Remember: Extract ALL questions. Count them as you go. Do not stop until you've 
         });
 
         console.log(`✅ Successfully formatted ${formattedQuestions.length} questions`);
+
+        // Log question numbers for verification
+        const questionNumbers = formattedQuestions.map(q => q.no);
+        const highestQNum = Math.max(...questionNumbers);
+        console.log(`📋 Question numbers extracted: ${questionNumbers.join(', ')}`);
+        console.log(`📊 Highest question number: ${highestQNum}, Total extracted: ${formattedQuestions.length}`);
+
+        if (formattedQuestions.length < highestQNum) {
+            console.warn(`⚠️ Warning: Extracted ${formattedQuestions.length} questions but highest number is ${highestQNum}. Some questions may be missing!`);
+        }
 
         return formattedQuestions;
 

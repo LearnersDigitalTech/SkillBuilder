@@ -52,7 +52,11 @@ const NeetClient = () => {
                 solution: q.explanation || "",
                 topic: subject,
                 questionId: q.id,
-                hint: ""
+                hint: "",
+                // Preserve image data for questions with attached images
+                image: q.imageUrl || q.image || null,
+                imageUrl: q.imageUrl || null,
+                hasImage: q.hasImage || !!q.imageUrl || !!q.image
             }));
 
             const userKey = user ? getUserDatabaseKey(user) : null;

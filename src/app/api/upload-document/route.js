@@ -91,28 +91,46 @@ export async function POST(request) {
                 console.log('📝 Processing as Word document...');
                 const mammoth = require('mammoth');
 
-                // Extract both text and images
+                // Track image index for placeholders
+                let imageCounter = 0;
+
+                // Extract HTML with image placeholders
                 const options = {
                     convertImage: mammoth.images.imgElement(function (image) {
                         return image.read("base64").then(function (imageBuffer) {
-                            // Store image data for later upload
+                            const currentIndex = imageCounter++;
+                            // Store image data for later use
                             images.push({
+                                index: currentIndex,
                                 buffer: imageBuffer,
                                 contentType: image.contentType || 'image/png',
                                 altText: image.altText || ''
                             });
-                            // Return placeholder for now
+                            // Return placeholder that will appear in HTML
                             return {
-                                src: `data:${image.contentType};base64,${imageBuffer}`
+                                src: `[IMAGE_PLACEHOLDER_${currentIndex}]`
                             };
                         });
                     })
                 };
 
-                // Extract HTML to get images, then extract text
+                // Extract HTML with placeholders
                 const htmlData = await mammoth.convertToHtml({ buffer: buffer }, options);
-                const textData = await mammoth.extractRawText({ buffer: buffer });
-                text = textData.value;
+
+                // Convert HTML to text with image placeholders preserved
+                // Replace <img src="[IMAGE_PLACEHOLDER_X]"> with [IMAGE_X]
+                let htmlContent = htmlData.value;
+                htmlContent = htmlContent.replace(/<img[^>]*src="\[IMAGE_PLACEHOLDER_(\d+)\]"[^>]*>/g, '[IMAGE_$1]');
+
+                // Strip remaining HTML tags but keep the text and [IMAGE_X] placeholders
+                text = htmlContent
+                    .replace(/<[^>]+>/g, ' ')  // Remove HTML tags
+                    .replace(/&nbsp;/g, ' ')   // Replace HTML entities
+                    .replace(/&amp;/g, '&')
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/\s+/g, ' ')      // Normalize whitespace
+                    .trim();
 
                 metadata = {
                     messages: htmlData.messages,
@@ -120,6 +138,7 @@ export async function POST(request) {
                 };
                 console.log(`✅ Extracted ${text.length} characters from Word document`);
                 console.log(`📸 Found ${images.length} images in document`);
+                console.log(`📍 Image placeholders in text: ${(text.match(/\[IMAGE_\d+\]/g) || []).length}`);
             } else {
                 throw new Error(`Unsupported file extension: .${fileExt}`);
             }
@@ -177,46 +196,46 @@ export async function POST(request) {
 
         console.log(`✅ Extracted ${questions.length} questions`);
 
-        // Step 3: Associate images with questions (if any)
+        // Step 3: Associate images with questions using imageIndex from AI
         if (images && images.length > 0) {
             console.log(`🖼️  Processing ${images.length} images...`);
 
-            // Convert images to data URLs for immediate display
-            const imageDataUrls = images.map(img => {
-                return `data:${img.contentType};base64,${img.buffer}`;
-            });
+            // Convert images to data URLs
+            const imageDataUrls = images.map(img => ({
+                index: img.index,
+                url: `data:${img.contentType};base64,${img.buffer}`
+            }));
 
-            // Intelligent image association: Match images to questions that need them
-            // Strategy: Assign images to questions marked with hasImage:true
-            const questionsNeedingImages = questions.filter(q => q.hasImage);
+            // Count how many questions have imageIndex specified
+            const questionsWithImageIndex = questions.filter(q => typeof q.imageIndex === 'number');
+            console.log(`📌 Found ${questionsWithImageIndex.length} questions with imageIndex specified`);
 
-            if (questionsNeedingImages.length > 0) {
-                console.log(`📌 Found ${questionsNeedingImages.length} questions marked as needing images`);
-
-                // Assign images to questions that need them
-                let imageIndex = 0;
-                questions.forEach((question, qIndex) => {
-                    if (question.hasImage && imageIndex < imageDataUrls.length) {
-                        question.imageUrl = imageDataUrls[imageIndex];
-                        console.log(`  ✓ Question ${question.no} (${qIndex + 1}) → Image ${imageIndex + 1}`);
-                        imageIndex++;
+            if (questionsWithImageIndex.length > 0) {
+                // Use AI-specified imageIndex for precise association
+                questions.forEach((question) => {
+                    if (typeof question.imageIndex === 'number') {
+                        const imageData = imageDataUrls.find(img => img.index === question.imageIndex);
+                        if (imageData) {
+                            question.imageUrl = imageData.url;
+                            console.log(`  ✓ Question ${question.no} → Image ${question.imageIndex} (AI-specified)`);
+                        } else {
+                            console.warn(`  ⚠️ Question ${question.no} references Image ${question.imageIndex} but not found`);
+                        }
                     }
                 });
-
-                console.log(`✅ Associated ${imageIndex} images with questions that need them`);
+            } else if (questions.some(q => q.hasImage)) {
+                // Fallback: AI marked hasImage but no imageIndex - use sequential assignment
+                console.log(`ℹ️  No imageIndex specified, using sequential assignment for hasImage questions...`);
+                let imageIdx = 0;
+                questions.forEach((question) => {
+                    if (question.hasImage && imageIdx < imageDataUrls.length) {
+                        question.imageUrl = imageDataUrls[imageIdx].url;
+                        console.log(`  ✓ Question ${question.no} → Image ${imageIdx} (sequential fallback)`);
+                        imageIdx++;
+                    }
+                });
             } else {
-                // Fallback: If no questions marked with hasImage, distribute sequentially
-                console.log(`ℹ️  No questions marked with hasImage, distributing sequentially...`);
-                let imageIndex = 0;
-                questions.forEach((question, qIndex) => {
-                    if (imageIndex < imageDataUrls.length) {
-                        question.imageUrl = imageDataUrls[imageIndex];
-                        question.hasImage = true;
-                        console.log(`  ✓ Question ${question.no} → Image ${imageIndex + 1}`);
-                        imageIndex++;
-                    }
-                });
-                console.log(`✅ Associated ${imageIndex} images sequentially`);
+                console.log(`ℹ️  No questions marked with images, skipping image assignment`);
             }
         } else {
             console.log('ℹ️  No images found in document');
