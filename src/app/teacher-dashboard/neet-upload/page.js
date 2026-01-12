@@ -5,7 +5,7 @@ import Footer from '@/components/Footer/Footer.component';
 import { ArrowLeft, UploadCloud, CheckCircle2, AlertCircle, FileSpreadsheet, Loader2, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx-js-style';
 import { saveNeetQuestions, getNeetQuestions, deleteNeetQuestion, clearNeetQuestions } from '@/services/neetQuestionService';
 import { toast } from 'react-toastify';
 

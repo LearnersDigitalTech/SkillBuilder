@@ -60,7 +60,7 @@ import MathRenderer from '@/components/MathRenderer/MathRenderer.component';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx-js-style';
 
 const StudentList = ({ students, onDelete, assessmentType = 'standard' }) => {
     const theme = useTheme();
