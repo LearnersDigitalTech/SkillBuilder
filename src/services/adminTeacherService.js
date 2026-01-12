@@ -1,6 +1,8 @@
 import { ref, get, update, set } from 'firebase/database';
 import { firebaseDatabase } from '@/backend/firebaseHandler';
 
+const normalize = (g) => (g || '').toLowerCase().replace(/\s+/g, '');
+
 /**
  * Get all teachers from Registrations
  * @returns {Promise<Array>} Array of teacher objects
@@ -111,8 +113,22 @@ export const getTeacherDetails = async (teacherUid) => {
  */
 export const assignGradesToTeacher = async (teacherUid, grades, adminUid) => {
     try {
+        // Fetch current details to ensure we only keep students for valid grades
+        const teacherDetails = await getTeacherDetails(teacherUid);
+        const currentStudents = teacherDetails?.assignments?.students || {};
+        const newStudents = {};
+        const normalizedGrades = grades.map(g => normalize(g));
+
+        // Filter students: Keep only those whose grade is in the new assigned grades list
+        Object.entries(currentStudents).forEach(([uid, student]) => {
+            if (normalizedGrades.includes(normalize(student.grade))) {
+                newStudents[uid] = student;
+            }
+        });
+
         const updates = {
             [`NMD_2025/Registrations/${teacherUid}/teacherAssignments/assignedGrades`]: grades,
+            [`NMD_2025/Registrations/${teacherUid}/teacherAssignments/students`]: newStudents,
             [`NMD_2025/Registrations/${teacherUid}/teacherAssignments/lastUpdated`]: new Date().toISOString(),
             [`NMD_2025/Registrations/${teacherUid}/teacherAssignments/updatedBy`]: adminUid
         };
@@ -177,8 +193,20 @@ export const removeGradeFromTeacher = async (teacherUid, grade) => {
 
         const updatedGrades = teacherDetails.assignments.assignedGrades.filter(g => g !== grade);
 
+        // Filter students: Remove those belonging to the removed grade
+        const currentStudents = teacherDetails.assignments.students || {};
+        const newStudents = {};
+        const normalizedRemovedGrade = normalize(grade);
+
+        Object.entries(currentStudents).forEach(([uid, student]) => {
+            if (normalize(student.grade) !== normalizedRemovedGrade) {
+                newStudents[uid] = student;
+            }
+        });
+
         const updates = {
             [`NMD_2025/Registrations/${teacherUid}/teacherAssignments/assignedGrades`]: updatedGrades,
+            [`NMD_2025/Registrations/${teacherUid}/teacherAssignments/students`]: newStudents,
             [`NMD_2025/Registrations/${teacherUid}/teacherAssignments/lastUpdated`]: new Date().toISOString()
         };
 

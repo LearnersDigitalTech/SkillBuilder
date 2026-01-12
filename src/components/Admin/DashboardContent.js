@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Box, Grid, Typography, CircularProgress, Container, Button, Stack } from '@mui/material';
-import { Users, CheckCircle, XCircle, FileText, LayoutDashboard, List, Trophy, AlertTriangle, Gift, GraduationCap } from 'lucide-react';
+import { Users, CheckCircle, XCircle, FileText, LayoutDashboard, List, Trophy, AlertTriangle, Gift, GraduationCap, Calculator } from 'lucide-react';
 import { ref, get, remove } from 'firebase/database';
 import { firebaseDatabase, db } from '@/backend/firebaseHandler';
 import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
@@ -15,6 +15,7 @@ import dynamic from 'next/dynamic';
 
 const LotteryManager = dynamic(() => import('./LotteryManager'), { ssr: false });
 const LuckyDrawWinners = dynamic(() => import('./LuckyDrawWinners'), { ssr: false });
+const AbacusInsightsManager = dynamic(() => import('./AbacusInsightsManager'), { ssr: false });
 
 const DashboardContent = ({ logoutAction }) => {
     const [view, setView] = useState('overview'); // 'overview' | 'students'
@@ -46,7 +47,7 @@ const DashboardContent = ({ logoutAction }) => {
 
                 let studentCount = 0;
                 let reportCount = 0;
-                let passedCount = 0;
+                let totalScoreSum = 0;
                 let perfectScoreCount = 0;
 
                 const students = [];
@@ -183,14 +184,10 @@ const DashboardContent = ({ logoutAction }) => {
 
                                             // Aggregate Stats
                                             reportCount += processedHistory.length;
-                                            processedHistory.forEach(rep => {
-                                                if (rep.marks >= 40) passedCount += rep.marks; // Using passedCount specifically for total marks now
-                                                else passedCount += rep.marks; // Just summing all marks, reusing variable for scope simplicity or renaming?
-                                                // Actually, let's fix logic properly below to avoid confusion.
-                                            });
+
                                             // Re-doing the loop properly:
                                             processedHistory.forEach(rep => {
-                                                passedCount += rep.marks; // Accumulate all marks (variable name 'passedCount' acts as 'totalScoreSum')
+                                                totalScoreSum += rep.marks; // Accumulate all marks
                                                 if (rep.marks === 100) perfectScoreCount++;
 
                                                 // Aggregate for Marks Chart
@@ -359,7 +356,7 @@ const DashboardContent = ({ logoutAction }) => {
 
                 setStats({
                     totalStudents: finalStudents.length,
-                    totalPassed: reportCount > 0 ? Math.round(passedCount / reportCount) + '%' : '0%', // passedCount acts as Sum of Scores
+                    totalPassed: reportCount > 0 ? Math.min(Math.round(totalScoreSum / reportCount), 100) + '%' : '0%', // Cap at 100%
                     totalPerfectScores: perfectScoreCount,
                     totalReports: reportCount,
                 });
@@ -538,6 +535,14 @@ const DashboardContent = ({ logoutAction }) => {
                 >
                     Teachers
                 </Button>
+                <Button
+                    variant={view === 'abacus' ? 'contained' : 'outlined'}
+                    startIcon={<Calculator size={20} />}
+                    onClick={() => setView('abacus')}
+                    sx={{ borderRadius: 2, textTransform: 'none', px: 3, bgcolor: view === 'abacus' ? '#6366f1' : undefined }}
+                >
+                    AbacusInsights
+                </Button>
             </Stack>
 
             {view === 'overview' ? (
@@ -602,6 +607,8 @@ const DashboardContent = ({ logoutAction }) => {
                 <LuckyDrawWinners />
             ) : view === 'teachers' ? (
                 <TeacherManagement />
+            ) : view === 'abacus' ? (
+                <AbacusInsightsManager />
             ) : (
                 <StudentList
                     students={studentList}
