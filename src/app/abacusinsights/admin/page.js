@@ -1624,15 +1624,25 @@ export default function AbacusAdminPage() {
                                                     <h3 className="font-bold text-slate-800 text-lg">Exam Results</h3>
                                                     <p className="text-sm text-slate-500">Click on any student to view detailed analysis</p>
                                                 </div>
-                                                {sessions.length > 0 && (
+                                                <div className="flex items-center gap-3">
                                                     <button
-                                                        onClick={exportResults}
-                                                        className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition flex items-center gap-2 text-sm font-medium shadow-sm"
+                                                        onClick={() => fetchSessions(selectedTest.id)}
+                                                        disabled={loadingSessions}
+                                                        className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-all active:scale-95 disabled:opacity-50"
+                                                        title="Refresh Results"
                                                     >
-                                                        <Download size={16} />
-                                                        Export Excel
+                                                        <RefreshCw size={20} className={loadingSessions ? "animate-spin" : ""} />
                                                     </button>
-                                                )}
+                                                    {sessions.length > 0 && (
+                                                        <button
+                                                            onClick={exportResults}
+                                                            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition flex items-center gap-2 text-sm font-medium shadow-sm"
+                                                        >
+                                                            <Download size={16} />
+                                                            Export Excel
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
 
                                             {/* Analytics Dashboard */}
@@ -1999,7 +2009,7 @@ export default function AbacusAdminPage() {
                                                                 <Loader2 size={16} className="animate-spin text-indigo-600" />
                                                             ) : (
                                                                 <>
-                                                                    <Image size={16} className="text-slate-400" />
+                                                                    <FileImage size={16} className="text-slate-400" />
                                                                     <span className="text-sm text-slate-500">Add Image</span>
                                                                 </>
                                                             )}

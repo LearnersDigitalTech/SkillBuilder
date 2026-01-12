@@ -77,36 +77,55 @@ export default function AbacusTestLoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-slate-900 to-purple-950 flex items-center justify-center p-4">
-            {/* Background decoration */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl" />
-                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl" />
+        <div className="min-h-screen bg-[#020617] flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
+            {/* Professional Background Layering */}
+            <div className="absolute inset-0 z-0">
+                {/* Brand Orange Glows */}
+                <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-[#f05a28]/10 rounded-full blur-[150px] animate-pulse" />
+                <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-[#f05a28]/10 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '3s' }} />
+
+                {/* Mesh Grid Pattern */}
+                <div className="absolute inset-0 opacity-[0.15]"
+                    style={{
+                        backgroundImage: `linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px)`,
+                        backgroundSize: '30px 30px',
+                        maskImage: 'radial-gradient(ellipse at center, black, transparent 80%)'
+                    }} />
             </div>
 
-            <div className="relative z-10 w-full max-w-md">
-                {/* Logo/Header */}
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl mb-4 shadow-lg shadow-indigo-500/30">
-                        <ShieldCheck size={32} className="text-white" />
+            <div className="relative z-10 w-full max-w-[440px] flex flex-col items-center space-y-6">
+                {/* Logo Section - More Integrated */}
+                <div className="flex flex-col items-center space-y-4">
+                    <div className="bg-white px-8 py-5 rounded-[2rem] shadow-[0_20px_40px_-15px_rgba(240,90,40,0.3)] border border-white/20 transition-transform duration-500 hover:scale-105">
+                        <img
+                            src="/images/abacus-logo.png"
+                            alt="AbacusInsights"
+                            className="h-10 md:h-12 w-auto object-contain"
+                        />
                     </div>
-                    <h1 className="text-3xl font-black text-white mb-2">AbacusInsights</h1>
-                    <p className="text-indigo-200/80">Secure Exam Portal</p>
+                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#f05a28]/10 border border-[#f05a28]/20 backdrop-blur-xl">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#f05a28] animate-ping" />
+                        <span className="text-[9px] font-black text-[#f05a28] uppercase tracking-[0.3em]">Official Assessment Node</span>
+                    </div>
                 </div>
 
-                {/* Main Card */}
-                <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl overflow-hidden">
+                {/* Main Card - Compact & Premium */}
+                <div className="w-full bg-slate-900/40 backdrop-blur-3xl rounded-[2.5rem] border border-white/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] overflow-hidden">
                     {!validatedData ? (
-                        // Login Form
-                        <div className="p-8">
-                            <h2 className="text-xl font-bold text-white mb-2">Enter Your UID</h2>
-                            <p className="text-indigo-200/60 text-sm mb-6">
-                                Enter the 6-digit unique ID provided to you
-                            </p>
+                        <div className="p-8 md:p-10">
+                            <div className="flex flex-col items-center text-center space-y-2 mb-8">
+                                <h2 className="text-2xl font-black text-white tracking-tight">Identity Access</h2>
+                                <p className="text-slate-400 text-xs font-medium max-w-[280px]">
+                                    Enter your unique security credential to unlock your assigned assessment session.
+                                </p>
+                            </div>
 
-                            <div className="space-y-4">
-                                <div className="relative">
-                                    <KeyRound size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-300" />
+                            <div className="space-y-6">
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center px-1">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Candidate UID</label>
+                                        <KeyRound size={12} className="text-[#f05a28]/50" />
+                                    </div>
                                     <input
                                         type="text"
                                         value={uid}
@@ -116,16 +135,16 @@ export default function AbacusTestLoginPage() {
                                             setError('');
                                         }}
                                         onKeyDown={(e) => e.key === 'Enter' && handleValidateUID()}
-                                        placeholder="Enter 6-digit UID"
-                                        className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white text-lg font-mono tracking-widest placeholder:text-indigo-300/40 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                        placeholder="000000"
+                                        className="w-full px-6 py-5 bg-black/40 border-2 border-slate-800 rounded-2xl text-[#f05a28] text-3xl font-mono tracking-[0.4em] placeholder:text-slate-800 focus:outline-none focus:border-[#f05a28]/40 focus:ring-8 focus:ring-[#f05a28]/5 transition-all text-center"
                                         maxLength={6}
                                         autoFocus
                                     />
                                 </div>
 
                                 {error && (
-                                    <div className="flex items-center gap-2 text-red-400 text-sm bg-red-500/10 p-3 rounded-lg">
-                                        <AlertCircle size={16} />
+                                    <div className="flex items-center gap-3 text-red-400 text-[11px] font-bold bg-red-500/5 border border-red-500/10 p-4 rounded-xl animate-shake">
+                                        <AlertCircle size={14} className="flex-shrink-0" />
                                         {error}
                                     </div>
                                 )}
@@ -133,88 +152,110 @@ export default function AbacusTestLoginPage() {
                                 <button
                                     onClick={handleValidateUID}
                                     disabled={loading || uid.length !== 6}
-                                    className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-500 hover:to-purple-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/30"
+                                    className="w-full py-5 bg-gradient-to-br from-[#f05a28] to-[#ff8c00] text-white font-black rounded-2xl hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-[0_20px_40px_-10px_rgba(240,90,40,0.4)] uppercase tracking-widest text-xs"
                                 >
                                     {loading ? (
                                         <>
-                                            <Loader2 size={20} className="animate-spin" />
-                                            Verifying...
+                                            <Loader2 size={16} className="animate-spin" />
+                                            Authenticating
                                         </>
                                     ) : (
                                         <>
-                                            Verify UID
-                                            <ArrowRight size={20} />
+                                            Unlock Assessment
+                                            <ArrowRight size={16} />
                                         </>
                                     )}
                                 </button>
                             </div>
                         </div>
                     ) : (
-                        // Test Info & Start
-                        <div>
-                            <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-6">
-                                <div className="flex items-center gap-2 text-white/80 text-sm mb-2">
-                                    <ShieldCheck size={16} />
-                                    UID Verified Successfully
-                                </div>
-                                <h2 className="text-2xl font-black text-white">{validatedData.student.name}</h2>
+                        <div className="flex flex-col">
+                            {/* Profile Header */}
+                            <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-8 border-b border-white/5 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-[#f05a28]/5 rounded-full blur-2xl -mr-16 -mt-16" />
+                                <span className="text-[10px] font-black text-[#f05a28] uppercase tracking-[0.4em] mb-2 block">Authorized Candidate</span>
+                                <h2 className="text-3xl font-black text-white leading-none tracking-tight">{validatedData.student.name}</h2>
                             </div>
 
-                            <div className="p-6 space-y-4">
-                                <div className="bg-white/5 rounded-xl p-4 space-y-3">
-                                    <div className="flex items-center gap-3">
-                                        <FileText size={18} className="text-indigo-400" />
-                                        <div>
-                                            <p className="text-xs text-indigo-300/60">Assigned Paper</p>
-                                            <p className="text-white font-bold">{validatedData.assignedPaper?.name || validatedData.test.name}</p>
-                                        </div>
+                            <div className="p-8 space-y-6">
+                                {/* Stats Grid */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="bg-white/5 rounded-2xl p-4 border border-white/5 flex flex-col items-center text-center">
+                                        <FileText size={14} className="text-[#f05a28] mb-2" />
+                                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Module</p>
+                                        <p className="text-white font-bold text-xs truncate w-full">{validatedData.assignedPaper?.name || validatedData.test.name}</p>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        <Clock size={18} className="text-indigo-400" />
-                                        <div>
-                                            <p className="text-xs text-indigo-300/60">Duration</p>
-                                            <p className="text-white font-bold">{validatedData.assignedPaper?.duration || validatedData.test.duration} Minutes</p>
-                                        </div>
+                                    <div className="bg-white/5 rounded-2xl p-4 border border-white/5 flex flex-col items-center text-center">
+                                        <Clock size={14} className="text-[#f05a28] mb-2" />
+                                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Time</p>
+                                        <p className="text-white font-bold text-xs">{validatedData.assignedPaper?.duration || validatedData.test.duration} MINS</p>
                                     </div>
                                 </div>
 
-                                {/* Security Notice */}
-                                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
-                                    <h4 className="font-bold text-amber-400 text-sm mb-2">⚠️ Important Notice</h4>
-                                    <ul className="text-xs text-amber-200/80 space-y-1">
-                                        <li>• The exam will run in fullscreen mode</li>
-                                        <li>• Do not switch tabs or windows</li>
-                                        <li>• 4 tab switches = automatic submission</li>
-                                        <li>• Copy/paste is disabled</li>
-                                    </ul>
+                                {/* Modern Instructions */}
+                                <div className="bg-black/20 rounded-2xl p-5 border border-white/5">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <ShieldCheck size={14} className="text-emerald-500" />
+                                        <h4 className="font-black text-slate-300 text-[10px] uppercase tracking-widest">Protocol Sync</h4>
+                                    </div>
+                                    <div className="space-y-3">
+                                        {[
+                                            "Auto-fullscreen enforcement",
+                                            "Proctored environment active",
+                                            "Tab persistence monitoring",
+                                            "Cloud-sync auto-save active"
+                                        ].map((text, i) => (
+                                            <div key={i} className="flex items-center gap-3">
+                                                <div className="w-4 h-[1px] bg-[#f05a28]/30" />
+                                                <span className="text-[10px] text-slate-400 font-medium">{text}</span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
 
-                                <button
-                                    onClick={handleStartExam}
-                                    className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-xl hover:from-emerald-400 hover:to-teal-400 transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30"
-                                >
-                                    Start Exam
-                                    <ArrowRight size={20} />
-                                </button>
+                                <div className="flex flex-col gap-4 pt-2">
+                                    <button
+                                        onClick={handleStartExam}
+                                        className="w-full py-5 bg-gradient-to-br from-[#f05a28] to-[#ff8c00] text-white font-black rounded-2xl hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-[0_20px_40px_-10px_rgba(240,90,40,0.4)] uppercase tracking-widest text-xs"
+                                    >
+                                        Initialize session
+                                        <ArrowRight size={16} />
+                                    </button>
 
-                                <button
-                                    onClick={() => {
-                                        setValidatedData(null);
-                                        setUid('');
-                                    }}
-                                    className="w-full py-2 text-indigo-300/60 hover:text-white text-sm transition"
-                                >
-                                    Use Different UID
-                                </button>
+                                    <button
+                                        onClick={() => {
+                                            setValidatedData(null);
+                                            setUid('');
+                                        }}
+                                        className="text-[9px] font-black text-slate-600 hover:text-white transition-colors uppercase tracking-[0.3em] flex items-center justify-center gap-2"
+                                    >
+                                        <div className="w-1 h-1 rounded-full bg-slate-800" />
+                                        Swap Credential
+                                        <div className="w-1 h-1 rounded-full bg-slate-800" />
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
                 </div>
 
-                {/* Quote */}
-                <div className="mt-8 text-center">
-                    <p className="text-indigo-200/60 italic text-sm">"{quote.text}"</p>
-                    <p className="text-indigo-300/40 text-xs mt-1">— {quote.author}</p>
+                {/* Powered By Section - Cleaner */}
+                <div className="flex flex-col items-center space-y-4 pt-4 opacity-40 hover:opacity-100 transition-opacity duration-700">
+                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.5em]">Powered by Technology from</span>
+                    <div className="bg-white/95 px-5 py-3 rounded-2xl shadow-xl flex items-center justify-center group border border-white/20">
+                        <img
+                            src="/images/learners-logo.png"
+                            alt="Learners"
+                            className="h-8 w-auto object-contain transition-all duration-500"
+                        />
+                    </div>
+                </div>
+
+                {/* Quote Section */}
+                <div className="text-center max-w-[320px] pt-4">
+                    <p className="text-slate-600 italic text-[10px] leading-relaxed">"{quote.text}"</p>
+                    <div className="h-px w-8 bg-slate-800 mx-auto my-3" />
+                    <p className="text-slate-700 text-[8px] font-black uppercase tracking-[0.3em]">{quote.author}</p>
                 </div>
             </div>
         </div>
