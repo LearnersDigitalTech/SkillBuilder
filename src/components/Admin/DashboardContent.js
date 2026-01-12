@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Box, Grid, Typography, CircularProgress, Container, Button, Stack } from '@mui/material';
-import { Users, CheckCircle, XCircle, FileText, LayoutDashboard, List, Trophy, AlertTriangle, Gift, GraduationCap } from 'lucide-react';
+import { Users, CheckCircle, XCircle, FileText, LayoutDashboard, List, Trophy, AlertTriangle, Gift, GraduationCap, Calculator } from 'lucide-react';
 import { ref, get, remove } from 'firebase/database';
 import { firebaseDatabase, db } from '@/backend/firebaseHandler';
 import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
@@ -15,6 +15,7 @@ import dynamic from 'next/dynamic';
 
 const LotteryManager = dynamic(() => import('./LotteryManager'), { ssr: false });
 const LuckyDrawWinners = dynamic(() => import('./LuckyDrawWinners'), { ssr: false });
+const AbacusInsightsManager = dynamic(() => import('./AbacusInsightsManager'), { ssr: false });
 
 const DashboardContent = ({ logoutAction }) => {
     const [view, setView] = useState('overview'); // 'overview' | 'students'
@@ -534,6 +535,14 @@ const DashboardContent = ({ logoutAction }) => {
                 >
                     Teachers
                 </Button>
+                <Button
+                    variant={view === 'abacus' ? 'contained' : 'outlined'}
+                    startIcon={<Calculator size={20} />}
+                    onClick={() => setView('abacus')}
+                    sx={{ borderRadius: 2, textTransform: 'none', px: 3, bgcolor: view === 'abacus' ? '#6366f1' : undefined }}
+                >
+                    AbacusInsights
+                </Button>
             </Stack>
 
             {view === 'overview' ? (
@@ -598,6 +607,8 @@ const DashboardContent = ({ logoutAction }) => {
                 <LuckyDrawWinners />
             ) : view === 'teachers' ? (
                 <TeacherManagement />
+            ) : view === 'abacus' ? (
+                <AbacusInsightsManager />
             ) : (
                 <StudentList
                     students={studentList}
