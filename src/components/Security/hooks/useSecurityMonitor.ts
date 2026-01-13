@@ -75,10 +75,30 @@ export function useSecurityMonitor({
         document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
         document.addEventListener('msfullscreenchange', handleFullscreenChange)
 
-        // Enter fullscreen on mount
+        // Check if we are in fullscreen on mount (important for recovery after refresh)
+        const checkInitialFullscreen = () => {
+            const isCurrentlyFullscreen = !!(
+                document.fullscreenElement ||
+                (document as any).webkitFullscreenElement ||
+                (document as any).msFullscreenElement
+            )
+
+            if (!isCurrentlyFullscreen) {
+                console.log('🖥️ Not in fullscreen on mount, requesting re-entry...')
+                // We show the warning to get a user gesture to re-enter fullscreen
+                setShowWarning(true)
+                setCurrentViolationType('fullscreen-exit')
+            }
+        }
+
+        // Slight delay to allow browser state to stabilize
+        const mountTimer = setTimeout(checkInitialFullscreen, 1000)
+
+        // Enter fullscreen on mount attempt (even if it might fail, we try)
         enterFullscreen()
 
         return () => {
+            clearTimeout(mountTimer)
             document.removeEventListener('fullscreenchange', handleFullscreenChange)
             document.removeEventListener('webkitfullscreenchange', handleFullscreenChange)
             document.removeEventListener('msfullscreenchange', handleFullscreenChange)
