@@ -34,6 +34,12 @@ const LotteryDraw = ({ isModal = false }) => {
         teacher: [],
         guest: []
     });
+    const [roleVisibility, setRoleVisibility] = useState({
+        parent: true,
+        student: true,
+        teacher: true,
+        guest: true
+    });
 
     const [roleVisibility, setRoleVisibility] = useState({
         parent: true,
