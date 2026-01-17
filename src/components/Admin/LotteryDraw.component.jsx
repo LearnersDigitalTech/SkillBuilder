@@ -12,7 +12,7 @@ import {
     TextField,
     MenuItem
 } from '@mui/material';
-import { ref, get } from 'firebase/database';
+import { ref, get, push } from 'firebase/database';
 import { firebaseDatabase } from '@/backend/firebaseHandler';
 import confetti from 'canvas-confetti';
 import { Users, Trophy } from 'lucide-react';
@@ -34,21 +34,6 @@ const LotteryDraw = ({ isModal = false }) => {
         teacher: [],
         guest: []
     });
-    const [roleVisibility, setRoleVisibility] = useState({
-        parent: true,
-        student: true,
-        teacher: true,
-        guest: true
-    });
-    const [eventName, setEventName] = useState('Annual Day Celebration!');
-
-    const [roleVisibility, setRoleVisibility] = useState({
-        parent: true,
-        student: true,
-        teacher: true,
-        guest: true
-    });
-    const [eventName, setEventName] = useState('Annual Day Celebration!');
 
     const [roleVisibility, setRoleVisibility] = useState({
         parent: true,
@@ -110,7 +95,6 @@ const LotteryDraw = ({ isModal = false }) => {
             if (!registrationDateFilter) return true;
             const regDate = new Date(r.createdAt || r.timestamp);
             const filterDate = new Date(registrationDateFilter);
-            // Set filter date to start of day for inclusive comparison
             filterDate.setHours(0, 0, 0, 0);
             return regDate >= filterDate;
         });
@@ -121,20 +105,16 @@ const LotteryDraw = ({ isModal = false }) => {
         setGrandWinners({ parent: [], student: [], teacher: [], guest: [] });
         setCurrentReveal('initiating');
 
-        // Helper to get random unique items
         const getRandomUnique = (pool, count) => {
             if (pool.length === 0) return [];
             const shuffled = [...pool].sort(() => 0.5 - Math.random());
             return shuffled.slice(0, Math.min(count, pool.length));
         };
 
-        // EXCLUSION LOGIC: Filter out Blacklist and Previous Winners
         const eligibleRegistrations = filteredPool.filter(r =>
             !BLACKLIST.includes(r.ticketCode) &&
             !previousWinners.has(r.ticketCode)
         );
-
-        console.log(`Pool Size: ${registrations.length} -> Eligible: ${eligibleRegistrations.length}`);
 
         const pools = {
             parent: eligibleRegistrations.filter(r => r.effectiveUserType === 'parent'),
@@ -143,18 +123,16 @@ const LotteryDraw = ({ isModal = false }) => {
             guest: eligibleRegistrations.filter(r => ['guest', 'other'].includes(r.effectiveUserType))
         };
 
-        // Determine Sequence of Draws
         let drawSequence = [];
-
         if (drawFilter === 'All') {
-            // Standard flow: 1 of each visible role
             ['parent', 'student', 'teacher', 'guest'].forEach(role => {
                 if (roleVisibility[role] === false) return;
                 const winner = getRandomUnique(pools[role], 1)[0];
-                drawSequence.push({ role, winner, label: `Lucky ${role.charAt(0).toUpperCase() + role.slice(1)}` });
+                if (winner) {
+                    drawSequence.push({ role, winner, label: `Lucky ${role.charAt(0).toUpperCase() + role.slice(1)}` });
+                }
             });
         } else {
-            // Filtered flow: N of specific role
             const winners = getRandomUnique(pools[drawFilter], winnerCount);
             winners.forEach((w, i) => {
                 drawSequence.push({
@@ -165,15 +143,13 @@ const LotteryDraw = ({ isModal = false }) => {
             });
         }
 
-        const { push } = await import('firebase/database');
         const winnersRef = ref(firebaseDatabase, 'Lottery/Winners');
 
         for (const step of drawSequence) {
-            setCurrentReveal(step.role); // For loading state
-            await wait(2000); // Suspense
+            setCurrentReveal(step.role);
+            await wait(2000);
 
             if (step.winner) {
-                // Update state to show card
                 setGrandWinners(prev => ({
                     ...prev,
                     [step.role]: [...(prev[step.role] || []), step.winner]
@@ -181,7 +157,6 @@ const LotteryDraw = ({ isModal = false }) => {
 
                 triggerConfetti();
 
-                // Save to Firebase
                 try {
                     const winnerData = {
                         ...step.winner,
@@ -191,17 +166,11 @@ const LotteryDraw = ({ isModal = false }) => {
                         wonAt: new Date().toISOString()
                     };
                     await push(winnersRef, winnerData);
-
-                    // Update local exclusion list immediately
                     setPreviousWinners(prev => new Set(prev).add(step.winner.ticketCode));
-
                 } catch (e) {
                     console.error("Error saving winner:", e);
                 }
-
-                await wait(2000); // Celebrate (shorter wait for multiple)
-            } else {
-                await wait(1000);
+                await wait(2000);
             }
         }
 
@@ -298,24 +267,15 @@ const LotteryDraw = ({ isModal = false }) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
                 const formattedData = Object.entries(data).map(([key, val]) => {
-                    // Start of Normalization Logic
                     let effectiveUserType = (val.userType || 'parent').toLowerCase();
-
-                    if (val.ticketCode) {
-                        const code = String(val.ticketCode).toUpperCase();
-                        if (code.startsWith('O')) effectiveUserType = 'other';
-                        else if (code.startsWith('G')) effectiveUserType = 'guest';
-                    }
-
+                    if (effectiveUserType === 'other') effectiveUserType = 'guest';
                     return {
                         id: key,
                         ...val,
-                        userType: val.userType || 'parent',
-                        effectiveUserType: effectiveUserType,
+                        effectiveUserType,
                         displayName: val.name || val.parentName || val.studentName || "Unknown"
                     };
                 });
-
                 setRegistrations(formattedData);
             } else {
                 setRegistrations([]);
@@ -332,29 +292,24 @@ const LotteryDraw = ({ isModal = false }) => {
     }, []);
 
     const filteredRegistrations = registrations.filter(r => {
-        // 1. Date Filter
         if (registrationDateFilter) {
             const regDate = new Date(r.createdAt || r.timestamp);
             const filterDate = new Date(registrationDateFilter);
             filterDate.setHours(0, 0, 0, 0);
             if (regDate < filterDate) return false;
         }
-
-        // 2. Role Visibility Filter
-        const roleKey = r.effectiveUserType === 'other' ? 'guest' : r.effectiveUserType;
-        if (roleVisibility[roleKey] === false) return false;
-
+        if (roleVisibility[r.effectiveUserType] === false) return false;
         return true;
     });
 
     const parentCount = filteredRegistrations.filter(r => r.effectiveUserType === 'parent').length;
     const studentCount = filteredRegistrations.filter(r => r.effectiveUserType === 'student').length;
     const teacherCount = filteredRegistrations.filter(r => r.effectiveUserType === 'teacher').length;
-    const guestCount = filteredRegistrations.filter(r => ['guest', 'other'].includes(r.effectiveUserType)).length;
+    const guestCount = filteredRegistrations.filter(r => r.effectiveUserType === 'guest').length;
 
     if (loading) {
         return (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight={isModal ? "400px" : "100vh"} sx={{ background: isModal ? 'transparent' : 'radial-gradient(circle at 70% 50%, #ffffff 0%, #e0f2fe 100%)' }}>
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
                 <CircularProgress size={60} thickness={4} />
             </Box>
         );
@@ -421,7 +376,6 @@ const LotteryDraw = ({ isModal = false }) => {
                     </Box>
                 </Box>
 
-                {/* GRAND CEREMONY DRAW SECTION */}
                 <Paper
                     elevation={0}
                     sx={{
@@ -458,7 +412,6 @@ const LotteryDraw = ({ isModal = false }) => {
                                 )}
                             </>
                         ) : (
-                            // Render N cards for the selected filter
                             Array.from({ length: winnerCount }).map((_, idx) => {
                                 const labels = {
                                     parent: 'Lucky Parent',
