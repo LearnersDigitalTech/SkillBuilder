@@ -36,6 +36,7 @@ const LotteryPage = () => {
         teacher: true,
         Guest: true
     });
+    const [eventName, setEventName] = useState('Annual Day Celebration!');
     const [hasChildren, setHasChildren] = useState(true); // Only for parents
     const ticketRef = useRef(null);
 
@@ -53,16 +54,18 @@ const LotteryPage = () => {
     useEffect(() => {
         const fetchSettings = async () => {
             try {
-                const settingsRef = ref(firebaseDatabase, 'Lottery/Config/RoleVisibility');
+                const settingsRef = ref(firebaseDatabase, 'Lottery/Config');
                 const snapshot = await get(settingsRef);
                 if (snapshot.exists()) {
-                    const settings = snapshot.val();
-                    setRoleVisibility(settings);
+                    const data = snapshot.val();
+                    if (data.RoleVisibility) setRoleVisibility(data.RoleVisibility);
+                    if (data.EventName) setEventName(data.EventName);
 
+                    const settings = data.RoleVisibility || {};
                     // If current role is hidden, switch to first visible role
                     const roles = ['parent', 'student', 'teacher', 'Guest'];
-                    if (!settings[registrationType.toLowerCase()]) {
-                        const firstVisible = roles.find(r => settings[r.toLowerCase()]);
+                    if (settings[registrationType.toLowerCase()] === false) {
+                        const firstVisible = roles.find(r => settings[r.toLowerCase()] !== false);
                         if (firstVisible) setRegistrationType(firstVisible);
                     }
                 }
@@ -403,7 +406,7 @@ const LotteryPage = () => {
                text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
                         {registrationType === 'student' ? 'Lucky Student' : registrationType === 'teacher' ? 'Lucky Teacher' : registrationType === 'parent' ? 'Lucky Parent' : 'Lucky Guest'} Lottery
                         <span className="block text-3xl md:text-5xl mt-2 text-slate-800">
-                            Annual Day Celebration!
+                            {eventName}
                         </span>
                     </h1>
 
