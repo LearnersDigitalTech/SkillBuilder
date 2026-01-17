@@ -40,6 +40,7 @@ const LotteryDraw = ({ isModal = false }) => {
         teacher: true,
         guest: true
     });
+    const [eventName, setEventName] = useState('Annual Day Celebration!');
 
     const [roleVisibility, setRoleVisibility] = useState({
         parent: true,
