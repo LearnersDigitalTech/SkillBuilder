@@ -48,6 +48,7 @@ const LotteryManager = () => {
         teacher: true,
         guest: true
     });
+    const [eventName, setEventName] = useState('Annual Day Celebration!');
 
     // Modal State
     const [openModal, setOpenModal] = useState(false);
@@ -137,10 +138,12 @@ const LotteryManager = () => {
 
     const fetchSettings = async () => {
         try {
-            const settingsRef = ref(firebaseDatabase, 'Lottery/Config/RoleVisibility');
+            const settingsRef = ref(firebaseDatabase, 'Lottery/Config');
             const snapshot = await get(settingsRef);
             if (snapshot.exists()) {
-                setRoleVisibility(snapshot.val());
+                const data = snapshot.val();
+                if (data.RoleVisibility) setRoleVisibility(data.RoleVisibility);
+                if (data.EventName) setEventName(data.EventName);
             }
         } catch (error) {
             console.error("Error fetching lottery settings:", error);
@@ -157,6 +160,20 @@ const LotteryManager = () => {
         } catch (error) {
             console.error("Error updating lottery settings:", error);
             alert("Failed to update settings. Please try again.");
+        } finally {
+            setSettingsLoading(false);
+        }
+    };
+
+    const handleUpdateEventName = async () => {
+        setSettingsLoading(true);
+        try {
+            const settingsRef = ref(firebaseDatabase, 'Lottery/Config/EventName');
+            await set(settingsRef, eventName);
+            alert("Event name updated successfully!");
+        } catch (error) {
+            console.error("Error updating event name:", error);
+            alert("Failed to update event name.");
         } finally {
             setSettingsLoading(false);
         }
@@ -332,9 +349,33 @@ const LotteryManager = () => {
                     </Typography>
                 </Box>
                 <Grid container spacing={3}>
-                    <Grid item xs={12} md={8}>
-                        <Typography variant="body2" color="text.secondary" mb={2}>
-                            Enable or disable registration roles. Disabled roles will be hidden from the registration page and the lottery draw.
+                    <Grid item xs={12} md={6}>
+                        <Typography variant="subtitle2" color="text.secondary" mb={1} fontWeight="bold">
+                            EVENT NAME
+                        </Typography>
+                        <Stack direction="row" spacing={1}>
+                            <TextField
+                                fullWidth
+                                size="small"
+                                value={eventName}
+                                onChange={(e) => setEventName(e.target.value)}
+                                placeholder="e.g., Annual Day Celebration!"
+                                sx={{ bgcolor: 'white' }}
+                            />
+                            <Button
+                                variant="contained"
+                                size="small"
+                                onClick={handleUpdateEventName}
+                                disabled={settingsLoading}
+                            >
+                                Update
+                            </Button>
+                        </Stack>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Divider sx={{ my: 1 }} />
+                        <Typography variant="subtitle2" color="text.secondary" mb={2} fontWeight="bold">
+                            ROLE VISIBILITY
                         </Typography>
                         <Box display="flex" gap={4} flexWrap="wrap">
                             {[
