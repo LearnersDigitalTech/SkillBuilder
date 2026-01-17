@@ -41,6 +41,14 @@ const LotteryDraw = ({ isModal = false }) => {
         guest: true
     });
 
+    const [roleVisibility, setRoleVisibility] = useState({
+        parent: true,
+        student: true,
+        teacher: true,
+        guest: true
+    });
+    const [eventName, setEventName] = useState('Annual Day Celebration!');
+
     const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     const triggerConfetti = () => {
@@ -48,7 +56,7 @@ const LotteryDraw = ({ isModal = false }) => {
             particleCount: 150,
             spread: 70,
             origin: { y: 0.6 },
-            zIndex: 9999, // Ensure confetti is on top for modal
+            zIndex: 9999,
             colors: ['#FFD700', '#FFA500', '#FF4500', '#008000', '#0000FF', '#4B0082', '#EE82EE']
         });
     };
@@ -74,10 +82,12 @@ const LotteryDraw = ({ isModal = false }) => {
 
         const fetchSettings = async () => {
             try {
-                const settingsRef = ref(firebaseDatabase, 'Lottery/Config/RoleVisibility');
+                const settingsRef = ref(firebaseDatabase, 'Lottery/Config');
                 const snapshot = await get(settingsRef);
                 if (snapshot.exists()) {
-                    setRoleVisibility(snapshot.val());
+                    const data = snapshot.val();
+                    if (data.RoleVisibility) setRoleVisibility(data.RoleVisibility);
+                    if (data.EventName) setEventName(data.EventName);
                 }
             } catch (error) {
                 console.error("Error fetching lottery settings:", error);
@@ -377,7 +387,7 @@ const LotteryDraw = ({ isModal = false }) => {
                                 fontSize: isModal ? { xs: '2rem', md: '3rem' } : { xs: '2.5rem', md: '4rem' }
                             }}
                         >
-                            Lucky Numbers Draw
+                            {eventName}
                         </Typography>
                     </Box>
                     <Box
