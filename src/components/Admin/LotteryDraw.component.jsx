@@ -26,6 +26,7 @@ const LotteryDraw = ({ isModal = false }) => {
     const [currentReveal, setCurrentReveal] = useState(''); // 'parent', 'student', 'teacher', 'guest'
     const [roundName, setRoundName] = useState('Round 1');
     const [drawFilter, setDrawFilter] = useState('All');
+    const [registrationDateFilter, setRegistrationDateFilter] = useState('');
     const [winnerCount, setWinnerCount] = useState(1);
     const [grandWinners, setGrandWinners] = useState({
         parent: [],
@@ -67,7 +68,16 @@ const LotteryDraw = ({ isModal = false }) => {
     }, []);
 
     const handleGrandDraw = async () => {
-        if (registrations.length === 0) return;
+        const filteredPool = registrations.filter(r => {
+            if (!registrationDateFilter) return true;
+            const regDate = new Date(r.createdAt || r.timestamp);
+            const filterDate = new Date(registrationDateFilter);
+            // Set filter date to start of day for inclusive comparison
+            filterDate.setHours(0, 0, 0, 0);
+            return regDate >= filterDate;
+        });
+
+        if (filteredPool.length === 0) return;
 
         setGrandDrawState('drawing');
         setGrandWinners({ parent: [], student: [], teacher: [], guest: [] });
@@ -81,7 +91,7 @@ const LotteryDraw = ({ isModal = false }) => {
         };
 
         // EXCLUSION LOGIC: Filter out Blacklist and Previous Winners
-        const eligibleRegistrations = registrations.filter(r =>
+        const eligibleRegistrations = filteredPool.filter(r =>
             !BLACKLIST.includes(r.ticketCode) &&
             !previousWinners.has(r.ticketCode)
         );
@@ -282,10 +292,18 @@ const LotteryDraw = ({ isModal = false }) => {
         fetchRegistrations();
     }, []);
 
-    const parentCount = registrations.filter(r => r.effectiveUserType === 'parent').length;
-    const studentCount = registrations.filter(r => r.effectiveUserType === 'student').length;
-    const teacherCount = registrations.filter(r => r.effectiveUserType === 'teacher').length;
-    const guestCount = registrations.filter(r => ['guest', 'other'].includes(r.effectiveUserType)).length;
+    const filteredRegistrations = registrations.filter(r => {
+        if (!registrationDateFilter) return true;
+        const regDate = new Date(r.createdAt || r.timestamp);
+        const filterDate = new Date(registrationDateFilter);
+        filterDate.setHours(0, 0, 0, 0);
+        return regDate >= filterDate;
+    });
+
+    const parentCount = filteredRegistrations.filter(r => r.effectiveUserType === 'parent').length;
+    const studentCount = filteredRegistrations.filter(r => r.effectiveUserType === 'student').length;
+    const teacherCount = filteredRegistrations.filter(r => r.effectiveUserType === 'teacher').length;
+    const guestCount = filteredRegistrations.filter(r => ['guest', 'other'].includes(r.effectiveUserType)).length;
 
     if (loading) {
         return (
@@ -351,7 +369,7 @@ const LotteryDraw = ({ isModal = false }) => {
                             Total Participants:
                         </Typography>
                         <Typography variant="h6" color="primary" fontWeight="800">
-                            {registrations.length}
+                            {filteredRegistrations.length}
                         </Typography>
                     </Box>
                 </Box>
@@ -442,6 +460,16 @@ const LotteryDraw = ({ isModal = false }) => {
                                 <MenuItem value="guest">Guest</MenuItem>
                             </TextField>
 
+                            <TextField
+                                label="Registered From"
+                                type="date"
+                                value={registrationDateFilter}
+                                onChange={(e) => setRegistrationDateFilter(e.target.value)}
+                                InputLabelProps={{ shrink: true }}
+                                sx={{ bgcolor: 'rgba(255,255,255,0.8)', borderRadius: 1, minWidth: 200 }}
+                                disabled={grandDrawState === 'drawing'}
+                            />
+
                             {drawFilter !== 'All' && (
                                 <TextField
                                     select
@@ -462,7 +490,7 @@ const LotteryDraw = ({ isModal = false }) => {
                             variant="contained"
                             size="large"
                             onClick={handleGrandDraw}
-                            disabled={grandDrawState === 'drawing' || registrations.length === 0}
+                            disabled={grandDrawState === 'drawing' || filteredRegistrations.length === 0}
                             sx={{
                                 px: 8,
                                 py: 2.5,
