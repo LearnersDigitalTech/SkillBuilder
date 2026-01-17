@@ -34,6 +34,12 @@ const LotteryDraw = ({ isModal = false }) => {
         teacher: [],
         guest: []
     });
+    const [roleVisibility, setRoleVisibility] = useState({
+        parent: true,
+        student: true,
+        teacher: true,
+        guest: true
+    });
 
     const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -65,6 +71,19 @@ const LotteryDraw = ({ isModal = false }) => {
             }
         };
         fetchWinners();
+
+        const fetchSettings = async () => {
+            try {
+                const settingsRef = ref(firebaseDatabase, 'Lottery/Config/RoleVisibility');
+                const snapshot = await get(settingsRef);
+                if (snapshot.exists()) {
+                    setRoleVisibility(snapshot.val());
+                }
+            } catch (error) {
+                console.error("Error fetching lottery settings:", error);
+            }
+        };
+        fetchSettings();
     }, []);
 
     const handleGrandDraw = async () => {
@@ -109,8 +128,9 @@ const LotteryDraw = ({ isModal = false }) => {
         let drawSequence = [];
 
         if (drawFilter === 'All') {
-            // Standard flow: 1 of each
+            // Standard flow: 1 of each visible role
             ['parent', 'student', 'teacher', 'guest'].forEach(role => {
+                if (roleVisibility[role] === false) return;
                 const winner = getRandomUnique(pools[role], 1)[0];
                 drawSequence.push({ role, winner, label: `Lucky ${role.charAt(0).toUpperCase() + role.slice(1)}` });
             });
@@ -293,11 +313,19 @@ const LotteryDraw = ({ isModal = false }) => {
     }, []);
 
     const filteredRegistrations = registrations.filter(r => {
-        if (!registrationDateFilter) return true;
-        const regDate = new Date(r.createdAt || r.timestamp);
-        const filterDate = new Date(registrationDateFilter);
-        filterDate.setHours(0, 0, 0, 0);
-        return regDate >= filterDate;
+        // 1. Date Filter
+        if (registrationDateFilter) {
+            const regDate = new Date(r.createdAt || r.timestamp);
+            const filterDate = new Date(registrationDateFilter);
+            filterDate.setHours(0, 0, 0, 0);
+            if (regDate < filterDate) return false;
+        }
+
+        // 2. Role Visibility Filter
+        const roleKey = r.effectiveUserType === 'other' ? 'guest' : r.effectiveUserType;
+        if (roleVisibility[roleKey] === false) return false;
+
+        return true;
     });
 
     const parentCount = filteredRegistrations.filter(r => r.effectiveUserType === 'parent').length;
@@ -389,18 +417,26 @@ const LotteryDraw = ({ isModal = false }) => {
                     <Grid container spacing={4} sx={{ pt: 2, justifyContent: 'center' }}>
                         {drawFilter === 'All' ? (
                             <>
-                                <Grid item xs={12} sm={6} md={3}>
-                                    {renderWinnerCard('parent', 'Lucky Parent', '#059669', parentCount)}
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={3}>
-                                    {renderWinnerCard('student', 'Lucky Student', '#2563eb', studentCount)}
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={3}>
-                                    {renderWinnerCard('teacher', 'Lucky Teacher', '#d97706', teacherCount)}
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={3}>
-                                    {renderWinnerCard('guest', 'Lucky Guest', '#7c3aed', guestCount)}
-                                </Grid>
+                                {roleVisibility.parent !== false && (
+                                    <Grid item xs={12} sm={6} md={3}>
+                                        {renderWinnerCard('parent', 'Lucky Parent', '#059669', parentCount)}
+                                    </Grid>
+                                )}
+                                {roleVisibility.student !== false && (
+                                    <Grid item xs={12} sm={6} md={3}>
+                                        {renderWinnerCard('student', 'Lucky Student', '#2563eb', studentCount)}
+                                    </Grid>
+                                )}
+                                {roleVisibility.teacher !== false && (
+                                    <Grid item xs={12} sm={6} md={3}>
+                                        {renderWinnerCard('teacher', 'Lucky Teacher', '#d97706', teacherCount)}
+                                    </Grid>
+                                )}
+                                {roleVisibility.guest !== false && (
+                                    <Grid item xs={12} sm={6} md={3}>
+                                        {renderWinnerCard('guest', 'Lucky Guest', '#7c3aed', guestCount)}
+                                    </Grid>
+                                )}
                             </>
                         ) : (
                             // Render N cards for the selected filter
@@ -454,10 +490,10 @@ const LotteryDraw = ({ isModal = false }) => {
                                 disabled={grandDrawState === 'drawing'}
                             >
                                 <MenuItem value="All">All Categories</MenuItem>
-                                <MenuItem value="student">Student</MenuItem>
-                                <MenuItem value="parent">Parent</MenuItem>
-                                <MenuItem value="teacher">Teacher</MenuItem>
-                                <MenuItem value="guest">Guest</MenuItem>
+                                {roleVisibility.student !== false && <MenuItem value="student">Student</MenuItem>}
+                                {roleVisibility.parent !== false && <MenuItem value="parent">Parent</MenuItem>}
+                                {roleVisibility.teacher !== false && <MenuItem value="teacher">Teacher</MenuItem>}
+                                {roleVisibility.guest !== false && <MenuItem value="guest">Guest</MenuItem>}
                             </TextField>
 
                             <TextField

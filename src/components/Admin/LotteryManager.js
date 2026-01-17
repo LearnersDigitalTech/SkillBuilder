@@ -26,10 +26,12 @@ import {
     List,
     ListItem,
     ListItemText,
-    Divider
+    Divider,
+    Switch,
+    FormControlLabel
 } from '@mui/material';
-import { RefreshCw, Download, Trash2, Search, Filter, Calendar, Eye, User, Phone, Mail, School, Briefcase, Star, Gift, Users } from 'lucide-react';
-import { ref, get, remove } from 'firebase/database';
+import { RefreshCw, Download, Trash2, Search, Filter, Calendar, Eye, User, Phone, Mail, School, Briefcase, Star, Gift, Users, Settings } from 'lucide-react';
+import { ref, get, remove, set } from 'firebase/database';
 import { firebaseDatabase } from '@/backend/firebaseHandler';
 
 
@@ -37,6 +39,15 @@ const LotteryManager = () => {
     const [registrations, setRegistrations] = useState([]);
     const [filteredRegistrations, setFilteredRegistrations] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [settingsLoading, setSettingsLoading] = useState(false);
+
+    // Role Visibility Settings
+    const [roleVisibility, setRoleVisibility] = useState({
+        parent: true,
+        student: true,
+        teacher: true,
+        guest: true
+    });
 
     // Modal State
     const [openModal, setOpenModal] = useState(false);
@@ -124,8 +135,36 @@ const LotteryManager = () => {
         }
     };
 
+    const fetchSettings = async () => {
+        try {
+            const settingsRef = ref(firebaseDatabase, 'Lottery/Config/RoleVisibility');
+            const snapshot = await get(settingsRef);
+            if (snapshot.exists()) {
+                setRoleVisibility(snapshot.val());
+            }
+        } catch (error) {
+            console.error("Error fetching lottery settings:", error);
+        }
+    };
+
+    const handleToggleRole = async (role) => {
+        setSettingsLoading(true);
+        try {
+            const newVisibility = { ...roleVisibility, [role]: !roleVisibility[role] };
+            const settingsRef = ref(firebaseDatabase, 'Lottery/Config/RoleVisibility');
+            await set(settingsRef, newVisibility);
+            setRoleVisibility(newVisibility);
+        } catch (error) {
+            console.error("Error updating lottery settings:", error);
+            alert("Failed to update settings. Please try again.");
+        } finally {
+            setSettingsLoading(false);
+        }
+    };
+
     useEffect(() => {
         fetchRegistrations();
+        fetchSettings();
     }, []);
 
     // Effect for Filtering
@@ -283,6 +322,48 @@ const LotteryManager = () => {
                     </Button>
                 </Box>
             </Box>
+
+            {/* Lottery Configuration Section */}
+            <Paper sx={{ mb: 4, p: 3, border: '1px solid #e2e8f0', borderRadius: 2, bgcolor: '#f8fafc' }}>
+                <Box display="flex" alignItems="center" gap={1} mb={2}>
+                    <Settings size={20} color="#64748b" />
+                    <Typography variant="h6" fontWeight="bold" color="text.secondary">
+                        Lottery Configuration
+                    </Typography>
+                </Box>
+                <Grid container spacing={3}>
+                    <Grid item xs={12} md={8}>
+                        <Typography variant="body2" color="text.secondary" mb={2}>
+                            Enable or disable registration roles. Disabled roles will be hidden from the registration page and the lottery draw.
+                        </Typography>
+                        <Box display="flex" gap={4} flexWrap="wrap">
+                            {[
+                                { id: 'parent', label: 'Parent' },
+                                { id: 'student', label: 'Student' },
+                                { id: 'teacher', label: 'Teacher' },
+                                { id: 'guest', label: 'Guest' }
+                            ].map((role) => (
+                                <FormControlLabel
+                                    key={role.id}
+                                    control={
+                                        <Switch
+                                            checked={roleVisibility[role.id]}
+                                            onChange={() => handleToggleRole(role.id)}
+                                            disabled={settingsLoading}
+                                            color="primary"
+                                        />
+                                    }
+                                    label={
+                                        <Typography variant="body1" fontWeight={500}>
+                                            {role.label}
+                                        </Typography>
+                                    }
+                                />
+                            ))}
+                        </Box>
+                    </Grid>
+                </Grid>
+            </Paper>
 
             {/* Filters Section */}
             <Box sx={{ mb: 4, p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>

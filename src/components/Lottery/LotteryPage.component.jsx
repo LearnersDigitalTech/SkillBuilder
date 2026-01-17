@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { Gift, Sparkles, User, BookOpen, Phone, Download, Mail, School, Users, Briefcase } from "lucide-react";
 import { Button } from "@mui/material";
@@ -30,6 +30,12 @@ const LotteryPage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [ticketCode, setTicketCode] = useState(null);
     const [registrationType, setRegistrationType] = useState('parent'); // 'parent' | 'student' | 'teacher' | 'other'
+    const [roleVisibility, setRoleVisibility] = useState({
+        parent: true,
+        student: true,
+        teacher: true,
+        Guest: true
+    });
     const [hasChildren, setHasChildren] = useState(true); // Only for parents
     const ticketRef = useRef(null);
 
@@ -43,6 +49,29 @@ const LotteryPage = () => {
             students: [{ name: "", grade: "" }]
         }); // Clear form errors and values when switching roles
     };
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const settingsRef = ref(firebaseDatabase, 'Lottery/Config/RoleVisibility');
+                const snapshot = await get(settingsRef);
+                if (snapshot.exists()) {
+                    const settings = snapshot.val();
+                    setRoleVisibility(settings);
+
+                    // If current role is hidden, switch to first visible role
+                    const roles = ['parent', 'student', 'teacher', 'Guest'];
+                    if (!settings[registrationType.toLowerCase()]) {
+                        const firstVisible = roles.find(r => settings[r.toLowerCase()]);
+                        if (firstVisible) setRegistrationType(firstVisible);
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching lottery settings:", error);
+            }
+        };
+        fetchSettings();
+    }, []);
 
     // Constants
     const GRADE_OPTIONS = ["Pre-KG", "LKG", "UKG", ...Array.from({ length: 12 }, (_, i) => `Grade ${i + 1}`)];
@@ -390,19 +419,22 @@ const LotteryPage = () => {
 
                         {/* Role Tabs */}
                         <div className="flex flex-wrap gap-2 p-1 bg-slate-100 rounded-lg mb-6">
-                            {['parent', 'student', 'teacher', 'Guest'].map((role) => (
-                                <button
-                                    key={role}
-                                    type="button"
-                                    onClick={() => handleRoleChange(role)}
-                                    className={`flex-1 min-w-[70px] py-2 text-xs md:text-sm font-semibold rounded-md transition-all capitalize ${registrationType === role
-                                        ? 'bg-white text-blue-600 shadow-sm'
-                                        : 'text-slate-500 hover:text-slate-700'
-                                        }`}
-                                >
-                                    {role}
-                                </button>
-                            ))}
+                            {['parent', 'student', 'teacher', 'Guest'].map((role) => {
+                                if (roleVisibility[role.toLowerCase()] === false) return null;
+                                return (
+                                    <button
+                                        key={role}
+                                        type="button"
+                                        onClick={() => handleRoleChange(role)}
+                                        className={`flex-1 min-w-[70px] py-2 text-xs md:text-sm font-semibold rounded-md transition-all capitalize ${registrationType === role
+                                            ? 'bg-white text-blue-600 shadow-sm'
+                                            : 'text-slate-500 hover:text-slate-700'
+                                            }`}
+                                    >
+                                        {role}
+                                    </button>
+                                );
+                            })}
                         </div>
 
                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
