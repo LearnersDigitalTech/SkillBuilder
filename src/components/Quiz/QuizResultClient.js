@@ -1647,7 +1647,10 @@ const QuizResultClient = () => {
                                         {q.type === 'tableInput' && q.rows && q.rows.length > 0 && q.rows[0].image && (
                                             <div style={{ marginTop: '16px' }}>
                                                 {/* Desktop Table View */}
-                                                <div className="fve-desktop-table">
+                                                <div style={{
+                                                    display: 'none',
+                                                    '@media (min-width: 768px)': { display: 'block' }
+                                                }} className="fve-desktop-table">
                                                     <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px', overflowX: 'auto' }}>
                                                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                                             <thead>
@@ -1716,7 +1719,10 @@ const QuizResultClient = () => {
                                                 </div>
 
                                                 {/* Mobile Card View */}
-                                                <div className="fve-mobile-cards">
+                                                <div style={{
+                                                    display: 'block',
+                                                    '@media (min-width: 768px)': { display: 'none' }
+                                                }} className="fve-mobile-cards">
                                                     {q.rows.map((row, idx) => {
                                                         const userAns = q.userAnswer ? JSON.parse(q.userAnswer)[idx] : {};
                                                         const correctAns = q.correctAnswer ? JSON.parse(q.correctAnswer)[idx] : {};
